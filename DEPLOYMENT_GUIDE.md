@@ -40,6 +40,7 @@ The backend is the "brain" that handles the exams and candidates.
    - **Build Command**: `pip install -r requirements.txt`
    - **Start Command**: `uvicorn main:app --host 0.0.0.0 --port $PORT`
 5. **Environment Variables**: Click the "Advanced" button and add:
+   - `FRONTEND_URL`: (Your Frontend URL, e.g., `https://exam-portal-app.onrender.com`)
    - `SECRET_KEY`: (Any random text like `KiwiSuperSecretKey123`)
    - `GOOGLE_API_KEY`: (Your Gemini API Key from Google AI Studio)
    - `SMTP_EMAIL`: (Your email for sending results)
@@ -62,7 +63,8 @@ The frontend is the website that users and candidates actually see.
    - **Build Command**: `npm install && npm run build`
    - **Publish Directory**: `dist`
 5. **Environment Variables**: IMPORTANT! Add these variables:
-   - `VITE_API_URL`: (Paste your Backend URL from Phase 2 here)
+   - `VITE_API_URL`: (Paste your Backend URL from Phase 2 here. Example: `https://exam-portal-api.onrender.com`)
+   - `NODE_VERSION`: `20`
 
 6. **Routing (IMPORTANT)**: 
    - In the Render dashboard for your **Frontend** site, go to **Redirects/Rewrites**.

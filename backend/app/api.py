@@ -26,7 +26,9 @@ os.makedirs("static/uploads/cvs", exist_ok=True)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # ── CORS ──────────────────────────────────────
-frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
+# For production, we allow all origins to avoid CORS issues on Render.
+# You can restrict this later by setting FRONTEND_URL environment variable.
+frontend_url = os.getenv("FRONTEND_URL", "*")
 origins = [
     "http://localhost:3000",
     "http://localhost:5173",
@@ -38,12 +40,17 @@ origins = [
     "http://localhost:5179",
     "http://localhost:5180",
 ]
-if frontend_url not in origins:
-    origins.append(frontend_url)
+
+if frontend_url == "*":
+    allow_origins = ["*"]
+else:
+    if frontend_url not in origins:
+        origins.append(frontend_url)
+    allow_origins = origins
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=allow_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
