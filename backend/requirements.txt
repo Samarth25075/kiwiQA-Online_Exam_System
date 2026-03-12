@@ -1,6 +1,7 @@
 fastapi
 uvicorn
 pydantic
+email-validator
 python-dotenv
 python-multipart
 python-jose[cryptography]
