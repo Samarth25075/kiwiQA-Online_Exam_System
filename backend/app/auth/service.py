@@ -22,6 +22,7 @@ def load_users_from_csv() -> dict[str, dict]:
     users = {}
     if not os.path.exists(CSV_FILE_PATH):
         # Create default admin if file doesn't exist
+        print(f"DEBUG: Creating default admin at {CSV_FILE_PATH}")
         default_admin = _make_user(
             email="admin@examportal.com",
             plain_password="admin123",
@@ -38,10 +39,19 @@ def load_users_from_csv() -> dict[str, dict]:
             reader = csv.DictReader(f)
             for row in reader:
                 # Deserialize permissions and session_id
-                row["permissions"] = json.loads(row["permissions"]) if row.get("permissions") else []
+                try:
+                    row["permissions"] = json.loads(row["permissions"]) if row.get("permissions") else []
+                except:
+                    row["permissions"] = []
+                
+                # Ensure all fields exist
+                if not row.get("email"): continue
+                row["session_id"] = row.get("session_id")
                 users[row["email"]] = row
     except Exception as e:
         print(f"Error loading members from CSV: {e}")
+        # Fallback to default if load fails
+        return load_users_from_csv() if not os.path.exists(CSV_FILE_PATH) else {}
     
     return users
 
