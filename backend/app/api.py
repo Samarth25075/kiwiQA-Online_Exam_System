@@ -26,33 +26,12 @@ os.makedirs("static/uploads/cvs", exist_ok=True)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # ── CORS ──────────────────────────────────────
-# For production, we allow all origins to avoid CORS issues on Render.
-# You can restrict this later by setting FRONTEND_URL environment variable.
-frontend_url = os.getenv("FRONTEND_URL", "https://kiwiqa-online-exam-system.onrender.com")
-origins = [
-    "http://localhost:3000",
-    "http://localhost:5173",
-    "http://localhost:5174",
-    "http://localhost:5175",
-    "http://localhost:5176",
-    "http://localhost:5177",
-    "http://localhost:5178",
-    "http://localhost:5179",
-    "http://localhost:5180",
-    "https://kiwiqa-online-exam-system.onrender.com",
-]
-
-if frontend_url == "*":
-    allow_origins = ["*"]
-else:
-    if frontend_url not in origins:
-        origins.append(frontend_url)
-    allow_origins = origins
-
+# Permit all origins for production to resolve CORS blocking.
+# This works with JWT authentication as it doesn't require cookies/credentials.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allow_origins,
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
