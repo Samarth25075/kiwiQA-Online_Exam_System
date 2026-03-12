@@ -2,29 +2,35 @@ from __future__ import annotations
 import csv
 import os
 import json
-from passlib.context import CryptContext
+import bcrypt
 
-# Fix for BCrypt compatibility
-try:
-    import bcrypt
-    from unittest.mock import MagicMock
-    if not hasattr(bcrypt, "__about__"):
-        bcrypt.__about__ = MagicMock()
-        bcrypt.__about__.__version__ = bcrypt.__version__
-except:
-    pass
-
-# Use bcrypt with rounds=4 for speed in this context
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__rounds=4)
-
-# Data Path Configuration - Use project root for the CSV
+# Data Path Configuration
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 CSV_FILE_PATH = os.path.join(BASE_DIR, "members.csv")
+
+def hash_password(password: str) -> str:
+    """Hash a password using bcrypt directly."""
+    # Salt is generated automatically by bcrypt
+    pwd_bytes = password.encode('utf-8')
+    salt = bcrypt.gensalt(rounds=10)
+    hashed = bcrypt.hashpw(pwd_bytes, salt)
+    return hashed.decode('utf-8')
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Verify a password against its hash."""
+    try:
+        return bcrypt.checkpw(
+            plain_password.encode('utf-8'), 
+            hashed_password.encode('utf-8')
+        )
+    except Exception as e:
+        print(f"VERIFY ERROR: {e}")
+        return False
 
 def _make_user(email, plain_password, role, full_name, permissions=None):
     return {
         "email": email,
-        "hashed_password": pwd_context.hash(plain_password),
+        "hashed_password": hash_password(plain_password),
         "role": role,
         "full_name": full_name,
         "permissions": permissions or [],
@@ -33,8 +39,6 @@ def _make_user(email, plain_password, role, full_name, permissions=None):
 
 def load_users_from_csv():
     users = {}
-    
-    # If file doesn't exist, create default admin
     if not os.path.exists(CSV_FILE_PATH):
         print(f"DEBUG: Creating default admin at {CSV_FILE_PATH}")
         admin = _make_user(
@@ -52,19 +56,15 @@ def load_users_from_csv():
         with open(CSV_FILE_PATH, mode='r', encoding='utf-8') as f:
             reader = csv.DictReader(f)
             for row in reader:
-                if not row or not row.get("email"):
-                    continue
-                # Deserialize permissions
+                if not row or not row.get("email"): continue
                 try:
                     perms = row.get("permissions", "[]")
                     row["permissions"] = json.loads(perms) if perms else []
                 except:
                     row["permissions"] = []
-                
                 users[row["email"]] = row
     except Exception as e:
-        print(f"ERROR loading users from {CSV_FILE_PATH}: {e}")
-    
+        print(f"ERROR loading users: {e}")
     return users
 
 def save_users_to_csv(users):
@@ -78,7 +78,7 @@ def save_users_to_csv(users):
                 user_copy["permissions"] = json.dumps(user_copy.get("permissions", []))
                 writer.writerow(user_copy)
     except Exception as e:
-        print(f"ERROR saving users to {CSV_FILE_PATH}: {e}")
+        print(f"ERROR saving users: {e}")
 
 # Global state
 STATIC_USERS = load_users_from_csv()
@@ -106,17 +106,14 @@ def authenticate(email, password):
     user = get_user(email)
     if not user or not user.get("hashed_password"):
         return None
-    try:
-        if pwd_context.verify(password, user["hashed_password"]):
-            return user
-    except Exception as e:
-        print(f"AUTH ERROR for {email}: {e}")
+    if verify_password(password, user["hashed_password"]):
+        return user
     return None
 
 def change_password(email, current_password, new_password):
     user = get_user(email)
     if user and authenticate(email, current_password):
-        user["hashed_password"] = pwd_context.hash(new_password)
+        user["hashed_password"] = hash_password(new_password)
         save_users_to_csv(STATIC_USERS)
         return True
     return False
@@ -130,6 +127,3 @@ def delete_user(email):
         save_users_to_csv(STATIC_USERS)
         return True
     return False
-
-def hash_password(password):
-    return pwd_context.hash(password)
