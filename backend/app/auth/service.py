@@ -1,36 +1,50 @@
+from __future__ import annotations
 import csv
 import os
 import json
 from passlib.context import CryptContext
 
-# Reduce work factor for development to make login faster
-_pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__rounds=4)
+# Fix for BCrypt compatibility
+try:
+    import bcrypt
+    from unittest.mock import MagicMock
+    if not hasattr(bcrypt, "__about__"):
+        bcrypt.__about__ = MagicMock()
+        bcrypt.__about__.__version__ = bcrypt.__version__
+except:
+    pass
 
-CSV_FILE_PATH = os.path.join(os.path.dirname(__file__), "members.csv")
+# Use bcrypt with rounds=4 for speed in this context
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__rounds=4)
 
-def _make_user(email: str, plain_password: str, role: str, full_name: str, permissions: list = None) -> dict:
+# Data Path Configuration - Use project root for the CSV
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+CSV_FILE_PATH = os.path.join(BASE_DIR, "members.csv")
+
+def _make_user(email, plain_password, role, full_name, permissions=None):
     return {
         "email": email,
-        "hashed_password": _pwd_context.hash(plain_password),
+        "hashed_password": pwd_context.hash(plain_password),
         "role": role,
         "full_name": full_name,
         "permissions": permissions or [],
         "session_id": None
     }
 
-def load_users_from_csv() -> dict[str, dict]:
+def load_users_from_csv():
     users = {}
+    
+    # If file doesn't exist, create default admin
     if not os.path.exists(CSV_FILE_PATH):
-        # Create default admin if file doesn't exist
         print(f"DEBUG: Creating default admin at {CSV_FILE_PATH}")
-        default_admin = _make_user(
+        admin = _make_user(
             email="admin@examportal.com",
             plain_password="admin123",
             role="admin",
             full_name="Portal Admin",
             permissions=["generate exam", "manage exam"]
         )
-        users[default_admin["email"]] = default_admin
+        users[admin["email"]] = admin
         save_users_to_csv(users)
         return users
 
@@ -38,110 +52,84 @@ def load_users_from_csv() -> dict[str, dict]:
         with open(CSV_FILE_PATH, mode='r', encoding='utf-8') as f:
             reader = csv.DictReader(f)
             for row in reader:
-                # Deserialize permissions and session_id
+                if not row or not row.get("email"):
+                    continue
+                # Deserialize permissions
                 try:
-                    row["permissions"] = json.loads(row["permissions"]) if row.get("permissions") else []
+                    perms = row.get("permissions", "[]")
+                    row["permissions"] = json.loads(perms) if perms else []
                 except:
                     row["permissions"] = []
                 
-                # Ensure all fields exist
-                if not row.get("email"): continue
-                row["session_id"] = row.get("session_id")
                 users[row["email"]] = row
     except Exception as e:
-        print(f"Error loading members from CSV: {e}")
-        # Fallback to default if load fails
-        return load_users_from_csv() if not os.path.exists(CSV_FILE_PATH) else {}
+        print(f"ERROR loading users from {CSV_FILE_PATH}: {e}")
     
     return users
 
-def save_users_to_csv(users: dict[str, dict]):
+def save_users_to_csv(users):
     try:
-        # Sort users by email for consistency
-        sorted_emails = sorted(users.keys())
         fieldnames = ["email", "hashed_password", "role", "full_name", "permissions", "session_id"]
-        
         with open(CSV_FILE_PATH, mode='w', encoding='utf-8', newline='') as f:
             writer = csv.DictWriter(f, fieldnames=fieldnames)
             writer.writeheader()
-            for email in sorted_emails:
+            for email in sorted(users.keys()):
                 user_copy = users[email].copy()
-                # Serialize permissions as JSON string
-                user_copy["permissions"] = json.dumps(user_copy["permissions"])
+                user_copy["permissions"] = json.dumps(user_copy.get("permissions", []))
                 writer.writerow(user_copy)
     except Exception as e:
-        print(f"Error saving members to CSV: {e}")
+        print(f"ERROR saving users to {CSV_FILE_PATH}: {e}")
 
-# Initialize STATIC_USERS from CSV
-STATIC_USERS: dict[str, dict] = load_users_from_csv()
+# Global state
+STATIC_USERS = load_users_from_csv()
 
-
-# ── Public API ────────────────────────────────────────────────────────────────
-
-def get_user(email: str) -> dict | None:
-    """Return the user record for the given email, or None."""
+def get_user(email):
     return STATIC_USERS.get(email)
 
-def add_user(user: dict) -> None:
-    """Add a new user and persist to CSV."""
-    if "session_id" not in user:
-        user["session_id"] = None
-    if "permissions" not in user:
-        user["permissions"] = []
-    
-    STATIC_USERS[user["email"]] = user
-    save_users_to_csv(STATIC_USERS)
-
-def update_user_session(email: str, session_id: str | None) -> None:
-    """Update the active session ID for a user and persist to CSV."""
-    user = get_user(email)
-    if user:
-        user["session_id"] = session_id
+def add_user(user):
+    email = user.get("email")
+    if email:
         STATIC_USERS[email] = user
         save_users_to_csv(STATIC_USERS)
 
-def verify_session(email: str, session_id: str | None) -> bool:
-    """Check if the provided session ID matches the active one."""
+def update_user_session(email, session_id):
     user = get_user(email)
-    if not user:
-        return False
-    return user.get("session_id") == session_id
+    if user:
+        user["session_id"] = session_id
+        save_users_to_csv(STATIC_USERS)
 
-def authenticate(email: str, password: str) -> dict | None:
-    """Verify email + password."""
+def verify_session(email, session_id):
     user = get_user(email)
-    if user is None:
-        return None
-    if not user.get("hashed_password"):
-        return None
-    if not _pwd_context.verify(password, user["hashed_password"]):
-        return None
-    return user
+    return user.get("session_id") == session_id if user else False
 
-def change_password(email: str, current_password: str, new_password: str) -> bool:
-    """Verify current_password, then update to new_password and persist to CSV."""
+def authenticate(email, password):
     user = get_user(email)
-    if user is None:
-        return False
-    if not _pwd_context.verify(current_password, user["hashed_password"]):
-        return False
-    user["hashed_password"] = _pwd_context.hash(new_password)
-    STATIC_USERS[email] = user
-    save_users_to_csv(STATIC_USERS)
-    return True
+    if not user or not user.get("hashed_password"):
+        return None
+    try:
+        if pwd_context.verify(password, user["hashed_password"]):
+            return user
+    except Exception as e:
+        print(f"AUTH ERROR for {email}: {e}")
+    return None
 
-def get_all_users() -> list[dict]:
-    """Return all users."""
-    return list(STATIC_USERS.values())
-
-def delete_user(email: str) -> bool:
-    """Delete a user and persist to CSV."""
-    if email in STATIC_USERS:
-        del STATIC_USERS[email]
+def change_password(email, current_password, new_password):
+    user = get_user(email)
+    if user and authenticate(email, current_password):
+        user["hashed_password"] = pwd_context.hash(new_password)
         save_users_to_csv(STATIC_USERS)
         return True
     return False
 
-def hash_password(password: str) -> str:
-    """Hash a plain text password."""
-    return _pwd_context.hash(password)
+def get_all_users():
+    return list(STATIC_USERS.values())
+
+def delete_user(email):
+    if email in STATIC_USERS:
+        STATIC_USERS.pop(email)
+        save_users_to_csv(STATIC_USERS)
+        return True
+    return False
+
+def hash_password(password):
+    return pwd_context.hash(password)

@@ -433,8 +433,7 @@ async def verify_enroll_otp(exam_id: str, req: CandidateEnrollOTPVerify):
         raise HTTPException(status_code=400, detail="You are already registered for this exam.")
         
     # Clear OTP
-    if req.email in OTP_STORE:
-        del OTP_STORE[req.email]
+    OTP_STORE.pop(req.email, None)
     
     # Create candidate
     candidate = create_candidate(
