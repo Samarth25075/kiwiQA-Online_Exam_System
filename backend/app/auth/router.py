@@ -8,7 +8,7 @@
 
 import uuid
 from datetime import timedelta
-from typing import Annotated
+from typing import Annotated, List
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
@@ -196,7 +196,7 @@ async def google_login(body: GoogleTokenRequest):
 
 # ── Member Management ─────────────────────────
 
-@router.get("/members", response_model=list[Member])
+@router.get("/members", response_model=List[Member])
 async def get_members(current_admin: Annotated[AdminUser, Depends(get_current_admin)]):
     """List all registered members (Admin only)."""
     if current_admin.role != "admin":

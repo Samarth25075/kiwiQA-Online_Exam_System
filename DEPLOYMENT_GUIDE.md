@@ -61,10 +61,17 @@ The frontend is the website that users and candidates actually see.
    - **Root Directory**: `frontend`
    - **Build Command**: `npm install && npm run build`
    - **Publish Directory**: `dist`
-5. **Environment Variables**: IMPORTANT! Add this variable:
+5. **Environment Variables**: IMPORTANT! Add these variables:
    - `VITE_API_URL`: (Paste your Backend URL from Phase 2 here)
-   
-6. Click **Create Static Site**.
+
+6. **Routing (IMPORTANT)**: 
+   - In the Render dashboard for your **Frontend** site, go to **Redirects/Rewrites**.
+   - Add a rule:
+     - **Source**: `/*`
+     - **Destination**: `/index.html`
+     - **Action**: `Rewrite` (Status 200)
+
+7. Click **Create Static Site**.
 
 ---
 

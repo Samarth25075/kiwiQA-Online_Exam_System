@@ -10,5 +10,5 @@ ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 # Gemini AI Settings
 GOOGLE_API_KEY: str = os.getenv("GOOGLE_API_KEY", "")
 
-# Google OAuth — Client ID from Google Cloud Console
+# Google OAuth Settings
 GOOGLE_CLIENT_ID: str = os.getenv("GOOGLE_CLIENT_ID", "")
