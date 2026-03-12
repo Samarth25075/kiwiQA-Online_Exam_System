@@ -1,0 +1,214 @@
+[
+    {
+        "id": "88feba29-8cfc-4748-a5f1-d6ee7a84066d",
+        "title": "Python programmin",
+        "topic": "Python",
+        "difficulty": "Intermediate",
+        "duration": 10,
+        "num_questions": 10,
+        "created_at": "2026-03-12T16:46:40.130134",
+        "link_expiry": "2026-03-13T11:37:27.485Z",
+        "auto_delete": null,
+        "proctoring_enabled": false,
+        "proctoring_type": "video",
+        "passing_score": 60,
+        "questions": [
+            {
+                "text": "How do you start a block in Python?",
+                "options": [
+                    {
+                        "text": "Indentation",
+                        "is_correct": true
+                    },
+                    {
+                        "text": "Braces {}",
+                        "is_correct": false
+                    },
+                    {
+                        "text": "Parentheses ()",
+                        "is_correct": false
+                    }
+                ],
+                "explanation": "Python uses whitespace/indentation to define blocks of code."
+            },
+            {
+                "text": "How do you handle exceptions in Python?",
+                "options": [
+                    {
+                        "text": "try/except",
+                        "is_correct": true
+                    },
+                    {
+                        "text": "try/catch",
+                        "is_correct": false
+                    },
+                    {
+                        "text": "catch/finally",
+                        "is_correct": false
+                    }
+                ],
+                "explanation": "Python uses try/except blocks for error handling."
+            },
+            {
+                "text": "What are the benefits of using Python for managing Memory management and performance?",
+                "options": [
+                    {
+                        "text": "Optimized Python approach for Memory management and performance",
+                        "is_correct": true
+                    },
+                    {
+                        "text": "Default Python behavior ignoring Memory management and performance",
+                        "is_correct": false
+                    },
+                    {
+                        "text": "Legacy implementation of Python",
+                        "is_correct": false
+                    },
+                    {
+                        "text": "Generic error handling for Memory management and performance",
+                        "is_correct": false
+                    }
+                ],
+                "explanation": "Automated question focusing on the intersection of Python and Memory management and performance at a Intermediate level."
+            },
+            {
+                "text": "How does Python implement Common errors and troubleshooting within a Intermediate architecture?",
+                "options": [
+                    {
+                        "text": "Optimized Python approach for Common errors and troubleshooting",
+                        "is_correct": true
+                    },
+                    {
+                        "text": "Default Python behavior ignoring Common errors and troubleshooting",
+                        "is_correct": false
+                    },
+                    {
+                        "text": "Legacy implementation of Python",
+                        "is_correct": false
+                    },
+                    {
+                        "text": "Generic error handling for Common errors and troubleshooting",
+                        "is_correct": false
+                    }
+                ],
+                "explanation": "Automated question focusing on the intersection of Python and Common errors and troubleshooting at a Intermediate level."
+            },
+            {
+                "text": "What is __init__ in Python?",
+                "options": [
+                    {
+                        "text": "Constructor",
+                        "is_correct": true
+                    },
+                    {
+                        "text": "Initializer",
+                        "is_correct": false
+                    },
+                    {
+                        "text": "Destructor",
+                        "is_correct": false
+                    }
+                ],
+                "explanation": "It's the method called when an object is instantiated."
+            },
+            {
+                "text": "What does 'pip' stand for?",
+                "options": [
+                    {
+                        "text": "Preferred Installer Program",
+                        "is_correct": true
+                    },
+                    {
+                        "text": "Python Install Pack",
+                        "is_correct": false
+                    },
+                    {
+                        "text": "Personal Interface Plugin",
+                        "is_correct": false
+                    }
+                ],
+                "explanation": "PIP is the standard package manager for Python."
+            },
+            {
+                "text": "Which keyword is used for loop control to skip the current iteration?",
+                "options": [
+                    {
+                        "text": "continue",
+                        "is_correct": true
+                    },
+                    {
+                        "text": "break",
+                        "is_correct": false
+                    },
+                    {
+                        "text": "pass",
+                        "is_correct": false
+                    }
+                ],
+                "explanation": "continue skips to the next iteration of the loop."
+            },
+            {
+                "text": "Which of these is immutable?",
+                "options": [
+                    {
+                        "text": "Tuple",
+                        "is_correct": true
+                    },
+                    {
+                        "text": "List",
+                        "is_correct": false
+                    },
+                    {
+                        "text": "Dict",
+                        "is_correct": false
+                    },
+                    {
+                        "text": "Set",
+                        "is_correct": false
+                    }
+                ],
+                "explanation": "Tuples cannot be changed after creation."
+            },
+            {
+                "text": "Which of the following describes the behavior of Python regarding Best practices and design patterns?",
+                "options": [
+                    {
+                        "text": "Optimized Python approach for Best practices and design patterns",
+                        "is_correct": true
+                    },
+                    {
+                        "text": "Default Python behavior ignoring Best practices and design patterns",
+                        "is_correct": false
+                    },
+                    {
+                        "text": "Legacy implementation of Python",
+                        "is_correct": false
+                    },
+                    {
+                        "text": "Generic error handling for Best practices and design patterns",
+                        "is_correct": false
+                    }
+                ],
+                "explanation": "Automated question focusing on the intersection of Python and Best practices and design patterns at a Intermediate level."
+            },
+            {
+                "text": "Correct way to create a function in Python?",
+                "options": [
+                    {
+                        "text": "def my_func():",
+                        "is_correct": true
+                    },
+                    {
+                        "text": "function my_func():",
+                        "is_correct": false
+                    },
+                    {
+                        "text": "create my_func():",
+                        "is_correct": false
+                    }
+                ],
+                "explanation": "'def' is the keyword for defining functions."
+            }
+        ]
+    }
+]

@@ -1,76 +1,76 @@
+# app/api.py
+# ─────────────────────────────────────────────
+# FastAPI application factory.
+# Register all routers here.
+# ─────────────────────────────────────────────
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from fastapi.staticfiles import StaticFiles
+import os
 
-todos = [
-    {
-        "id": "1",
-        "item": "Read a book."
-    },
-    {
-        "id": "2",
-        "item": "Cycle around town."
-    }
-]
+from app.auth.router import router as auth_router
+from app.candidates.router import router as candidates_router
+from app.exams.router import router as exams_router
 
-app = FastAPI()
+app = FastAPI(
+    title="ExamPortal API",
+    description="Backend for ExamPortal admin panel.",
+    version="1.0.0",
+)
 
+# ── Static Files ──────────────────────────────
+# Ensure static/uploads/cvs exists
+os.makedirs("static/uploads/cvs", exist_ok=True)
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# ── CORS ──────────────────────────────────────
+frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
 origins = [
+    "http://localhost:3000",
     "http://localhost:5173",
-    "localhost:5173"
+    "http://localhost:5174",
+    "http://localhost:5175",
+    "http://localhost:5176",
+    "http://localhost:5177",
+    "http://localhost:5178",
+    "http://localhost:5179",
+    "http://localhost:5180",
 ]
-
+if frontend_url not in origins:
+    origins.append(frontend_url)
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"]
+    allow_headers=["*"],
 )
 
+# ── Routers ───────────────────────────────────
+app.include_router(auth_router)       # /login, /me
+app.include_router(candidates_router)  # /candidates
+app.include_router(exams_router)       # /exams
 
+# ── Background Cleanup ────────────────────────
+import asyncio
+from app.exams.service import check_and_delete_expired_exams
+
+@app.on_event("startup")
+async def start_background_cleanup():
+    async def cleanup_loop():
+        while True:
+            try:
+                check_and_delete_expired_exams()
+            except Exception as e:
+                print(f"ERROR in background cleanup: {e}")
+            await asyncio.sleep(60) # check every minute
+            
+    asyncio.create_task(cleanup_loop())
+
+# ── Health check ──────────────────────────────
 @app.get("/", tags=["root"])
-async def read_root() -> dict:
-    return {"message": "Welcome to your todo list."}
-
-
-@app.get("/todo", tags=["todos"])
-async def get_todos() -> dict:
-    return { "data": todos }
-
-
-@app.post("/todo", tags=["todos"])
-async def add_todo(todo: dict) -> dict:
-    todos.append(todo)
-    return {
-        "data": { "Todo added." }
-    }
-
-
-@app.put("/todo/{id}", tags=["todos"])
-async def update_todo(id: int, body: dict) -> dict:
-    for todo in todos:
-        if int(todo["id"]) == id:
-            todo["item"] = body["item"]
-            return {
-                "data": f"Todo with id {id} has been updated."
-            }
-
-    return {
-        "data": f"Todo with id {id} not found."
-    }
-
-
-@app.delete("/todo/{id}", tags=["todos"])
-async def delete_todo(id: int) -> dict:
-    for todo in todos:
-        if int(todo["id"]) == id:
-            todos.remove(todo)
-            return {
-                "data": f"Todo with id {id} has been removed."
-            }
-
-    return {
-        "data": f"Todo with id {id} not found."
-    }
+async def root():
+    return {"message": "ExamPortal API is running."}

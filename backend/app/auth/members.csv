@@ -1,0 +1,2 @@
+email,hashed_password,role,full_name,permissions,session_id
+admin@examportal.com,$2b$04$417FJzpE5XDPBduUq8OZLeEiAiYQvGxwpR8Y7nqd4mdb6rGTRChOu,admin,Portal Admin,"[""generate exam"", ""manage exam""]",cdb59da5-a583-43d3-807c-ea195e9d2136
