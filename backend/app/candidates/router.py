@@ -13,6 +13,9 @@ import smtplib
 from dotenv import load_dotenv
 load_dotenv()
 
+FRONTEND_URL = os.getenv("FRONTEND_URL", "https://kiwiqa-online-exam-system.onrender.com").rstrip("/")
+BACKEND_URL = os.getenv("BACKEND_URL", "https://kiwiqa-api.onrender.com").rstrip("/")
+
 from app.auth.router import get_current_admin, check_permission
 from app.auth.schemas import AdminUser
 from app.candidates.schemas import (
@@ -68,7 +71,7 @@ async def upload_cv(
         shutil.copyfileobj(file.file, buffer)
     
     # Update candidate record with the local URL
-    cv_url = f"http://localhost:8000/static/uploads/cvs/{file_name}"
+    cv_url = f"{BACKEND_URL}/static/uploads/cvs/{file_name}"
     update_candidate_details(candidate_id, {"cv_url": cv_url})
     
     return {"message": "File uploaded", "cv_url": cv_url}
@@ -235,8 +238,7 @@ async def resend_test_results(token: str, background_tasks: BackgroundTasks):
     return {"message": "Email resent successfully"}
 
 def _format_candidate(c: dict) -> CandidateResponse:
-    # Use 5173 as it is the default Vite dev port
-    test_link = f"http://localhost:5173/test/{c['token']}"
+    test_link = f"{FRONTEND_URL}/test/{c['token']}"
     return CandidateResponse(**c, test_link=test_link)
 
 @router.get("", response_model=List[CandidateResponse])
@@ -281,8 +283,8 @@ async def send_candidate_link(
     if not candidate.get("assigned_exam_id"):
         raise HTTPException(status_code=400, detail="No exam assigned to this candidate yet.")
 
-    # Generate link (5173 is the dev port)
-    test_link = f"http://localhost:5173/test/{candidate['token']}"
+    # Generate link
+    test_link = f"{FRONTEND_URL}/test/{candidate['token']}"
     
     # Enqueue email task
     background_tasks.add_task(send_invitation_email, candidate['email'], candidate['name'], test_link)

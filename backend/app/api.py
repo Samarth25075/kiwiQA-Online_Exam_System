@@ -28,7 +28,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 # ── CORS ──────────────────────────────────────
 # For production, we allow all origins to avoid CORS issues on Render.
 # You can restrict this later by setting FRONTEND_URL environment variable.
-frontend_url = os.getenv("FRONTEND_URL", "*")
+frontend_url = os.getenv("FRONTEND_URL", "https://kiwiqa-online-exam-system.onrender.com")
 origins = [
     "http://localhost:3000",
     "http://localhost:5173",
@@ -39,6 +39,7 @@ origins = [
     "http://localhost:5178",
     "http://localhost:5179",
     "http://localhost:5180",
+    "https://kiwiqa-online-exam-system.onrender.com",
 ]
 
 if frontend_url == "*":
