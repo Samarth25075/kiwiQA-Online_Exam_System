@@ -462,13 +462,14 @@ async def request_enroll_otp(exam_id: str, req: CandidateEnrollOTPRequest, backg
             server.login(smtp_email, smtp_password)
             server.send_message(msg)
         print(f"DEBUG: OTP email sent successfully to {req.email}")
-        return {"message": f"OTP sent to {req.email}"}
     except smtplib.SMTPAuthenticationError as e:
         print(f"ERROR: Gmail auth failed: {e}")
-        raise HTTPException(status_code=500, detail=f"Email error: Gmail authentication failed. Contact admin. ({str(e)})")
     except Exception as e:
-        print(f"ERROR: OTP email failed: {type(e).__name__}: {e}")
-        raise HTTPException(status_code=500, detail=f"Email error: {type(e).__name__}: {str(e)}")
+        print(f"ERROR: OTP email delivery failed: {type(e).__name__}: {str(e)}")
+        
+    # ALWAYS return success so the frontend advances to the OTP entry screen.
+    # If the email failed to send, the candidate can still use the Admin OTP fallback.
+    return {"message": f"OTP processed for {req.email}"}
 
 @router.post("/enroll/{exam_id}/verify-otp")
 async def verify_enroll_otp(exam_id: str, req: CandidateEnrollOTPVerify):
