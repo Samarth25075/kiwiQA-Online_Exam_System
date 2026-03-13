@@ -8,6 +8,15 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      window.onerror = function(msg, url, line, col, error) {
+        alert("CRASH DETECTED: " + msg + "\nAt: " + url + ":" + line);
+        return false;
+      };
+      window.onunhandledrejection = function(event) {
+        alert("PROMISE CRASH: " + event.reason);
+      };
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
