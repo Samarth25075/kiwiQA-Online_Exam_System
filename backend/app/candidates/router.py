@@ -11,7 +11,7 @@ import smtplib
 
 # Load environment variables from .env
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv(override=True)
 
 # These will use the values from Render Environment Variables first.
 FRONTEND_URL = os.getenv("FRONTEND_URL", "https://kiwiqa-online-exam-system.onrender.com").rstrip("/")
@@ -105,7 +105,7 @@ def send_screenshot_email(receiver_email: str, screenshot_path: str | None, cand
         print(f"DEBUG: Email built for {receiver_email}. Attempting to send...")
         
         from dotenv import load_dotenv
-        load_dotenv()
+        load_dotenv(override=True)
         
         smtp_server = os.environ.get("SMTP_SERVER", "smtp.gmail.com")
         smtp_port = int(os.environ.get("SMTP_PORT", 465))
@@ -133,7 +133,7 @@ def send_otp_email(receiver_email: str, candidate_name: str, otp: str):
         print(f"DEBUG: OTP email built for {receiver_email}. Attempting to send...")
         
         from dotenv import load_dotenv
-        load_dotenv()
+        load_dotenv(override=True)
         
         smtp_server = os.environ.get("SMTP_SERVER", "smtp.gmail.com")
         smtp_port = int(os.environ.get("SMTP_PORT", 465))
@@ -313,11 +313,11 @@ async def get_test(token: str, device_id: str = None):
         raise HTTPException(status_code=403, detail="Your exam has already been submitted and cannot be retaken.")
 
     if device_id:
-        # Prevent ANOTHER person from using this device, but allow the same email
+        # Prevent ANOTHER person from using this device for the SAME EXAM, but allow the same email
         all_cands = get_all_candidates()
         for c in all_cands:
-            if c.get("device_id") == device_id and c["email"] != candidate["email"]:
-                raise HTTPException(status_code=403, detail="This device has already been used by another candidate. You cannot take the exam on this device.")
+            if c.get("device_id") == device_id and c["email"] != candidate["email"] and c.get("assigned_exam_id") == candidate.get("assigned_exam_id"):
+                raise HTTPException(status_code=403, detail="This device has already been used by another candidate for this exam. You cannot take this exam on this device.")
 
         saved_device = candidate.get("device_id")
         
@@ -416,12 +416,12 @@ async def request_enroll_otp(exam_id: str, req: CandidateEnrollOTPRequest, backg
             detail="You are already registered for this specific exam. Please check your email or contact the admin."
         )
 
-    # 2. Check if device is already used by another candidate
+    # 2. Check if device is already used by another candidate FOR THIS EXAM
     if device_id:
-        if any(c.get("device_id") == device_id and c["email"] != req.email for c in existing):
+        if any(c.get("device_id") == device_id and c["email"] != req.email and c.get("assigned_exam_id") == exam_id for c in existing):
              raise HTTPException(
                 status_code=403, 
-                detail="This device has already been used to register or take an exam by another candidate. You cannot proceed using this device."
+                detail="This device has already been used to register or take this exam by another candidate. You cannot proceed using this device for this exam."
             )
 
     import random

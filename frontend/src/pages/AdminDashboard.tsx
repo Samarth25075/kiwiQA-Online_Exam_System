@@ -122,6 +122,8 @@ export default function AdminDashboard() {
     const [examStats, setExamStats] = useState<ExamStat[]>([]);
     const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState({ total: 0, live: 0 });
+    const [candidatesList, setCandidatesList] = useState<Candidate[]>([]);
+    const [showExamPopup, setShowExamPopup] = useState<boolean>(false);
     const [adminOtp, setAdminOtp] = useState<string | null>(null);
     const [copyingId, setCopyingId] = useState<string | null>(null);
     const [now, setNow] = useState(new Date());
@@ -209,6 +211,7 @@ export default function AdminDashboard() {
             if (res.status === 401) { handleAuthFailure(); return; }
             if (res.ok) {
                 const data: Candidate[] = await res.json();
+                setCandidatesList(data);
                 setStats({
                     total: data.length,
                     live: data.filter(c => c.status.toLowerCase() === "live").length,
@@ -1036,6 +1039,47 @@ export default function AdminDashboard() {
         @media (max-width: 480px) {
           .db-stats { grid-template-columns: 1fr; }
         }
+
+        /* ── Candidates Modal ─────────────────────────────────────────────────── */
+        .candidates-modal-overlay {
+          position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+          background: rgba(15, 23, 42, 0.6);
+          backdrop-filter: blur(4px);
+          z-index: 999;
+          display: flex; align-items: center; justify-content: center;
+          padding: 24px;
+        }
+        .candidates-modal {
+          background: var(--white);
+          border-radius: var(--radius-lg);
+          width: 100%; max-width: 600px;
+          max-height: 85vh; display: flex; flex-direction: column;
+          box-shadow: var(--shadow-lg);
+          animation: modalIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes modalIn {
+          from { opacity: 0; transform: scale(0.96) translateY(10px); }
+          to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .candidates-modal-header {
+          padding: 20px 24px; border-bottom: 1px solid var(--slate-100);
+          display: flex; align-items: center; justify-content: space-between;
+        }
+        .candidates-modal-title { margin: 0; font-family: var(--font-serif); font-size: 18px; color: var(--slate-900); }
+        .candidates-modal-close { background: none; border: none; cursor: pointer; color: var(--slate-500); padding: 4px; border-radius: 4px; transition: background 0.2s; display: flex; align-items: center; justify-content: center; }
+        .candidates-modal-close:hover { background: var(--slate-100); color: var(--slate-900); }
+        .candidates-modal-body { padding: 24px; overflow-y: auto; }
+        .exam-candidate-group { margin-bottom: 24px; }
+        .exam-candidate-group:last-child { margin-bottom: 0; }
+        .exam-candidate-group h5 { margin: 0 0 12px; font-size: 14px; color: var(--slate-800); font-weight: 600; display: flex; justify-content: space-between; }
+        .exam-candidate-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+        .exam-candidate-item { background: var(--slate-50); border: 1px solid var(--slate-100); padding: 10px 14px; border-radius: var(--radius-md); display: flex; justify-content: space-between; align-items: center; }
+        .candidate-name { font-size: 13px; font-weight: 500; color: var(--slate-900); }
+        .candidate-email { font-size: 12px; color: var(--slate-500); }
+        .candidate-status { font-size: 11px; padding: 2px 8px; border-radius: 100px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+        .status-started, .status-live { background: #fef3c7; color: #b45309; }
+        .status-completed { background: #ecfdf5; color: #047857; }
+        .status-not_started { background: var(--slate-100); color: var(--slate-600); }
       `}</style>
 
             {/* ── Top Bar ─────────────────────────────────────────────────────────── */}
@@ -1113,7 +1157,15 @@ export default function AdminDashboard() {
                         <div className="stat-value" style={{ color: "var(--success)" }}>{stats.live}</div>
                     </div>
 
-                    <div className={`stat-card ${!hasPermission("manage exam") ? "locked" : ""}`}>
+                    <div 
+                        className={`stat-card ${!hasPermission("manage exam") ? "locked" : ""}`}
+                        style={{ cursor: hasPermission("manage exam") ? "pointer" : "default" }}
+                        onClick={() => {
+                            if (hasPermission("manage exam")) {
+                                setShowExamPopup(true);
+                            }
+                        }}
+                    >
                         <div className="stat-card-accent" style={{ background: "#6366f1" }} />
                         <div className="stat-icon" style={{ background: "#ede9fe", color: "#6366f1" }}>
                             <Icons.FileText size={18} />
@@ -1126,6 +1178,10 @@ export default function AdminDashboard() {
                         </div>
                         <div className="stat-value" style={{ opacity: hasPermission("manage exam") ? 1 : 0.3 }}>
                             {examStats.length}
+                        </div>
+                        <div className="stat-hint" style={{ opacity: hasPermission("manage exam") ? 1 : 0.3 }}>
+                            <Icons.Users size={12} />
+                            {examStats.reduce((sum, exam) => sum + exam.completed + exam.live, 0)} Candidates Appeared
                         </div>
                     </div>
 
@@ -1273,6 +1329,58 @@ export default function AdminDashboard() {
                     )}
                 </div>
             </div>
+
+            {showExamPopup && (
+                <div className="candidates-modal-overlay" onClick={() => setShowExamPopup(false)}>
+                    <div className="candidates-modal" onClick={e => e.stopPropagation()}>
+                        <div className="candidates-modal-header">
+                            <h3 className="candidates-modal-title">Assessments & Participants</h3>
+                            <button className="candidates-modal-close" onClick={() => setShowExamPopup(false)}>
+                                <Icons.X size={18} />
+                            </button>
+                        </div>
+                        <div className="candidates-modal-body">
+                            {examStats.length === 0 ? (
+                                <p style={{ color: "var(--slate-500)", textAlign: "center", margin: 0 }}>No assessments found.</p>
+                            ) : (
+                                examStats.map(exam => {
+                                    const participants = candidatesList.filter(c => c.assigned_exam_id === exam.id);
+                                    return (
+                                        <div key={exam.id} className="exam-candidate-group">
+                                            <h5>
+                                                {exam.title}
+                                                <span style={{ color: "var(--slate-500)", fontWeight: 500 }}>{participants.length} candidates</span>
+                                            </h5>
+                                            {participants.length === 0 ? (
+                                                <div style={{ fontSize: "13px", color: "var(--slate-500)", padding: "10px", background: "var(--slate-50)", borderRadius: "var(--radius-md)", textAlign: "center", border: "1px dashed var(--slate-200)" }}>
+                                                    No candidates assigned.
+                                                </div>
+                                            ) : (
+                                                <ul className="exam-candidate-list">
+                                                    {participants.map(p => {
+                                                        const statClass = p.status.toLowerCase().replace(" ", "_");
+                                                        return (
+                                                            <li key={p.id} className="exam-candidate-item">
+                                                                <div>
+                                                                    <div className="candidate-name">{p.name}</div>
+                                                                    <div className="candidate-email">{p.email}</div>
+                                                                </div>
+                                                                <span className={`candidate-status status-${statClass}`}>
+                                                                    {p.status}
+                                                                </span>
+                                                            </li>
+                                                        )
+                                                    })}
+                                                </ul>
+                                            )}
+                                        </div>
+                                    )
+                                })
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {popup && (
                 <CustomPopup
