@@ -285,7 +285,7 @@ async def send_candidate_link(
         raise HTTPException(status_code=400, detail="No exam assigned to this candidate yet.")
 
     # Generate link
-    test_link = f"{FRONTEND_URL}/test/{candidate['token']}"
+    test_link = f"{FRONTEND_URL}/#/test/{candidate['token']}"
     
     # Enqueue email task
     background_tasks.add_task(send_invitation_email, candidate['email'], candidate['name'], test_link)
