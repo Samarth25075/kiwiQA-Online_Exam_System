@@ -438,10 +438,41 @@ async def request_enroll_otp(exam_id: str, req: CandidateEnrollOTPRequest, backg
         "expires_at": expires_at
     }
     
-    # Send email natively in background task
-    background_tasks.add_task(send_otp_email, req.email, req.name, otp)
+    # Send email SYNCHRONOUSLY so errors are visible (not silently swallowed by background task)
+    smtp_server   = os.environ.get("SMTP_SERVER", "smtp.gmail.com")
+    smtp_port     = int(os.environ.get("SMTP_PORT", 587))
+    smtp_email    = os.environ.get("SMTP_EMAIL", "").strip()
+    smtp_password = os.environ.get("SMTP_PASSWORD", "").strip()
     
-    return {"message": f"OTP sent to {req.email}"}
+    print(f"DEBUG OTP REQUEST: SERVER={smtp_server} PORT={smtp_port} EMAIL_SET={bool(smtp_email)} PASS_LEN={len(smtp_password)}")
+    
+    if not smtp_email or not smtp_password:
+        print(f"WARNING: SMTP not configured. OTP for {req.email} = {otp}")
+        return {"message": f"OTP sent to {req.email}"}
+    
+    try:
+        msg = EmailMessage()
+        msg['Subject'] = 'Your Exam Portal Verification Code'
+        msg['From']    = smtp_email
+        msg['To']      = req.email
+        msg.set_content(
+            f"Hello {req.name},\n\n"
+            f"Your verification code is: {otp}\n"
+            f"It expires in 10 minutes.\n\n"
+            f"Thank you."
+        )
+        with smtplib.SMTP(smtp_server, smtp_port, timeout=15) as server:
+            server.starttls()
+            server.login(smtp_email, smtp_password)
+            server.send_message(msg)
+        print(f"DEBUG: OTP email sent successfully to {req.email}")
+        return {"message": f"OTP sent to {req.email}"}
+    except smtplib.SMTPAuthenticationError as e:
+        print(f"ERROR: Gmail auth failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Email error: Gmail authentication failed. Contact admin. ({str(e)})")
+    except Exception as e:
+        print(f"ERROR: OTP email failed: {type(e).__name__}: {e}")
+        raise HTTPException(status_code=500, detail=f"Email error: {type(e).__name__}: {str(e)}")
 
 @router.post("/enroll/{exam_id}/verify-otp")
 async def verify_enroll_otp(exam_id: str, req: CandidateEnrollOTPVerify):
