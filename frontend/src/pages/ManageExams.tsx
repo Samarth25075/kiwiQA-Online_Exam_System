@@ -379,7 +379,7 @@ export default function ManageExams() {
                                     <Icons.Merge size={12} /> Merge Marked
                                 </button>
                             )}
-                            <a href="/create-exam" className="create-btn">
+                            <a href="/#/create-exam" className="create-btn">
                                 <Icons.Plus size={12} /> New AI Assessment
                             </a>
                         </div>
@@ -393,7 +393,7 @@ export default function ManageExams() {
                                 <p style={{ color: 'var(--text-muted)', fontSize: 16, maxWidth: 400, margin: '0 auto 32px' }}>
                                     You haven't generated any assessments yet. Boost your testing process by creating a new one.
                                 </p>
-                                <a href="/create-exam" className="create-btn" style={{ width: 'fit-content', margin: '0 auto' }}>
+                                <a href="/#/create-exam" className="create-btn" style={{ width: 'fit-content', margin: '0 auto' }}>
                                     <Icons.Plus /> Generate Your First Exam
                                 </a>
                             </div>

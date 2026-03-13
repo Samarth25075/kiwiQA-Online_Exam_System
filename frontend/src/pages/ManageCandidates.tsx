@@ -353,7 +353,7 @@ export default function ManageCandidates() {
                                                     <>
                                                         <button 
                                                             className="mc-action-btn mc-btn-copy" 
-                                                            onClick={() => copyToClipboard(`${window.location.origin}/test/${candidate.token}`)} 
+                                                            onClick={() => copyToClipboard(`${window.location.origin}/#/test/${candidate.token}`)} 
                                                             title="Copy Unique Test Link"
                                                         >
                                                             <Icons.Copy />

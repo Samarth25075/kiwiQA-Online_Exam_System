@@ -1167,7 +1167,7 @@ export default function AdminDashboard() {
                             const countdown = formatCountdown(exam.link_expiry);
                             const isExpired = countdown === "Expired";
                             const isActive = !!countdown && !isExpired;
-                            const publicLink = `${window.location.origin}/enroll/${exam.id}`;
+                            const publicLink = `${window.location.origin}/#/enroll/${exam.id}`;
                             const completionRate = exam.total_assigned > 0
                                 ? Math.round((exam.completed / exam.total_assigned) * 100)
                                 : 0;
