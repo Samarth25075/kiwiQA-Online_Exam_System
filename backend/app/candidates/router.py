@@ -357,6 +357,38 @@ async def get_current_admin_otp(current_admin: Annotated[AdminUser, Depends(get_
     """Return the current Admin OTP rotation code."""
     return {"admin_otp": get_admin_otp(), "expires_in": 600 - (int(time.time()) % 600)}
 
+@router.get("/debug-smtp")
+async def debug_smtp(current_admin: Annotated[AdminUser, Depends(get_current_admin)]):
+    """Diagnose SMTP config on Render — checks env vars and attempts a real test send."""
+    smtp_server   = os.environ.get("SMTP_SERVER", "smtp.gmail.com")
+    smtp_port     = int(os.environ.get("SMTP_PORT", 587))
+    smtp_email    = os.environ.get("SMTP_EMAIL", "")
+    smtp_password = os.environ.get("SMTP_PASSWORD", "")
+
+    config_status = {
+        "SMTP_SERVER":   smtp_server,
+        "SMTP_PORT":     smtp_port,
+        "SMTP_EMAIL":    smtp_email if smtp_email else "NOT SET",
+        "SMTP_PASSWORD": f"SET (length={len(smtp_password)})" if smtp_password else "NOT SET",
+    }
+
+    if not smtp_email or not smtp_password:
+        return {"config": config_status, "send_test": "SKIPPED — email or password not set"}
+
+    try:
+        msg = EmailMessage()
+        msg["Subject"] = "Render SMTP Debug Test"
+        msg["From"]    = smtp_email
+        msg["To"]      = smtp_email
+        msg.set_content("If you see this, SMTP is working correctly on Render!")
+        with smtplib.SMTP(smtp_server, smtp_port, timeout=15) as server:
+            server.starttls()
+            server.login(smtp_email, smtp_password)
+            server.send_message(msg)
+        return {"config": config_status, "send_test": "SUCCESS — check inbox of SMTP_EMAIL"}
+    except Exception as e:
+        return {"config": config_status, "send_test": f"FAILED — {type(e).__name__}: {str(e)}"}
+
 def get_exam_and_check_expiry(exam_id: str):
     exam = get_exam_by_id(exam_id)
     if not exam:
