@@ -107,19 +107,19 @@ def send_screenshot_email(receiver_email: str, screenshot_path: str | None, cand
         from dotenv import load_dotenv
         load_dotenv()
         
-        smtp_server = os.environ.get("SMTP_SERVER")
-        smtp_port = os.environ.get("SMTP_PORT", 587)
+        smtp_server = os.environ.get("SMTP_SERVER", "smtp.gmail.com")
+        smtp_port = int(os.environ.get("SMTP_PORT", 587))
         smtp_email = os.environ.get("SMTP_EMAIL")
         smtp_password = os.environ.get("SMTP_PASSWORD")
         
-        if smtp_server and smtp_email and smtp_password:
-            with smtplib.SMTP(smtp_server, int(smtp_port)) as server:
+        if smtp_email and smtp_password:
+            with smtplib.SMTP(smtp_server, smtp_port) as server:
                 server.starttls()
                 server.login(smtp_email, smtp_password)
                 server.send_message(msg)
             print(f"DEBUG: Screenshot email sent successfully to {receiver_email}.")
         else:
-            print("DEBUG: Screenshot Email sent module finished (simulated/no-smtp credentials present).")
+            print("DEBUG: Screenshot Email skipped — SMTP_EMAIL or SMTP_PASSWORD not set.")
     except Exception as e:
         print(f"Error sending email: {e}")
 
@@ -136,22 +136,22 @@ def send_otp_email(receiver_email: str, candidate_name: str, otp: str):
         from dotenv import load_dotenv
         load_dotenv()
         
-        smtp_server = os.environ.get("SMTP_SERVER")
-        smtp_port = os.environ.get("SMTP_PORT", 587)
+        smtp_server = os.environ.get("SMTP_SERVER", "smtp.gmail.com")
+        smtp_port = int(os.environ.get("SMTP_PORT", 587))
         smtp_email = os.environ.get("SMTP_EMAIL")
         smtp_password = os.environ.get("SMTP_PASSWORD")
         
-        if smtp_server and smtp_email and smtp_password:
-            with smtplib.SMTP(smtp_server, int(smtp_port)) as server:
+        if smtp_email and smtp_password:
+            with smtplib.SMTP(smtp_server, smtp_port) as server:
                 server.starttls()
                 server.login(smtp_email, smtp_password)
                 server.send_message(msg)
             print(f"DEBUG: OTP email sent successfully to {receiver_email}.")
         else:
-            print("DEBUG: OTP Email sent module finished (simulated/no-smtp credentials present).")
+            print("DEBUG: OTP Email skipped — SMTP_EMAIL or SMTP_PASSWORD not set.")
             print(f"==================================================")
             print(f"MOCK Email to {receiver_email}: OTP is {otp}")
-            print(f"==================================================")
+            print(f"==========================================")
     except Exception as e:
         print(f"ERROR: send_otp_email failed for {receiver_email}. Details: {str(e)}")
         import traceback
@@ -165,13 +165,13 @@ def send_invitation_email(receiver_email: str, candidate_name: str, test_link: s
         msg['To'] = receiver_email
         msg.set_content(f"Hello {candidate_name},\n\nYou have been invited to complete an online assessment. Please use the link below to begin your test:\n\n{test_link}\n\nGood luck!")
 
-        smtp_server = os.environ.get("SMTP_SERVER")
-        smtp_port = os.environ.get("SMTP_PORT", 587)
+        smtp_server = os.environ.get("SMTP_SERVER", "smtp.gmail.com")
+        smtp_port = int(os.environ.get("SMTP_PORT", 587))
         smtp_email = os.environ.get("SMTP_EMAIL")
         smtp_password = os.environ.get("SMTP_PASSWORD")
         
-        if smtp_server and smtp_email and smtp_password:
-            with smtplib.SMTP(smtp_server, int(smtp_port)) as server:
+        if smtp_email and smtp_password:
+            with smtplib.SMTP(smtp_server, smtp_port) as server:
                 server.starttls()
                 server.login(smtp_email, smtp_password)
                 server.send_message(msg)
