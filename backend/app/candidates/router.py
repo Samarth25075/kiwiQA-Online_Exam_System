@@ -13,6 +13,7 @@ import smtplib
 from dotenv import load_dotenv
 load_dotenv()
 
+# These will use the values from Render Environment Variables first.
 FRONTEND_URL = os.getenv("FRONTEND_URL", "https://kiwiqa-online-exam-system.onrender.com").rstrip("/")
 BACKEND_URL = os.getenv("BACKEND_URL", "https://kiwiqa-api.onrender.com").rstrip("/")
 

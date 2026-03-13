@@ -36,6 +36,12 @@ const Icons = {
     CPU: () => (
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/></svg>
     ),
+    Send: () => (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg>
+    ),
+    Copy: () => (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg>
+    ),
 };
 
 const getInitials = (name: string) => name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
@@ -136,6 +142,29 @@ export default function ManageCandidates() {
         } catch { setPopup({ isOpen: true, type: 'alert', title: 'Error', message: "Error saving candidate", onConfirm: () => setPopup(null) }); }
     };
 
+    const handleSendLink = async (id: number) => {
+        const token = localStorage.getItem("access_token");
+        try {
+            const res = await fetch(`${API_BASE_URL}/candidates/${id}/send-link`, {
+                method: "POST",
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+            if (res.ok) {
+                setPopup({ isOpen: true, type: 'alert', title: 'Success', message: 'Exam link has been sent to the candidate.', onConfirm: () => setPopup(null) });
+            } else {
+                const data = await res.json();
+                setPopup({ isOpen: true, type: 'alert', title: 'Error', message: data.detail || 'Failed to send link.', onConfirm: () => setPopup(null) });
+            }
+        } catch {
+            setPopup({ isOpen: true, type: 'alert', title: 'Error', message: 'Network error while sending link.', onConfirm: () => setPopup(null) });
+        }
+    };
+
+    const copyToClipboard = (text: string) => {
+        navigator.clipboard.writeText(text);
+        setPopup({ isOpen: true, type: 'alert', title: 'Copied', message: 'Candidate test link copied to clipboard.', onConfirm: () => setPopup(null) });
+    };
+
     if (loading) return null;
 
     return (
@@ -204,6 +233,8 @@ export default function ManageCandidates() {
                 .mc-action-btn { width:28px; height:28px; display:flex; align-items:center; justify-content:center; border-radius:8px; border:1px solid var(--border); background:var(--bg-neutral); cursor:pointer; transition:all 0.2s; color:var(--text-muted); }
                 .mc-action-btn:hover { transform:scale(1.1); }
                 .mc-btn-edit:hover { background:color-mix(in srgb, var(--primary) 10%, var(--bg)); color:var(--primary); border-color:color-mix(in srgb, var(--primary) 30%, transparent); }
+                .mc-btn-send:hover { background:#f0f9fa; color:#1c848f; border-color:#ccf1f5; }
+                .mc-btn-copy:hover { background:#f1f5f9; color:#475569; border-color:#e2e8f0; }
                 .mc-btn-del:hover { background:#fff1f2; color:#e11d48; border-color:#ffe4e6; }
 
                 .mc-resume-link { display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:100px; font-size:10px; font-weight:700; text-decoration:none; background:#f0fdf4; color:#166534; border:1px solid #bbf7d0; transition:all 0.2s; }
@@ -318,6 +349,24 @@ export default function ManageCandidates() {
                                         </td>
                                         <td>
                                             <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
+                                                {candidate.assigned_exam_id && (
+                                                    <>
+                                                        <button 
+                                                            className="mc-action-btn mc-btn-copy" 
+                                                            onClick={() => copyToClipboard(`${window.location.origin}/test/${candidate.token}`)} 
+                                                            title="Copy Unique Test Link"
+                                                        >
+                                                            <Icons.Copy />
+                                                        </button>
+                                                        <button 
+                                                            className="mc-action-btn mc-btn-send" 
+                                                            onClick={() => handleSendLink(candidate.id)} 
+                                                            title="Email Link to Candidate"
+                                                        >
+                                                            <Icons.Send />
+                                                        </button>
+                                                    </>
+                                                )}
                                                 <button className="mc-action-btn mc-btn-edit" onClick={() => handleEdit(candidate)} title="Edit">
                                                     <Icons.Edit />
                                                 </button>

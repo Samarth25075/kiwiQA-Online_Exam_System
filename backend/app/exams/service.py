@@ -45,10 +45,10 @@ def _generate_with_gemini(topic: str, difficulty: str, count: int) -> Optional[L
         
         # Aggressive model fallback with working models
         m_list = [
-            'models/gemini-2.5-flash',      # Currently working according to test
             'models/gemini-2.0-flash',
-            'models/gemini-2.0-flash-lite',
             'models/gemini-1.5-flash',
+            'models/gemini-pro',
+            'models/gemini-2.0-flash-lite',
             'models/gemini-1.5-flash-8b',
         ]
         
