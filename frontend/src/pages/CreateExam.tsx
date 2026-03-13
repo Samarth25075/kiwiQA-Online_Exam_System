@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import AdminLayout from "../components/AdminLayout";
 import CustomPopup, { PopupType } from "../components/CustomPopup";
 import API_BASE_URL from "../config";
@@ -180,6 +180,7 @@ function SectionCard({ title, desc, children }: { title: string; desc?: string; 
 
 // ─── Main Component ────────────────────────────────────────────────────────────
 export default function CreateExam() {
+  const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const [subject, setSubject] = useState("");
   const [difficulty, setDifficulty] = useState<DifficultyLevel>("Beginner");
@@ -314,7 +315,7 @@ export default function CreateExam() {
       setPopup({
         isOpen: true, type: "alert", title: "Published",
         message: "Exam has been saved and is ready to deploy.",
-        onConfirm: () => window.location.href = "/manage-exams"
+        onConfirm: () => navigate("/manage-exams")
       });
     } catch {
       setPopup({
@@ -1079,7 +1080,7 @@ export default function CreateExam() {
                 <p className="ce-brand-subtitle">Configure, preview, and publish assessments</p>
               </div>
             </div>
-            <button className="btn btn-outline" onClick={() => window.location.href = "/manage-exams"}>
+            <button className="btn btn-outline" onClick={() => navigate("/manage-exams")}>
               <Icons.X /> Cancel
             </button>
           </div>
