@@ -17,6 +17,7 @@ class CandidateEnrollOTPRequest(BaseModel):
 
 class CandidateEnrollOTPVerify(CandidateBase):
     otp: str
+    device_id: Optional[str] = None
 
 class Candidate(CandidateBase):
     id: int

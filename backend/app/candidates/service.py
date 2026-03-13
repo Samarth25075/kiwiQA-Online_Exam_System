@@ -46,7 +46,7 @@ def get_all_candidates() -> List[Dict]:
     with CANDIDATE_LOCK:
         return list(reversed(_get_raw_candidates()))
 
-def create_candidate(name: str, email: str, phone_number: str = "", cv_url: str = "") -> Dict:
+def create_candidate(name: str, email: str, phone_number: str = "", cv_url: str = "", device_id: str = "") -> Dict:
     _ensure_csv()
     with CANDIDATE_LOCK:
         candidates = _get_raw_candidates()
@@ -64,7 +64,7 @@ def create_candidate(name: str, email: str, phone_number: str = "", cv_url: str 
             "score": "",
             "total_questions": "",
             "violations": "0",
-            "device_id": ""
+            "device_id": device_id
         }
         
         with open(CSV_PATH, mode="a", newline="", encoding="utf-8") as f:

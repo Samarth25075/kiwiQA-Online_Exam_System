@@ -153,7 +153,9 @@ def send_otp_email(receiver_email: str, candidate_name: str, otp: str):
             print(f"MOCK Email to {receiver_email}: OTP is {otp}")
             print(f"==================================================")
     except Exception as e:
-        print(f"Error sending OTP email: {e}")
+        print(f"ERROR: send_otp_email failed for {receiver_email}. Details: {str(e)}")
+        import traceback
+        traceback.print_exc()
 
 def send_invitation_email(receiver_email: str, candidate_name: str, test_link: str):
     try:
@@ -441,7 +443,8 @@ async def verify_enroll_otp(exam_id: str, req: CandidateEnrollOTPVerify):
         req.name, 
         req.email, 
         req.phone_number or "", 
-        req.cv_url or ""
+        req.cv_url or "",
+        req.device_id or ""
     )
     
     # Assign exam

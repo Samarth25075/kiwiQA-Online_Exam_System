@@ -131,9 +131,10 @@ export default function EnrollCandidate() {
         setLoading(true);
         setError("");
         try {
+            const deviceId = getOrCreateDeviceId();
             const res = await fetch(
                 `${API_BASE_URL}/candidates/enroll/${examId}/verify-otp`,
-                { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name, email, otp, phone_number: "", cv_url: "" }) }
+                { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name, email, otp, phone_number: "", cv_url: "", device_id: deviceId }) }
             );
             const data = await res.json();
             if (res.ok) {
