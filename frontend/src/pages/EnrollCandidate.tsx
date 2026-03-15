@@ -236,9 +236,7 @@ export default function EnrollCandidate() {
         }
 
         /* ── Header ───────────────────────────────────── */
-        .enroll-logo-wrap { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 28px; }
-        .enroll-logo { height: 34px; object-fit: contain; }
-        .enroll-vite-logo { height: 26px; opacity: 0.9; }
+        .enroll-logo { height: 34px; object-fit: contain; display: block; margin: 0 auto 28px; }
 
         .enroll-heading {
           font-family: var(--font-serif);
@@ -468,10 +466,7 @@ export default function EnrollCandidate() {
             </button>
 
             <div className="enroll-card">
-                <div className="enroll-logo-wrap">
-                    <img src={logo} alt="KiwiQA" className="enroll-logo" />
-                    <img src="/vite.svg" alt="Vite" className="enroll-vite-logo" />
-                </div>
+                <img src={logo} alt="KiwiQA" className="enroll-logo" />
 
                 {step === "details" ? (
                     <>

@@ -1638,10 +1638,7 @@ export default function TakeTest() {
             <div className="test-container">
                 <header className="test-header">
                     <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                            <img src={logo} alt="KiwiQA Logo" style={{ height: 40 }} />
-                            <img src="/vite.svg" alt="Vite Logo" style={{ height: 32, opacity: 0.9 }} />
-                        </div>
+                        <img src={logo} alt="KiwiQA Logo" style={{ height: 40 }} />
                         <div>
                             <div className="test-badge">{testData.exam.title}</div>
                             <h1 className="test-title" style={{ marginTop: 0 }}>Assessment Portal</h1>

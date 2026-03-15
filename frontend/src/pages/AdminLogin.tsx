@@ -275,9 +275,8 @@ export default function AdminLogin() {
           40%, 60% { transform: translateX(5px); }
         }
 
-        .login-logo-wrap { display: flex; align-items: center; gap: 10px; margin-bottom: 32px; }
+        .login-logo-wrap { margin-bottom: 32px; }
         .login-logo { height: 34px; object-fit: contain; }
-        .login-vite-logo { height: 26px; opacity: 0.9; }
 
         .login-heading {
           font-family: var(--font-serif);
@@ -442,7 +441,6 @@ export default function AdminLogin() {
 
           <div className="login-logo-wrap">
             <img src={logo} alt="KiwiQA" className="login-logo" />
-            <img src="/vite.svg" alt="Vite" className="login-vite-logo" />
           </div>
 
           <h1 className="login-heading">Sign in</h1>

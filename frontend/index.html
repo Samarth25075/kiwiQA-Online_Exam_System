@@ -1,25 +1,28 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React + TS</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script>
-      // Magic Redirect: If someone visits /test/... without a #, redirect them to /#/test/...
-      const path = window.location.pathname;
-      if (path.startsWith('/test/') || path.startsWith('/enroll/')) {
-        window.location.href = window.location.origin + '/#' + path + window.location.search;
-      }
 
-      window.onerror = function(msg, url, line, col, error) {
-        // Only alert if it's a real crash, not just a missing file
-        console.error("CRASH:", msg);
-      };
-    </script>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" href="/logo.png" />
+  <title>Vite + React + TS</title>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script>
+    // Magic Redirect: If someone visits /test/... without a #, redirect them to /#/test/...
+    const path = window.location.pathname;
+    if (path.startsWith('/test/') || path.startsWith('/enroll/')) {
+      window.location.href = window.location.origin + '/#' + path + window.location.search;
+    }
+
+    window.onerror = function (msg, url, line, col, error) {
+      // Only alert if it's a real crash, not just a missing file
+      console.error("CRASH:", msg);
+    };
+  </script>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+
 </html>
