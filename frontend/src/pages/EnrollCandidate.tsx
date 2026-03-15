@@ -87,6 +87,10 @@ export default function EnrollCandidate() {
     const [theme, setTheme] = useState(localStorage.getItem("kiwi-theme") || "default");
 
     useEffect(() => {
+        document.title = "Enroll | KiwiQA";
+    }, []);
+
+    useEffect(() => {
         if (theme === "default") {
             document.documentElement.removeAttribute("data-theme");
         } else {
@@ -232,7 +236,9 @@ export default function EnrollCandidate() {
         }
 
         /* ── Header ───────────────────────────────────── */
-        .enroll-logo { height: 34px; object-fit: contain; display: block; margin: 0 auto 28px; }
+        .enroll-logo-wrap { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 28px; }
+        .enroll-logo { height: 34px; object-fit: contain; }
+        .enroll-vite-logo { height: 26px; opacity: 0.9; }
 
         .enroll-heading {
           font-family: var(--font-serif);
@@ -462,7 +468,10 @@ export default function EnrollCandidate() {
             </button>
 
             <div className="enroll-card">
-                <img src={logo} alt="KiwiQA" className="enroll-logo" />
+                <div className="enroll-logo-wrap">
+                    <img src={logo} alt="KiwiQA" className="enroll-logo" />
+                    <img src="/vite.svg" alt="Vite" className="enroll-vite-logo" />
+                </div>
 
                 {step === "details" ? (
                     <>

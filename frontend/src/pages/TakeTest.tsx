@@ -799,6 +799,14 @@ export default function TakeTest() {
     const toggleCheck = (key: keyof typeof checks) =>
         setChecks(prev => ({ ...prev, [key]: !prev[key] }));
 
+    useEffect(() => {
+        if (testData?.exam?.title) {
+            document.title = `${testData.exam.title} | KiwiQA`;
+        } else {
+            document.title = "Take Test | KiwiQA";
+        }
+    }, [testData]);
+
     // Keep refs in sync so event handlers always see latest values
     useEffect(() => { startedRef.current = started; }, [started]);
     useEffect(() => { finishedRef.current = finished; }, [finished]);
@@ -1630,7 +1638,10 @@ export default function TakeTest() {
             <div className="test-container">
                 <header className="test-header">
                     <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                        <img src={logo} alt="KiwiQA Logo" style={{ height: 40 }} />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                            <img src={logo} alt="KiwiQA Logo" style={{ height: 40 }} />
+                            <img src="/vite.svg" alt="Vite Logo" style={{ height: 32, opacity: 0.9 }} />
+                        </div>
                         <div>
                             <div className="test-badge">{testData.exam.title}</div>
                             <h1 className="test-title" style={{ marginTop: 0 }}>Assessment Portal</h1>

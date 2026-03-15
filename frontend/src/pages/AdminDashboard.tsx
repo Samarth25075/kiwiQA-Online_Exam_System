@@ -406,6 +406,10 @@ export default function AdminDashboard() {
           justify-content: center;
           color: var(--white);
         }
+        .db-vite-logo {
+          height: 22px;
+          opacity: 0.9;
+        }
 
         .db-topbar-title {
           font-family: var(--font-serif);
@@ -1088,6 +1092,7 @@ export default function AdminDashboard() {
                     <div className="db-topbar-logo">
                         <Icons.Shield size={16} />
                     </div>
+                    <img src="/vite.svg" alt="Vite" className="db-vite-logo" />
                     <h2 className="db-topbar-title">Assessment Hub</h2>
                 </div>
 

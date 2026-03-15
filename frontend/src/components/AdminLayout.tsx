@@ -132,6 +132,15 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         { path: "/settings", label: "Settings", icon: Icons.Settings, perm: null },
     ];
 
+    useEffect(() => {
+        const currentItem = navItems.find(item => isActive(item.path));
+        if (currentItem) {
+            document.title = `${currentItem.label} | KiwiQA`;
+        } else {
+            document.title = "KiwiQA Assessment Hub";
+        }
+    }, [location.pathname]);
+
     return (
         <div className="al-layout-wrap">
             <style>{`
@@ -202,10 +211,15 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                     margin-bottom: 8px;
                 }
                 .al-logo-area img {
-                    height: 34px;
+                    height: 28px;
                     width: auto;
                     object-fit: contain;
                     filter: brightness(1.1);
+                }
+                .al-vite-logo {
+                    height: 22px !important;
+                    margin-left: 8px;
+                    opacity: 0.9;
                 }
 
                 /* ── Nav ── */
@@ -367,6 +381,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
             <aside className={`al-sidebar ${sidebarOpen ? 'open' : ''}`}>
                 <div className="al-logo-area" onClick={() => { navigate("/dashboard"); setSidebarOpen(false); }}>
                     <img src={logo} alt="KiwiQA Logo" />
+                    <img src="/vite.svg" alt="Vite Logo" className="al-vite-logo" />
                 </div>
 
                 <nav className="al-nav">
@@ -430,7 +445,10 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
 
             <main className="al-main-content">
                 <header className="al-mobile-header">
-                    <img src={logo} alt="Logo" style={{ height: 28 }} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <img src={logo} alt="Logo" style={{ height: 24 }} />
+                        <img src="/vite.svg" alt="Vite Logo" style={{ height: 18 }} />
+                    </div>
                     <button className="al-menu-toggle" onClick={() => setSidebarOpen(true)}>
                         <Icons.Menu />
                     </button>
