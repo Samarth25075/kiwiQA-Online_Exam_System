@@ -880,8 +880,9 @@ export default function TakeTest() {
     useEffect(() => {
         if (videoRef.current && stream) {
             videoRef.current.srcObject = stream;
+            videoRef.current.play().catch(err => console.error("Error playing video:", err));
         }
-    }, [stream]);
+    }, [stream, started]);
 
     // ── Eye/Gaze Tracking Loop ────────────────────────────────────────────────
     useEffect(() => {
