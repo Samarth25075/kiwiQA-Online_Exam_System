@@ -21,6 +21,7 @@ def _to_dict(c: Candidate) -> Dict:
         "joined_date": c.joined_date or "",
         "token": c.token or "",
         "assigned_exam_id": c.assigned_exam_id or "",
+        "exam_title": c.exam.title if c.exam else "No Exam Assigned",
         "score": c.score,
         "total_questions": c.total_questions,
         "violations": c.violations if c.violations is not None else 0,
@@ -28,8 +29,21 @@ def _to_dict(c: Candidate) -> Dict:
     }
 
 def get_all_candidates(db: Session) -> List[Dict]:
-    candidates = db.query(Candidate).order_by(Candidate.id.desc()).all()
-    return [_to_dict(c) for c in candidates]
+    from sqlalchemy.orm import joinedload
+    from app.core.redis import get_cached_data, set_cached_data
+    
+    # Try cache first
+    cached = get_cached_data("all_candidates_list")
+    if cached:
+        return cached
+
+    # Use joinedload to fetch exam data in ONE query instead of many
+    candidates = db.query(Candidate).options(joinedload(Candidate.exam)).order_by(Candidate.id.desc()).all()
+    res = [_to_dict(c) for c in candidates]
+    
+    # Store in cache for 5 minutes
+    set_cached_data("all_candidates_list", res, expire=300)
+    return res
 
 def create_candidate(db: Session, name: str, email: str, phone_number: str = "", dob: str = "", gender: str = "", address: str = "", profile_photo: str = "", cv_url: str = "", device_id: str = "") -> Dict:
     current_year = datetime.now().year
