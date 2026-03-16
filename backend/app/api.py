@@ -11,6 +11,7 @@ from fastapi.responses import JSONResponse
 import os
 import traceback
 import asyncio
+import uuid
 
 from .auth.router import router as auth_router
 from .candidates.router import router as candidates_router
@@ -76,16 +77,19 @@ async def startup_event():
     Base.metadata.create_all(bind=engine)
     print("INFO: Database tables verified/created.")
 
-    # 2. Check and Create Default Admin if 0 users
+    # 2. Check and Create Default Admins
     db = SessionLocal()
     try:
         from app.models import User
+        from app.auth.service import hash_password
+        from app.core.config import AUTHORIZED_GOOGLE_EMAIL
+        import json
+        
+        # Add basic admin if no users exist
         if db.query(User).count() == 0:
-            from app.auth.service import hash_password
-            import json
             admin_user = User(
                 email="admin@examportal.com",
-                hashed_password=hash_password("Admin@123"), # Standard default
+                hashed_password=hash_password("Admin@123"),
                 role="admin",
                 full_name="System Admin",
                 permissions=json.dumps(["manage exam", "generate exam", "manage candidates", "manage users"])
@@ -93,8 +97,23 @@ async def startup_event():
             db.add(admin_user)
             db.commit()
             print("INFO: Created default admin user: admin@examportal.com / Admin@123")
+
+        # Ensure AUTHORIZED_GOOGLE_EMAIL user exists for Google Login to work
+        if AUTHORIZED_GOOGLE_EMAIL and AUTHORIZED_GOOGLE_EMAIL != "NOT_SET":
+            existing_google_user = db.query(User).filter(User.email == AUTHORIZED_GOOGLE_EMAIL).first()
+            if not existing_google_user:
+                new_google_user = User(
+                    email=AUTHORIZED_GOOGLE_EMAIL,
+                    hashed_password=hash_password(str(uuid.uuid4())), # Random password, they use Google
+                    role="admin",
+                    full_name="Authorized Google User",
+                    permissions=json.dumps(["manage exam", "generate exam", "manage candidates", "manage users"])
+                )
+                db.add(new_google_user)
+                db.commit()
+                print(f"INFO: Created pre-authorized Google user: {AUTHORIZED_GOOGLE_EMAIL}")
     except Exception as e:
-        print(f"ERROR creating default admin: {e}")
+        print(f"ERROR creating default admins: {e}")
     finally:
         db.close()
 
