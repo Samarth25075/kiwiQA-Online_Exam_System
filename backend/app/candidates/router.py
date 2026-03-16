@@ -125,12 +125,13 @@ def send_screenshot_email(receiver_email: str, screenshot_path: str | None, cand
         load_dotenv(override=True)
         
         smtp_server = os.environ.get("SMTP_SERVER", "smtp.gmail.com")
-        smtp_port = int(os.environ.get("SMTP_PORT", 465))
+        smtp_port = int(os.environ.get("SMTP_PORT", 587))
         smtp_email = os.environ.get("SMTP_EMAIL")
         smtp_password = os.environ.get("SMTP_PASSWORD")
         
         if smtp_email and smtp_password:
-            with smtplib.SMTP_SSL(smtp_server, smtp_port) as server:
+            with smtplib.SMTP(smtp_server, smtp_port, timeout=15) as server:
+                server.starttls()
                 server.login(smtp_email, smtp_password)
                 server.send_message(msg)
             print(f"DEBUG: Screenshot email sent successfully to {receiver_email}.")
@@ -153,12 +154,13 @@ def send_otp_email(receiver_email: str, candidate_name: str, otp: str):
         load_dotenv(override=True)
         
         smtp_server = os.environ.get("SMTP_SERVER", "smtp.gmail.com")
-        smtp_port = int(os.environ.get("SMTP_PORT", 465))
+        smtp_port = int(os.environ.get("SMTP_PORT", 587))
         smtp_email = os.environ.get("SMTP_EMAIL")
         smtp_password = os.environ.get("SMTP_PASSWORD")
         
         if smtp_email and smtp_password:
-            with smtplib.SMTP_SSL(smtp_server, smtp_port) as server:
+            with smtplib.SMTP(smtp_server, smtp_port, timeout=15) as server:
+                server.starttls()
                 server.login(smtp_email, smtp_password)
                 server.send_message(msg)
             print(f"DEBUG: OTP email sent successfully to {receiver_email}.")
@@ -181,12 +183,13 @@ def send_invitation_email(receiver_email: str, candidate_name: str, test_link: s
         msg.set_content(f"Hello {candidate_name},\n\nYou have been invited to complete an online assessment. Please use the link below to begin your test:\n\n{test_link}\n\nGood luck!")
 
         smtp_server = os.environ.get("SMTP_SERVER", "smtp.gmail.com")
-        smtp_port = int(os.environ.get("SMTP_PORT", 465))
+        smtp_port = int(os.environ.get("SMTP_PORT", 587))
         smtp_email = os.environ.get("SMTP_EMAIL")
         smtp_password = os.environ.get("SMTP_PASSWORD")
         
         if smtp_email and smtp_password:
-            with smtplib.SMTP_SSL(smtp_server, smtp_port) as server:
+            with smtplib.SMTP(smtp_server, smtp_port, timeout=15) as server:
+                server.starttls()
                 server.login(smtp_email, smtp_password)
                 server.send_message(msg)
             print(f"DEBUG: Invitation email sent successfully to {receiver_email}.")
@@ -455,7 +458,7 @@ async def request_enroll_otp(exam_id: str, req: CandidateEnrollOTPRequest, backg
     
     # Send email SYNCHRONOUSLY so errors are visible (not silently swallowed by background task)
     smtp_server   = os.environ.get("SMTP_SERVER", "smtp.gmail.com")
-    smtp_port     = int(os.environ.get("SMTP_PORT", 465))
+    smtp_port     = int(os.environ.get("SMTP_PORT", 587))
     smtp_email    = os.environ.get("SMTP_EMAIL", "").strip()
     smtp_password = os.environ.get("SMTP_PASSWORD", "").strip()
     
@@ -476,7 +479,8 @@ async def request_enroll_otp(exam_id: str, req: CandidateEnrollOTPRequest, backg
             f"It expires in 10 minutes.\n\n"
             f"Thank you."
         )
-        with smtplib.SMTP_SSL(smtp_server, smtp_port, timeout=15) as server:
+        with smtplib.SMTP(smtp_server, smtp_port, timeout=15) as server:
+            server.starttls()
             server.login(smtp_email, smtp_password)
             server.send_message(msg)
         print(f"DEBUG: OTP email sent successfully to {req.email}")
