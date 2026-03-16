@@ -51,36 +51,37 @@ def _generate_with_gemini(topic: str, difficulty: str, count: int) -> Optional[L
             return None
         
         prompt = f"""
-        TASK: Generate EXACTLY {count} high-quality Multiple Choice Questions (MCQs).
-        TOPIC: {topic}
-        DIFFICULTY: {difficulty}
+        PERSONA: You are a professional subject matter expert and examination designer with 20 years of experience in creating high-stakes technical recruitment assessments.
+        
+        TASK: Design a rigorous {difficulty} level technical assessment for the topic: "{topic}".
+        COUNT: Generate exactly {count} distinct Multiple Choice Questions (MCQs).
 
-        CONSTRAINTS:
-        1. YOU MUST RETURN EXACTLY {count} QUESTIONS.
-        2. EVERY QUESTION MUST FOCUS ON A DIFFERENT SUB-TOPIC. Do not repeat the same concept.
-        3. For a topic like '{topic}', ensure you cover different areas (e.g., Syntax, Logic, Performance, Security, etc.).
-        4. Output MUST be only the JSON array of objects.
-        5. Each object MUST contain: "text", "options", "explanation".
-        6. Provide exactly 4 distinct options per question.
-        7. EXACTLY one option per question must be "is_correct": true.
-        8. Standardize difficulty to the '{difficulty}' level.
-        9. Avoid starting questions with the same phrasing (e.g., don't start every question with 'What is ...').
-        10. BE CONCISE. Keep question text and explanations short to avoid being truncated.
-        11. OUTPUT ONLY THE JSON ARRAY. NO PREAMBLE. NO EXPLANATION AFTER THE JSON.
+        QUALITY STANDARDS:
+        1. **Strict Relevance**: Every single question MUST be directly and strictly related to "{topic}". Do not deviate into other areas.
+        2. **Technical Depth**: Questions must test deep conceptual understanding and practical problem-solving, not just definitions.
+        3. **Difficulty Alignment**: Each question must be calibrated perfectly for a "{difficulty}" level expert.
+        4. **Zero Redundancy**: Ensure 100% variety across all {count} questions. Each must cover a unique facet of "{topic}".
+        5. **Professional Distractors**: Options must be technically plausible to a non-expert, making the test challenging and valid.
 
-        FORMAT EXAMPLE:
+        MANDATORY OUTPUT FORMAT (JSON ONLY):
         [
           {{
-            "text": "What is the primary purpose of React Hooks?",
+            "text": "Direct and clearly worded technical question...",
             "options": [
-              {{"text": "To manage state and side effects in functional components", "is_correct": true}},
-              {{"text": "To replace class components entirely", "is_correct": false}},
-              {{"text": "To improve CSS performance", "is_correct": false}},
-              {{"text": "To handle database migrations", "is_correct": false}}
+              {{"text": "The correct technical answer", "is_correct": true}},
+              {{"text": "Plausible technical distractor 1", "is_correct": false}},
+              {{"text": "Plausible technical distractor 2", "is_correct": false}},
+              {{"text": "Plausible technical distractor 3", "is_correct": false}}
             ],
-            "explanation": "Hooks allow function components to have access to state and other React features."
+            "explanation": "A concise technical justification for the correct answer."
           }}
         ]
+
+        STRICT CONSTRAINTS:
+        - OUTPUT ONLY THE JSON ARRAY. 
+        - DO NOT include markdown formatting like ```json.
+        - NO PREAMBLE or post-text.
+        - Ensure all technical terms are spelled correctly.
         """
         
         response = client.models.generate_content(
