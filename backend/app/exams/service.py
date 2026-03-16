@@ -6,9 +6,80 @@ from typing import List, Dict, Optional
 from app.exams.schemas import ExamCreate, ExamFinalize, Question, Option
 import google.genai as new_genai
 from google.genai import types as genai_types
-from app.core.config import GOOGLE_API_KEY
+from app.core.config import GOOGLE_API_KEY, QUIZ_API_KEY
+import requests
 from sqlalchemy.orm import Session
 from app.models import Exam
+
+def _generate_with_quiz_api(topic: str, difficulty: str, count: int) -> Optional[List[Dict]]:
+    """Generate questions using QuizAPI.io."""
+    if not QUIZ_API_KEY:
+        return None
+        
+    try:
+        url = "https://quizapi.io/api/v1/questions"
+        params = {
+            "apiKey": QUIZ_API_KEY,
+            "limit": count,
+            "difficulty": difficulty.capitalize() if difficulty else "Medium"
+        }
+        
+        # Map topics to QuizAPI categories/tags if possible
+        category_map = {
+            "linux": "linux",
+            "bash": "bash",
+            "docker": "docker",
+            "sql": "sql",
+            "mysql": "mysql",
+            "cms": "cms",
+            "code": "code",
+            "devops": "devops"
+        }
+        
+        topic_lower = topic.lower()
+        if topic_lower in category_map:
+            params["category"] = category_map[topic_lower]
+        else:
+            params["tags"] = topic
+            
+        response = requests.get(url, params=params, timeout=10)
+        if response.status_code != 200:
+            print(f"ERROR: QuizAPI failed with code {response.status_code}: {response.text}")
+            return None
+            
+        data = response.json()
+        if not isinstance(data, list):
+            return None
+            
+        questions = []
+        for q in data:
+            options = []
+            answers = q.get("answers", {})
+            correct_answers = q.get("correct_answers", {})
+            
+            # QuizAPI provides answers as answer_a, answer_b, etc.
+            # and correctness as answer_a_correct, etc.
+            for key, val in answers.items():
+                if val:
+                    is_correct = correct_answers.get(f"{key}_correct") == "true"
+                    options.append({"text": val, "is_correct": is_correct})
+            
+            if not options: continue
+            
+            # Ensure at least one correct answer
+            if not any(o["is_correct"] for o in options):
+                options[0]["is_correct"] = True
+                
+            questions.append({
+                "text": q.get("question", "Untitled Question"),
+                "options": options,
+                "explanation": q.get("explanation") or "No explanation provided."
+            })
+            
+        return questions if questions else None
+    except Exception as e:
+        print(f"ERROR: QuizAPI generation failed: {e}")
+        return None
 
 def _generate_with_gemini(topic: str, difficulty: str, count: int) -> Optional[List[Dict]]:
     """Actually use Google Gemini to generate questions."""
@@ -191,10 +262,16 @@ def _generate_with_gemini(topic: str, difficulty: str, count: int) -> Optional[L
         return None
 
 def _generate_mock_questions(topic: str, difficulty: str, count: int) -> List[Dict]:
-    """Simulate AI generation. Picks from knowledge base if possible, otherwise generates generic."""
+    """Simulate AI generation. Picks from QuizAPI first, then Gemini, then fallback."""
     
-    # Try Gemini first
-    questions = _generate_with_gemini(topic, difficulty, count)
+    # Try QuizAPI first as requested
+    questions = _generate_with_quiz_api(topic, difficulty, count)
+    
+    # If QuizAPI fails or returns nothing, try Gemini
+    if not questions:
+        print("INFO: QuizAPI returned no questions, falling back to Gemini...")
+        questions = _generate_with_gemini(topic, difficulty, count)
+        
     if not questions:
         questions = []
     

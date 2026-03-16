@@ -20,6 +20,9 @@ SMTP_PORT: int = int(os.getenv("SMTP_PORT", 587))
 SMTP_EMAIL: str = os.getenv("SMTP_EMAIL", "")
 SMTP_PASSWORD: str = os.getenv("SMTP_PASSWORD", "")
 
+# Quiz API Configuration
+QUIZ_API_KEY: str = os.getenv("QUIZ_API_KEY", "")
+
 # Frontend / Backend URLs
 FRONTEND_URL: str = os.getenv("FRONTEND_URL", "https://kiwiqa-online-exam-system.onrender.com").rstrip("/")
 BACKEND_URL: str = os.getenv("BACKEND_URL", "https://kiwiqa-api.onrender.com").rstrip("/")
