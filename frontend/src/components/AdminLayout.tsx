@@ -78,6 +78,15 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         const token = localStorage.getItem("access_token");
         if (!token) return;
 
+        // Try local cache first for performance
+        const cached = sessionStorage.getItem("admin-profile");
+        if (cached) {
+            try {
+                setProfile(JSON.parse(cached));
+                return;
+            } catch { sessionStorage.removeItem("admin-profile"); }
+        }
+
         let cancelled = false;
         fetch(`${API_BASE_URL}/me`, {
             headers: { "Authorization": `Bearer ${token}` }
@@ -86,18 +95,24 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                 if (cancelled) return;
                 if (res.status === 401) {
                     localStorage.removeItem("access_token");
+                    sessionStorage.removeItem("admin-profile");
                     navigate("/", { replace: true });
                     throw new Error("Unauthorized");
                 }
                 return res.json();
             })
-            .then(data => { if (!cancelled && data) setProfile(data); })
+            .then(data => { 
+                if (!cancelled && data) {
+                    setProfile(data);
+                    sessionStorage.setItem("admin-profile", JSON.stringify(data));
+                }
+            })
             .catch(err => {
                 if (err.message !== "Unauthorized") console.error(err);
             });
 
         return () => { cancelled = true; };
-    }, []);
+    }, [navigate]);
 
     const hasPermission = (perm: string) => {
         if (!profile) return true;

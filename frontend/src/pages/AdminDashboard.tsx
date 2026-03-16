@@ -181,7 +181,7 @@ export default function AdminDashboard() {
                 await fetchCandidates();
                 await fetchExamStats();
                 await fetchAdminOtp();
-            }, 5000);
+            }, 15000);
 
             timerId = setInterval(() => setNow(new Date()), 1000);
         };
@@ -199,6 +199,7 @@ export default function AdminDashboard() {
     // ─── Auth ────────────────────────────────────────────────────────────────────
     const handleAuthFailure = () => {
         localStorage.removeItem("access_token");
+        sessionStorage.removeItem("admin-profile");
         navigate("/");
     };
 
