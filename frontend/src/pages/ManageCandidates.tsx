@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import AdminLayout from "../components/AdminLayout";
 import CustomPopup, { PopupType } from "../components/CustomPopup";
 import API_BASE_URL from "../config";
@@ -178,26 +178,29 @@ export default function ManageCandidates() {
 
     if (loading) return null;
 
-    // Group candidates by email
-    const groupedCandidates = Object.values(candidates.reduce((acc, candidate) => {
-        const email = candidate.email;
-        if (!acc[email]) {
-            acc[email] = {
+    // Memoized grouping of candidates by email
+    const groupedCandidates = useMemo(() => {
+        const examMap = new Map(exams.map(e => [e.id, e.title]));
+        
+        const groups: Record<string, any> = {};
+        for (const candidate of candidates) {
+            const email = candidate.email;
+            if (!groups[email]) {
+                groups[email] = {
+                    ...candidate,
+                    enrollments: []
+                };
+            }
+            
+            const examName = examMap.get(candidate.assigned_exam_id || "") || candidate.assigned_exam_id || "Unassigned";
+            
+            groups[email].enrollments.push({
                 ...candidate,
-                enrollments: []
-            };
+                examName
+            });
         }
-        
-        const examObj = exams.find(e => e.id === candidate.assigned_exam_id);
-        const examName = examObj ? examObj.title : candidate.assigned_exam_id || "Unassigned";
-        
-        acc[email].enrollments.push({
-            ...candidate,
-            examName
-        });
-        
-        return acc;
-    }, {} as Record<string, any>));
+        return Object.values(groups);
+    }, [candidates, exams]);
 
     return (
         <AdminLayout>

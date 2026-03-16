@@ -13,6 +13,10 @@ HEADERS = ["id", "candidate_id", "name", "email", "phone_number", "dob", "gender
 # Multi-threading lock for safe concurrent CSV access
 CANDIDATE_LOCK = threading.RLock()
 
+# In-memory cache
+_CANDIDATE_CACHE = None
+_LAST_MOD_TIME = 0
+
 def _ensure_csv():
     if not os.path.exists(CSV_PATH):
         with CANDIDATE_LOCK:
@@ -32,16 +36,33 @@ def _add_initial_data(writer):
     writer.writerows(initial_data)
 
 def _get_raw_candidates() -> List[Dict]:
+    global _CANDIDATE_CACHE, _LAST_MOD_TIME
     _ensure_csv()
-    candidates = []
-    with open(CSV_PATH, mode="r", newline="", encoding="utf-8") as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            for header in HEADERS:
-                if header not in row:
-                    row[header] = ""
-            candidates.append(row)
-    return candidates
+    
+    with CANDIDATE_LOCK:
+        try:
+            current_mod_time = os.path.getmtime(CSV_PATH)
+            if _CANDIDATE_CACHE is not None and current_mod_time == _LAST_MOD_TIME:
+                return _CANDIDATE_CACHE
+        except OSError:
+            current_mod_time = 0
+
+        candidates = []
+        try:
+            with open(CSV_PATH, mode="r", newline="", encoding="utf-8") as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    for header in HEADERS:
+                        if header not in row:
+                            row[header] = ""
+                    candidates.append(row)
+        except Exception as e:
+            print(f"ERROR reading candidates CSV: {e}")
+            return _CANDIDATE_CACHE if _CANDIDATE_CACHE else []
+            
+        _CANDIDATE_CACHE = candidates
+        _LAST_MOD_TIME = current_mod_time
+        return candidates
 
 def get_all_candidates() -> List[Dict]:
     with CANDIDATE_LOCK:

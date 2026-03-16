@@ -19,6 +19,10 @@ KNOWLEDGE_BASE_FILE = os.path.join(STORAGE_DIR, "knowledge_base.json")
 # Multi-threading lock for safe concurrent JSON access
 EXAMS_LOCK = threading.RLock()
 
+# In-memory cache
+_EXAMS_CACHE = None
+_EXAMS_LAST_MOD = 0
+
 def _ensure_storage():
     if not os.path.exists(STORAGE_DIR):
         os.makedirs(STORAGE_DIR)
@@ -379,11 +383,26 @@ def create_exam(exam_in: ExamCreate) -> Dict:
     return new_exam
 
 def get_all_exams() -> List[Dict]:
+    global _EXAMS_CACHE, _EXAMS_LAST_MOD
     _ensure_storage()
+    
     with EXAMS_LOCK:
-        with open(EXAMS_FILE, "r") as f:
-            exams = json.load(f)
-        return list(reversed(exams))
+        try:
+            current_mod = os.path.getmtime(EXAMS_FILE)
+            if _EXAMS_CACHE is not None and current_mod == _EXAMS_LAST_MOD:
+                return list(reversed(_EXAMS_CACHE))
+        except OSError:
+            current_mod = 0
+            
+        try:
+            with open(EXAMS_FILE, "r") as f:
+                exams = json.load(f)
+            _EXAMS_CACHE = exams
+            _EXAMS_LAST_MOD = current_mod
+            return list(reversed(exams))
+        except Exception as e:
+            print(f"ERROR reading exams JSON: {e}")
+            return list(reversed(_EXAMS_CACHE)) if _EXAMS_CACHE else []
 
 def get_exam_by_id(exam_id: str) -> Dict | None:
     exams = get_all_exams()
@@ -425,9 +444,16 @@ def get_exams_with_candidate_counts() -> List[Dict]:
     exams = get_all_exams()
     candidates = get_all_candidates()
 
+    from collections import defaultdict
+    candidates_by_exam = defaultdict(list)
+    for c in candidates:
+        exam_id = c.get("assigned_exam_id")
+        if exam_id:
+            candidates_by_exam[exam_id].append(c)
+
     result = []
     for exam in exams:
-        assigned = [c for c in candidates if c.get("assigned_exam_id") == exam["id"]]
+        assigned = candidates_by_exam.get(exam["id"], [])
         completed_cands = [c for c in assigned if c.get("status", "").lower() == "completed"]
         
         passing_score_pct = exam.get("passing_score", 50)
@@ -440,7 +466,6 @@ def get_exams_with_candidate_counts() -> List[Dict]:
             vios = int(c.get("violations", "0") or 0)
             if vios >= 3:
                 eliminated += 1
-                # Usually eliminated counts as failed, but we mark it separately if they hit the cap
                 failed += 1 
             else:
                 try:
