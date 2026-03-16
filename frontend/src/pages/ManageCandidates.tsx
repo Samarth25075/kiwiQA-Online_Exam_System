@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import AdminLayout from "../components/AdminLayout";
 import CustomPopup, { PopupType } from "../components/CustomPopup";
 import API_BASE_URL from "../config";
@@ -85,6 +86,7 @@ const StatusChip = ({ status }: { status: string }) => {
 };
 
 export default function ManageCandidates() {
+    const navigate = useNavigate();
     const [candidates, setCandidates] = useState<Candidate[]>([]);
     const [exams, setExams] = useState<ExamStat[]>([]);
     const [loading, setLoading] = useState(true);
@@ -105,15 +107,31 @@ export default function ManageCandidates() {
 
     const fetchData = async () => {
         const token = localStorage.getItem("access_token");
+        if (!token) { navigate("/"); return; }
+
         try {
             const [candRes, examRes] = await Promise.all([
                 fetch(`${API_BASE_URL}/candidates`, { headers: { "Authorization": `Bearer ${token}` } }),
                 fetch(`${API_BASE_URL}/exams`, { headers: { "Authorization": `Bearer ${token}` } })
             ]);
-            if (candRes.ok) setCandidates(await candRes.json());
-            if (examRes.ok) setExams(await examRes.json());
+
+            if (candRes.status === 401 || examRes.status === 401) {
+                localStorage.removeItem("access_token");
+                sessionStorage.removeItem("admin-profile");
+                navigate("/");
+                return;
+            }
+
+            if (candRes.ok) {
+                const cData = await candRes.json();
+                if (Array.isArray(cData)) setCandidates(cData);
+            }
+            if (examRes.ok) {
+                const eData = await examRes.json();
+                if (Array.isArray(eData)) setExams(eData);
+            }
         } catch {
-            setPopup({ isOpen: true, type: 'alert', title: 'Error', message: 'Failed to fetch data.', onConfirm: () => setPopup(null) });
+            setPopup({ isOpen: true, type: 'alert', title: 'Error', message: 'Failed to connect to server.', onConfirm: () => setPopup(null) });
         } finally { setLoading(false); }
     };
 
@@ -197,26 +215,28 @@ export default function ManageCandidates() {
 
     // Memoized grouping of candidates by email
     const groupedCandidates = useMemo(() => {
-        const examMap = new Map(exams.map(e => [e.id, e.title]));
-        
-        const groups: Record<string, any> = {};
-        for (const candidate of candidates) {
-            const email = candidate.email;
-            if (!groups[email]) {
-                groups[email] = {
+        try {
+            const examMap = new Map(exams.map(e => [e.id, e.title]));
+            const groups: Record<string, any> = {};
+            for (const candidate of candidates) {
+                const email = candidate.email;
+                if (!groups[email]) {
+                    groups[email] = {
+                        ...candidate,
+                        enrollments: []
+                    };
+                }
+                const examName = examMap.get(candidate.assigned_exam_id || "") || candidate.assigned_exam_id || "Unassigned";
+                groups[email].enrollments.push({
                     ...candidate,
-                    enrollments: []
-                };
+                    examName
+                });
             }
-            
-            const examName = examMap.get(candidate.assigned_exam_id || "") || candidate.assigned_exam_id || "Unassigned";
-            
-            groups[email].enrollments.push({
-                ...candidate,
-                examName
-            });
+            return Object.values(groups);
+        } catch (err) {
+            console.error("Error grouping candidates:", err);
+            return [];
         }
-        return Object.values(groups);
     }, [candidates, exams]);
 
     return (

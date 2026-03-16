@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import AdminLayout from "../components/AdminLayout";
 import API_BASE_URL from "../config";
 
@@ -99,6 +100,7 @@ function EmptyRow({ colSpan, hasFilters }: { colSpan: number; hasFilters: boolea
 
 // ─── Main Component ────────────────────────────────────────────────────────────
 export default function CandidateResults() {
+    const navigate = useNavigate();
     const [candidates, setCandidates] = useState<Candidate[]>([]);
     const [exams, setExams] = useState<Record<string, Exam>>({});
     const [loading, setLoading] = useState(true);
@@ -111,6 +113,7 @@ export default function CandidateResults() {
 
     const fetchData = async () => {
         const token = localStorage.getItem("access_token");
+        if (!token) { navigate("/"); return; }
         const headers = { Authorization: `Bearer ${token}` };
         try {
             const [cRes, eRes] = await Promise.all([
@@ -118,16 +121,26 @@ export default function CandidateResults() {
                 fetch(`${API_BASE_URL}/exams`, { headers }),
             ]);
 
-            const cData: Candidate[] = await cRes.json();
-            const eData: Exam[] = await eRes.json();
+            if (cRes.status === 401 || eRes.status === 401) {
+                localStorage.removeItem("access_token");
+                sessionStorage.removeItem("admin-profile");
+                navigate("/");
+                return;
+            }
 
-            // Sort all candidates by date DESC initially
-            const sortedData = cData
-                .filter(c => c.status === "Completed" || c.score || parseInt(c.violations || "0", 10) >= 3)
-                .sort((a, b) => new Date(b.joined_date).getTime() - new Date(a.joined_date).getTime());
+            if (cRes.ok && eRes.ok) {
+                const cData = await cRes.json();
+                const eData = await eRes.json();
 
-            setCandidates(sortedData);
-            setExams(Object.fromEntries(eData.map(e => [e.id, e])));
+                if (Array.isArray(cData) && Array.isArray(eData)) {
+                    const sortedData = cData
+                        .filter(c => c.status === "Completed" || c.score || parseInt(c.violations || "0", 10) >= 3)
+                        .sort((a, b) => new Date(b.joined_date).getTime() - new Date(a.joined_date).getTime());
+
+                    setCandidates(sortedData);
+                    setExams(Object.fromEntries(eData.map(e => [e.id, e])));
+                }
+            }
         } catch (err) {
             console.error("Failed to fetch results:", err);
         } finally {

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import AdminLayout from "../components/AdminLayout";
 import CustomPopup, { PopupType } from "../components/CustomPopup";
 import API_BASE_URL from "../config";
@@ -53,6 +54,7 @@ interface Exam {
 }
 
 export default function ManageExams() {
+    const navigate = useNavigate();
     const [exams, setExams] = useState<Exam[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedExamIds, setSelectedExamIds] = useState<Set<string>>(new Set());
@@ -67,12 +69,22 @@ export default function ManageExams() {
 
     const fetchExams = async () => {
         const token = localStorage.getItem("access_token");
+        if (!token) { navigate("/"); return; }
         try {
             const res = await fetch(`${API_BASE_URL}/exams`, {
                 headers: { "Authorization": `Bearer ${token}` }
             });
+
+            if (res.status === 401) {
+                localStorage.removeItem("access_token");
+                sessionStorage.removeItem("admin-profile");
+                navigate("/");
+                return;
+            }
+
             if (res.ok) {
-                setExams(await res.json());
+                const data = await res.json();
+                if (Array.isArray(data)) setExams(data);
             }
         } catch {
             console.error("Failed to fetch exams");
