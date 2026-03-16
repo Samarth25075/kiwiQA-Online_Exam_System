@@ -428,14 +428,43 @@ def get_exams_with_candidate_counts() -> List[Dict]:
     result = []
     for exam in exams:
         assigned = [c for c in candidates if c.get("assigned_exam_id") == exam["id"]]
+        completed_cands = [c for c in assigned if c.get("status", "").lower() == "completed"]
+        
+        passing_score_pct = exam.get("passing_score", 50)
+        
+        passed = 0
+        failed = 0
+        eliminated = 0
+        
+        for c in completed_cands:
+            vios = int(c.get("violations", "0") or 0)
+            if vios >= 3:
+                eliminated += 1
+                # Usually eliminated counts as failed, but we mark it separately if they hit the cap
+                failed += 1 
+            else:
+                try:
+                    score = float(c.get("score", "0") or 0)
+                    total = float(c.get("total_questions", "1") or 1)
+                    if (score / total * 100) >= passing_score_pct:
+                        passed += 1
+                    else:
+                        failed += 1
+                except:
+                    failed += 1
+
         result.append({
             "id": exam["id"],
             "title": exam["title"],
             "difficulty": exam["difficulty"],
             "total_assigned": len(assigned),
-            "completed": len([c for c in assigned if c.get("status", "").lower() == "completed"]),
+            "completed": len(completed_cands),
             "live": len([c for c in assigned if c.get("status", "").lower() == "live"]),
             "not_started": len([c for c in assigned if c.get("status", "").lower() not in ("completed", "live")]),
+            "passed": passed,
+            "failed": failed,
+            "eliminated": eliminated,
+            "passing_score": passing_score_pct,
             "link_expiry": exam.get("link_expiry"),
             "auto_delete": exam.get("auto_delete"),
             "proctoring_enabled": exam.get("proctoring_enabled", True),

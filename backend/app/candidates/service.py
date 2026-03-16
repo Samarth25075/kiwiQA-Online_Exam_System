@@ -8,7 +8,7 @@ from typing import List, Dict
 import threading
 
 CSV_PATH = os.path.join(os.path.dirname(__file__), "candidates.csv")
-HEADERS = ["id", "name", "email", "phone_number", "cv_url", "status", "joined_date", "token", "assigned_exam_id", "score", "total_questions", "violations", "device_id"]
+HEADERS = ["id", "candidate_id", "name", "email", "phone_number", "dob", "gender", "address", "profile_photo", "cv_url", "status", "joined_date", "token", "assigned_exam_id", "score", "total_questions", "violations", "device_id"]
 
 # Multi-threading lock for safe concurrent CSV access
 CANDIDATE_LOCK = threading.RLock()
@@ -26,8 +26,8 @@ def _ensure_csv():
 
 def _add_initial_data(writer):
     initial_data = [
-        ["1", "Rajesh Kumar", "rajesh@example.com", "+91 9876543210", "", "Active", "2024-02-15", str(uuid.uuid4()), "", "", "", "0", ""],
-        ["2", "Amit Sharma", "amit@example.com", "+91 8888888888", "", "Not Started", "2024-02-20", str(uuid.uuid4()), "", "", "", "0", ""],
+        ["1", "CAND-2024-001", "Rajesh Kumar", "rajesh@example.com", "+91 9876543210", "1990-01-01", "Male", "Mumbai, India", "", "", "Active", "2024-02-15", str(uuid.uuid4()), "", "", "", "0", ""],
+        ["2", "CAND-2024-002", "Amit Sharma", "amit@example.com", "+91 8888888888", "1992-05-15", "Male", "Delhi, India", "", "", "Not Started", "2024-02-20", str(uuid.uuid4()), "", "", "", "0", ""],
     ]
     writer.writerows(initial_data)
 
@@ -37,8 +37,9 @@ def _get_raw_candidates() -> List[Dict]:
     with open(CSV_PATH, mode="r", newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for row in reader:
-            if "device_id" not in row:
-                row["device_id"] = ""
+            for header in HEADERS:
+                if header not in row:
+                    row[header] = ""
             candidates.append(row)
     return candidates
 
@@ -46,16 +47,27 @@ def get_all_candidates() -> List[Dict]:
     with CANDIDATE_LOCK:
         return list(reversed(_get_raw_candidates()))
 
-def create_candidate(name: str, email: str, phone_number: str = "", cv_url: str = "", device_id: str = "") -> Dict:
+def create_candidate(name: str, email: str, phone_number: str = "", dob: str = "", gender: str = "", address: str = "", profile_photo: str = "", cv_url: str = "", device_id: str = "") -> Dict:
     _ensure_csv()
     with CANDIDATE_LOCK:
         candidates = _get_raw_candidates()
-        new_id = str(max([int(c["id"]) for c in candidates], default=0) + 1)
+        numeric_id = max([int(c["id"]) for c in candidates], default=0) + 1
+        new_id = str(numeric_id)
+        
+        # Auto-generate Candidate ID: CAND-YYYY-XXX
+        current_year = datetime.now().year
+        candidate_id_str = f"CAND-{current_year}-{str(numeric_id).zfill(3)}"
+        
         new_candidate = {
             "id": new_id,
+            "candidate_id": candidate_id_str,
             "name": name,
             "email": email,
             "phone_number": phone_number,
+            "dob": dob,
+            "gender": gender,
+            "address": address,
+            "profile_photo": profile_photo,
             "cv_url": cv_url,
             "status": "Not Started",
             "joined_date": datetime.now().strftime("%Y-%m-%d"),

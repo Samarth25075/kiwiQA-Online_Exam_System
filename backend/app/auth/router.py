@@ -23,7 +23,7 @@ from app.auth.service import (
     get_all_users, delete_user, hash_password, 
     update_user_session, verify_session
 )
-from app.core.config import ACCESS_TOKEN_EXPIRE_MINUTES, GOOGLE_CLIENT_ID
+from app.core.config import ACCESS_TOKEN_EXPIRE_MINUTES, GOOGLE_CLIENT_ID, AUTHORIZED_GOOGLE_EMAIL
 from app.core.security import create_access_token, decode_access_token
 
 router = APIRouter(tags=["auth"])
@@ -156,6 +156,7 @@ async def google_login(body: GoogleTokenRequest):
             body.id_token,
             google_requests.Request(),
             GOOGLE_CLIENT_ID,
+            clock_skew_in_seconds=30,  # Corrected parameter name
         )
     except ValueError as exc:
         raise HTTPException(
@@ -172,15 +173,28 @@ async def google_login(body: GoogleTokenRequest):
             detail="Google account has no email",
         )
 
+    # DEBUG
+    print(f"GOOGLE LOGIN ATTEMPT: {email}, AUTHORIZED: {AUTHORIZED_GOOGLE_EMAIL}")
+
+    # Strict restriction to ONLY ONE specific email link
+    if AUTHORIZED_GOOGLE_EMAIL == "NOT_SET":
+         raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Google login is currently disabled (AUTHORIZED_GOOGLE_EMAIL not set).",
+        )
+
+    if email.lower() != AUTHORIZED_GOOGLE_EMAIL.lower():
+         raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Access denied. Only Authorized persone are allowed to login.",
+        )
+
     user = get_user(email)
     if not user:
-        user = {
-            "email": email,
-            "role": "admin",
-            "full_name": full_name,
-            "hashed_password": "",
-        }
-        add_user(user)
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Access denied. User '{email}' is not authorized. Please contact the administrator to be added to the members list.",
+        )
 
     # Single Session logic for Google Login
     session_id = str(uuid.uuid4())

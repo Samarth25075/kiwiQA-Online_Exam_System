@@ -8,12 +8,15 @@ import API_BASE_URL from "../config";
 interface Option {
   text: string;
   is_correct: boolean;
+  image?: string;
 }
 
 interface Question {
   text: string;
   options: Option[];
   explanation?: string;
+  image?: string;
+  image_required?: boolean;
 }
 
 type DifficultyLevel = "Beginner" | "Intermediate" | "Advanced";
@@ -138,6 +141,12 @@ const Icons = {
       <polyline points="7 3 7 8 15 8" />
     </svg>
   ),
+  Camera: () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+      <circle cx="12" cy="13" r="4" />
+    </svg>
+  ),
 };
 
 // ─── Step indicator ────────────────────────────────────────────────────────────
@@ -196,6 +205,15 @@ export default function CreateExam() {
   const [questions, setQuestions] = useState<Question[] | null>(null);
   const [editingIdx, setEditingIdx] = useState<number | null>(null);
   const [aiTipIndex, setAiTipIndex] = useState(0);
+
+  const handleImageUpload = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target?.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -271,7 +289,8 @@ export default function CreateExam() {
         options: [
           { text: "Option A", is_correct: true },
           { text: "Option B", is_correct: false },
-        ]
+        ],
+        image_required: false
       }]);
       setEditingIdx(0);
       return;
@@ -1250,7 +1269,6 @@ export default function CreateExam() {
               <button className="btn btn-back" onClick={() => setQuestions(null)}>
                 <Icons.ChevronLeft /> Back to Configuration
               </button>
-
               {/* Summary */}
               <div className="summary-bar">
                 {[
@@ -1293,9 +1311,39 @@ export default function CreateExam() {
                 <div className="q-card" key={idx}>
                   {editingIdx === idx ? (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                         <input className="form-input" style={{ fontWeight: 600, fontSize: 16 }} value={q.text} onChange={e => {
-                            const nq = [...questions]; nq[idx].text = e.target.value; setQuestions(nq);
-                         }} placeholder="Question Text" />
+                         <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                            <input className="form-input" style={{ flex: 1, fontWeight: 600, fontSize: 16 }} value={q.text} onChange={e => {
+                                const nq = [...questions]; nq[idx].text = e.target.value; setQuestions(nq);
+                            }} placeholder="Question Text" />
+                            
+                            <div style={{ display: 'flex', gap: 6 }}>
+                                <input type="file" id={`q-img-${idx}`} style={{ display: 'none' }} accept="image/*" onChange={async (e) => {
+                                   const file = e.target.files?.[0];
+                                   if (file) {
+                                      const base64 = await handleImageUpload(file);
+                                      const nq = [...questions]; nq[idx].image = base64; setQuestions(nq);
+                                   }
+                                }} />
+                                <button className="q-delete" type="button" onClick={() => document.getElementById(`q-img-${idx}`)?.click()} title="Upload question image">
+                                   <Icons.Camera />
+                                </button>
+                                <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '13px', fontWeight: 600, color: 'var(--ink-2)', cursor: 'pointer', background: 'var(--bg)', padding: '8px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--line)' }}>
+                                    <input type="checkbox" checked={q.image_required} onChange={e => {
+                                        const nq = [...questions]; nq[idx].image_required = e.target.checked; setQuestions(nq);
+                                    }} />
+                                    📷 Add Image
+                                </label>
+                            </div>
+                         </div>
+
+                         {q.image && (
+                            <div style={{ position: 'relative', width: 'fit-content' }}>
+                               <img src={q.image} alt="Question" style={{ maxWidth: '200px', borderRadius: 8, border: '1px solid var(--line)' }} />
+                               <button className="q-delete" style={{ position: 'absolute', top: -10, right: -10, width: 24, height: 24 }} onClick={() => {
+                                  const nq = [...questions]; delete nq[idx].image; setQuestions(nq);
+                               }}><Icons.X /></button>
+                            </div>
+                         )}
                          
                          <div style={{ paddingLeft: 10, marginTop: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
                              {q.options.map((opt, oIdx) => (
@@ -1305,12 +1353,36 @@ export default function CreateExam() {
                                        nq[idx].options = nq[idx].options.map((o, i) => ({...o, is_correct: i === oIdx}));
                                        setQuestions(nq);
                                     }} />
-                                    <input className="form-input" style={{ flex: 1 }} value={opt.text} onChange={e => {
-                                       const nq = [...questions]; nq[idx].options[oIdx].text = e.target.value; setQuestions(nq);
-                                    }} placeholder={`Option ${String.fromCharCode(65 + oIdx)}`} />
-                                    <button className="q-delete" type="button" onClick={() => {
-                                       const nq = [...questions]; nq[idx].options.splice(oIdx, 1); setQuestions(nq);
-                                    }}><Icons.Trash /></button>
+                                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                                        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                                            <input className="form-input" style={{ flex: 1 }} value={opt.text} onChange={e => {
+                                               const nq = [...questions]; nq[idx].options[oIdx].text = e.target.value; setQuestions(nq);
+                                            }} placeholder={`Option ${String.fromCharCode(65 + oIdx)}`} />
+                                            
+                                            <input type="file" id={`o-img-${idx}-${oIdx}`} style={{ display: 'none' }} accept="image/*" onChange={async (e) => {
+                                               const file = e.target.files?.[0];
+                                               if (file) {
+                                                  const base64 = await handleImageUpload(file);
+                                                  const nq = [...questions]; nq[idx].options[oIdx].image = base64; setQuestions(nq);
+                                               }
+                                            }} />
+                                            <button className="q-delete" type="button" onClick={() => document.getElementById(`o-img-${idx}-${oIdx}`)?.click()} title="Upload option image">
+                                               <Icons.Camera />
+                                            </button>
+                                            
+                                            <button className="q-delete" type="button" onClick={() => {
+                                               const nq = [...questions]; nq[idx].options.splice(oIdx, 1); setQuestions(nq);
+                                            }}><Icons.Trash /></button>
+                                        </div>
+                                        {opt.image && (
+                                            <div style={{ position: 'relative', width: 'fit-content' }}>
+                                                <img src={opt.image} alt="Option" style={{ maxWidth: '100px', borderRadius: 4, border: '1px solid var(--line)' }} />
+                                                <button className="q-delete" style={{ position: 'absolute', top: -5, right: -5, width: 20, height: 20 }} onClick={() => {
+                                                    const nq = [...questions]; delete nq[idx].options[oIdx].image; setQuestions(nq);
+                                                }}><Icons.X /></button>
+                                            </div>
+                                        )}
+                                    </div>
                                  </div>
                              ))}
                          </div>
@@ -1324,11 +1396,19 @@ export default function CreateExam() {
                             </button>
                          </div>
                       </div>
-                  ) : (
+                   ) : (
                     <>
                       <div className="q-header">
                         <div className="q-num">{idx + 1}</div>
-                        <div className="q-text">{q.text}</div>
+                        <div className="q-text">
+                            <div style={{ marginBottom: q.image ? 12 : 0 }}>{q.text}</div>
+                            {q.image && <img src={q.image} alt="Question" style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: 8, display: 'block', marginBottom: 12 }} />}
+                            {q.image_required && (
+                                <span style={{ fontSize: '11px', background: 'var(--teal-light)', color: 'var(--teal)', padding: '2px 8px', borderRadius: '100px', fontWeight: 700, textTransform: 'uppercase' }}>
+                                    📷 Image Required
+                                </span>
+                            )}
+                        </div>
                         <div style={{ display: 'flex', gap: 6 }}>
                           <button className="q-delete" type="button" onClick={() => setEditingIdx(idx)} title="Edit question">
                             <Icons.Edit />
@@ -1341,9 +1421,12 @@ export default function CreateExam() {
 
                       <div className="opt-grid">
                         {q.options.map((opt, oIdx) => (
-                          <div key={oIdx} className={`opt ${opt.is_correct ? "opt--correct" : ""}`}>
-                            <span className="opt-letter">{String.fromCharCode(65 + oIdx)}.</span>
-                            {opt.text}
+                          <div key={oIdx} className={`opt ${opt.is_correct ? "opt--correct" : ""}`} style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 8 }}>
+                            <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                                <span className="opt-letter">{String.fromCharCode(65 + oIdx)}.</span>
+                                {opt.text}
+                            </div>
+                            {opt.image && <img src={opt.image} alt="Option" style={{ maxWidth: '100%', maxHeight: '100px', borderRadius: 4, marginLeft: 22 }} />}
                           </div>
                         ))}
                       </div>
@@ -1360,7 +1443,7 @@ export default function CreateExam() {
               
               {creationMode !== 'ai' && (
                  <button className="btn btn-secondary" type="button" style={{ width: '100%', marginBottom: 20, padding: 16, borderStyle: 'dashed' }} onClick={() => {
-                     setQuestions(prev => [...(prev||[]), { text: "New Question", options: [{text: "Option A", is_correct: true}, {text: "Option B", is_correct: false}] }]);
+                     setQuestions(prev => [...(prev||[]), { text: "New Question", options: [{text: "Option A", is_correct: true}, {text: "Option B", is_correct: false}], image_required: false }]);
                      setEditingIdx((questions?.length || 0));
                  }}>
                      <Icons.Plus /> Add Another Question

@@ -12,10 +12,10 @@ import os
 import traceback
 import asyncio
 
-from app.auth.router import router as auth_router
-from app.candidates.router import router as candidates_router
-from app.exams.router import router as exams_router
-from app.exams.service import check_and_delete_expired_exams
+from .auth.router import router as auth_router
+from .candidates.router import router as candidates_router
+from .exams.router import router as exams_router
+from .exams.service import check_and_delete_expired_exams
 
 app = FastAPI(
     title="ExamPortal API",

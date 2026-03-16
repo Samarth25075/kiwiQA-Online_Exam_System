@@ -5,13 +5,16 @@ import API_BASE_URL from "../config";
 // ─── Types ─────────────────────────────────────────────────────────────────────
 interface Candidate {
     id: number;
+    candidate_id?: string;
     name: string;
     email: string;
+    profile_photo?: string;
     status: string;
     joined_date: string;
     score?: string;
     total_questions?: string;
     assigned_exam_id?: string;
+    violations?: string;
 }
 
 interface Exam {
@@ -35,10 +38,20 @@ function scoreTier(pct: number): "high" | "mid" | "low" {
 }
 
 function formatDate(dateStr: string): string {
+    if (!dateStr) return "";
+    // If it's already in YYYY-MM-DD format (possibly with T... suffix)
+    const isoPart = dateStr.split('T')[0];
+    const parts = isoPart.split('-');
+    if (parts.length === 3 && parts[0].length === 4) {
+        // YYYY-MM-DD -> DD-MM-YYYY
+        return `${parts[2]}-${parts[1]}-${parts[0]}`;
+    }
     try {
-        return new Date(dateStr).toLocaleDateString(undefined, {
-            year: "numeric", month: "short", day: "numeric",
-        });
+        const date = new Date(dateStr);
+        const d = String(date.getDate()).padStart(2, '0');
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const y = date.getFullYear();
+        return `${d}-${m}-${y}`;
     } catch {
         return dateStr;
     }
@@ -110,7 +123,7 @@ export default function CandidateResults() {
 
             // Sort all candidates by date DESC initially
             const sortedData = cData
-                .filter(c => c.status === "Completed" || c.score)
+                .filter(c => c.status === "Completed" || c.score || parseInt(c.violations || "0", 10) >= 3)
                 .sort((a, b) => new Date(b.joined_date).getTime() - new Date(a.joined_date).getTime());
 
             setCandidates(sortedData);
@@ -131,36 +144,44 @@ export default function CandidateResults() {
             const { score, pct } = calcScore(c);
             
             if (filterDate) {
-                const [d, m, y] = filterDate.split('-');
-                if (d && m && y && y.length === 4) {
-                    const fDate = new Date(`${y}-${m}-${d}`).toDateString();
-                    const cDate = new Date(c.joined_date).toDateString();
-                    if (fDate !== cDate) return false;
-                }
+                const cDateStr = formatDate(c.joined_date);
+                if (!cDateStr.includes(filterDate)) return false;
             }
             
             return (
                 (!filterExam || examName.toLowerCase().includes(filterExam.toLowerCase())) &&
                 (!minScore || score >= parseInt(minScore, 10)) &&
-                (!minPct || pct >= parseInt(minPct, 10)) &&
-                (pct >= exam.passing_score)
+                (!minPct || pct >= parseInt(minPct, 10))
             );
         });
 
-        // Group by Date
-        const groups: Record<string, Candidate[]> = {};
+        // Group by Status: Passed, Failed, Eliminated
+        const groups: Record<string, Candidate[]> = {
+            "Passed": [],
+            "Failed": [],
+            "Eliminated": []
+        };
+
         filtered.forEach(c => {
-            const d = new Date(c.joined_date).toDateString();
-            if (!groups[d]) groups[d] = [];
-            groups[d].push(c);
+            const exam = exams[c.assigned_exam_id ?? ""] || { passing_score: 50 };
+            const { pct } = calcScore(c);
+            const violations = parseInt(c.violations || "0", 10);
+
+            if (violations >= 3) {
+                groups["Eliminated"].push(c);
+            } else if (pct >= exam.passing_score) {
+                groups["Passed"].push(c);
+            } else {
+                groups["Failed"].push(c);
+            }
         });
 
-        // Return sorted keys (dates) and their candidates
-        return Object.keys(groups).sort((a, b) => new Date(b).getTime() - new Date(a).getTime()).map(date => ({
-            date,
-            items: groups[date]
-        }));
-    }, [candidates, exams, filterExam, minScore, minPct, filterDate]);
+        return [
+            { title: "Passed", items: groups["Passed"], color: "#065f46", bg: "#d1fae5" },
+            { title: "Failed", items: groups["Failed"], color: "#991b1b", bg: "#fee2e2" },
+            { title: "Eliminated", items: groups["Eliminated"], color: "#92400e", bg: "#fef3c7" }
+        ].filter(g => g.items.length > 0 || !hasFilters);
+    }, [candidates, exams, filterExam, minScore, minPct, filterDate, hasFilters]);
 
     const clearFilters = () => { 
         setFilterExam(""); 
@@ -215,7 +236,8 @@ export default function CandidateResults() {
         .cr-topbar-count {
           font-size: 12.5px;
           font-weight: 600;
-          color: var(--text-muted);
+          color: var(--text);
+          opacity: 0.8;
         }
 
         /* -- Content ----------------------------------- */
@@ -286,12 +308,12 @@ export default function CandidateResults() {
 
         .day-count {
             font-size: 11px;
-            font-weight: 600;
-            color: var(--text-muted);
-            background: color-mix(in srgb, var(--primary) 8%, var(--bg));
+            font-weight: 700;
+            color: var(--text);
+            background: color-mix(in srgb, var(--primary) 12%, var(--bg));
             padding: 2px 10px;
             border-radius: 100px;
-            border: 1px solid color-mix(in srgb, var(--primary) 20%, var(--bg));
+            border: 1px solid color-mix(in srgb, var(--primary) 25%, var(--bg));
         }
 
         .cr-table-wrap {
@@ -410,7 +432,7 @@ export default function CandidateResults() {
           font-weight: 700;
           text-transform: uppercase;
           letter-spacing: 0.06em;
-          color: var(--text-muted);
+          color: #475569;
           white-space: nowrap;
         }
 
@@ -471,13 +493,15 @@ export default function CandidateResults() {
 
         .score-sep {
           font-size: 13px;
-          color: var(--text-muted);
+          color: #64748b;
+          font-weight: 600;
         }
 
         .score-total {
           font-family: 'JetBrains Mono', monospace;
           font-size: 13px;
-          color: var(--text-muted);
+          color: #475569;
+          font-weight: 600;
         }
 
         /* -- Score Badge ------------------------------- */
@@ -493,20 +517,20 @@ export default function CandidateResults() {
         }
 
         .score-badge--high {
-          background: #f0fdf4;
-          color: #15803d;
-          border-color: #bbf7d0;
+          background: #d1fae5;
+          color: #065f46;
+          border-color: #a7f3d0;
         }
 
         .score-badge--mid {
-          background: #fffbeb;
-          color: #b45309;
-          border-color: #fde68a;
+          background: #fef3c7;
+          color: #92400e;
+          border-color: #fce788;
         }
 
         .score-badge--low {
-          background: #eff6ff;
-          color: #1d4ed8;
+          background: #dbeafe;
+          color: #1e40af;
           border-color: #bfdbfe;
         }
 
@@ -526,9 +550,9 @@ export default function CandidateResults() {
           transition: width 0.6s ease;
         }
 
-        .progress-fill--high { background: #15803d; }
-        .progress-fill--mid  { background: #b45309; }
-        .progress-fill--low  { background: #1d4ed8; }
+        .progress-fill--high { background: #059669; }
+        .progress-fill--mid  { background: #d97706; }
+        .progress-fill--low  { background: #2563eb; }
 
         /* -- Performance Cell -------------------------- */
         .perf-cell {
@@ -573,15 +597,44 @@ export default function CandidateResults() {
         }
 
         .pass-fail-badge.pass {
-            background: #f0fdf4;
-            color: #15803d;
-            border: 1px solid #bbf7d0;
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
         }
 
         .pass-fail-badge.fail {
-            background: #fef2f2;
-            color: #b91c1c;
+            background: #fee2e2;
+            color: #991b1b;
             border: 1px solid #fecaca;
+        }
+
+        .pass-fail-badge.eliminated {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fce788;
+        }
+
+        .res-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: var(--bg-neutral);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 800;
+            overflow: hidden;
+            flex-shrink: 0;
+            border: 1px solid var(--border);
+        }
+        .res-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .res-id {
+            font-size: 10px;
+            font-weight: 800;
+            color: var(--primary);
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: -0.02em;
         }
       `}</style>
 
@@ -664,13 +717,16 @@ export default function CandidateResults() {
                         </div>
                     ) : (
                         groupedCandidates.map(group => (
-                            <div key={group.date} className="day-card">
-                                <div className="day-header">
-                                    <div className="day-title">
-                                        📅 {group.date}
+                            <div key={group.title} className="day-card">
+                                <div className="day-header" style={{ background: group.bg }}>
+                                    <div className="day-title" style={{ color: group.color }}>
+                                        {group.title === "Passed" && "✅ "}
+                                        {group.title === "Failed" && "❌ "}
+                                        {group.title === "Eliminated" && "⚠️ "}
+                                        {group.title}
                                     </div>
                                     <div className="day-count">
-                                        {group.items.length} Successful {group.items.length === 1 ? 'Candidate' : 'Candidates'}
+                                        {group.items.length} {group.items.length === 1 ? 'Candidate' : 'Candidates'}
                                     </div>
                                 </div>
                                 <div className="cr-table-wrap">
@@ -679,7 +735,7 @@ export default function CandidateResults() {
                                             <tr>
                                                 <th>Candidate</th>
                                                 <th>Exam</th>
-                                                <th>Completed</th>
+                                                <th>Exam Date</th>
                                                 <th>Score</th>
                                                 <th>Performance</th>
                                             </tr>
@@ -688,13 +744,27 @@ export default function CandidateResults() {
                                             {group.items.map(candidate => {
                                                 const { score, total, pct } = calcScore(candidate);
                                                 const exam = exams[candidate.assigned_exam_id ?? ""] || { title: "Unknown Exam", passing_score: 50 };
-                                                const isPassed = pct >= exam.passing_score;
+                                                const violations = parseInt(candidate.violations || "0", 10);
+                                                const isEliminated = violations >= 3;
+                                                const isPassed = pct >= exam.passing_score && !isEliminated;
 
                                                 return (
                                                     <tr key={candidate.id}>
                                                         <td>
-                                                            <div className="candidate-name">{candidate.name}</div>
-                                                            <div className="candidate-email">{candidate.email}</div>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                                                <div className="res-avatar">
+                                                                    {candidate.profile_photo ? (
+                                                                        <img src={candidate.profile_photo} alt={candidate.name} />
+                                                                    ) : (
+                                                                        candidate.name.charAt(0).toUpperCase()
+                                                                    )}
+                                                                </div>
+                                                                <div>
+                                                                    <div className="res-id">{candidate.candidate_id || `CAND-${candidate.id}`}</div>
+                                                                    <div className="candidate-name">{candidate.name}</div>
+                                                                    <div className="candidate-email">{candidate.email}</div>
+                                                                </div>
+                                                            </div>
                                                         </td>
 
                                                         <td>
@@ -717,8 +787,8 @@ export default function CandidateResults() {
                                                             <div className="perf-cell">
                                                                 <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
                                                                     <ScoreBadge pct={pct} />
-                                                                    <span className={`pass-fail-badge ${isPassed ? 'pass' : 'fail'}`}>
-                                                                        {isPassed ? 'Passed' : 'Failed'}
+                                                                    <span className={`pass-fail-badge ${isEliminated ? 'eliminated' : isPassed ? 'pass' : 'fail'}`}>
+                                                                        {isEliminated ? 'Eliminated' : isPassed ? 'Passed' : 'Failed'}
                                                                     </span>
                                                                 </div>
                                                                 <ProgressBar pct={pct} />

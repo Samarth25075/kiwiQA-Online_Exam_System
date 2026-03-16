@@ -1,5 +1,5 @@
 # app/candidates/router.py
-from typing import Annotated, List
+from typing import Annotated, List, Dict
 from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile, BackgroundTasks
 import shutil
 import os
@@ -42,6 +42,23 @@ async def remove_candidate(
     if not success:
         raise HTTPException(status_code=404, detail="Candidate not found")
     return {"message": "Candidate deleted"}
+
+@router.post("", response_model=CandidateResponse)
+async def admin_create_candidate(
+    candidate_in: CandidateCreate,
+    current_admin: Annotated[AdminUser, Depends(check_permission("manage candidates"))]
+):
+    """Admin-only: Manually create a candidate."""
+    new_cand = create_candidate(
+        name=candidate_in.name,
+        email=candidate_in.email,
+        phone_number=candidate_in.phone_number or "",
+        dob=candidate_in.dob or "",
+        gender=candidate_in.gender or "",
+        address=candidate_in.address or "",
+        profile_photo=candidate_in.profile_photo or ""
+    )
+    return _format_candidate(new_cand)
 
 @router.put("/{candidate_id}", response_model=CandidateResponse)
 async def update_candidate(
@@ -336,8 +353,8 @@ async def get_test(token: str, device_id: str = None):
     }
 
 # Simple in-memory OTP store
-# Format: { "email@example.com": { "otp": "123456", "expires_at": datetime } }
-OTP_STORE = {}
+# Format: { "email@example.com": { "otp": "123456", "expires_at": datetime, "data": dict } }
+OTP_STORE: Dict[str, dict] = {}
 
 def get_admin_otp():
     """Generate a 6-digit OTP that remains valid for a 10-minute window."""
@@ -432,7 +449,8 @@ async def request_enroll_otp(exam_id: str, req: CandidateEnrollOTPRequest, backg
     
     OTP_STORE[req.email] = {
         "otp": otp,
-        "expires_at": expires_at
+        "expires_at": expires_at,
+        "data": req.dict()
     }
     
     # Send email SYNCHRONOUSLY so errors are visible (not silently swallowed by background task)
@@ -498,13 +516,17 @@ async def verify_enroll_otp(exam_id: str, req: CandidateEnrollOTPVerify):
     # Clear OTP
     OTP_STORE.pop(req.email, None)
     
-    # Create candidate
+    candidate_data = record.get("data", {})
     candidate = create_candidate(
-        req.name, 
-        req.email, 
-        req.phone_number or "", 
-        req.cv_url or "",
-        req.device_id or ""
+        name=str(candidate_data.get("name", record.get("name", ""))), 
+        email=str(candidate_data.get("email", record.get("email", ""))), 
+        phone_number=str(candidate_data.get("phone_number", "")), 
+        dob=str(candidate_data.get("dob", "")),
+        gender=str(candidate_data.get("gender", "")),
+        address=str(candidate_data.get("address", "")),
+        profile_photo=str(candidate_data.get("profile_photo", "")),
+        cv_url="", # CV upload is separate
+        device_id=str(req.device_id or "")
     )
     
     # Assign exam

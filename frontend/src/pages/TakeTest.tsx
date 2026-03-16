@@ -10,11 +10,14 @@ import logo from "../assets/logo.png";
 interface Option {
     text: string;
     is_correct: boolean;
+    image?: string;
 }
 
 interface Question {
     text: string;
     options: Option[];
+    image?: string;
+    image_required?: boolean;
 }
 
 interface Exam {
@@ -1028,8 +1031,9 @@ export default function TakeTest() {
                     setShuffledQuestions(qs);
                     setLoading(false);
 
-                    const url = `${API_BASE_URL}/candidates/test/${token}/status?status=Active`;
-                    fetch(url, { method: 'POST' }).catch(() => { });
+                    // Remove automatic status update on load to wait for explicit start
+                    // const url = `${API_BASE_URL}/candidates/test/${token}/status?status=Active`;
+                    // fetch(url, { method: 'POST' }).catch(() => { });
                 })
                 .catch(err => {
                     setErrorMsg(err.message);
@@ -1092,7 +1096,7 @@ export default function TakeTest() {
                 }
             } else if (document.visibilityState === 'visible') {
                 window.focus();
-                updateStatus('Active');
+                updateStatus('Live');
             }
         };
 
@@ -1230,6 +1234,7 @@ export default function TakeTest() {
             });
         }
         setStarted(true);
+        fetch(`${API_BASE_URL}/candidates/test/${token}/status?status=Live`, { method: 'POST' }).catch(() => { });
     };
 
     useEffect(() => {
@@ -1670,7 +1675,14 @@ export default function TakeTest() {
                                     {Math.round(((currentIdx + 1) / shuffledQuestions.length) * 100)}% Complete
                                 </div>
                             </div>
-                            <div className="test-q-text">{currentQ.text}</div>
+                            <div className="test-q-text">
+                                {currentQ.text}
+                                {currentQ.image && (
+                                    <div style={{ marginTop: 20 }}>
+                                        <img src={currentQ.image} alt="Question Attachment" style={{ maxWidth: '100%', maxHeight: '300px', borderRadius: 12, border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)' }} />
+                                    </div>
+                                )}
+                            </div>
                             <div className="test-opts">
                                 {currentQ.options.map((opt, idx) => (
                                     <div
@@ -1681,7 +1693,12 @@ export default function TakeTest() {
                                         <div className="test-opt-circle">
                                             {String.fromCharCode(65 + idx)}
                                         </div>
-                                        <span>{opt.text}</span>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: 1 }}>
+                                            <span>{opt.text}</span>
+                                            {opt.image && (
+                                                <img src={opt.image} alt="Option Attachment" style={{ maxWidth: '200px', maxHeight: '150px', borderRadius: 8, border: '1px solid var(--border)' }} />
+                                            )}
+                                        </div>
                                     </div>
                                 ))}
                             </div>

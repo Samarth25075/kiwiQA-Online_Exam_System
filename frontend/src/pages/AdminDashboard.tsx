@@ -81,6 +81,25 @@ const Icons = {
             <polyline points="12 6 12 12 16 14" />
         </svg>
     ),
+    CheckCircle: ({ size = 14 }: { size?: number }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+            <polyline points="22 4 12 14.01 9 11.01" />
+        </svg>
+    ),
+    AlertCircle: ({ size = 14 }: { size?: number }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
+    ),
+    Zap: ({ size = 14 }: { size?: number }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+        </svg>
+    ),
+
 };
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
@@ -100,6 +119,9 @@ interface Candidate {
     token: string;
     test_link: string;
     assigned_exam_id?: string;
+    score?: string;
+    total_questions?: string;
+    violations?: string;
 }
 
 interface ExamStat {
@@ -110,6 +132,10 @@ interface ExamStat {
     completed: number;
     live: number;
     not_started: number;
+    passed: number;
+    failed: number;
+    eliminated: number;
+    passing_score: number;
     link_expiry?: string;
     auto_delete?: string;
     proctoring_enabled?: boolean;
@@ -311,14 +337,7 @@ export default function AdminDashboard() {
         return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
     };
 
-    const getDifficultyStyle = (difficulty: string) => {
-        const map: Record<string, { bg: string; color: string; border: string }> = {
-            beginner: { bg: "color-mix(in srgb, #15803d 10%, var(--bg))", color: "#22c55e", border: "color-mix(in srgb, #15803d 30%, var(--bg))" },
-            intermediate: { bg: "color-mix(in srgb, #b45309 10%, var(--bg))", color: "#f59e0b", border: "color-mix(in srgb, #b45309 30%, var(--bg))" },
-            advanced: { bg: "color-mix(in srgb, #b91c1c 10%, var(--bg))", color: "#ef4444", border: "color-mix(in srgb, #b91c1c 30%, var(--bg))" },
-        };
-        return map[difficulty.toLowerCase()] ?? { bg: "var(--bg-neutral)", color: "var(--text)", border: "var(--border)" };
-    };
+
 
     const getGreeting = () => {
         const h = new Date().getHours();
@@ -759,7 +778,7 @@ export default function AdminDashboard() {
         /* ── Stat Counters ────────────────────────────────────────────── */
         .exam-counters {
           display: grid;
-          grid-template-columns: 1fr 1fr;
+          grid-template-columns: 1fr 1fr 1fr;
           gap: 8px;
         }
 
@@ -1077,9 +1096,50 @@ export default function AdminDashboard() {
         .candidate-name { font-size: 13px; font-weight: 500; color: var(--slate-900); }
         .candidate-email { font-size: 12px; color: var(--slate-500); }
         .candidate-status { font-size: 11px; padding: 2px 8px; border-radius: 100px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
-        .status-started, .status-live { background: #fef3c7; color: #b45309; }
-        .status-completed { background: #ecfdf5; color: #047857; }
+        .status-started, .status-live { background: #fde68a; color: #92400e; }
+        .status-completed { background: #d1fae5; color: #065f46; }
         .status-not_started { background: var(--slate-100); color: var(--slate-600); }
+
+        /* Result Grouping */
+        .result-group {
+          margin-bottom: 20px;
+          border: 1px solid var(--slate-100);
+          border-radius: var(--radius-lg);
+          overflow: hidden;
+        }
+        .result-group-header {
+          padding: 8px 16px;
+          font-size: 11px;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+        .result-group-header.pass { background: #d1fae5; color: #065f46; }
+        .result-group-header.fail { background: #fee2e2; color: #991b1b; }
+        .result-group-header.eliminated { background: #fef3c7; color: #92400e; }
+        .result-group-header.other { background: var(--slate-50); color: var(--slate-500); }
+        
+        .result-list { list-style: none; padding: 0; margin: 0; }
+        .result-item {
+          padding: 12px 16px;
+          border-bottom: 1px solid var(--slate-50);
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          transition: background 0.2s;
+        }
+        .result-item:last-child { border-bottom: none; }
+        .result-item:hover { background: var(--slate-50); }
+        
+        .result-info h6 { margin: 0; font-size: 13px; color: var(--slate-900); font-weight: 600; }
+        .result-info p { margin: 0; font-size: 12px; color: var(--slate-500); }
+        
+        .result-stats { text-align: right; }
+        .result-score { font-family: var(--font-mono); font-size: 13px; font-weight: 700; color: var(--slate-700); }
+        .result-meta { font-size: 11px; color: var(--slate-400); display: block; }
       `}</style>
 
             {/* ── Top Bar ─────────────────────────────────────────────────────────── */}
@@ -1219,7 +1279,6 @@ export default function AdminDashboard() {
                         </div>
                     ) : (
                         examStats.map(exam => {
-                            const diffStyle = getDifficultyStyle(exam.difficulty);
                             const countdown = formatCountdown(exam.link_expiry);
                             const isExpired = countdown === "Expired";
                             const isActive = !!countdown && !isExpired;
@@ -1235,18 +1294,9 @@ export default function AdminDashboard() {
                                     <div>
                                         <h4 className="exam-card-title">{exam.title}</h4>
                                         <div className="exam-card-meta">
-                                            <span className="exam-id-chip">{exam.id.split("-")[0]}</span>
-                                            <span
-                                                className="badge"
-                                                style={{ background: diffStyle.bg, color: diffStyle.color, borderColor: diffStyle.border }}
-                                            >
-                                                {exam.difficulty}
+                                            <span className="badge" style={{ background: "var(--slate-50)", color: "var(--slate-600)", padding: "4px 10px", fontSize: "12px", border: "1px solid var(--slate-200)", display: "flex", alignItems: "center", gap: "6px" }}>
+                                                <Icons.Users size={14} /> {exam.total_assigned} Candidates
                                             </span>
-                                            {exam.proctoring_enabled && (
-                                                <span className="badge" style={{ background: "var(--teal-light)", color: "var(--teal)", borderColor: "var(--teal-mid)" }}>
-                                                    🛡️ {exam.proctoring_type}
-                                                </span>
-                                            )}
                                         </div>
                                     </div>
 
@@ -1256,12 +1306,16 @@ export default function AdminDashboard() {
                                     <div>
                                         <div className="exam-counters">
                                             <div className="exam-counter">
-                                                <div className="exam-counter-value" style={{ color: "var(--teal)" }}>{exam.live}</div>
-                                                <div className="exam-counter-label">In Progress</div>
+                                                <div className="exam-counter-value" style={{ color: "var(--success)" }}>{exam.passed}</div>
+                                                <div className="exam-counter-label">Pass</div>
                                             </div>
                                             <div className="exam-counter">
-                                                <div className="exam-counter-value" style={{ color: "var(--success)" }}>{exam.completed}</div>
-                                                <div className="exam-counter-label">Completed</div>
+                                                <div className="exam-counter-value" style={{ color: "var(--danger)" }}>{exam.failed}</div>
+                                                <div className="exam-counter-label">Fail</div>
+                                            </div>
+                                            <div className="exam-counter">
+                                                <div className="exam-counter-value" style={{ color: "var(--amber)" }}>{exam.eliminated}</div>
+                                                <div className="exam-counter-label">Eliminated</div>
                                             </div>
                                         </div>
 
@@ -1355,24 +1409,77 @@ export default function AdminDashboard() {
                                                 <div style={{ fontSize: "13px", color: "var(--slate-500)", padding: "10px", background: "var(--slate-50)", borderRadius: "var(--radius-md)", textAlign: "center", border: "1px dashed var(--slate-200)" }}>
                                                     No candidates assigned.
                                                 </div>
-                                            ) : (
-                                                <ul className="exam-candidate-list">
-                                                    {participants.map(p => {
-                                                        const statClass = p.status.toLowerCase().replace(" ", "_");
-                                                        return (
-                                                            <li key={p.id} className="exam-candidate-item">
-                                                                <div>
-                                                                    <div className="candidate-name">{p.name}</div>
-                                                                    <div className="candidate-email">{p.email}</div>
-                                                                </div>
-                                                                <span className={`candidate-status status-${statClass}`}>
-                                                                    {p.status}
-                                                                </span>
-                                                            </li>
-                                                        )
-                                                    })}
-                                                </ul>
-                                            )}
+                                            ) : (() => {
+                                                const passed: Candidate[] = [];
+                                                const failed: Candidate[] = [];
+                                                const eliminated: Candidate[] = [];
+                                                const other: Candidate[] = [];
+
+                                                participants.forEach(p => {
+                                                    const status = p.status.toLowerCase();
+                                                    const vios = parseInt(p.violations || "0");
+                                                    if (vios >= 3) {
+                                                        eliminated.push(p);
+                                                    } else if (status === "completed") {
+                                                        const score = parseFloat(p.score || "0");
+                                                        const total = parseFloat(p.total_questions || "1");
+                                                        if ((score / total * 100) >= (exam.passing_score || 50)) {
+                                                            passed.push(p);
+                                                        } else {
+                                                            failed.push(p);
+                                                        }
+                                                    } else {
+                                                        other.push(p);
+                                                    }
+                                                });
+
+                                                const renderGroup = (label: string, list: Candidate[], type: "pass" | "fail" | "eliminated" | "other") => {
+                                                    if (list.length === 0) return null;
+                                                    return (
+                                                        <div className="result-group">
+                                                            <div className={`result-group-header ${type}`}>
+                                                                {type === 'pass' && <Icons.CheckCircle size={12} />}
+                                                                {type === 'fail' && <Icons.AlertCircle size={12} />}
+                                                                {type === 'eliminated' && <Icons.Zap size={12} />}
+                                                                {label} ({list.length})
+                                                            </div>
+                                                            <ul className="result-list">
+                                                                {list.map(p => (
+                                                                    <li key={p.id} className="result-item">
+                                                                        <div className="result-info">
+                                                                            <h6>{p.name}</h6>
+                                                                            <p>{p.email}</p>
+                                                                        </div>
+                                                                        <div className="result-stats">
+                                                                            {p.status.toLowerCase() === 'completed' ? (
+                                                                                <span className="result-score">{p.score}/{p.total_questions}</span>
+                                                                            ) : (
+                                                                                <span className={`candidate-status status-${p.status.toLowerCase().replace(" ", "_")}`}>
+                                                                                    {p.status}
+                                                                                </span>
+                                                                            )}
+                                                                            {parseInt(p.violations || "0") > 0 && (
+                                                                                <span className="result-meta" style={{ color: "var(--danger)" }}>
+                                                                                    {p.violations} violations
+                                                                                </span>
+                                                                            )}
+                                                                        </div>
+                                                                    </li>
+                                                                ))}
+                                                            </ul>
+                                                        </div>
+                                                    );
+                                                };
+
+                                                return (
+                                                    <div>
+                                                        {renderGroup("Passed", passed, "pass")}
+                                                        {renderGroup("Failed", failed, "fail")}
+                                                        {renderGroup("Eliminated (3+ Violations)", eliminated, "eliminated")}
+                                                        {renderGroup("Other / Live", other, "other")}
+                                                    </div>
+                                                );
+                                            })()}
                                         </div>
                                     )
                                 })

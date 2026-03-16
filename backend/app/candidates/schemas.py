@@ -6,6 +6,10 @@ class CandidateBase(BaseModel):
     name: str
     email: str
     phone_number: Optional[str] = None
+    dob: Optional[str] = None
+    gender: Optional[str] = None
+    address: Optional[str] = None
+    profile_photo: Optional[str] = None
     cv_url: Optional[str] = None
 
 class CandidateCreate(CandidateBase):
@@ -14,6 +18,11 @@ class CandidateCreate(CandidateBase):
 class CandidateEnrollOTPRequest(BaseModel):
     name: str
     email: str
+    phone_number: Optional[str] = None
+    dob: Optional[str] = None
+    gender: Optional[str] = None
+    address: Optional[str] = None
+    profile_photo: Optional[str] = None
 
 class CandidateEnrollOTPVerify(CandidateBase):
     otp: str
@@ -21,6 +30,7 @@ class CandidateEnrollOTPVerify(CandidateBase):
 
 class Candidate(CandidateBase):
     id: int
+    candidate_id: str
     status: str
     joined_date: str
     token: str

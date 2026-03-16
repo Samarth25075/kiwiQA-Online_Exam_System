@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { GoogleLogin } from "@react-oauth/google";
 import API_BASE_URL from "../config";
 import logo from "../assets/logo.png";
 
@@ -122,6 +123,28 @@ export default function AdminLogin() {
       navigate("/dashboard");
     } catch (err) {
       setErrors({ auth: err instanceof Error ? err.message : "Something went wrong" });
+      triggerShake();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse: any) => {
+    setLoading(true);
+    setErrors({});
+    try {
+      const res = await fetch(`${API_BASE_URL}/auth/google`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id_token: credentialResponse.credential }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || "Google authentication failed");
+      
+      localStorage.setItem("access_token", data.access_token);
+      navigate("/dashboard");
+    } catch (err) {
+      setErrors({ auth: err instanceof Error ? err.message : "Google login failed" });
       triggerShake();
     } finally {
       setLoading(false);
@@ -391,6 +414,17 @@ export default function AdminLogin() {
           color: var(--ink-3); text-align: center;
           border-top: 1px solid var(--line); padding-top: 20px;
         }
+
+        .login-divider {
+          display: flex; align-items: center; gap: 12px;
+          margin: 24px 0;
+        }
+        .login-divider-line { flex: 1; height: 1px; background: var(--line); }
+        .login-divider-text { font-size: 11px; font-weight: 700; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.05em; }
+        
+        .login-google-wrap {
+          display: flex; justify-content: center;
+        }
       `}</style>
 
       {/* Left Panel */}
@@ -509,6 +543,23 @@ export default function AdminLogin() {
               {loading ? <LoaderDots color="white" /> : "Sign in to Dashboard"}
             </button>
           </form>
+
+          <div className="login-divider">
+            <div className="login-divider-line"></div>
+            <div className="login-divider-text">or continue with</div>
+            <div className="login-divider-line"></div>
+          </div>
+
+          <div className="login-google-wrap">
+            <GoogleLogin
+               onSuccess={handleGoogleSuccess}
+               onError={() => setErrors({ auth: "Google Login failed. Please try again." })}
+               useOneTap
+               theme="outline"
+               shape="rectangular"
+               width="380"
+            />
+          </div>
 
           <div className="login-form-footer">
             Secure access · Enterprise grade · Powered by KiwiQA

@@ -12,3 +12,4 @@ GOOGLE_API_KEY: str = os.getenv("GOOGLE_API_KEY", "")
 
 # Google OAuth Settings
 GOOGLE_CLIENT_ID: str = os.getenv("GOOGLE_CLIENT_ID", "")
+AUTHORIZED_GOOGLE_EMAIL: str = os.getenv("AUTHORIZED_GOOGLE_EMAIL", "NOT_SET")

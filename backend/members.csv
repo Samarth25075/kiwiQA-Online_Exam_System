@@ -1,2 +1,4 @@
 email,hashed_password,role,full_name,permissions,session_id
-admin@examportal.com,$2b$10$SmrNV0bZCwxdzXUCqXMtl.7g2HXcJZF4bPLsVG6LD6TS12EDoCRAS,admin,Portal Admin,"[""generate exam"", ""manage exam""]",53e73d13-1f6a-4451-a143-00675bfbcc3d
+admin@examportal.com,$2b$10$SmrNV0bZCwxdzXUCqXMtl.7g2HXcJZF4bPLsVG6LD6TS12EDoCRAS,admin,Portal Admin,"[""generate exam"", ""manage exam""]",9356a17c-c0eb-4076-a0a6-4ad89b268b18
+samarthp5522@gmail.com,,admin,Samarth Patel,[],
+shreyapatel4151@gmail.com,,admin,Shreya Patel,[],

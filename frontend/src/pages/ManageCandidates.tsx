@@ -6,9 +6,14 @@ import API_BASE_URL from "../config";
 // ─── Types ────────────────────────────────────────────────────────────────
 interface Candidate {
     id: number;
+    candidate_id?: string;
     name: string;
     email: string;
     phone_number: string;
+    dob?: string;
+    gender?: string;
+    address?: string;
+    profile_photo?: string;
     cv_url: string;
     status: string;
     joined_date: string;
@@ -47,6 +52,9 @@ const Icons = {
     Copy: () => (
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg>
     ),
+    User: () => (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    ),
 };
 
 const getInitials = (name: string) => name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
@@ -81,7 +89,15 @@ export default function ManageCandidates() {
     const [exams, setExams] = useState<ExamStat[]>([]);
     const [loading, setLoading] = useState(true);
     const [editingId, setEditingId] = useState<number | null>(null);
-    const [formData, setFormData] = useState({ name: "", email: "", phone_number: "", cv_url: "" });
+    const [formData, setFormData] = useState({ 
+        name: "", 
+        email: "", 
+        phone_number: "", 
+        dob: "", 
+        gender: "", 
+        address: "", 
+        cv_url: "" 
+    });
     const [cvFile, setCvFile] = useState<File | null>(null);
     const [popup, setPopup] = useState<{ isOpen: boolean; type: PopupType; title?: string; message: string; onConfirm: () => void; onCancel?: () => void; confirmText?: string; } | null>(null);
 
@@ -103,7 +119,15 @@ export default function ManageCandidates() {
 
     const handleEdit = (candidate: Candidate) => {
         setEditingId(candidate.id);
-        setFormData({ name: candidate.name, email: candidate.email, phone_number: candidate.phone_number || "", cv_url: candidate.cv_url || "" });
+        setFormData({ 
+            name: candidate.name, 
+            email: candidate.email, 
+            phone_number: candidate.phone_number || "", 
+            dob: candidate.dob || "", 
+            gender: candidate.gender || "", 
+            address: candidate.address || "", 
+            cv_url: candidate.cv_url || "" 
+        });
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
@@ -128,29 +152,6 @@ export default function ManageCandidates() {
         });
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        const token = localStorage.getItem("access_token");
-        try {
-            const res = await fetch(`${API_BASE_URL}/candidates/${editingId}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
-                body: JSON.stringify(formData)
-            });
-            if (res.ok) {
-                const candidate = await res.json();
-                if (cvFile) {
-                    const uploadData = new FormData();
-                    uploadData.append("file", cvFile);
-                    await fetch(`${API_BASE_URL}/candidates/${candidate.id}/upload-cv`, { method: "POST", headers: { "Authorization": `Bearer ${token}` }, body: uploadData });
-                }
-                setFormData({ name: "", email: "", phone_number: "", cv_url: "" });
-                setCvFile(null);
-                setEditingId(null);
-                fetchData();
-            }
-        } catch { setPopup({ isOpen: true, type: 'alert', title: 'Error', message: "Error saving candidate", onConfirm: () => setPopup(null) }); }
-    };
 
     const handleSendLink = async (id: number) => {
         const token = localStorage.getItem("access_token");
@@ -257,7 +258,9 @@ export default function ManageCandidates() {
                 .mc-table tr:last-child td { border-bottom:none; }
                 .mc-table tr:hover td { background:var(--bg-neutral); }
 
-                .mc-avatar { width:32px; height:32px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; color:white; flex-shrink:0; }
+                .mc-avatar { width:32px; height:32px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; color:white; flex-shrink:0; overflow:hidden; }
+                .mc-avatar img { width:100%; height:100%; object-fit:cover; }
+                .mc-id { font-size:10px; font-weight:800; color:var(--primary); font-family:'JetBrains Mono',monospace; letter-spacing:-0.02em; }
                 .mc-name { font-size:12px; font-weight:700; color:var(--text); }
                 .mc-sub { font-size:10px; color:var(--text-muted); font-weight:500; margin-top:1px; }
 
@@ -276,24 +279,65 @@ export default function ManageCandidates() {
                 .mc-empty-title { font-family:'Outfit',sans-serif; font-size:16px; font-weight:800; color:var(--text); margin-bottom:6px; }
                 .mc-empty-sub { font-size:12px; }
             `}</style>
-
+ 
             <header className="mc-header">
                 <div>
                     <div className="mc-header-title">Candidate Management</div>
                     <div className="mc-header-count">{candidates.length} Total Candidates</div>
                 </div>
+                <button 
+                  className="mc-save-btn" 
+                  style={{ width: 'auto', padding: '8px 16px', marginTop: 0 }}
+                  onClick={() => {
+                    setEditingId(-1); // Use -1 to indicate "Adding New"
+                    setFormData({ name: "", email: "", phone_number: "", dob: "", gender: "", address: "", cv_url: "" });
+                  }}
+                >
+                  <Icons.User /> Add Candidate
+                </button>
             </header>
-
+ 
             <div className="mc-content">
-                {editingId && (
+                {editingId !== null && (
                     <div className="mc-edit-card">
                         <div className="mc-edit-header">
-                            <div className="mc-edit-title">✏️ Update Candidate Profile</div>
-                            <button className="mc-edit-cancel" onClick={() => { setEditingId(null); setFormData({ name: "", email: "", phone_number: "", cv_url: "" }); }}>
+                            <div className="mc-edit-title">
+                                {editingId === -1 ? "🆕 Add New Candidate" : "✏️ Update Candidate Profile"}
+                            </div>
+                            <button className="mc-edit-cancel" onClick={() => { setEditingId(null); setFormData({ name: "", email: "", phone_number: "", dob: "", gender: "", address: "", cv_url: "" }); }}>
                                 <Icons.X />
                             </button>
                         </div>
-                        <form className="mc-form-grid" onSubmit={handleSubmit}>
+                        <form className="mc-form-grid" onSubmit={async (e) => {
+                            e.preventDefault();
+                            const token = localStorage.getItem("access_token");
+                            try {
+                                const method = editingId === -1 ? "POST" : "PUT";
+                                const url = editingId === -1 ? `${API_BASE_URL}/candidates` : `${API_BASE_URL}/candidates/${editingId}`;
+                                
+                                const res = await fetch(url, {
+                                    method,
+                                    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+                                    body: JSON.stringify(formData)
+                                });
+                                
+                                if (res.ok) {
+                                    const candidate = await res.json();
+                                    if (cvFile) {
+                                        const uploadData = new FormData();
+                                        uploadData.append("file", cvFile);
+                                        await fetch(`${API_BASE_URL}/candidates/${candidate.id}/upload-cv`, { method: "POST", headers: { "Authorization": `Bearer ${token}` }, body: uploadData });
+                                    }
+                                    setFormData({ name: "", email: "", phone_number: "", dob: "", gender: "", address: "", cv_url: "" });
+                                    setCvFile(null);
+                                    setEditingId(null);
+                                    fetchData();
+                                } else {
+                                    const data = await res.json();
+                                    setPopup({ isOpen: true, type: 'alert', title: 'Error', message: data.detail || "Failed to save candidate.", onConfirm: () => setPopup(null) });
+                                }
+                            } catch { setPopup({ isOpen: true, type: 'alert', title: 'Error', message: "Error saving candidate", onConfirm: () => setPopup(null) }); }
+                        }}>
                             <div className="mc-field">
                                 <label className="mc-label">Full Name</label>
                                 <input className="mc-input" placeholder="John Doe" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} required />
@@ -307,22 +351,39 @@ export default function ManageCandidates() {
                                 <input className="mc-input" placeholder="+91 00000 00000" value={formData.phone_number} onChange={e => setFormData({ ...formData, phone_number: e.target.value })} />
                             </div>
                             <div className="mc-field">
+                                <label className="mc-label">Date of Birth</label>
+                                <input className="mc-input" type="date" value={formData.dob} onChange={e => setFormData({ ...formData, dob: e.target.value })} />
+                            </div>
+                            <div className="mc-field">
+                                <label className="mc-label">Gender</label>
+                                <select className="mc-input" value={formData.gender} onChange={e => setFormData({ ...formData, gender: e.target.value })}>
+                                    <option value="">Select</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div className="mc-field">
+                                <label className="mc-label">Address</label>
+                                <input className="mc-input" placeholder="City, Country" value={formData.address} onChange={e => setFormData({ ...formData, address: e.target.value })} />
+                            </div>
+                            <div className="mc-field" style={{ gridColumn: 'span 2' }}>
                                 <label className="mc-label">Upload CV / Resume</label>
                                 <input className="mc-input" type="file" accept=".pdf,.doc,.docx" style={{ padding: '7px 10px' }} onChange={e => setCvFile(e.target.files?.[0] || null)} />
                             </div>
                             <button type="submit" className="mc-save-btn">
-                                <Icons.Check /> Save Changes
+                                <Icons.Check /> {editingId === -1 ? "Create Candidate" : "Save Changes"}
                             </button>
                         </form>
                     </div>
                 )}
-
+ 
                 {candidates.length === 0 ? (
                     <div className="mc-table-wrap">
                         <div className="mc-empty">
                             <div className="mc-empty-icon">👥</div>
                             <div className="mc-empty-title">No Candidates Yet</div>
-                            <div className="mc-empty-sub">Enroll candidates via the dashboard to get started.</div>
+                            <div className="mc-empty-sub">Enroll candidates via the dashboard or add them manually to get started.</div>
                         </div>
                     </div>
                 ) : (
@@ -331,7 +392,8 @@ export default function ManageCandidates() {
                             <thead>
                                 <tr>
                                     <th>Candidate</th>
-                                    <th>Contact</th>
+                                    <th>Profile Details</th>
+                                    <th>Contact & CV</th>
                                     <th>Assigned Exams</th>
                                     <th>Status</th>
                                     <th style={{ textAlign: 'right' }}>Actions</th>
@@ -342,12 +404,32 @@ export default function ManageCandidates() {
                                     <tr key={group.email}>
                                         <td>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                                                <div className="mc-avatar" style={{ background: getAvatarColor(group.name) }}>
-                                                    {getInitials(group.name)}
+                                                <div className="mc-avatar" style={{ background: group.profile_photo ? 'transparent' : getAvatarColor(group.name) }}>
+                                                    {group.profile_photo ? (
+                                                        <img src={group.profile_photo} alt={group.name} />
+                                                    ) : (
+                                                        getInitials(group.name)
+                                                    )}
                                                 </div>
                                                 <div>
+                                                    <div className="mc-id">{group.candidate_id || 'Generating...'}</div>
                                                     <div className="mc-name">{group.name}</div>
                                                     <div className="mc-sub">Joined: {group.joined_date?.split('T')[0] || '—'}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                                <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text)' }}>
+                                                    <span style={{ color: 'var(--text-muted)', fontSize: 9, textTransform: 'uppercase', marginRight: 4 }}>Gender:</span>
+                                                    {group.gender || '—'}
+                                                </div>
+                                                <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text)' }}>
+                                                    <span style={{ color: 'var(--text-muted)', fontSize: 9, textTransform: 'uppercase', marginRight: 4 }}>DOB:</span>
+                                                    {group.dob || '—'}
+                                                </div>
+                                                <div style={{ fontSize: 10, color: 'var(--text-muted)', maxWidth: 150, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={group.address}>
+                                                    📍 {group.address || 'No address'}
                                                 </div>
                                             </div>
                                         </td>
@@ -361,8 +443,8 @@ export default function ManageCandidates() {
                                             )}
                                         </td>
                                         <td>
-                                            <div style={{ maxWidth: 200, fontSize: 13, fontWeight: 500, lineHeight: 1.5, color: "var(--text)" }}>
-                                                {group.enrollments.map((en: any) => en.examName).join(", ")}
+                                            <div style={{ maxWidth: 180, fontSize: 12, fontWeight: 500, lineHeight: 1.5, color: "var(--text)" }}>
+                                                {group.enrollments.map((en: any) => en.examName).join(", ") || "None"}
                                             </div>
                                         </td>
                                         <td>
@@ -370,7 +452,7 @@ export default function ManageCandidates() {
                                                 {group.enrollments.map((en: any) => (
                                                     <div key={en.id} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                                                         <StatusChip status={en.status} />
-                                                        <span style={{ fontSize: 11, color: "var(--text-muted)", whiteSpace: 'nowrap', maxWidth: 100, overflow: 'hidden', textOverflow: 'ellipsis' }} title={en.examName}>
+                                                        <span style={{ fontSize: 11, color: "var(--text-muted)", whiteSpace: 'nowrap', maxWidth: 80, overflow: 'hidden', textOverflow: 'ellipsis' }} title={en.examName}>
                                                             {en.examName}
                                                         </span>
                                                         {en.device_id && (
@@ -378,13 +460,14 @@ export default function ManageCandidates() {
                                                         )}
                                                     </div>
                                                 ))}
+                                                {group.enrollments.length === 0 && <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>Unassigned</span>}
                                             </div>
                                         </td>
                                         <td>
                                             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-end' }}>
-                                                {group.enrollments.map((en: any) => (
+                                                {group.enrollments.length > 0 ? group.enrollments.map((en: any) => (
                                                     <div key={`actions-${en.id}`} style={{ display: 'flex', gap: 6, justifyContent: 'flex-end', alignItems: 'center', background: 'var(--bg-neutral)', padding: '4px', borderRadius: '8px', border: '1px solid var(--border)' }}>
-                                                        <span style={{ fontSize: 10, fontWeight: 700, padding: '0 4px', color: 'var(--text-muted)', maxWidth: 80, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={en.examName}>{en.examName}</span>
+                                                        <span style={{ fontSize: 10, fontWeight: 700, padding: '0 4px', color: 'var(--text-muted)', maxWidth: 70, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={en.examName}>{en.examName}</span>
                                                         {en.assigned_exam_id && (
                                                             <>
                                                                 <button 
@@ -410,7 +493,16 @@ export default function ManageCandidates() {
                                                             <Icons.Trash />
                                                         </button>
                                                     </div>
-                                                ))}
+                                                )) : (
+                                                    <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
+                                                        <button className="mc-action-btn mc-btn-edit" onClick={() => handleEdit(group)} title="Edit">
+                                                            <Icons.Edit />
+                                                        </button>
+                                                        <button className="mc-action-btn mc-btn-del" onClick={() => handleDelete(group.id)} title="Delete">
+                                                            <Icons.Trash />
+                                                        </button>
+                                                    </div>
+                                                )}
                                             </div>
                                         </td>
                                     </tr>
@@ -420,7 +512,7 @@ export default function ManageCandidates() {
                     </div>
                 )}
             </div>
-
+ 
             {popup && (
                 <CustomPopup
                     isOpen={popup.isOpen} type={popup.type} title={popup.title} message={popup.message}
