@@ -16,3 +16,4 @@ colorama
 
 sqlalchemy
 psycopg2-binary
+redis

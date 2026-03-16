@@ -144,8 +144,17 @@ def _generate_with_gemini(topic: str, difficulty: str, count: int) -> Optional[L
         return None
 
 def _generate_mock_questions(topic: str, difficulty: str, count: int) -> List[Dict]:
-    """Generates questions using QuizAPI, then Gemini, then high-quality templates."""
+    """Generates questions using QuizAPI, then Gemini, then high-quality templates.
+    Uses Redis to cache results for faster subsequent loads.
+    """
+    from app.core.redis import get_cached_data, set_cached_data
     
+    cache_key = f"exam_questions:{topic.lower().replace(' ', '_')}:{difficulty.lower()}:{count}"
+    cached = get_cached_data(cache_key)
+    if cached:
+        print(f"INFO: Loading questions from Redis cache for {topic}")
+        return cached
+
     # 1. Try QuizAPI
     questions = _generate_with_quiz_api(topic, difficulty, count)
     
@@ -157,31 +166,33 @@ def _generate_mock_questions(topic: str, difficulty: str, count: int) -> List[Di
     
     # FINAL FALLBACK: If AI is completely offline, use technical templates instead of generic ones
     remaining = count - len(questions)
-    if remaining <= 0: return questions[:count]
-    
-    tech_fallbacks = [
-        f"Which architectural principle is most critical for a scaled {topic} implementation?",
-        f"When optimizing {topic}, which of the following provides the best performance gain?",
-        f"In a {difficulty} scenario, how would you handle a memory leak in {topic}?",
-        f"What is the industry standard approach for securing a {topic} production environment?",
-        f"Identify the most common anti-pattern when developing with {topic}.",
-        f"How does {topic} handle asynchronous operations at an advanced level?"
-    ]
-    
-    for i in range(remaining):
-        tpl = tech_fallbacks[i % len(tech_fallbacks)]
-        questions.append({
-            "text": tpl,
-            "options": [
-                {"text": f"Standard {topic} optimization protocols", "is_correct": True},
-                {"text": "Legacy procedural approaches", "is_correct": False},
-                {"text": "Generic implementation without tuning", "is_correct": False},
-                {"text": "Third-party non-standard modules", "is_correct": False}
-            ],
-            "explanation": f"This question focuses on professional standards for {topic}."
-        })
+    if remaining > 0:
+        tech_fallbacks = [
+            f"Which architectural principle is most critical for a scaled {topic} implementation?",
+            f"When optimizing {topic}, which of the following provides the best performance gain?",
+            f"In a {difficulty} scenario, how would you handle a memory leak in {topic}?",
+            f"What is the industry standard approach for securing a {topic} production environment?",
+            f"Identify the most common anti-pattern when developing with {topic}.",
+            f"How does {topic} handle asynchronous operations at an advanced level?"
+        ]
         
-    return questions[:count]
+        for i in range(remaining):
+            tpl = tech_fallbacks[i % len(tech_fallbacks)]
+            questions.append({
+                "text": tpl,
+                "options": [
+                    {"text": f"Standard {topic} optimization protocols", "is_correct": True},
+                    {"text": "Legacy procedural approaches", "is_correct": False},
+                    {"text": "Generic implementation without tuning", "is_correct": False},
+                    {"text": "Third-party non-standard modules", "is_correct": False}
+                ],
+                "explanation": f"This question focuses on professional standards for {topic}."
+            })
+    
+    res = questions[:count]
+    # Cache for 24 hours
+    set_cached_data(cache_key, res, expire=86400)
+    return res
     
     # If we have some questions but not all, try one more time with a MORE SPECIFIC request
     if 0 < len(questions) < count:
