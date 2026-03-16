@@ -38,6 +38,9 @@ app.add_middleware(
     expose_headers=["*"],
 )
 
+from fastapi.middleware.gzip import GZipMiddleware
+app.add_middleware(GZipMiddleware, minimum_size=1000)
+
 # ── Global Exception Handler ──────────────────
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
