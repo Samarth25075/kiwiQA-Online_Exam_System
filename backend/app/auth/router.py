@@ -48,6 +48,13 @@ async def login(form: Annotated[OAuth2PasswordRequestForm, Depends()], db: Sessi
     session_id = str(uuid.uuid4())
     update_user_session(db, user["email"], session_id)
 
+    # Multi-module cache invalidation on login for fresh start
+    try:
+        from app.core.redis import redis_client
+        if redis_client:
+            redis_client.delete("all_candidates_list", "all_exams_list", "exams_with_counts")
+    except: pass
+
     token = create_access_token(
         subject=user["email"],
         expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
@@ -202,6 +209,13 @@ async def google_login(body: GoogleTokenRequest, db: Session = Depends(get_db)):
     # Single Session logic for Google Login
     session_id = str(uuid.uuid4())
     update_user_session(db, email, session_id)
+
+    # Multi-module cache invalidation on login for fresh start
+    try:
+        from app.core.redis import redis_client
+        if redis_client:
+            redis_client.delete("all_candidates_list", "all_exams_list", "exams_with_counts")
+    except: pass
 
     token = create_access_token(
         subject=email,

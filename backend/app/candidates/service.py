@@ -46,6 +46,7 @@ def get_all_candidates(db: Session) -> List[Dict]:
     return res
 
 def create_candidate(db: Session, name: str, email: str, phone_number: str = "", dob: str = "", gender: str = "", address: str = "", profile_photo: str = "", cv_url: str = "", device_id: str = "") -> Dict:
+    from app.core.redis import redis_client
     current_year = datetime.now().year
     
     highest_id = db.query(Candidate).order_by(Candidate.id.desc()).first()
@@ -75,9 +76,14 @@ def create_candidate(db: Session, name: str, email: str, phone_number: str = "",
     db.add(new_cand)
     db.commit()
     db.refresh(new_cand)
+    
+    if redis_client:
+        redis_client.delete("all_candidates_list", "exams_with_counts")
+        
     return _to_dict(new_cand)
 
 def assign_exam_to_candidate(db: Session, candidate_id: str, exam_id: str) -> Dict | None:
+    from app.core.redis import redis_client
     try:
         cand_id_int = int(candidate_id)
     except (ValueError, TypeError):
@@ -87,6 +93,8 @@ def assign_exam_to_candidate(db: Session, candidate_id: str, exam_id: str) -> Di
         c.assigned_exam_id = exam_id
         db.commit()
         db.refresh(c)
+        if redis_client:
+            redis_client.delete("all_candidates_list", "exams_with_counts")
         return _to_dict(c)
     return None
 
@@ -95,14 +103,18 @@ def get_candidate_by_token(db: Session, token: str) -> Dict | None:
     return _to_dict(c)
 
 def update_candidate_status(db: Session, token: str, status: str) -> bool:
+    from app.core.redis import redis_client
     c = db.query(Candidate).filter(Candidate.token == token).first()
     if c:
         c.status = status
         db.commit()
+        if redis_client:
+            redis_client.delete("all_candidates_list", "exams_with_counts")
         return True
     return False
 
 def delete_candidate(db: Session, candidate_id: str) -> bool:
+    from app.core.redis import redis_client
     try:
         cand_id_int = int(candidate_id)
     except (ValueError, TypeError):
@@ -111,10 +123,13 @@ def delete_candidate(db: Session, candidate_id: str) -> bool:
     if c:
         db.delete(c)
         db.commit()
+        if redis_client:
+            redis_client.delete("all_candidates_list", "exams_with_counts")
         return True
     return False
 
 def update_candidate_details(db: Session, candidate_id: str, data: Dict) -> Dict | None:
+    from app.core.redis import redis_client
     try:
         cand_id_int = int(candidate_id)
     except (ValueError, TypeError):
@@ -126,10 +141,13 @@ def update_candidate_details(db: Session, candidate_id: str, data: Dict) -> Dict
                 setattr(c, k, v)
         db.commit()
         db.refresh(c)
+        if redis_client:
+            redis_client.delete("all_candidates_list", "exams_with_counts")
         return _to_dict(c)
     return None
 
 def update_candidate_result(db: Session, token: str, score: int, total: int, violations: int = 0) -> bool:
+    from app.core.redis import redis_client
     c = db.query(Candidate).filter(Candidate.token == token).first()
     if c:
         c.score = score
@@ -137,10 +155,13 @@ def update_candidate_result(db: Session, token: str, score: int, total: int, vio
         c.violations = violations
         c.status = "Completed"
         db.commit()
+        if redis_client:
+            redis_client.delete("all_candidates_list", "exams_with_counts")
         return True
     return False
 
 def reset_candidate_for_retest(db: Session, candidate_id: str) -> Dict | None:
+    from app.core.redis import redis_client
     try:
         cand_id_int = int(candidate_id)
     except (ValueError, TypeError):
@@ -154,5 +175,7 @@ def reset_candidate_for_retest(db: Session, candidate_id: str) -> Dict | None:
         c.device_id = ""
         db.commit()
         db.refresh(c)
+        if redis_client:
+            redis_client.delete("all_candidates_list", "exams_with_counts")
         return _to_dict(c)
     return None

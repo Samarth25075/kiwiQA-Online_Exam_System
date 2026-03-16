@@ -293,6 +293,7 @@ def _to_dict(exam: Exam) -> Dict:
     }
 
 def save_exam(db: Session, exam_in: ExamFinalize) -> Dict:
+    from app.core.redis import redis_client
     new_exam = Exam(
         id=str(uuid.uuid4()),
         title=exam_in.title,
@@ -311,9 +312,15 @@ def save_exam(db: Session, exam_in: ExamFinalize) -> Dict:
     db.add(new_exam)
     db.commit()
     db.refresh(new_exam)
+    
+    # Invalidate cache
+    if redis_client:
+        redis_client.delete("all_exams_list", "exams_with_counts")
+        
     return _to_dict(new_exam)
 
 def create_exam(db: Session, exam_in: ExamCreate) -> Dict:
+    from app.core.redis import redis_client
     questions = _generate_mock_questions(exam_in.topic, exam_in.difficulty, exam_in.num_questions)
     
     new_exam = Exam(
@@ -332,37 +339,62 @@ def create_exam(db: Session, exam_in: ExamCreate) -> Dict:
     db.add(new_exam)
     db.commit()
     db.refresh(new_exam)
+    
+    if redis_client:
+        redis_client.delete("all_exams_list", "exams_with_counts")
+        
     return _to_dict(new_exam)
 
 def get_all_exams(db: Session) -> List[Dict]:
-    # Changed internal sorting based on created_at or just id desc
+    from app.core.redis import get_cached_data, set_cached_data
+    
+    cached = get_cached_data("all_exams_list")
+    if cached:
+        return cached
+
     exams = db.query(Exam).order_by(Exam.created_at.desc()).all()
-    return [_to_dict(e) for e in exams]
+    res = [_to_dict(e) for e in exams]
+    
+    set_cached_data("all_exams_list", res, expire=300)
+    return res
 
 def get_exam_by_id(db: Session, exam_id: str) -> Dict | None:
     exam = db.query(Exam).filter(Exam.id == exam_id).first()
     return _to_dict(exam)
 
 def delete_exam(db: Session, exam_id: str) -> bool:
+    from app.core.redis import redis_client
     exam = db.query(Exam).filter(Exam.id == exam_id).first()
     if exam:
         db.delete(exam)
         db.commit()
+        if redis_client:
+            redis_client.delete("all_exams_list", "exams_with_counts")
         return True
     return False
 
 def update_exam(db: Session, exam_id: str, updates: dict) -> bool:
+    from app.core.redis import redis_client
     exam = db.query(Exam).filter(Exam.id == exam_id).first()
     if exam:
         for k, v in updates.items():
             if hasattr(exam, k):
                 setattr(exam, k, v)
         db.commit()
+        if redis_client:
+            redis_client.delete("all_exams_list", "exams_with_counts")
         return True
     return False
 
 def get_exams_with_candidate_counts(db: Session) -> List[Dict]:
-    """Returns each exam along with candidate assignment counts."""
+    """Returns each exam along with candidate assignment counts. Cached for speed."""
+    from app.core.redis import get_cached_data, set_cached_data
+    
+    cached = get_cached_data("exams_with_counts")
+    if cached:
+        print("INFO: Loading dashboard stats from Redis cache")
+        return cached
+
     from app.candidates.service import get_all_candidates
     exams = get_all_exams(db)
     candidates = get_all_candidates(db)
@@ -418,6 +450,8 @@ def get_exams_with_candidate_counts(db: Session) -> List[Dict]:
             "proctoring_enabled": exam.get("proctoring_enabled", True),
             "proctoring_type": exam.get("proctoring_type", "video")
         })
+    
+    set_cached_data("exams_with_counts", result, expire=300)
     return result
 
 def check_and_delete_expired_exams(db: Session):
