@@ -25,6 +25,8 @@ from app.auth.service import (
 )
 from app.core.config import ACCESS_TOKEN_EXPIRE_MINUTES, GOOGLE_CLIENT_ID, AUTHORIZED_GOOGLE_EMAIL
 from app.core.security import create_access_token, decode_access_token
+from app.database import get_db
+from sqlalchemy.orm import Session
 
 router = APIRouter(tags=["auth"])
 
@@ -33,8 +35,8 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 # ── POST /login ───────────────────────────────
 @router.post("/login", response_model=Token)
-async def login(form: Annotated[OAuth2PasswordRequestForm, Depends()]):
-    user = authenticate(form.username, form.password)
+async def login(form: Annotated[OAuth2PasswordRequestForm, Depends()], db: Session = Depends(get_db)):
+    user = authenticate(db, form.username, form.password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -44,7 +46,7 @@ async def login(form: Annotated[OAuth2PasswordRequestForm, Depends()]):
     
     # Single Session logic: Generate a unique session ID
     session_id = str(uuid.uuid4())
-    update_user_session(user["email"], session_id)
+    update_user_session(db, user["email"], session_id)
 
     token = create_access_token(
         subject=user["email"],
@@ -55,7 +57,7 @@ async def login(form: Annotated[OAuth2PasswordRequestForm, Depends()]):
 
 
 # ── Dependency ────────────────────────────────
-async def get_current_admin(token: Annotated[str, Depends(oauth2_scheme)]) -> AdminUser:
+async def get_current_admin(token: Annotated[str, Depends(oauth2_scheme)], db: Session = Depends(get_db)) -> AdminUser:
     try:
         payload = decode_access_token(token)
         token_data = TokenPayload(sub=payload.get("sub"), sid=payload.get("sid"))
@@ -67,14 +69,14 @@ async def get_current_admin(token: Annotated[str, Depends(oauth2_scheme)]) -> Ad
         )
     
     # Single Session logic: Verify session ID
-    if not verify_session(token_data.sub, token_data.sid):
+    if not verify_session(db, token_data.sub, token_data.sid):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Session has been invalidated. Please log in again.",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    user = get_user(token_data.sub)
+    user = get_user(db, token_data.sub)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -120,10 +122,11 @@ class ChangePasswordRequest(BaseModel):
 @router.post("/change-password")
 async def change_password_route(
     body: ChangePasswordRequest,
-    current_admin: Annotated[AdminUser, Depends(get_current_admin)]
+    current_admin: Annotated[AdminUser, Depends(get_current_admin)],
+    db: Session = Depends(get_db)
 ):
     """Change the password for the currently logged-in admin."""
-    success = change_password(current_admin.email, body.current_password, body.new_password)
+    success = change_password(db, current_admin.email, body.current_password, body.new_password)
     if not success:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -133,9 +136,9 @@ async def change_password_route(
 
 
 @router.post("/logout")
-async def logout(current_admin: Annotated[AdminUser, Depends(get_current_admin)]):
+async def logout(current_admin: Annotated[AdminUser, Depends(get_current_admin)], db: Session = Depends(get_db)):
     """Invalidate the current session."""
-    update_user_session(current_admin.email, None)
+    update_user_session(db, current_admin.email, None)
     return {"message": "Logged out successfully"}
 
 
@@ -145,7 +148,7 @@ class GoogleTokenRequest(BaseModel):
 
 
 @router.post("/auth/google", response_model=Token)
-async def google_login(body: GoogleTokenRequest):
+async def google_login(body: GoogleTokenRequest, db: Session = Depends(get_db)):
     if not GOOGLE_CLIENT_ID:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -189,7 +192,7 @@ async def google_login(body: GoogleTokenRequest):
             detail=f"Access denied. Only Authorized persone are allowed to login.",
         )
 
-    user = get_user(email)
+    user = get_user(db, email)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -198,7 +201,7 @@ async def google_login(body: GoogleTokenRequest):
 
     # Single Session logic for Google Login
     session_id = str(uuid.uuid4())
-    update_user_session(email, session_id)
+    update_user_session(db, email, session_id)
 
     token = create_access_token(
         subject=email,
@@ -211,11 +214,11 @@ async def google_login(body: GoogleTokenRequest):
 # ── Member Management ─────────────────────────
 
 @router.get("/members", response_model=List[Member])
-async def get_members(current_admin: Annotated[AdminUser, Depends(get_current_admin)]):
+async def get_members(current_admin: Annotated[AdminUser, Depends(get_current_admin)], db: Session = Depends(get_db)):
     """List all registered members (Admin only)."""
     if current_admin.role != "admin":
         raise HTTPException(status_code=403, detail="Only admins can manage members")
-    users = get_all_users()
+    users = get_all_users(db)
     return [
         Member(
             email=u["email"],
@@ -229,13 +232,14 @@ async def get_members(current_admin: Annotated[AdminUser, Depends(get_current_ad
 @router.post("/members", response_model=Member)
 async def create_member(
     body: MemberCreate,
-    current_admin: Annotated[AdminUser, Depends(get_current_admin)]
+    current_admin: Annotated[AdminUser, Depends(get_current_admin)],
+    db: Session = Depends(get_db)
 ):
     """Add a new member (Admin only)."""
     if current_admin.role != "admin":
         raise HTTPException(status_code=403, detail="Only admins can manage members")
     
-    if get_user(body.email):
+    if get_user(db, body.email):
         raise HTTPException(status_code=400, detail="User already exists")
     
     new_user = {
@@ -245,7 +249,7 @@ async def create_member(
         "role": body.role,
         "permissions": body.permissions
     }
-    add_user(new_user)
+    add_user(db, new_user)
     return Member(
         email=new_user["email"],
         full_name=new_user["full_name"],
@@ -257,7 +261,8 @@ async def create_member(
 @router.delete("/members/{email}")
 async def remove_member(
     email: str,
-    current_admin: Annotated[AdminUser, Depends(get_current_admin)]
+    current_admin: Annotated[AdminUser, Depends(get_current_admin)],
+    db: Session = Depends(get_db)
 ):
     """Remove a member (Admin only)."""
     if current_admin.role != "admin":
@@ -266,7 +271,7 @@ async def remove_member(
     if email == current_admin.email:
         raise HTTPException(status_code=400, detail="Cannot delete yourself")
     
-    success = delete_user(email)
+    success = delete_user(db, email)
     if not success:
         raise HTTPException(status_code=404, detail="User not found")
     

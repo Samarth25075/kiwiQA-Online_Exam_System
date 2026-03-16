@@ -35,9 +35,9 @@ class Candidate(CandidateBase):
     joined_date: str
     token: str
     assigned_exam_id: Optional[str] = None
-    score: Optional[str] = None
-    total_questions: Optional[str] = None
-    violations: Optional[str] = None
+    score: Optional[int] = None
+    total_questions: Optional[int] = None
+    violations: Optional[int] = 0
     device_id: Optional[str] = None
 
 class CandidateAssign(BaseModel):

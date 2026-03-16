@@ -1,23 +1,15 @@
-from __future__ import annotations
-import csv
-import os
 import json
 import bcrypt
-
-# Data Path Configuration
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-CSV_FILE_PATH = os.path.join(BASE_DIR, "members.csv")
+from sqlalchemy.orm import Session
+from app.models import User
 
 def hash_password(password: str) -> str:
-    """Hash a password using bcrypt directly."""
-    # Salt is generated automatically by bcrypt
     pwd_bytes = password.encode('utf-8')
     salt = bcrypt.gensalt(rounds=10)
     hashed = bcrypt.hashpw(pwd_bytes, salt)
     return hashed.decode('utf-8')
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """Verify a password against its hash."""
     try:
         return bcrypt.checkpw(
             plain_password.encode('utf-8'), 
@@ -27,103 +19,89 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
         print(f"VERIFY ERROR: {e}")
         return False
 
-def _make_user(email, plain_password, role, full_name, permissions=None):
-    return {
-        "email": email,
-        "hashed_password": hash_password(plain_password),
-        "role": role,
-        "full_name": full_name,
-        "permissions": permissions or [],
-        "session_id": None
-    }
-
-def load_users_from_csv():
-    users = {}
-    if not os.path.exists(CSV_FILE_PATH):
-        print(f"DEBUG: Creating default admin at {CSV_FILE_PATH}")
-        admin = _make_user(
-            email="admin@examportal.com",
-            plain_password="admin123",
-            role="admin",
-            full_name="Portal Admin",
-            permissions=["generate exam", "manage exam"]
-        )
-        users[admin["email"]] = admin
-        save_users_to_csv(users)
-        return users
-
-    try:
-        with open(CSV_FILE_PATH, mode='r', encoding='utf-8') as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                if not row or not row.get("email"): continue
-                try:
-                    perms = row.get("permissions", "[]")
-                    row["permissions"] = json.loads(perms) if perms else []
-                except:
-                    row["permissions"] = []
-                users[row["email"]] = row
-    except Exception as e:
-        print(f"ERROR loading users: {e}")
-    return users
-
-def save_users_to_csv(users):
-    try:
-        fieldnames = ["email", "hashed_password", "role", "full_name", "permissions", "session_id"]
-        with open(CSV_FILE_PATH, mode='w', encoding='utf-8', newline='') as f:
-            writer = csv.DictWriter(f, fieldnames=fieldnames)
-            writer.writeheader()
-            for email in sorted(users.keys()):
-                user_copy = users[email].copy()
-                user_copy["permissions"] = json.dumps(user_copy.get("permissions", []))
-                writer.writerow(user_copy)
-    except Exception as e:
-        print(f"ERROR saving users: {e}")
-
-# Global state
-STATIC_USERS = load_users_from_csv()
-
-def get_user(email):
-    return STATIC_USERS.get(email)
-
-def add_user(user):
-    email = user.get("email")
-    if email:
-        STATIC_USERS[email] = user
-        save_users_to_csv(STATIC_USERS)
-
-def update_user_session(email, session_id):
-    user = get_user(email)
+def get_user(db: Session, email: str):
+    user = db.query(User).filter(User.email == email).first()
     if user:
-        user["session_id"] = session_id
-        save_users_to_csv(STATIC_USERS)
+        perms = user.permissions
+        if isinstance(perms, str):
+            try:
+                perms = json.loads(perms)
+            except:
+                perms = []
+        return {
+            "email": user.email,
+            "hashed_password": user.hashed_password,
+            "role": user.role,
+            "full_name": user.full_name,
+            "permissions": perms,
+            "session_id": user.session_id
+        }
+    return None
 
-def verify_session(email, session_id):
-    user = get_user(email)
-    return user.get("session_id") == session_id if user else False
+def add_user(db: Session, user_data: dict):
+    new_user = User(
+        email=user_data["email"],
+        hashed_password=user_data["hashed_password"],
+        role=user_data["role"],
+        full_name=user_data["full_name"],
+        permissions=json.dumps(user_data.get("permissions", [])),
+        session_id=user_data.get("session_id", "")
+    )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return new_user
 
-def authenticate(email, password):
-    user = get_user(email)
+def update_user_session(db: Session, email: str, session_id: str):
+    user = db.query(User).filter(User.email == email).first()
+    if user:
+        user.session_id = session_id
+        db.commit()
+
+def verify_session(db: Session, email: str, session_id: str):
+    user = db.query(User).filter(User.email == email).first()
+    return user.session_id == session_id if user else False
+
+def authenticate(db: Session, email: str, password: str):
+    user = get_user(db, email)
     if not user or not user.get("hashed_password"):
         return None
     if verify_password(password, user["hashed_password"]):
         return user
     return None
 
-def change_password(email, current_password, new_password):
-    user = get_user(email)
-    if user and authenticate(email, current_password):
-        user["hashed_password"] = hash_password(new_password)
-        save_users_to_csv(STATIC_USERS)
+def change_password(db: Session, email: str, current_password: str, new_password: str):
+    user = db.query(User).filter(User.email == email).first()
+    if user and authenticate(db, email, current_password):
+        user.hashed_password = hash_password(new_password)
+        db.commit()
         return True
     return False
 
-def get_all_users():
-    return list(STATIC_USERS.values())
+def get_all_users(db: Session):
+    users = db.query(User).all()
+    res = []
+    for user in users:
+        perms = user.permissions
+        if isinstance(perms, str):
+            try:
+                perms = json.loads(perms)
+            except:
+                perms = []
+        res.append({
+            "email": user.email,
+            "hashed_password": user.hashed_password,
+            "role": user.role,
+            "full_name": user.full_name,
+            "permissions": perms,
+            "session_id": user.session_id
+        })
+    return res
 
-def delete_user(email):
-    if email in STATIC_USERS:
-        STATIC_USERS.pop(email)
-        save_users_to_csv(STATIC_USERS)
+def delete_user(db: Session, email: str):
+    user = db.query(User).filter(User.email == email).first()
+    if user:
+        db.delete(user)
+        db.commit()
         return True
     return False

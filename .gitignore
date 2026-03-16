@@ -7,3 +7,6 @@ __pycache__/
 *.pyc
 .env
 .env.local
+*.db
+*.log
+static/uploads/

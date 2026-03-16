@@ -71,9 +71,12 @@ app.include_router(exams_router)       # /exams
 @app.on_event("startup")
 async def start_background_cleanup():
     async def cleanup_loop():
+        from app.database import SessionLocal
         while True:
             try:
-                check_and_delete_expired_exams()
+                db = SessionLocal()
+                check_and_delete_expired_exams(db)
+                db.close()
             except Exception as e:
                 print(f"ERROR in background cleanup: {e}")
             await asyncio.sleep(60)

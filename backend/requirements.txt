@@ -13,3 +13,6 @@ anyio
 typing_extensions
 tqdm
 colorama
+
+sqlalchemy
+psycopg2-binary

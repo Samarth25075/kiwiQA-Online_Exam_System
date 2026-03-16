@@ -5,6 +5,8 @@ from app.auth.router import get_current_admin, check_permission
 from app.auth.schemas import AdminUser
 from app.exams.schemas import ExamCreate, ExamResponse, ExamFinalize, Question, ExamStatsResponse
 from app.exams.service import save_exam, generate_questions, get_all_exams, delete_exam, get_exams_with_candidate_counts
+from sqlalchemy.orm import Session
+from app.database import get_db
 
 router = APIRouter(prefix="/exams", tags=["exams"])
 
@@ -19,28 +21,30 @@ async def preview_exam(
 @router.post("", response_model=ExamResponse)
 async def add_exam(
     exam_in: ExamFinalize,
-    current_admin: Annotated[AdminUser, Depends(check_permission("generate exam"))]
+    current_admin: Annotated[AdminUser, Depends(check_permission("generate exam"))],
+    db: Session = Depends(get_db)
 ):
     """Finalize and save the exam."""
-    return save_exam(exam_in)
+    return save_exam(db, exam_in)
 
 @router.get("", response_model=List[ExamResponse])
-async def read_exams(current_admin: Annotated[AdminUser, Depends(check_permission("manage exam"))]):
+async def read_exams(current_admin: Annotated[AdminUser, Depends(check_permission("manage exam"))], db: Session = Depends(get_db)):
     """List all generated exams."""
-    return get_all_exams()
+    return get_all_exams(db)
 
 @router.get("/stats", response_model=List[ExamStatsResponse])
-async def read_exam_stats(current_admin: Annotated[AdminUser, Depends(check_permission("manage exam"))]):
+async def read_exam_stats(current_admin: Annotated[AdminUser, Depends(check_permission("manage exam"))], db: Session = Depends(get_db)):
     """Returns each exam along with the count of candidates assigned to it."""
-    return get_exams_with_candidate_counts()
+    return get_exams_with_candidate_counts(db)
 
 @router.delete("/{exam_id}")
 async def remove_exam(
     exam_id: str,
-    current_admin: Annotated[AdminUser, Depends(check_permission("manage exam"))]
+    current_admin: Annotated[AdminUser, Depends(check_permission("manage exam"))],
+    db: Session = Depends(get_db)
 ):
     """Delete an exam."""
-    success = delete_exam(exam_id)
+    success = delete_exam(db, exam_id)
     if not success:
         raise HTTPException(status_code=404, detail="Exam not found")
     return {"message": "Exam deleted"}
@@ -56,18 +60,19 @@ async def update_exam_expiry(
     exam_id: str,
     payload: ExpiryUpdate,
     background_tasks: BackgroundTasks,
-    current_admin: Annotated[AdminUser, Depends(check_permission("manage exam"))]
+    current_admin: Annotated[AdminUser, Depends(check_permission("manage exam"))],
+    db: Session = Depends(get_db)
 ):
     """Set the public link expiry for an exam."""
     # Only update fields that were actually provided in the JSON body
     update_data = payload.dict(exclude_unset=True)
     
     from app.exams.service import update_exam, check_and_delete_expired_exams
-    success = update_exam(exam_id, update_data)
+    success = update_exam(db, exam_id, update_data)
     if not success:
         raise HTTPException(status_code=404, detail="Exam not found")
     
     # Run cleanup immediately
-    check_and_delete_expired_exams()
+    check_and_delete_expired_exams(db)
     
     return {"message": "Expiry and/or deletion schedule updated"}
