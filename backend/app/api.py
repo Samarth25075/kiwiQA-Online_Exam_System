@@ -69,7 +69,36 @@ app.include_router(exams_router)       # /exams
 
 # ── Background Cleanup ────────────────────────
 @app.on_event("startup")
-async def start_background_cleanup():
+async def startup_event():
+    # 1. Ensure tables exist (Critical for Render/Postgres)
+    from app.database import engine, Base, SessionLocal
+    import app.models # Import models to register them with Base
+    Base.metadata.create_all(bind=engine)
+    print("INFO: Database tables verified/created.")
+
+    # 2. Check and Create Default Admin if 0 users
+    db = SessionLocal()
+    try:
+        from app.models import User
+        if db.query(User).count() == 0:
+            from app.auth.service import hash_password
+            import json
+            admin_user = User(
+                email="admin@examportal.com",
+                hashed_password=hash_password("Admin@123"), # Standard default
+                role="admin",
+                full_name="System Admin",
+                permissions=json.dumps(["manage exam", "generate exam", "manage candidates", "manage users"])
+            )
+            db.add(admin_user)
+            db.commit()
+            print("INFO: Created default admin user: admin@examportal.com / Admin@123")
+    except Exception as e:
+        print(f"ERROR creating default admin: {e}")
+    finally:
+        db.close()
+
+    # 3. Start background cleanup loop
     async def cleanup_loop():
         from app.database import SessionLocal
         while True:
