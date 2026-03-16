@@ -108,7 +108,7 @@ export default function ManageCandidates() {
         try {
             const [candRes, examRes] = await Promise.all([
                 fetch(`${API_BASE_URL}/candidates`, { headers: { "Authorization": `Bearer ${token}` } }),
-                fetch(`${API_BASE_URL}/exams/stats`, { headers: { "Authorization": `Bearer ${token}` } })
+                fetch(`${API_BASE_URL}/exams`, { headers: { "Authorization": `Bearer ${token}` } })
             ]);
             if (candRes.ok) setCandidates(await candRes.json());
             if (examRes.ok) setExams(await examRes.json());
@@ -176,7 +176,24 @@ export default function ManageCandidates() {
         setPopup({ isOpen: true, type: 'alert', title: 'Copied', message: 'Candidate test link copied to clipboard.', onConfirm: () => setPopup(null) });
     };
 
-    if (loading) return null;
+    if (loading) {
+        return (
+            <AdminLayout>
+                <div style={{ 
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', 
+                    height: '60vh', gap: '12px' 
+                }}>
+                    <div className="mc-spinner" style={{
+                        width: '40px', height: '40px', border: '4px solid var(--border)',
+                        borderTop: '4px solid var(--primary)', borderRadius: '50%',
+                        animation: 'spin 1s linear infinite'
+                    }}></div>
+                    <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-muted)' }}>Loading Candidates...</div>
+                </div>
+                <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+            </AdminLayout>
+        );
+    }
 
     // Memoized grouping of candidates by email
     const groupedCandidates = useMemo(() => {
