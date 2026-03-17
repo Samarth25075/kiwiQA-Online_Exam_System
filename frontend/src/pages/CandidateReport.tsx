@@ -182,23 +182,31 @@ export default function CandidateReport() {
 
                 <div className="section-card">
                     <h2 className="section-title">🛡️ Proctoring Snapshots</h2>
-                    <div className="proctor-grid">
-                        <div className="proctor-frame">
-                            {proctoring.start ? <img src={proctoring.start} className="proctor-img" /> : <div style={{ display: 'grid', placeItems: 'center', height: '100%', color: 'var(--text-muted)' }}>No Image</div>}
-                            <div className="proctor-label">START OF EXAM</div>
+                    {(!proctoring.start && !proctoring.mid && !proctoring.end) ? (
+                        <div style={{ padding: '40px', textAlign: 'center', background: 'var(--bg-neutral)', borderRadius: '12px', border: '1px dashed var(--border)' }}>
+                            <p style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Proctoring data has been cleaned up for this candidate.</p>
                         </div>
-                        <div className="proctor-frame">
-                            {proctoring.mid ? <img src={proctoring.mid} className="proctor-img" /> : <div style={{ display: 'grid', placeItems: 'center', height: '100%', color: 'var(--text-muted)' }}>No Image</div>}
-                            <div className="proctor-label">MIDDLE OF EXAM</div>
-                        </div>
-                        <div className="proctor-frame">
-                            {proctoring.end ? <img src={proctoring.end} className="proctor-img" /> : <div style={{ display: 'grid', placeItems: 'center', height: '100%', color: 'var(--text-muted)' }}>No Image</div>}
-                            <div className="proctor-label">END OF EXAM</div>
-                        </div>
-                    </div>
-                    <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 12, fontStyle: 'italic' }}>
-                        * Snapshots are taken automatically at key points to verify candidate identity and environment.
-                    </p>
+                    ) : (
+                        <>
+                            <div className="proctor-grid">
+                                <div className="proctor-frame">
+                                    {proctoring.start ? <img src={proctoring.start} className="proctor-img" alt="Start" /> : <div style={{ display: 'grid', placeItems: 'center', height: '100%', color: 'var(--text-muted)' }}>No Image</div>}
+                                    <div className="proctor-label">START OF EXAM</div>
+                                </div>
+                                <div className="proctor-frame">
+                                    {proctoring.mid ? <img src={proctoring.mid} className="proctor-img" alt="Mid" /> : <div style={{ display: 'grid', placeItems: 'center', height: '100%', color: 'var(--text-muted)' }}>No Image</div>}
+                                    <div className="proctor-label">MIDDLE OF EXAM</div>
+                                </div>
+                                <div className="proctor-frame">
+                                    {proctoring.end ? <img src={proctoring.end} className="proctor-img" alt="End" /> : <div style={{ display: 'grid', placeItems: 'center', height: '100%', color: 'var(--text-muted)' }}>No Image</div>}
+                                    <div className="proctor-label">END OF EXAM</div>
+                                </div>
+                            </div>
+                            <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 12, fontStyle: 'italic' }}>
+                                * Snapshots are taken automatically at key points to verify candidate identity and environment.
+                            </p>
+                        </>
+                    )}
                 </div>
 
                 <div className="section-card">
@@ -241,22 +249,46 @@ export default function CandidateReport() {
                     })}
                 </div>
 
-                <div style={{ textAlign: 'center', padding: '24px 0 48px' }}>
-                    <button 
-                        className="test-btn secondary" 
-                        onClick={() => window.print()} 
-                        style={{ padding: '12px 32px' }}
-                    >
-                         Print PDF Report
-                    </button>
+                <div style={{ textAlign: 'center', padding: '24px 0 48px' }} className="no-print">
                     <button 
                         className="test-btn" 
+                        onClick={async () => {
+                            window.print();
+                            // Optional: Small delay to ensure print dialog opened
+                            setTimeout(async () => {
+                                if (window.confirm("Report downloaded? Would you like to permanently delete the proctoring images from the server now to save space and ensure privacy?")) {
+                                    const token = localStorage.getItem("access_token");
+                                    try {
+                                        const res = await fetch(`${API_BASE_URL}/candidates/${candidateId}/cleanup-screenshots`, {
+                                            method: "POST",
+                                            headers: { "Authorization": `Bearer ${token}` }
+                                        });
+                                        if (res.ok) {
+                                            setReport(prev => prev ? { ...prev, proctoring: { start: null, mid: null, end: null } } : null);
+                                        }
+                                    } catch (err) { console.error(err); }
+                                }
+                            }, 500);
+                        }} 
+                        style={{ padding: '12px 32px', background: 'var(--secondary)' }}
+                    >
+                         Download & Cleanup
+                    </button>
+                    <button 
+                        className="test-btn secondary" 
                         onClick={() => navigate("/manage-candidates")} 
                         style={{ marginLeft: 16, padding: '12px 32px' }}
                     >
                          Back to Candidates
                     </button>
                 </div>
+                <style>{`
+                    @media print {
+                        .no-print, .admin-sidebar, .admin-header { display: none !important; }
+                        .report-container { padding: 0; margin: 0; max-width: 100%; }
+                        body { background: white !important; }
+                    }
+                `}</style>
             </div>
         </AdminLayout>
     );

@@ -20,7 +20,7 @@ from app.candidates.schemas import (
 from app.candidates.service import (
     get_all_candidates, create_candidate, assign_exam_to_candidate, 
     get_candidate_by_token, update_candidate_status, delete_candidate, update_candidate_details,
-    update_candidate_result, reset_candidate_for_retest
+    update_candidate_result, reset_candidate_for_retest, cleanup_candidate_screenshots
 )
 from app.exams.service import get_exam_by_id
 
@@ -166,6 +166,18 @@ async def submit_test(token: str, result: CandidateResult, background_tasks: Bac
         background_tasks.add_task(send_screenshot_email, candidate['email'], os.path.join(screenshots_dir, f"screenshot_{token}_end.png"), candidate['name'])
 
     return {"message": "Results submitted successfully"}
+
+@router.post("/{candidate_id}/cleanup-screenshots")
+async def cleanup_screenshots(
+    candidate_id: str,
+    current_admin: Annotated[AdminUser, Depends(check_permission("manage candidates"))],
+    db: Session = Depends(get_db)
+):
+    """Delete proctoring images from disk and clear DB references search for the candidate."""
+    success = cleanup_candidate_screenshots(db, candidate_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Candidate not found")
+    return {"message": "Proctoring data cleaned up"}
 
 @router.get("/{candidate_id}/report")
 async def get_candidate_report(

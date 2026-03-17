@@ -119,12 +119,23 @@ def update_candidate_status(db: Session, token: str, status: str) -> bool:
 
 def delete_candidate(db: Session, candidate_id: str) -> bool:
     from app.core.redis import redis_client
+    import os
     try:
         cand_id_int = int(candidate_id)
     except (ValueError, TypeError):
         return False
     c = db.query(Candidate).filter(Candidate.id == cand_id_int).first()
     if c:
+        # Delete screenshots from disk if they exist
+        for attr in ["screenshot_start", "screenshot_mid", "screenshot_end"]:
+            url = getattr(c, attr)
+            if url and "/static/uploads/screenshots/" in url:
+                file_name = url.split("/")[-1]
+                file_path = os.path.join("static", "uploads", "screenshots", file_name)
+                if os.path.exists(file_path):
+                    try: os.remove(file_path)
+                    except: pass
+        
         db.delete(c)
         db.commit()
         if redis_client:
@@ -164,6 +175,32 @@ def update_candidate_result(db: Session, token: str, score: int, total: int, vio
             c.screenshot_start = screenshots.get("start")
             c.screenshot_mid = screenshots.get("mid")
             c.screenshot_end = screenshots.get("end")
+            
+        db.commit()
+        if redis_client:
+            redis_client.delete("all_candidates_list", "exams_with_counts")
+        return True
+    return False
+
+def cleanup_candidate_screenshots(db: Session, candidate_id: str) -> bool:
+    from app.core.redis import redis_client
+    import os
+    try:
+        cand_id_int = int(candidate_id)
+    except (ValueError, TypeError):
+        return False
+    c = db.query(Candidate).filter(Candidate.id == cand_id_int).first()
+    if c:
+        # Delete files from disk
+        for attr in ["screenshot_start", "screenshot_mid", "screenshot_end"]:
+            url = getattr(c, attr)
+            if url and "/static/uploads/screenshots/" in url:
+                file_name = url.split("/")[-1]
+                file_path = os.path.join("static", "uploads", "screenshots", file_name)
+                if os.path.exists(file_path):
+                    try: os.remove(file_path)
+                    except: pass
+            setattr(c, attr, None) # Clear in DB
             
         db.commit()
         if redis_client:
