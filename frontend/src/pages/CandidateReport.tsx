@@ -207,7 +207,7 @@ export default function CandidateReport() {
                         const isCorrect = q.selected_index !== null && q.options[q.selected_index]?.is_correct;
                         return (
                             <div key={idx} className={`q-item ${isCorrect ? 'correct' : 'incorrect'}`}>
-                                <div style={{ display: 'flex', justifyBetween: 'space-between', marginBottom: 8 }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                                     <span style={{ fontSize: 10, fontWeight: 900, color: 'var(--primary)', textTransform: 'uppercase' }}>Question {idx + 1} • {q.category}</span>
                                     {q.selected_index === null && <span style={{ fontSize: 10, color: '#e11d48', fontWeight: 700, marginLeft: 'auto' }}>NOT ANSWERED</span>}
                                 </div>
