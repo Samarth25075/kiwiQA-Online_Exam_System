@@ -121,35 +121,117 @@ def send_invitation_email(receiver_email: str, candidate_name: str, test_link: s
 
 @router.post("/test/{token}/submit")
 async def submit_test(token: str, result: CandidateResult, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
-    """Submit test results for a candidate."""
-    success = update_candidate_result(db, token, result.score, result.total_questions, result.violations)
+    """Submit test results for a candidate with proctoring snapshots and answers."""
+    # Process screenshots (start, mid, end)
+    screenshots = {}
+    screenshots_dir = os.path.join("static", "uploads", "screenshots")
+    os.makedirs(screenshots_dir, exist_ok=True)
+
+    for shot_type in ["start", "mid", "end"]:
+        shot_data = getattr(result, f"screenshot_{shot_type}")
+        if shot_data:
+            try:
+                # Fix base64 padding/header if present
+                header, encoded = shot_data.split(",", 1) if "," in shot_data else ("", shot_data)
+                file_name = f"screenshot_{token}_{shot_type}.png"
+                file_path = os.path.join(screenshots_dir, file_name)
+                with open(file_path, "wb") as fh:
+                    fh.write(base64.b64decode(encoded))
+                screenshots[shot_type] = f"{BACKEND_URL}/static/uploads/screenshots/{file_name}"
+            except Exception as e:
+                print(f"Error saving {shot_type} screenshot: {e}")
+
+    # Fallback for legacy screenshot field
+    if not result.screenshot_end and result.screenshot:
+        try:
+             header, encoded = result.screenshot.split(",", 1) if "," in result.screenshot else ("", result.screenshot)
+             file_name = f"screenshot_{token}_end.png"
+             file_path = os.path.join(screenshots_dir, file_name)
+             with open(file_path, "wb") as fh:
+                 fh.write(base64.b64decode(encoded))
+             screenshots["end"] = f"{BACKEND_URL}/static/uploads/screenshots/{file_name}"
+        except: pass
+
+    success = update_candidate_result(
+        db, token, result.score, result.total_questions, result.violations, 
+        answers=result.answers, screenshots=screenshots
+    )
+    
     if not success:
         raise HTTPException(status_code=404, detail="Candidate not found")
         
     candidate = get_candidate_by_token(db, token)
-    
-    # Process screenshot if provided
-    if result.screenshot and candidate:
-        try:
-            # Create screenshots directory
-            screenshots_dir = os.path.join("static", "uploads", "screenshots")
-            os.makedirs(screenshots_dir, exist_ok=True)
-            
-            # Use candidate ID or token for filename
-            file_name = f"screenshot_{token}.png"
-            file_path = os.path.join(screenshots_dir, file_name)
-            
-            # Fix base64 padding/header if present
-            header, encoded = result.screenshot.split(",", 1) if "," in result.screenshot else ("", result.screenshot)
-            with open(file_path, "wb") as fh:
-                fh.write(base64.b64decode(encoded))
-            
-            # Enqueue email task
-            background_tasks.add_task(send_screenshot_email, candidate['email'], file_path, candidate['name'])
-        except Exception as e:
-            print(f"Error processing screenshot: {e}")
+    # Use background task for emails
+    if screenshots.get("end") and candidate:
+        background_tasks.add_task(send_screenshot_email, candidate['email'], os.path.join(screenshots_dir, f"screenshot_{token}_end.png"), candidate['name'])
 
-    return {"message": "Results submitted"}
+    return {"message": "Results submitted successfully"}
+
+@router.get("/{candidate_id}/report")
+async def get_candidate_report(
+    candidate_id: str,
+    current_admin: Annotated[AdminUser, Depends(check_permission("manage candidates"))],
+    db: Session = Depends(get_db)
+):
+    """Generate a detailed report for a candidate including proctoring and performance stats."""
+    from app.candidates.service import get_all_candidates
+    candidates = get_all_candidates(db)
+    candidate = next((c for c in candidates if str(c["id"]) == str(candidate_id)), None)
+    
+    if not candidate:
+        raise HTTPException(status_code=404, detail="Candidate not found")
+        
+    if candidate.get("status") != "Completed":
+         raise HTTPException(status_code=400, detail="Candidate has not completed the exam yet.")
+
+    exam = get_exam_by_id(db, candidate["assigned_exam_id"])
+    if not exam:
+        raise HTTPException(status_code=404, detail="Exam data not found")
+
+    # performance stats by category
+    stats = {} # {category: {correct: 0, total: 0}}
+    questions = exam.get("questions", [])
+    answers = candidate.get("answers", []) # [{question_index, selected_option_index}]
+
+    # Build a lookup for answers
+    ans_lookup = {a.get("question_index"): a.get("selected_option_index") for a in answers if a}
+
+    for idx, q in enumerate(questions):
+        cat = q.get("category", "General")
+        if cat not in stats:
+            stats[cat] = {"correct": 0, "total": 0}
+        
+        stats[cat]["total"] += 1
+        
+        selected = ans_lookup.get(idx)
+        if selected is not None:
+             # Check if correct
+             options = q.get("options", [])
+             if 0 <= selected < len(options) and options[selected].get("is_correct"):
+                 stats[cat]["correct"] += 1
+
+    # Format questions for the report with candidate selection
+    report_questions = []
+    for idx, q in enumerate(questions):
+        report_questions.append({
+            "text": q["text"],
+            "options": q["options"],
+            "selected_index": ans_lookup.get(idx),
+            "category": q.get("category", "General"),
+            "explanation": q.get("explanation")
+        })
+
+    return {
+        "candidate": candidate,
+        "exam_title": exam["title"],
+        "stats": stats,
+        "questions": report_questions,
+        "proctoring": {
+            "start": candidate.get("screenshot_start"),
+            "mid": candidate.get("screenshot_mid"),
+            "end": candidate.get("screenshot_end")
+        }
+    }
 
 @router.post("/test/{token}/resend-results")
 async def resend_test_results(token: str, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
@@ -282,9 +364,9 @@ async def get_test(token: str, device_id: str = None, db: Session = Depends(get_
 OTP_STORE: Dict[str, dict] = {}
 
 def get_admin_otp():
-    """Generate a 6-digit OTP that remains valid for a 10-minute window."""
-    # 10 minute window (600 seconds)
-    window = int(time.time() / 600)
+    """Generate a 6-digit OTP that remains valid for a 80-second window."""
+    # 80 second window
+    window = int(time.time() / 80)
     secret = os.environ.get("ADMIN_OTP_SECRET", "kiwi-admin-portal-otp-default-secret")
     hash_input = f"{secret}-{window}".encode()
     hash_hex = hashlib.sha256(hash_input).hexdigest()
@@ -294,7 +376,7 @@ def get_admin_otp():
 @router.get("/current-admin-otp")
 async def get_current_admin_otp(current_admin: Annotated[AdminUser, Depends(get_current_admin)]):
     """Return the current Admin OTP rotation code."""
-    return {"admin_otp": get_admin_otp(), "expires_in": 600 - (int(time.time()) % 600)}
+    return {"admin_otp": get_admin_otp(), "expires_in": 80 - (int(time.time()) % 80)}
 
 @router.get("/debug-smtp")
 async def debug_smtp(current_admin: Annotated[AdminUser, Depends(get_current_admin)]):

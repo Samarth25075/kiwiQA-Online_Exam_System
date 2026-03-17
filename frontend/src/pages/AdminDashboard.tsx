@@ -151,6 +151,7 @@ export default function AdminDashboard() {
     const [candidatesList, setCandidatesList] = useState<Candidate[]>([]);
     const [showExamPopup, setShowExamPopup] = useState<boolean>(false);
     const [adminOtp, setAdminOtp] = useState<string | null>(null);
+    const [otpExpiresIn, setOtpExpiresIn] = useState<number>(80);
     const [copyingId, setCopyingId] = useState<string | null>(null);
     const [now, setNow] = useState(new Date());
     const navigate = useNavigate();
@@ -267,11 +268,26 @@ export default function AdminDashboard() {
             if (res.ok) {
                 const data = await res.json();
                 setAdminOtp(data.admin_otp);
+                setOtpExpiresIn(data.expires_in || 80);
             }
         } catch (err) {
             console.error("OTP fetch failed:", err);
         }
     };
+
+    // OTP Countdown effect
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setOtpExpiresIn(prev => {
+                if (prev <= 1) {
+                    fetchAdminOtp();
+                    return 80;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+        return () => clearInterval(timer);
+    }, []);
 
     // ─── Actions ──────────────────────────────────────────────────────────────────
     const copyLink = (link: string, id: string) => {
@@ -1218,7 +1234,7 @@ export default function AdminDashboard() {
                         <div className="stat-value" style={{ color: "var(--success)" }}>{stats.live}</div>
                     </div>
 
-                    <div 
+                    <div
                         className={`stat-card ${!hasPermission("manage exam") ? "locked" : ""}`}
                         style={{ cursor: hasPermission("manage exam") ? "pointer" : "default" }}
                         onClick={() => {
@@ -1257,7 +1273,7 @@ export default function AdminDashboard() {
                         </div>
                         <div className="stat-hint">
                             <Icons.Clock size={12} />
-                            Rotates every 10 minutes
+                            Rotates in {otpExpiresIn}s
                         </div>
                     </div>
                 </div>

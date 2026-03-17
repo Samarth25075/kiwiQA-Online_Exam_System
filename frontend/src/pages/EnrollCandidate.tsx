@@ -161,24 +161,24 @@ export default function EnrollCandidate() {
             const deviceId = getOrCreateDeviceId();
             const res = await fetch(
                 `${API_BASE_URL}/candidates/enroll/${examId}/request-otp?device_id=${deviceId}`,
-                { 
-                    method: "POST", 
-                    headers: { "Content-Type": "application/json" }, 
-                    body: JSON.stringify({ 
-                        name, 
-                        email, 
-                        phone_number: phone, 
-                        dob, 
-                        gender, 
-                        address, 
-                        profile_photo: profilePhoto 
-                    }) 
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        name,
+                        email,
+                        phone_number: phone,
+                        dob,
+                        gender,
+                        address,
+                        profile_photo: profilePhoto
+                    })
                 }
             );
             const data = await res.json();
             if (res.ok) {
                 setStep("otp");
-                setResendTimer(60);
+                setResendTimer(20);
             } else {
                 setError(data.detail || "Failed to send OTP. Please try again.");
             }
@@ -197,20 +197,20 @@ export default function EnrollCandidate() {
             const deviceId = getOrCreateDeviceId();
             const res = await fetch(
                 `${API_BASE_URL}/candidates/enroll/${examId}/verify-otp`,
-                { 
-                    method: "POST", 
-                    headers: { "Content-Type": "application/json" }, 
-                    body: JSON.stringify({ 
-                        name, 
-                        email, 
-                        otp, 
-                        phone_number: phone, 
-                        dob, 
-                        gender, 
-                        address, 
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        name,
+                        email,
+                        otp,
+                        phone_number: phone,
+                        dob,
+                        gender,
+                        address,
                         profile_photo: profilePhoto,
-                        device_id: deviceId 
-                    }) 
+                        device_id: deviceId
+                    })
                 }
             );
             const data = await res.json();
@@ -530,8 +530,8 @@ export default function EnrollCandidate() {
         }
       `}</style>
 
-            <button 
-                className="enroll-theme-btn" 
+            <button
+                className="enroll-theme-btn"
                 onClick={() => setTheme(t => t === 'dark' ? 'default' : 'dark')}
                 title="Toggle Theme"
             >
@@ -557,11 +557,11 @@ export default function EnrollCandidate() {
                             {/* Profile Photo Upload */}
                             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
                                 <div style={{ position: 'relative' }}>
-                                    <div style={{ 
-                                        width: 100, 
-                                        height: 100, 
-                                        borderRadius: '50%', 
-                                        background: 'var(--bg-neutral)', 
+                                    <div style={{
+                                        width: 100,
+                                        height: 100,
+                                        borderRadius: '50%',
+                                        background: 'var(--bg-neutral)',
                                         border: '2px dashed var(--line)',
                                         display: 'flex',
                                         alignItems: 'center',
@@ -576,7 +576,7 @@ export default function EnrollCandidate() {
                                         )}
                                     </div>
                                     {profilePhoto && (
-                                        <button 
+                                        <button
                                             type="button"
                                             onClick={(e) => { e.stopPropagation(); setProfilePhoto(null); }}
                                             style={{ position: 'absolute', top: 0, right: 0, background: 'var(--danger)', color: 'white', border: 'none', borderRadius: '50%', width: 20, height: 20, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
@@ -584,12 +584,12 @@ export default function EnrollCandidate() {
                                             <Icons.X />
                                         </button>
                                     )}
-                                    <input 
+                                    <input
                                         id="profile-upload"
-                                        type="file" 
-                                        accept="image/*" 
-                                        onChange={handleImageUpload} 
-                                        style={{ display: 'none' }} 
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleImageUpload}
+                                        style={{ display: 'none' }}
                                     />
                                     <p style={{ textAlign: 'center', fontSize: 10, marginTop: 4, color: 'var(--ink-3)' }}>Profile Photo</p>
                                 </div>
@@ -658,8 +658,8 @@ export default function EnrollCandidate() {
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                                 <div className="form-field">
                                     <label className="form-label">Gender</label>
-                                    <select 
-                                        className="form-input" 
+                                    <select
+                                        className="form-input"
                                         style={{ paddingLeft: 14 }}
                                         value={gender}
                                         onChange={e => setGender(e.target.value)}

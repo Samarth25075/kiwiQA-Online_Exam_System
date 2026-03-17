@@ -47,7 +47,11 @@ class CandidateResult(BaseModel):
     score: int
     total_questions: int
     violations: int = 0
-    screenshot: Optional[str] = None
+    answers: Optional[list] = None # List of {question_index, selected_option_index}
+    screenshot: Optional[str] = None # Legacy
+    screenshot_start: Optional[str] = None
+    screenshot_mid: Optional[str] = None
+    screenshot_end: Optional[str] = None
 
 class CandidateResponse(Candidate):
     test_link: str

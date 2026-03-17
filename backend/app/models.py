@@ -59,3 +59,9 @@ class Candidate(Base):
     total_questions = Column(Integer, nullable=True)
     violations = Column(Integer, default=0)
     device_id = Column(String)
+    
+    # Detailed result data
+    answers = Column(JSON, nullable=True)  # Store list of {question_index, selected_option_index}
+    screenshot_start = Column(Text, nullable=True)
+    screenshot_mid = Column(Text, nullable=True)
+    screenshot_end = Column(Text, nullable=True)

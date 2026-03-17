@@ -11,6 +11,7 @@ interface Option {
     text: string;
     is_correct: boolean;
     image?: string;
+    originalIndex?: number;
 }
 
 interface Question {
@@ -18,6 +19,7 @@ interface Question {
     options: Option[];
     image?: string;
     image_required?: boolean;
+    originalIndex?: number;
 }
 
 interface Exam {
@@ -710,17 +712,18 @@ interface SecurityPopupProps {
     violations: number;
     maxViolations: number;
     isTerminal: boolean;
+    isWarning?: boolean;
     onDismiss: () => void;
 }
 
-function SecurityPopup({ message, violations, maxViolations, isTerminal, onDismiss }: SecurityPopupProps) {
+function SecurityPopup({ message, violations, maxViolations, isTerminal, isWarning, onDismiss }: SecurityPopupProps) {
     return (
         <div className="sec-overlay" onClick={(e) => { if (e.target === e.currentTarget && !isTerminal) onDismiss(); }}>
             <div className="sec-modal">
-                <div className="sec-icon">{isTerminal ? '🚫' : '⚠️'}</div>
-                <div className="sec-label">{isTerminal ? 'Exam Terminated' : 'Security Violation'}</div>
+                <div className="sec-icon">{isTerminal ? '🚫' : (isWarning ? '💡' : '⚠️')}</div>
+                <div className="sec-label">{isTerminal ? 'Exam Terminated' : (isWarning ? 'Security Warning' : 'Security Violation')}</div>
                 <h2 className="sec-heading">
-                    {isTerminal ? 'Tab Switch Blocked & Exam Ended' : 'Tab Switch Blocked!'}
+                    {isTerminal ? 'Tab Switch Blocked & Exam Ended' : (isWarning ? 'Attention Required' : 'Tab Switch Blocked!')}
                 </h2>
                 <p className="sec-body">{message}</p>
 
@@ -752,6 +755,10 @@ export default function TakeTest() {
     const { token } = useParams();
     const [testData, setTestData] = useState<TestData | null>(null);
     const [shuffledQuestions, setShuffledQuestions] = useState<Question[]>([]);
+
+    const needsVideo = !!(testData?.exam.proctoring_enabled && (testData.exam.proctoring_type === 'video' || testData.exam.proctoring_type === 'both'));
+    const needsScreen = !!(testData?.exam.proctoring_enabled && (testData.exam.proctoring_type === 'screen' || testData.exam.proctoring_type === 'both'));
+
     // ─── Theme ─────────────────────────────────────────────────────────────
     useEffect(() => {
       const saved = localStorage.getItem("kiwi-theme") || "default";
@@ -773,15 +780,18 @@ export default function TakeTest() {
     const [finished, setFinished] = useState(false);
     const [timeLeft, setTimeLeft] = useState<number | null>(null);
     const [violations, setViolations] = useState(0);
-    const [warningPopup, setWarningPopup] = useState<{ message: string; isTerminal: boolean } | null>(null);
+    const [warningPopup, setWarningPopup] = useState<{ message: string; isTerminal: boolean; isWarning?: boolean } | null>(null);
     const [popup, setPopup] = useState<{ isOpen: boolean; type: PopupType; title?: string; message: string; onConfirm: () => void; onCancel?: () => void; confirmText?: string; } | null>(null);
     const [declared, setDeclared] = useState(false);
     const [checks, setChecks] = useState({ c1: false, c2: false, c3: false, c4: false });
     const [stream, setStream] = useState<MediaStream | null>(null);
-    const [gazeStatus, setGazeStatus] = useState<'ok' | 'warning' | 'away' | 'noface'>('ok');
+    const [gazeStatus, setGazeStatus] = useState<'ok' | 'warning' | 'away' | 'noface' | 'multiface'>('ok');
     const [modelsLoaded, setModelsLoaded] = useState(false);
     const [closeCountdown, setCloseCountdown] = useState<number | null>(null);
     const [resendTimer, setResendTimer] = useState(0);
+    const [snapshotStart, setSnapshotStart] = useState<string | null>(null);
+    const [snapshotMid, setSnapshotMid] = useState<string | null>(null);
+    const midCapturedRef = useRef(false);
 
     // ── Refs ──────────────────────────────────────────────────────────────
     const videoRef = useRef<HTMLVideoElement>(null);
@@ -797,6 +807,7 @@ export default function TakeTest() {
     const submittedRef = useRef(false);
     // FIX #8: Prevent countdown from starting twice
     const countdownStartedRef = useRef(false);
+    const softWarnedRef = useRef<{ type: 'away' | 'noface' | 'multiface' | null, timestamp: number }>({ type: null, timestamp: 0 });
 
     const allChecked = checks.c1 && checks.c2 && checks.c3 && checks.c4;
     const toggleCheck = (key: keyof typeof checks) =>
@@ -835,9 +846,6 @@ export default function TakeTest() {
     useEffect(() => {
         if (!testData) return;
 
-        const needsVideo = testData.exam.proctoring_enabled &&
-            (testData.exam.proctoring_type === 'video' || testData.exam.proctoring_type === 'both');
-
         if (!needsVideo) {
             setModelsLoaded(true);
             return;
@@ -852,24 +860,24 @@ export default function TakeTest() {
             console.log('Face-api models loaded.');
         }).catch(err => console.error('Face-api model load error:', err));
         // FIX: depends on testData so it actually runs after testData is set
-    }, [testData]);
+    }, [testData, needsVideo]);
 
     // FIX #1: Request camera AFTER testData is available so the condition evaluates correctly
     useEffect(() => {
         if (!testData) return;
 
-        const needsVideo = testData.exam.proctoring_enabled &&
-            (testData.exam.proctoring_type === 'video' || testData.exam.proctoring_type === 'both');
-
         if (!needsVideo) return;
 
         navigator.mediaDevices.getUserMedia({ video: true, audio: false })
-            .then(s => setStream(s))
+            .then(s => {
+                console.log("Camera stream obtained successfully");
+                setStream(s);
+            })
             .catch(err => {
                 console.warn("Camera access denied or unavailable", err);
             });
         // Depend on testData so this runs once testData arrives
-    }, [testData]);
+    }, [testData, needsVideo]);
 
     // Cleanup camera when finished
     useEffect(() => {
@@ -881,11 +889,11 @@ export default function TakeTest() {
 
     // FIX #7: Add [stream] dependency so this only runs when stream changes, not on every render
     useEffect(() => {
-        if (videoRef.current && stream) {
+        if (videoRef.current && stream && videoRef.current.srcObject !== stream) {
             videoRef.current.srcObject = stream;
-            videoRef.current.play().catch(err => console.error("Error playing video:", err));
+            videoRef.current.play().catch(err => console.error("Video play error:", err));
         }
-    }, [stream, started]);
+    }); // Runs on every render to ensure stream is attached to newly mounted elements
 
     // ── Eye/Gaze Tracking Loop ────────────────────────────────────────────────
     useEffect(() => {
@@ -895,10 +903,24 @@ export default function TakeTest() {
             (testData.exam.proctoring_type === 'video' || testData.exam.proctoring_type === 'both');
         if (!needsVideo) return;
 
-        const triggerGazeViolation = (message: string) => {
+        const triggerGazeViolation = (message: string, type: 'away' | 'noface' | 'multiface', isSoft: boolean = false) => {
             const now = Date.now();
             if (now - lastGazeViolationRef.current < 8000) return;
+            
+            if (isSoft) {
+                softWarnedRef.current = { type, timestamp: now };
+                setWarningPopup({ 
+                    message: `${message}. Please correct this immediately. You have 10 seconds before a violation is recorded.`, 
+                    isTerminal: false,
+                    isWarning: true 
+                });
+                lastGazeViolationRef.current = now;
+                return;
+            }
+
+            // If it's a real violation, increment count
             lastGazeViolationRef.current = now;
+            softWarnedRef.current = { type: null, timestamp: 0 }; // reset soft warning
 
             // FIX #6: Use addViolation for atomic update
             const next = addViolation();
@@ -906,7 +928,7 @@ export default function TakeTest() {
                 finishedRef.current = true;
                 setFinished(true);
                 fetch(`${API_BASE_URL}/candidates/test/${token}/status?status=Completed`, { method: 'POST' }).catch(() => { });
-                setWarningPopup({ message: 'You looked away from the screen too many times. Your exam has been automatically submitted.', isTerminal: true });
+                setWarningPopup({ message: 'Proctoring system detected persistent security violations. Your exam has been automatically submitted.', isTerminal: true });
             } else {
                 setWarningPopup({ message: `${message} (Violation ${next}/3)`, isTerminal: false });
             }
@@ -915,16 +937,45 @@ export default function TakeTest() {
         const detectGaze = async () => {
             if (!videoRef.current || !startedRef.current || finishedRef.current) return;
 
-            const detection = await faceapi
-                .detectSingleFace(videoRef.current, new faceapi.TinyFaceDetectorOptions({ scoreThreshold: 0.4 }))
+            const detections = await faceapi
+                .detectAllFaces(videoRef.current, new faceapi.TinyFaceDetectorOptions({ scoreThreshold: 0.4 }))
                 .withFaceLandmarks(true);
+
+            // 1. Multiple Face Detection
+            if (detections.length > 1) {
+                setGazeStatus('multiface');
+                lookAwayCountRef.current += 1;
+                
+                if (lookAwayCountRef.current >= 3) {
+                    const now = Date.now();
+                    const isSoftWarned = softWarnedRef.current.type === 'multiface';
+                    
+                    if (!isSoftWarned) {
+                        triggerGazeViolation('Multiple people detected in the camera frame.', 'multiface', true);
+                    } else if (now - softWarnedRef.current.timestamp >= 10000) {
+                        triggerGazeViolation('Multiple people detected for more than 10 seconds.', 'multiface', false);
+                        lookAwayCountRef.current = 0; // Reset after violation
+                    }
+                }
+                return;
+            }
+
+            const detection = detections[0];
 
             if (!detection) {
                 lookAwayCountRef.current += 1;
                 setGazeStatus('noface');
-                if (lookAwayCountRef.current >= 5) {
-                    triggerGazeViolation('No face detected. You may not leave the camera frame during the exam.');
-                    lookAwayCountRef.current = 0;
+                
+                if (lookAwayCountRef.current >= 3) {
+                    const now = Date.now();
+                    const isSoftWarned = softWarnedRef.current.type === 'noface';
+                    
+                    if (!isSoftWarned) {
+                        triggerGazeViolation('No face detected. You must remain in camera view.', 'noface', true);
+                    } else if (now - softWarnedRef.current.timestamp >= 10000) {
+                        triggerGazeViolation('Face not detected for more than 10 seconds.', 'noface', false);
+                        lookAwayCountRef.current = 0; // Reset after violation
+                    }
                 }
                 return;
             }
@@ -963,16 +1014,28 @@ export default function TakeTest() {
             if (lookingAway) {
                 lookAwayCountRef.current += 1;
                 setGazeStatus('away');
-                if (lookAwayCountRef.current >= 4) {
-                    triggerGazeViolation('You are looking away from the screen. Keep your eyes on the exam at all times.');
-                    lookAwayCountRef.current = 0;
+                
+                if (lookAwayCountRef.current >= 3) {
+                    const now = Date.now();
+                    const isSoftWarned = softWarnedRef.current.type === 'away';
+                    
+                    if (!isSoftWarned) {
+                        triggerGazeViolation('You appear to be looking away or showing a side-profile.', 'away', true);
+                    } else if (now - softWarnedRef.current.timestamp >= 10000) {
+                        triggerGazeViolation('Looking away detected for more than 10 seconds.', 'away', false);
+                        lookAwayCountRef.current = 0; // Reset after violation
+                    }
                 }
             } else if (lookingWarn) {
                 lookAwayCountRef.current = Math.max(0, lookAwayCountRef.current - 1);
                 setGazeStatus('warning');
+                // Optional: reset soft warning if they fixed it for a while? 
+                // For now, we'll keep it simple: once warned, next persist = violation.
             } else {
-                lookAwayCountRef.current = Math.max(0, lookAwayCountRef.current - 1);
+                lookAwayCountRef.current = 0;
                 setGazeStatus('ok');
+                // If they are 'ok' for a bit, we could reset softWarnedRef.current.type = null;
+                // But usually better to be strict after the first warning.
             }
         };
 
@@ -981,7 +1044,7 @@ export default function TakeTest() {
         return () => {
             if (gazeIntervalRef.current) clearInterval(gazeIntervalRef.current);
         };
-    }, [started, finished, modelsLoaded, token, testData]);
+    }, [started, finished, modelsLoaded, token, testData, needsVideo, stream]);
 
     useEffect(() => {
         setVisited(prev => prev.includes(currentIdx) ? prev : [...prev, currentIdx]);
@@ -1023,10 +1086,16 @@ export default function TakeTest() {
                     setTestData(data);
                     if (data.exam.duration) setTimeLeft(data.exam.duration * 60);
 
-                    // FIX #9: Stable shuffle once here based on token
-                    const qs = shuffleArrayWithSeed(data.exam.questions, token || "").map(q => ({
+                    // Stable shuffle once here based on token to ensure unique order per candidate
+                    const qs = shuffleArrayWithSeed(
+                        data.exam.questions.map((q, i) => ({ ...q, originalIndex: i })), 
+                        token || ""
+                    ).map(q => ({
                         ...q,
-                        options: shuffleArrayWithSeed(q.options, (token || "") + q.text)
+                        options: shuffleArrayWithSeed(
+                            q.options.map((o, i) => ({ ...o, originalIndex: i })), 
+                            (token || "") + q.text
+                        )
                     }));
                     setShuffledQuestions(qs);
                     setLoading(false);
@@ -1064,9 +1133,6 @@ export default function TakeTest() {
 
         // FIX #4 & #5: Check started/finished via refs; check proctoring_type from testData ref
         const handleVisible = () => {
-            const needsScreen = testData?.exam.proctoring_enabled &&
-                (testData.exam.proctoring_type === 'screen' || testData.exam.proctoring_type === 'both');
-
             if (!needsScreen) return;
 
             if (document.visibilityState === 'hidden' && startedRef.current && !finishedRef.current) {
@@ -1211,10 +1277,24 @@ export default function TakeTest() {
     }, [token, started, finished, testData]);
 
     // FIX #2: Guard handleStart against non-video proctoring types
-    const handleStart = () => {
-        const needsVideo = testData?.exam.proctoring_enabled &&
-            (testData.exam.proctoring_type === 'video' || testData.exam.proctoring_type === 'both');
+    // Capture webcam snapshot helper
+    const takeSnapshot = () => {
+        if (videoRef.current) {
+            try {
+                const canvas = document.createElement("canvas");
+                canvas.width = videoRef.current.videoWidth || 640;
+                canvas.height = videoRef.current.videoHeight || 480;
+                const ctx = canvas.getContext("2d");
+                if (ctx) {
+                    ctx.drawImage(videoRef.current, 0, 0);
+                    return canvas.toDataURL("image/png");
+                }
+            } catch (e) { console.error("Snapshot error:", e); }
+        }
+        return null;
+    };
 
+    const handleStart = () => {
         if (needsVideo && !stream) {
             setPopup({
                 isOpen: true,
@@ -1233,6 +1313,13 @@ export default function TakeTest() {
                 console.error("Fullscreen request failed:", err);
             });
         }
+        
+        // Take START snapshot
+        if (needsVideo) {
+            const shot = takeSnapshot();
+            if (shot) setSnapshotStart(shot);
+        }
+
         setStarted(true);
         fetch(`${API_BASE_URL}/candidates/test/${token}/status?status=Live`, { method: 'POST' }).catch(() => { });
     };
@@ -1247,8 +1334,18 @@ export default function TakeTest() {
 
         const timer = setInterval(() => {
             setTimeLeft(prev => {
-                if (prev !== null && prev > 0) return prev - 1;
-                return 0;
+                const next = (prev !== null && prev > 0) ? prev - 1 : 0;
+                
+                // Take MID snapshot (around 50% time left)
+                if (testData?.exam.duration && next === Math.floor((testData.exam.duration * 60) / 2) && !midCapturedRef.current) {
+                    const shot = takeSnapshot();
+                    if (shot) {
+                        setSnapshotMid(shot);
+                        midCapturedRef.current = true;
+                    }
+                }
+                
+                return next;
             });
         }, 1000);
 
@@ -1265,17 +1362,28 @@ export default function TakeTest() {
                 document.exitFullscreen().catch(() => { });
             }
 
-            let base64Image = null;
+            let base64Image = null; // This will hold the END snapshot
             try {
-                const canvas = await html2canvas(document.body, { useCORS: true });
-                base64Image = canvas.toDataURL("image/png");
+                const shot = takeSnapshot();
+                if (shot) {
+                    base64Image = shot;
+                } else {
+                    // Fallback to html2canvas if webcam fails
+                    const canvas = await html2canvas(document.body, { useCORS: true });
+                    base64Image = canvas.toDataURL("image/png");
+                }
             } catch (err) {
-                console.error("Screenshot capture failed:", err);
+                console.error("Snapshot capture failed:", err);
             }
 
             let score = 0;
+            const answersArray: any[] = [];
             shuffledQuestions.forEach((q, idx) => {
                 const answerIdx = answers[idx];
+                answersArray.push({
+                    question_index: q.originalIndex ?? idx,
+                    selected_option_index: answerIdx !== undefined ? q.options[answerIdx].originalIndex : null
+                });
                 if (answerIdx !== undefined && q.options[answerIdx].is_correct) {
                     score++;
                 }
@@ -1288,7 +1396,11 @@ export default function TakeTest() {
                     score: score,
                     total_questions: shuffledQuestions.length,
                     violations: violationsRef.current,
-                    screenshot: base64Image
+                    screenshot: base64Image, // backward compatibility
+                    screenshot_start: snapshotStart,
+                    screenshot_mid: snapshotMid,
+                    screenshot_end: base64Image,
+                    answers: answersArray
                 })
             }).catch(err => console.error("Failed to submit result:", err));
 
@@ -1497,30 +1609,70 @@ export default function TakeTest() {
                         </div>
                     </div>
 
+                    {needsVideo && (
+                        <div style={{ marginBottom: 28, textAlign: 'center' }}>
+                            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', marginBottom: 12 }}>
+                                📷 Camera Check & Readiness
+                            </div>
+                            <div style={{ 
+                                background: '#000', 
+                                border: stream ? '2px solid #22c55e' : '2px solid var(--border)', 
+                                borderRadius: '16px', 
+                                overflow: 'hidden', 
+                                width: '300px', 
+                                height: '180px', 
+                                margin: '0 auto', 
+                                position: 'relative',
+                                boxShadow: 'var(--shadow)'
+                            }}>
+                                {stream ? (
+                                    <video
+                                        ref={videoRef}
+                                        autoPlay
+                                        playsInline
+                                        muted
+                                        style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scaleX(-1)' }}
+                                    />
+                                ) : (
+                                    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#64748b', gap: 12, padding: 20 }}>
+                                        <div style={{ fontSize: 24 }}>📷</div>
+                                        <div style={{ fontSize: 13, fontWeight: 600 }}>Camera loading or access denied</div>
+                                        <p style={{ fontSize: 11, margin: 0 }}>Please allow camera access in your browser to proceed.</p>
+                                    </div>
+                                )}
+                                {stream && (
+                                    <div style={{ position: 'absolute', bottom: 12, left: '50%', transform: 'translateX(-50%)', background: 'rgba(34, 197, 94, 0.9)', color: 'white', padding: '4px 12px', borderRadius: 100, fontSize: 10, fontWeight: 800 }}>
+                                        READY
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
                     <div className="decl-box">
                         <div style={{ fontSize: 13, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--primary)', marginBottom: 14 }}>
                             📋 Exam Rules &amp; Declaration
                         </div>
                         <ul className="decl-rules">
-                            {(testData.exam.proctoring_enabled && (testData.exam.proctoring_type === 'screen' || testData.exam.proctoring_type === 'both')) && (
+                            {needsScreen && (
                                 <>
                                     <li>This exam must be taken in <strong>Fullscreen mode</strong>. Exiting fullscreen will be treated as a violation.</li>
                                     <li>Tab switching, window switching, or navigating away from this page is strictly <strong>prohibited</strong>.</li>
                                 </>
                             )}
                             {testData.exam.proctoring_enabled && (
-                                <li><strong>3 violations</strong> ({testData.exam.proctoring_type === 'video' ? 'looking away' : testData.exam.proctoring_type === 'screen' ? 'tab/window switch, fullscreen exit' : 'tab/window switch, fullscreen exit, looking away'}) will result in <strong>automatic exam termination</strong> and submission.</li>
+                                <li><strong>3 violations</strong> ({needsVideo && needsScreen ? 'tab/window switch, fullscreen exit, looking away' : needsVideo ? 'looking away' : 'tab/window switch, fullscreen exit'}) will result in <strong>automatic exam termination</strong> and submission.</li>
                             )}
                             <li>Keyboard shortcuts (Ctrl+C, Ctrl+V, F12, etc.) and right-click are <strong>disabled</strong> during the exam.</li>
                             <li><strong>Randomized Content</strong>: Questions and their multiple-choice options are shuffled for each candidate.</li>
-                            {(testData.exam.proctoring_enabled && (testData.exam.proctoring_type === 'video' || testData.exam.proctoring_type === 'both')) && (
+                            {needsVideo && (
                                 <li><strong>Live eye tracking</strong> is active via your webcam. Looking away from the screen repeatedly will count as a violation.</li>
                             )}
                             <li>All activities during the exam are <strong>monitored and logged</strong> for security and integrity purposes.</li>
                         </ul>
 
                         <div className="decl-checks">
-                            {(testData.exam.proctoring_enabled && (testData.exam.proctoring_type === 'screen' || testData.exam.proctoring_type === 'both')) ? (
+                            {needsScreen ? (
                                 <>
                                     <label className="decl-check-row">
                                         <input type="checkbox" checked={checks.c1} onChange={() => toggleCheck('c1')} />
@@ -1629,6 +1781,7 @@ export default function TakeTest() {
                     violations={violations}
                     maxViolations={3}
                     isTerminal={warningPopup.isTerminal}
+                    isWarning={warningPopup.isWarning}
                     onDismiss={() => {
                         if (warningPopup.isTerminal) {
                             handleTabClose();
@@ -1747,7 +1900,8 @@ export default function TakeTest() {
                     </main>
 
                     <aside className="q-palette">
-                        <div style={{ marginBottom: 24 }}>
+                        {needsVideo && (
+                            <div style={{ marginBottom: 24 }}>
                             <div style={{ fontFamily: 'var(--font-heading)', fontSize: 14, fontWeight: 700, color: 'var(--text)', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
                                 📷 Live Proctoring
                                 {modelsLoaded
@@ -1756,21 +1910,28 @@ export default function TakeTest() {
                                 }
                             </div>
 
-                            <div style={{ background: '#000', borderRadius: '12px', overflow: 'hidden', height: '160px', position: 'relative', border: gazeStatus === 'away' || gazeStatus === 'noface' ? '2px solid #ef4444' : '1px solid var(--border)', transition: 'border 0.3s' }}>
-                                <video
-                                    ref={videoRef}
-                                    autoPlay
-                                    playsInline
-                                    muted
-                                    style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scaleX(-1)' }}
-                                />
+                            <div style={{ background: '#000', borderRadius: '12px', overflow: 'hidden', height: '160px', position: 'relative', border: (gazeStatus === 'away' || gazeStatus === 'noface' || gazeStatus === 'multiface') ? '2px solid #ef4444' : '1px solid var(--border)', transition: 'border 0.3s' }}>
+                                {stream ? (
+                                    <video
+                                        ref={videoRef}
+                                        autoPlay
+                                        playsInline
+                                        muted
+                                        style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scaleX(-1)' }}
+                                    />
+                                ) : (
+                                    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#64748b', textAlign: 'center', padding: '10px' }}>
+                                        <span style={{ fontSize: '20px', marginBottom: '8px' }}>🚫</span>
+                                        <span style={{ fontSize: '10px', fontWeight: 600 }}>Camera Disconnected</span>
+                                    </div>
+                                )}
                                 <div style={{ position: 'absolute', top: 8, left: 8, display: 'flex', gap: 5, alignItems: 'center', background: 'rgba(0,0,0,0.65)', padding: '3px 8px', borderRadius: 100 }}>
-                                    <div style={{ width: 7, height: 7, background: '#ef4444', borderRadius: '50%', animation: 'pulse 1.5s infinite' }} />
-                                    <span style={{ fontSize: 10, fontWeight: 800, color: 'white', letterSpacing: '0.06em' }}>REC</span>
+                                    <div style={{ width: 7, height: 7, background: stream ? '#ef4444' : '#64748b', borderRadius: '50%', animation: stream ? 'pulse 1.5s infinite' : 'none' }} />
+                                    <span style={{ fontSize: 10, fontWeight: 800, color: 'white', letterSpacing: '0.06em' }}>{stream ? 'REC' : 'OFF'}</span>
                                 </div>
-                                {(gazeStatus === 'away' || gazeStatus === 'noface') && (
+                                {(gazeStatus === 'away' || gazeStatus === 'noface' || gazeStatus === 'multiface') && (
                                     <div style={{ position: 'absolute', inset: 0, background: 'rgba(239,68,68,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
-                                        <span style={{ fontSize: 26 }}>{gazeStatus === 'noface' ? '🚫' : '👁️'}</span>
+                                        <span style={{ fontSize: 26 }}>{gazeStatus === 'noface' ? '🚫' : (gazeStatus === 'multiface' ? '👥' : '👁️')}</span>
                                     </div>
                                 )}
                             </div>
@@ -1799,7 +1960,14 @@ export default function TakeTest() {
                                     🚫 No Face Detected!
                                 </div>
                             )}
+                            {gazeStatus === 'multiface' && (
+                                <div className="gaze-badge away" style={{ background: '#fff1f2', color: '#9f1239', border: '1px solid #fda4af' }}>
+                                    <div className="gaze-dot" style={{ background: '#e11d48' }} />
+                                    🚨 Multiple Faces Detected!
+                                </div>
+                            )}
                         </div>
+                        )}
 
                         <div className="q-palette-title">
                             <span>Question Palette</span>

@@ -115,7 +115,7 @@ def _generate_with_gemini(topic: str, difficulty: str, count: int) -> Optional[L
         REQUIREMENTS:
         - Return ONLY a JSON array.
         - No markdown formatting (no ```json).
-        - Format: [{{"text": "...", "options": [{{"text": "...", "is_correct": true}}, ...], "explanation": "..."}}]
+        - Format: [{{"text": "...", "options": [{{"text": "...", "is_correct": true}}, ...], "category": "Skill Area", "explanation": "..."}}]
         """
         
         response = client.models.generate_content(

@@ -25,7 +25,11 @@ def _to_dict(c: Candidate) -> Dict:
         "score": c.score,
         "total_questions": c.total_questions,
         "violations": c.violations if c.violations is not None else 0,
-        "device_id": c.device_id or ""
+        "device_id": c.device_id or "",
+        "answers": c.answers or [],
+        "screenshot_start": c.screenshot_start or "",
+        "screenshot_mid": c.screenshot_mid or "",
+        "screenshot_end": c.screenshot_end or ""
     }
 
 def get_all_candidates(db: Session) -> List[Dict]:
@@ -146,7 +150,7 @@ def update_candidate_details(db: Session, candidate_id: str, data: Dict) -> Dict
         return _to_dict(c)
     return None
 
-def update_candidate_result(db: Session, token: str, score: int, total: int, violations: int = 0) -> bool:
+def update_candidate_result(db: Session, token: str, score: int, total: int, violations: int = 0, answers: list = None, screenshots: dict = None) -> bool:
     from app.core.redis import redis_client
     c = db.query(Candidate).filter(Candidate.token == token).first()
     if c:
@@ -154,6 +158,13 @@ def update_candidate_result(db: Session, token: str, score: int, total: int, vio
         c.total_questions = total
         c.violations = violations
         c.status = "Completed"
+        if answers is not None:
+            c.answers = answers
+        if screenshots:
+            c.screenshot_start = screenshots.get("start")
+            c.screenshot_mid = screenshots.get("mid")
+            c.screenshot_end = screenshots.get("end")
+            
         db.commit()
         if redis_client:
             redis_client.delete("all_candidates_list", "exams_with_counts")

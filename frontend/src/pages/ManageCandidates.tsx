@@ -507,8 +507,18 @@ export default function ManageCandidates() {
                                             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-end' }}>
                                                 {group.enrollments.length > 0 ? group.enrollments.map((en: any) => (
                                                     <div key={`actions-${en.id}`} style={{ display: 'flex', gap: 6, justifyContent: 'flex-end', alignItems: 'center', background: 'var(--bg-neutral)', padding: '4px', borderRadius: '8px', border: '1px solid var(--border)' }}>
-                                                        <span style={{ fontSize: 10, fontWeight: 700, padding: '0 4px', color: 'var(--text-muted)', maxWidth: 70, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={en.examName}>{en.examName}</span>
-                                                        {en.assigned_exam_id && (
+                                                         <span style={{ fontSize: 10, fontWeight: 700, padding: '0 4px', color: 'var(--text-muted)', maxWidth: 70, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={en.examName}>{en.examName}</span>
+                                                         {en.status.toUpperCase() === 'COMPLETED' && (
+                                                             <button 
+                                                                 className="mc-action-btn mc-btn-send" 
+                                                                 style={{ background: '#fef3c7', color: '#92400e', borderColor: '#fde68a' }}
+                                                                 onClick={() => navigate(`/report/${en.id}`)} 
+                                                                 title="View Detailed Exam Report"
+                                                             >
+                                                                 <Icons.FileText />
+                                                             </button>
+                                                         )}
+                                                         {en.assigned_exam_id && (
                                                             <>
                                                                 <button 
                                                                     className="mc-action-btn mc-btn-copy" 
