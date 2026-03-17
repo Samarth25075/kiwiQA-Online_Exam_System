@@ -222,7 +222,10 @@ export default function AdminDashboard() {
             if (!res.ok) { handleAuthFailure(); return false; }
             setProfile(await res.json());
 
-            await Promise.all([fetchCandidates(), fetchExamStats(), fetchAdminOtp()]);
+            // Fetch independently so one failing doesn't block others
+            fetchCandidates().catch(console.error);
+            fetchExamStats().catch(console.error);
+            fetchAdminOtp().catch(console.error);
             return true;
         } catch (err) {
             console.error("Fetch error:", err);
