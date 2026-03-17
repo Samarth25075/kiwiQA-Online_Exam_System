@@ -12,6 +12,7 @@ import os
 import traceback
 import asyncio
 import uuid
+from sqlalchemy import text, inspect
 
 from .auth.router import router as auth_router
 from .candidates.router import router as candidates_router
@@ -72,10 +73,43 @@ app.include_router(exams_router)       # /exams
 @app.on_event("startup")
 async def startup_event():
     # 1. Ensure tables exist (Critical for Render/Postgres)
-    from app.database import engine, Base, SessionLocal
+    from app.database import engine, Base, SessionLocal, DATABASE_URL
     import app.models # Import models to register them with Base
     Base.metadata.create_all(bind=engine)
-    print("INFO: Database tables verified/created.")
+    
+    # 2. Add missing columns (Manual Auto-Migration)
+    # create_all doesn't add new columns to existing tables
+    try:
+        inspector = inspect(engine)
+        with engine.connect() as conn:
+            # ── Candidates Table ─────
+            existing_cols = [c['name'] for c in inspector.get_columns('candidates')]
+            new_cols = [
+                ("answers", "JSONB" if "postgresql" in DATABASE_URL else "JSON"),
+                ("screenshot_start", "TEXT"), ("screenshot_mid", "TEXT"), ("screenshot_end", "TEXT")
+            ]
+            for col_name, col_type in new_cols:
+                if col_name not in existing_cols:
+                    print(f"INFO: Adding column {col_name} to candidates...")
+                    conn.execute(text(f"ALTER TABLE candidates ADD COLUMN {col_name} {col_type}"))
+                    conn.commit()
+
+            # ── Exams Table ─────
+            existing_cols = [c['name'] for c in inspector.get_columns('exams')]
+            new_cols = [
+                ("link_expiry", "TEXT"), ("auto_delete", "TEXT"),
+                ("proctoring_enabled", "BOOLEAN DEFAULT FALSE" if "postgresql" in DATABASE_URL else "BOOLEAN DEFAULT 0"),
+                ("proctoring_type", "TEXT"), ("passing_score", "INTEGER DEFAULT 50")
+            ]
+            for col_name, col_type in new_cols:
+                if col_name not in existing_cols:
+                    print(f"INFO: Adding column {col_name} to exams...")
+                    conn.execute(text(f"ALTER TABLE exams ADD COLUMN {col_name} {col_type}"))
+                    conn.commit()
+    except Exception as e:
+        print(f"WARNING: Auto-migration failed (might be ok): {e}")
+
+    print("INFO: Database tables verified/migrated.")
 
     # 2. Check and Create Default Admins
     db = SessionLocal()
