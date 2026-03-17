@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://kiwiqa-online-exam-system.onrender.com/sitemap.xml
