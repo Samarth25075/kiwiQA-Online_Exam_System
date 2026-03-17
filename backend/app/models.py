@@ -51,7 +51,7 @@ class Candidate(Base):
     token = Column(String, unique=True)
     
     # Foreign Key integrity
-    assigned_exam_id = Column(String, ForeignKey("exams.id"), nullable=True)
+    assigned_exam_id = Column(String, ForeignKey("exams.id", ondelete="SET NULL"), nullable=True)
     exam = relationship("Exam", back_populates="candidates")
     
     # Proper numeric types for integrity

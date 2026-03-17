@@ -345,12 +345,13 @@ def create_exam(db: Session, exam_in: ExamCreate) -> Dict:
         
     return _to_dict(new_exam)
 
-def get_all_exams(db: Session) -> List[Dict]:
+def get_all_exams(db: Session, bypass_cache: bool = False) -> List[Dict]:
     from app.core.redis import get_cached_data, set_cached_data
     
-    cached = get_cached_data("all_exams_list")
-    if cached:
-        return cached
+    if not bypass_cache:
+        cached = get_cached_data("all_exams_list")
+        if cached:
+            return cached
 
     exams = db.query(Exam).order_by(Exam.created_at.desc()).all()
     res = [_to_dict(e) for e in exams]
@@ -369,7 +370,7 @@ def delete_exam(db: Session, exam_id: str) -> bool:
         db.delete(exam)
         db.commit()
         if redis_client:
-            redis_client.delete("all_exams_list", "exams_with_counts")
+            redis_client.delete("all_exams_list", "exams_with_counts", "all_candidates_list")
         return True
     return False
 
@@ -396,7 +397,8 @@ def get_exams_with_candidate_counts(db: Session) -> List[Dict]:
         return cached
 
     from app.candidates.service import get_all_candidates
-    exams = get_all_exams(db)
+    # Always get fresh exams for dashboard stats
+    exams = get_all_exams(db, bypass_cache=True)
     candidates = get_all_candidates(db)
 
     from collections import defaultdict
