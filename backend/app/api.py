@@ -72,84 +72,92 @@ app.include_router(exams_router)       # /exams
 # ── Background Cleanup ────────────────────────
 @app.on_event("startup")
 async def startup_event():
-    # 1. Ensure tables exist (Critical for Render/Postgres)
-    from app.database import engine, Base, SessionLocal, DATABASE_URL
-    import app.models # Import models to register them with Base
-    Base.metadata.create_all(bind=engine)
-    
-    # 2. Add missing columns (Manual Auto-Migration)
-    # create_all doesn't add new columns to existing tables
-    try:
-        inspector = inspect(engine)
-        with engine.connect() as conn:
-            # ── Candidates Table ─────
-            existing_cols = [c['name'] for c in inspector.get_columns('candidates')]
-            new_cols = [
-                ("answers", "JSONB" if "postgresql" in DATABASE_URL else "JSON"),
-                ("screenshot_start", "TEXT"), ("screenshot_mid", "TEXT"), ("screenshot_end", "TEXT")
-            ]
-            for col_name, col_type in new_cols:
-                if col_name not in existing_cols:
-                    print(f"INFO: Adding column {col_name} to candidates...")
-                    conn.execute(text(f"ALTER TABLE candidates ADD COLUMN {col_name} {col_type}"))
-                    conn.commit()
-
-            # ── Exams Table ─────
-            existing_cols = [c['name'] for c in inspector.get_columns('exams')]
-            new_cols = [
-                ("link_expiry", "TEXT"), ("auto_delete", "TEXT"),
-                ("proctoring_enabled", "BOOLEAN DEFAULT FALSE" if "postgresql" in DATABASE_URL else "BOOLEAN DEFAULT 0"),
-                ("proctoring_type", "TEXT"), ("passing_score", "INTEGER DEFAULT 50")
-            ]
-            for col_name, col_type in new_cols:
-                if col_name not in existing_cols:
-                    print(f"INFO: Adding column {col_name} to exams...")
-                    conn.execute(text(f"ALTER TABLE exams ADD COLUMN {col_name} {col_type}"))
-                    conn.commit()
-    except Exception as e:
-        print(f"WARNING: Auto-migration failed (might be ok): {e}")
-
-    print("INFO: Database tables verified/migrated.")
-
-    # 2. Check and Create Default Admins
-    db = SessionLocal()
-    try:
-        from app.models import User
-        from app.auth.service import hash_password
-        from app.core.config import AUTHORIZED_GOOGLE_EMAIL
-        import json
+    # Run heavy DB work in a separate thread so health check passes immediately
+    async def db_initialization():
+        from app.database import engine, Base, SessionLocal, DATABASE_URL
+        import app.models # Import models to register them with Base
         
-        # Add basic admin if no users exist
-        if db.query(User).count() == 0:
-            admin_user = User(
-                email="admin@examportal.com",
-                hashed_password=hash_password("Admin@123"),
-                role="admin",
-                full_name="System Admin",
-                permissions=json.dumps(["manage exam", "generate exam", "manage candidates", "manage users"])
-            )
-            db.add(admin_user)
-            db.commit()
-            print("INFO: Created default admin user: admin@examportal.com / Admin@123")
+        # 1. Ensure tables exist
+        try:
+            Base.metadata.create_all(bind=engine)
+            print("INFO: Database tables verified.")
+        except Exception as e:
+            print(f"ERROR: Base.metadata.create_all: {e}")
 
-        # Ensure AUTHORIZED_GOOGLE_EMAIL user exists for Google Login to work
-        if AUTHORIZED_GOOGLE_EMAIL and AUTHORIZED_GOOGLE_EMAIL != "NOT_SET":
-            existing_google_user = db.query(User).filter(User.email == AUTHORIZED_GOOGLE_EMAIL).first()
-            if not existing_google_user:
-                new_google_user = User(
-                    email=AUTHORIZED_GOOGLE_EMAIL,
-                    hashed_password=hash_password(str(uuid.uuid4())), # Random password, they use Google
+        # 2. Add missing columns (Manual Auto-Migration)
+        try:
+            inspector = inspect(engine)
+            with engine.connect() as conn:
+                # ── Candidates Table ─────
+                existing_cols = [c['name'] for c in inspector.get_columns('candidates')]
+                new_cols = [
+                    ("answers", "JSONB" if "postgresql" in DATABASE_URL else "JSON"),
+                    ("screenshot_start", "TEXT"), ("screenshot_mid", "TEXT"), ("screenshot_end", "TEXT")
+                ]
+                for col_name, col_type in new_cols:
+                    if col_name not in existing_cols:
+                        print(f"INFO: Adding column {col_name} to candidates...")
+                        conn.execute(text(f"ALTER TABLE candidates ADD COLUMN {col_name} {col_type}"))
+                        conn.commit()
+
+                # ── Exams Table ─────
+                existing_cols = [c['name'] for c in inspector.get_columns('exams')]
+                new_cols = [
+                    ("link_expiry", "TEXT"), ("auto_delete", "TEXT"),
+                    ("proctoring_enabled", "BOOLEAN DEFAULT FALSE" if "postgresql" in DATABASE_URL else "BOOLEAN DEFAULT 0"),
+                    ("proctoring_type", "TEXT"), ("passing_score", "INTEGER DEFAULT 50")
+                ]
+                for col_name, col_type in new_cols:
+                    if col_name not in existing_cols:
+                        print(f"INFO: Adding column {col_name} to exams...")
+                        conn.execute(text(f"ALTER TABLE exams ADD COLUMN {col_name} {col_type}"))
+                        conn.commit()
+            print("INFO: Auto-migration checks complete.")
+        except Exception as e:
+            print(f"WARNING: Auto-migration skipped: {e}")
+
+        # 3. Create Default Admins
+        db = SessionLocal()
+        try:
+            from app.models import User
+            from app.auth.service import hash_password
+            from app.core.config import AUTHORIZED_GOOGLE_EMAIL
+            import json
+            
+            # Default credential check
+            if db.query(User).count() == 0:
+                admin_user = User(
+                    email="admin@examportal.com",
+                    hashed_password=hash_password("Admin@123"),
                     role="admin",
-                    full_name="Authorized Google User",
+                    full_name="System Admin",
                     permissions=json.dumps(["manage exam", "generate exam", "manage candidates", "manage users"])
                 )
-                db.add(new_google_user)
+                db.add(admin_user)
                 db.commit()
-                print(f"INFO: Created pre-authorized Google user: {AUTHORIZED_GOOGLE_EMAIL}")
-    except Exception as e:
-        print(f"ERROR creating default admins: {e}")
-    finally:
-        db.close()
+                print("INFO: Default admin created.")
+
+            # Authorized Google Email check
+            if AUTHORIZED_GOOGLE_EMAIL and AUTHORIZED_GOOGLE_EMAIL != "NOT_SET":
+                google_user = db.query(User).filter(User.email == AUTHORIZED_GOOGLE_EMAIL).first()
+                if not google_user:
+                    new_google_user = User(
+                        email=AUTHORIZED_GOOGLE_EMAIL,
+                        hashed_password=hash_password(str(uuid.uuid4())),
+                        role="admin",
+                        full_name="Google Admin",
+                        permissions=json.dumps(["manage exam", "generate exam", "manage candidates", "manage users"])
+                    )
+                    db.add(new_google_user)
+                    db.commit()
+                    print(f"INFO: Google admin {AUTHORIZED_GOOGLE_EMAIL} created.")
+        except Exception as e:
+            print(f"ERROR admin setup: {e}")
+        finally:
+            db.close()
+
+    # Fire off DB tasks WITHOUT awaiting them immediately
+    asyncio.create_task(db_initialization())
 
     # 3. Start background cleanup loop
     async def cleanup_loop():
