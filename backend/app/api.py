@@ -13,6 +13,10 @@ import traceback
 import asyncio
 import uuid
 from sqlalchemy import text, inspect
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.redis import RedisBackend
+from fastapi_cache.decorator import cache
+import redis.asyncio as redis
 
 from .auth.router import router as auth_router
 from .candidates.router import router as candidates_router
@@ -159,6 +163,15 @@ async def startup_event():
     # Fire off DB tasks WITHOUT awaiting them immediately
     asyncio.create_task(db_initialization())
 
+    # 4. Initialize FastAPICache with Redis
+    try:
+        from app.core.config import REDIS_URL
+        redis_cache = redis.from_url(REDIS_URL, encoding="utf8", decode_responses=True)
+        FastAPICache.init(RedisBackend(redis_cache), prefix="fastapi-cache")
+        print("INFO: FastAPICache initialized with Redis.")
+    except Exception as e:
+        print(f"WARNING: FastAPICache initialization failed: {e}")
+
     # 3. Start background cleanup loop
     async def cleanup_loop():
         from app.database import SessionLocal
@@ -173,6 +186,25 @@ async def startup_event():
     asyncio.create_task(cleanup_loop())
 
 # ── Health check ──────────────────────────────
+@app.get("/health", tags=["system"])
+async def health_check():
+    """Detailed health check for Render/Uptime monitoring."""
+    return {"status": "ok", "message": "Application is healthy."}
+
+@app.get("/settings", tags=["system"])
+@cache(expire=600)
+async def get_app_settings():
+    """Public application settings (Cached for 10 min)."""
+    return {
+        "app_name": "ExamPortal",
+        "version": "1.0.0",
+        "environment": os.getenv("ENVIRONMENT", "production"),
+        "features": {
+            "google_login": True if os.getenv("GOOGLE_CLIENT_ID") else False,
+            "proctoring": True
+        }
+    }
+
 @app.get("/", tags=["root"])
 async def root():
     return {"status": "ok", "message": "ExamPortal API is running."}
