@@ -46,8 +46,9 @@ interface Exam {
     topic: string;
     difficulty: string;
     duration: number;
+    num_questions?: number;
     created_at: string;
-    questions: Question[];
+    questions?: Question[];
     proctoring_enabled: boolean;
     proctoring_type: string;
     auto_delete?: string;
