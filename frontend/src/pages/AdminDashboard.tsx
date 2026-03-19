@@ -99,7 +99,13 @@ const Icons = {
             <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
         </svg>
     ),
-
+    Refresh: ({ size = 14, className = "" }: { size?: number, className?: string }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+            <path d="M23 4v6h-6" />
+            <path d="M1 20v-6h6" />
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+        </svg>
+    ),
 };
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
@@ -148,6 +154,7 @@ export default function AdminDashboard() {
     const [examStats, setExamStats] = useState<ExamStat[]>([]);
     const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState({ total: 0, live: 0 });
+    const [refreshing, setRefreshing] = useState(false);
     const [candidatesList, setCandidatesList] = useState<Candidate[]>([]);
     const [showExamPopup, setShowExamPopup] = useState<boolean>(false);
     const [adminOtp, setAdminOtp] = useState<string | null>(null);
@@ -259,7 +266,19 @@ export default function AdminDashboard() {
             return false;
         } finally {
             setLoading(false);
+            setRefreshing(false);
         }
+    };
+
+    const handleManualRefresh = async () => {
+        setRefreshing(true);
+        // Force bypass_cache=true for all calls
+        await Promise.all([
+            fetchCandidates(),
+            fetchExamStats(),
+            fetchAdminOtp()
+        ]);
+        setRefreshing(false);
     };
 
     const fetchCandidates = async () => {
@@ -980,6 +999,36 @@ export default function AdminDashboard() {
         .field-select:focus { border-color: var(--teal); }
 
         /* ── Buttons ──────────────────────────────────────────────────── */
+        .btn-refresh {
+          padding: 8px 16px;
+          font-size: 13px;
+          background: var(--white);
+          border: 1px solid var(--slate-200);
+          color: var(--slate-600);
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          transition: all 0.2s ease;
+        }
+        .btn-refresh:hover:not(:disabled) {
+          background: var(--slate-50);
+          border-color: var(--slate-300);
+          color: var(--slate-900);
+          transform: translateY(-1px);
+        }
+        .btn-refresh:disabled {
+          opacity: 0.7;
+          cursor: not-allowed;
+          background: var(--slate-50);
+        }
+        .spin {
+          animation: spin 1.2s linear infinite;
+        }
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+
         .btn {
           display: inline-flex;
           align-items: center;
@@ -1318,6 +1367,15 @@ export default function AdminDashboard() {
                         <h3 className="section-title">Assessment Control</h3>
                         <p className="section-subtitle">Manage evaluation links, expiry, and lifecycle policies.</p>
                     </div>
+                    <button 
+                        className={`btn btn-refresh ${refreshing ? 'refreshing' : ''}`} 
+                        onClick={handleManualRefresh}
+                        disabled={refreshing}
+                        title="Force sync with database"
+                    >
+                        <Icons.Refresh size={14} className={refreshing ? 'spin' : ''} />
+                        {refreshing ? 'Syncing...' : 'Refresh'}
+                    </button>
                 </div>
 
                 {/* Exam Cards */}
