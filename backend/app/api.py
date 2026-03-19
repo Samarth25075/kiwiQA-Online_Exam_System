@@ -137,6 +137,7 @@ async def startup_event():
             if db.query(User).count() == 0:
                 admin_user = User(
                     email="admin@examportal.com",
+                    username="admin",
                     hashed_password=hash_password("Admin@123"),
                     role="admin",
                     full_name="System Admin",
@@ -146,20 +147,25 @@ async def startup_event():
                 db.commit()
                 print("INFO: Default admin created.")
 
-            # Authorized Google Email check
+            # Authorized Google Email check (Multiple support)
             if AUTHORIZED_GOOGLE_EMAIL and AUTHORIZED_GOOGLE_EMAIL != "NOT_SET":
-                google_user = db.query(User).filter(User.email == AUTHORIZED_GOOGLE_EMAIL).first()
-                if not google_user:
-                    new_google_user = User(
-                        email=AUTHORIZED_GOOGLE_EMAIL,
-                        hashed_password=hash_password(str(uuid.uuid4())),
-                        role="admin",
-                        full_name="Google Admin",
-                        permissions=json.dumps(["manage exam", "generate exam", "manage candidates", "manage users"])
-                    )
-                    db.add(new_google_user)
-                    db.commit()
-                    print(f"INFO: Google admin {AUTHORIZED_GOOGLE_EMAIL} created.")
+                authorized_emails = [e.strip().lower() for e in AUTHORIZED_GOOGLE_EMAIL.split(",") if e.strip()]
+                
+                for idx, email_addr in enumerate(authorized_emails):
+                    google_user = db.query(User).filter(User.email == email_addr).first()
+                    if not google_user:
+                        uname = "google_admin" if idx == 0 else f"google_admin_{idx+1}"
+                        new_google_user = User(
+                            email=email_addr,
+                            username=uname,
+                            hashed_password=hash_password(str(uuid.uuid4())),
+                            role="admin",
+                            full_name=f"Google Admin ({email_addr.split('@')[0]})",
+                            permissions=json.dumps(["manage exam", "generate exam", "manage candidates", "manage users"])
+                        )
+                        db.add(new_google_user)
+                        db.commit()
+                        print(f"INFO: Google admin {email_addr} created with username {uname}.")
         except Exception as e:
             print(f"ERROR admin setup: {e}")
         finally:

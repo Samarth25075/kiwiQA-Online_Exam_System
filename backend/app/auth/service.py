@@ -19,8 +19,8 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
         print(f"VERIFY ERROR: {e}")
         return False
 
-def get_user(db: Session, email: str):
-    user = db.query(User).filter(User.email == email).first()
+def get_user(db: Session, identifier: str):
+    user = db.query(User).filter((User.email == identifier) | (User.username == identifier)).first()
     if user:
         perms = user.permissions
         if isinstance(perms, str):
@@ -30,6 +30,7 @@ def get_user(db: Session, email: str):
                 perms = []
         return {
             "email": user.email,
+            "username": user.username,
             "hashed_password": user.hashed_password,
             "role": user.role,
             "full_name": user.full_name,
@@ -41,6 +42,7 @@ def get_user(db: Session, email: str):
 def add_user(db: Session, user_data: dict):
     new_user = User(
         email=user_data["email"],
+        username=user_data.get("username"),
         hashed_password=user_data["hashed_password"],
         role=user_data["role"],
         full_name=user_data["full_name"],
@@ -62,8 +64,8 @@ def verify_session(db: Session, email: str, session_id: str):
     user = db.query(User).filter(User.email == email).first()
     return user.session_id == session_id if user else False
 
-def authenticate(db: Session, email: str, password: str):
-    user = get_user(db, email)
+def authenticate(db: Session, identifier: str, password: str):
+    user = get_user(db, identifier)
     if not user or not user.get("hashed_password"):
         return None
     if verify_password(password, user["hashed_password"]):
@@ -90,6 +92,7 @@ def get_all_users(db: Session):
                 perms = []
         res.append({
             "email": user.email,
+            "username": user.username,
             "hashed_password": user.hashed_password,
             "role": user.role,
             "full_name": user.full_name,

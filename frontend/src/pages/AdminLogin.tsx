@@ -479,7 +479,7 @@ export default function AdminLogin() {
 
           <h1 className="login-heading">Sign in</h1>
           <p className="login-subheading">
-            Access the KiwiQA assessment dashboard.
+            Access the KiwiQA assessment dashboard with your email or username.
           </p>
 
           {errors.auth && (
@@ -493,14 +493,14 @@ export default function AdminLogin() {
 
             {/* Email */}
             <div className="login-field">
-              <label className="login-label" htmlFor="login-email">Email address</label>
+              <label className="login-label" htmlFor="login-email">Email or Username</label>
               <div className="login-input-wrap">
                 <span className="login-input-icon"><Icons.Mail /></span>
                 <input
                   id="login-email"
                   type="email"
                   className={`login-input${errors.email ? " has-error" : ""}`}
-                  placeholder="admin@kiwiqa.com"
+                  placeholder="admin@kiwiqa.com or 'admin'"
                   value={email}
                   autoComplete="email"
                   onChange={e => { setEmail(e.target.value); clearFieldErr("email"); }}

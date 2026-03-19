@@ -27,6 +27,7 @@ class TokenPayload(BaseModel):
 class AdminUser(BaseModel):
     """Profile info for the currently authenticated admin."""
     email: str
+    username: str | None = None
     role: str
     full_name: str
     permissions: list[str] = []
@@ -35,6 +36,7 @@ class AdminUser(BaseModel):
 class MemberCreate(BaseModel):
     """Schema for creating a new member."""
     email: EmailStr
+    username: str | None = None
     full_name: str
     password: str
     role: str = "member"
@@ -44,6 +46,7 @@ class MemberCreate(BaseModel):
 class Member(BaseModel):
     """Schema for returning member info."""
     email: str
+    username: str | None = None
     full_name: str
     role: str
     permissions: list[str]

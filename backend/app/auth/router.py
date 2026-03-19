@@ -186,17 +186,20 @@ async def google_login(body: GoogleTokenRequest, db: Session = Depends(get_db)):
     # DEBUG
     print(f"GOOGLE LOGIN ATTEMPT: {email}, AUTHORIZED: {AUTHORIZED_GOOGLE_EMAIL}")
 
-    # Strict restriction to ONLY ONE specific email link
-    if AUTHORIZED_GOOGLE_EMAIL == "NOT_SET":
+    # Normalize and split authorized emails
+    authorized_list = [e.strip().lower() for e in AUTHORIZED_GOOGLE_EMAIL.split(",") if e.strip()]
+
+    # Strict restriction to authorized emails
+    if AUTHORIZED_GOOGLE_EMAIL == "NOT_SET" or not authorized_list:
          raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Google login is currently disabled (AUTHORIZED_GOOGLE_EMAIL not set).",
         )
 
-    if email.lower() != AUTHORIZED_GOOGLE_EMAIL.lower():
+    if email.lower() not in authorized_list:
          raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail=f"Access denied. Only Authorized persone are allowed to login.",
+            detail=f"Access denied. Only Authorized persons are allowed to login.",
         )
 
     user = get_user(db, email)
@@ -258,6 +261,7 @@ async def create_member(
     
     new_user = {
         "email": body.email,
+        "username": body.username,
         "full_name": body.full_name,
         "hashed_password": hash_password(body.password),
         "role": body.role,
@@ -266,6 +270,7 @@ async def create_member(
     add_user(db, new_user)
     return Member(
         email=new_user["email"],
+        username=new_user.get("username"),
         full_name=new_user["full_name"],
         role=new_user["role"],
         permissions=new_user["permissions"]

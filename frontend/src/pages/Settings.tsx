@@ -6,6 +6,7 @@ import API_BASE_URL from "../config";
 // ─── Types ────────────────────────────────────────────────────────────────
 interface AdminProfile {
     email: string;
+    username?: string;
     role: string;
     full_name: string;
     permissions: string[];
@@ -13,6 +14,7 @@ interface AdminProfile {
 
 interface Member {
     email: string;
+    username?: string;
     full_name: string;
     role: string;
     permissions: string[];
@@ -111,6 +113,7 @@ export default function Settings() {
     const [showAddMember, setShowAddMember] = useState(false);
     const [memberForm, setMemberForm] = useState({
         email: "",
+        username: "",
         full_name: "",
         password: "",
         role: "member",
@@ -242,7 +245,7 @@ export default function Settings() {
             });
             if (res.ok) {
                 setMemberMsg({ type: "success", text: "Member added successfully." });
-                setMemberForm({ email: "", full_name: "", password: "", role: "member", permissions: [] });
+                setMemberForm({ email: "", username: "", full_name: "", password: "", role: "member", permissions: [] });
                 setShowAddMember(false);
                 fetchMembers(token!);
             } else {
@@ -743,6 +746,12 @@ export default function Settings() {
                                 </div>
                             </div>
                             <div className="st-field">
+                                <div className="st-field-label">Username</div>
+                                <div className="st-field-value">
+                                    <Icons.User /> {profile.username || "—"}
+                                </div>
+                            </div>
+                            <div className="st-field">
                                 <div className="st-field-label">Active Theme</div>
                                 <div className="st-field-value">
                                     <Icons.Palette />
@@ -959,6 +968,15 @@ export default function Settings() {
                                         />
                                     </div>
                                     <div className="st-field">
+                                        <label className="st-field-label">Username (Login ID)</label>
+                                        <input
+                                            className="st-pw-input"
+                                            placeholder="john123"
+                                            value={memberForm.username}
+                                            onChange={e => setMemberForm(p => ({ ...p, username: e.target.value }))}
+                                        />
+                                    </div>
+                                    <div className="st-field">
                                         <label className="st-field-label">Email Address</label>
                                         <input
                                             type="email"
@@ -1044,7 +1062,7 @@ export default function Settings() {
                                                 <td>
                                                     <div className="st-member-info">
                                                         <span className="st-member-name">{m.full_name}</span>
-                                                        <span className="st-member-email">{m.email}</span>
+                                                        <span className="st-member-email">{m.email} {m.username && <span style={{ opacity: 0.6 }}>({m.username})</span>}</span>
                                                     </div>
                                                 </td>
                                                 <td>
