@@ -1,12 +1,15 @@
-import smtplib
 import os
-from email.message import EmailMessage
-from app.core.config import SMTP_SERVER, SMTP_PORT, SMTP_EMAIL, SMTP_PASSWORD
+import json
+import base64
+import urllib.request
+import urllib.error
+from typing import List, Optional
+from app.core.config import SMTP_EMAIL, SENDGRID_API_KEY
 
-def send_email(to_email: str, subject: str, content: str, attachments: list = None):
-    """Base helper to send emails using SMTP settings from config."""
-    if not SMTP_EMAIL or not SMTP_PASSWORD:
-        print(f"DEBUG: Email to {to_email} skipped (SMTP not configured).")
+def send_email(to_email: str, subject: str, content: str, attachments: Optional[List[str]] = None):
+    """Base helper to send emails using SendGrid API to bypass cloud provider port blocks."""
+    if not SENDGRID_API_KEY or not SMTP_EMAIL:
+        print(f"DEBUG: Email to {to_email} skipped (SendGrid API Key or Sender not configured).")
         print(f"--- MOCK EMAIL ---")
         print(f"To: {to_email}")
         print(f"Subject: {subject}")
@@ -14,30 +17,45 @@ def send_email(to_email: str, subject: str, content: str, attachments: list = No
         print(f"------------------")
         return False
 
+    url = "https://api.sendgrid.com/v3/mail/send"
+
+    payload = {
+        "personalizations": [{"to": [{"email": to_email}]}],
+        "from": {"email": SMTP_EMAIL},
+        "subject": subject,
+        "content": [{"type": "text/plain", "value": content}]
+    }
+
+    if attachments:
+        payload["attachments"] = []
+        for filepath in attachments:
+            if os.path.exists(filepath):
+                with open(filepath, 'rb') as f:
+                    file_data = base64.b64encode(f.read()).decode('utf-8')
+                    file_name = os.path.basename(filepath)
+                    payload["attachments"].append({
+                        "content": file_data,
+                        "type": "image/png",
+                        "filename": file_name,
+                        "disposition": "attachment"
+                    })
+
     try:
-        msg = EmailMessage()
-        msg['Subject'] = subject
-        msg['From'] = SMTP_EMAIL
-        msg['To'] = to_email
-        msg.set_content(content)
-
-        if attachments:
-            for filepath in attachments:
-                if os.path.exists(filepath):
-                    with open(filepath, 'rb') as f:
-                        file_data = f.read()
-                        file_name = os.path.basename(filepath)
-                        # Basic assumption: PNG for screenshots. 
-                        # Could be expanded if needed.
-                        msg.add_attachment(file_data, maintype='image', subtype='png', filename=file_name)
-
-        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT, timeout=15) as server:
-            server.starttls()
-            server.login(SMTP_EMAIL, SMTP_PASSWORD)
-            server.send_message(msg)
-        
-        print(f"DEBUG: Email sent to {to_email} successfully.")
-        return True
+        req = urllib.request.Request(
+            url, 
+            data=json.dumps(payload).encode("utf-8"), 
+            headers={
+                "Authorization": f"Bearer {SENDGRID_API_KEY}", 
+                "Content-Type": "application/json"
+            }
+        )
+        with urllib.request.urlopen(req) as resp:
+            print(f"DEBUG: Email sent to {to_email} via SendGrid successfully. Status: {resp.status}")
+            return True
+    except urllib.error.HTTPError as e:
+        error_msg = e.read().decode()
+        print(f"ERROR: SendGrid failed to send email to {to_email}: {e.status} {error_msg}")
+        return False
     except Exception as e:
         print(f"ERROR: Failed to send email to {to_email}: {e}")
         return False
