@@ -42,14 +42,17 @@ def _to_full_dict(c: Candidate) -> Dict:
     })
     return data
 
-def get_all_candidates(db: Session) -> List[Dict]:
+def get_all_candidates(db: Session, **kwargs) -> List[Dict]:
+    bypass_cache = kwargs.get("bypass_cache", False)
+    """Fetch all candidates from DB. Supports bypass_cache for real-time dashboard updates."""
     from sqlalchemy.orm import joinedload
     from app.core.redis import get_cached_data, set_cached_data
     
     # Cache key for summary list
-    cached = get_cached_data("all_candidates_list_summary")
-    if cached:
-        return cached
+    if not bypass_cache:
+        cached = get_cached_data("all_candidates_list_summary")
+        if cached:
+            return cached
 
     # Use joinedload and fetch only essential columns (skip base64/heavy JSON)
     candidates = db.query(Candidate).options(
