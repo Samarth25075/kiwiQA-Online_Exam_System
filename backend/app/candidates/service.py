@@ -4,7 +4,8 @@ from typing import List, Dict
 from sqlalchemy.orm import Session
 from app.models import Candidate
 
-def _to_dict(c: Candidate) -> Dict:
+def _to_summary_dict(c: Candidate) -> Dict:
+    """Lightweight mapping for list views (excludes base64/JSON)."""
     if not c: return None
     return {
         "id": str(c.id),
@@ -12,11 +13,6 @@ def _to_dict(c: Candidate) -> Dict:
         "name": c.name or "",
         "email": c.email or "",
         "phone_number": c.phone_number or "",
-        "dob": c.dob or "",
-        "gender": c.gender or "",
-        "address": c.address or "",
-        "profile_photo": c.profile_photo or "",
-        "cv_url": c.cv_url or "",
         "status": c.status or "",
         "joined_date": c.joined_date or "",
         "token": c.token or "",
@@ -24,29 +20,41 @@ def _to_dict(c: Candidate) -> Dict:
         "exam_title": c.exam.title if c.exam else "No Exam Assigned",
         "score": c.score,
         "total_questions": c.total_questions,
-        "violations": c.violations if c.violations is not None else 0,
+        "violations": c.violations if c.violations is not None else 0
+    }
+
+def _to_full_dict(c: Candidate) -> Dict:
+    """Full mapping including heavy proctoring and result data."""
+    if not c: return None
+    data = _to_summary_dict(c)
+    data.update({
+        "dob": c.dob or "",
+        "gender": c.gender or "",
+        "address": c.address or "",
+        "profile_photo": c.profile_photo or "",
+        "cv_url": c.cv_url or "",
         "device_id": c.device_id or "",
         "answers": c.answers or [],
         "screenshot_start": c.screenshot_start or "",
         "screenshot_mid": c.screenshot_mid or "",
         "screenshot_end": c.screenshot_end or ""
-    }
+    })
+    return data
 
 def get_all_candidates(db: Session) -> List[Dict]:
     from sqlalchemy.orm import joinedload
     from app.core.redis import get_cached_data, set_cached_data
     
-    # Try cache first
-    cached = get_cached_data("all_candidates_list")
+    # Cache key for summary list
+    cached = get_cached_data("all_candidates_list_summary")
     if cached:
         return cached
 
-    # Use joinedload to fetch exam data in ONE query instead of many
+    # Use joinedload and fetch only essential columns
     candidates = db.query(Candidate).options(joinedload(Candidate.exam)).order_by(Candidate.id.desc()).all()
-    res = [_to_dict(c) for c in candidates]
+    res = [_to_summary_dict(c) for c in candidates]
     
-    # Store in cache for 5 minutes
-    set_cached_data("all_candidates_list", res, expire=300)
+    set_cached_data("all_candidates_list_summary", res, expire=300)
     return res
 
 def create_candidate(db: Session, name: str, email: str, phone_number: str = "", dob: str = "", gender: str = "", address: str = "", profile_photo: str = "", cv_url: str = "", device_id: str = "") -> Dict:
@@ -84,7 +92,7 @@ def create_candidate(db: Session, name: str, email: str, phone_number: str = "",
     if redis_client:
         redis_client.delete("all_candidates_list", "exams_with_counts")
         
-    return _to_dict(new_cand)
+    return _to_full_dict(new_cand)
 
 def assign_exam_to_candidate(db: Session, candidate_id: str, exam_id: str) -> Dict | None:
     from app.core.redis import redis_client
@@ -99,7 +107,7 @@ def assign_exam_to_candidate(db: Session, candidate_id: str, exam_id: str) -> Di
         db.refresh(c)
         if redis_client:
             redis_client.delete("all_candidates_list", "exams_with_counts")
-        return _to_dict(c)
+        return _to_full_dict(c)
     return None
 
 def get_candidate_by_token(db: Session, token: str) -> Dict | None:
@@ -158,7 +166,7 @@ def update_candidate_details(db: Session, candidate_id: str, data: Dict) -> Dict
         db.refresh(c)
         if redis_client:
             redis_client.delete("all_candidates_list", "exams_with_counts")
-        return _to_dict(c)
+        return _to_full_dict(c)
     return None
 
 def update_candidate_result(db: Session, token: str, score: int, total: int, violations: int = 0, answers: list = None, screenshots: dict = None) -> bool:
@@ -225,5 +233,5 @@ def reset_candidate_for_retest(db: Session, candidate_id: str) -> Dict | None:
         db.refresh(c)
         if redis_client:
             redis_client.delete("all_candidates_list", "exams_with_counts")
-        return _to_dict(c)
+        return _to_full_dict(c)
     return None

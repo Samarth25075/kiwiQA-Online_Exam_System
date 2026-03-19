@@ -274,7 +274,8 @@ def _generate_mock_questions(topic: str, difficulty: str, count: int) -> List[Di
 def generate_questions(exam_in: ExamCreate) -> List[Dict]:
     return _generate_mock_questions(exam_in.topic, exam_in.difficulty, exam_in.num_questions)
 
-def _to_dict(exam: Exam) -> Dict:
+def _to_summary_dict(exam: Exam) -> Dict:
+    """Lightweight mapping for list views (excludes heavy JSON questions)."""
     if not exam: return None
     return {
         "id": exam.id,
@@ -288,9 +289,15 @@ def _to_dict(exam: Exam) -> Dict:
         "auto_delete": exam.auto_delete,
         "proctoring_enabled": exam.proctoring_enabled,
         "proctoring_type": exam.proctoring_type,
-        "passing_score": exam.passing_score,
-        "questions": exam.questions
+        "passing_score": exam.passing_score
     }
+
+def _to_full_dict(exam: Exam) -> Dict:
+    """Full mapping including all questions."""
+    if not exam: return None
+    data = _to_summary_dict(exam)
+    data["questions"] = exam.questions or []
+    return data
 
 def save_exam(db: Session, exam_in: ExamFinalize) -> Dict:
     from app.core.redis import redis_client
@@ -354,14 +361,14 @@ def get_all_exams(db: Session, bypass_cache: bool = False) -> List[Dict]:
             return cached
 
     exams = db.query(Exam).order_by(Exam.created_at.desc()).all()
-    res = [_to_dict(e) for e in exams]
+    res = [_to_summary_dict(e) for e in exams]
     
     set_cached_data("all_exams_list", res, expire=300)
     return res
 
 def get_exam_by_id(db: Session, exam_id: str) -> Dict | None:
     exam = db.query(Exam).filter(Exam.id == exam_id).first()
-    return _to_dict(exam)
+    return _to_full_dict(exam)
 
 def delete_exam(db: Session, exam_id: str) -> bool:
     from app.core.redis import redis_client

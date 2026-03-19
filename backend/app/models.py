@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, Text, Boolean, JSON, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, deferred
 from app.database import Base
 
 class User(Base):
@@ -28,7 +28,7 @@ class Exam(Base):
     proctoring_enabled = Column(Boolean, default=False)
     proctoring_type = Column(String, nullable=True)
     passing_score = Column(Integer)
-    questions = Column(JSON)  # Database JSON type, handles dicts/lists
+    questions = deferred(Column(JSON))  # Defer large JSON questions block
 
     # Relationship to candidates assigned to this exam
     candidates = relationship("Candidate", back_populates="exam")
@@ -44,7 +44,7 @@ class Candidate(Base):
     dob = Column(String)
     gender = Column(String)
     address = Column(String)
-    profile_photo = Column(Text)
+    profile_photo = deferred(Column(Text))
     cv_url = Column(Text)
     status = Column(String)
     joined_date = Column(String)
@@ -61,7 +61,7 @@ class Candidate(Base):
     device_id = Column(String)
     
     # Detailed result data
-    answers = Column(JSON, nullable=True)  # Store list of {question_index, selected_option_index}
-    screenshot_start = Column(Text, nullable=True)
-    screenshot_mid = Column(Text, nullable=True)
-    screenshot_end = Column(Text, nullable=True)
+    answers = deferred(Column(JSON, nullable=True))  # Defer large answers JSON
+    screenshot_start = deferred(Column(Text, nullable=True))
+    screenshot_mid = deferred(Column(Text, nullable=True))
+    screenshot_end = deferred(Column(Text, nullable=True))
