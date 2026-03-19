@@ -39,9 +39,13 @@ async def read_exams(
     return get_all_exams(db, bypass_cache=bypass_cache)
 
 @router.get("/stats", response_model=List[ExamStatsResponse])
-async def read_exam_stats(current_admin: Annotated[AdminUser, Depends(check_permission("manage exam"))], db: Session = Depends(get_db)):
+async def read_exam_stats(
+    current_admin: Annotated[AdminUser, Depends(check_permission("manage exam"))], 
+    db: Session = Depends(get_db),
+    bypass_cache: bool = False
+):
     """Returns each exam along with the count of candidates assigned to it."""
-    return get_exams_with_candidate_counts(db)
+    return get_exams_with_candidate_counts(db, bypass_cache=bypass_cache)
 
 @router.get("/{exam_id}", response_model=ExamResponse)
 async def read_exam(

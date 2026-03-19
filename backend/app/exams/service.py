@@ -395,14 +395,15 @@ def update_exam(db: Session, exam_id: str, updates: dict) -> bool:
         return True
     return False
 
-def get_exams_with_candidate_counts(db: Session) -> List[Dict]:
+def get_exams_with_candidate_counts(db: Session, bypass_cache: bool = False) -> List[Dict]:
     """Returns each exam along with candidate assignment counts. Cached for speed."""
     from app.core.redis import get_cached_data, set_cached_data
     
-    cached = get_cached_data("exams_with_counts")
-    if cached:
-        print("INFO: Loading dashboard stats from Redis cache")
-        return cached
+    if not bypass_cache:
+        cached = get_cached_data("exams_with_counts")
+        if cached:
+            print("INFO: Loading dashboard stats from Redis cache")
+            return cached
 
     from app.candidates.service import get_all_candidates
     # Always get fresh exams and candidates for dashboard stats
