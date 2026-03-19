@@ -122,6 +122,17 @@ async def startup_event():
                         conn.execute(text(f"ALTER TABLE exams ADD COLUMN {col_name} {col_type}"))
                         conn.commit()
             print("INFO: Auto-migration checks complete.")
+
+            with engine.connect() as conn:
+                # ── Users Table ─────
+                existing_user_cols = [c['name'] for c in inspector.get_columns('users')]
+                if "username" not in existing_user_cols:
+                    print(f"INFO: Adding column username to users...")
+                    conn.execute(text("ALTER TABLE users ADD COLUMN username TEXT"))
+                    # Notice: creating UNIQUE constraint on postgres via raw ALTER TABLE
+                    conn.execute(text("ALTER TABLE users ADD CONSTRAINT ix_users_username UNIQUE (username)"))
+                    conn.commit()
+
         except Exception as e:
             print(f"WARNING: Auto-migration skipped: {e}")
 
