@@ -36,7 +36,7 @@ class ExamFinalize(ExamBase):
 class ExamResponse(ExamBase):
     id: str
     created_at: str
-    questions: List[Question]
+    questions: Optional[List[Question]] = None
 
 class ExamStatsResponse(BaseModel):
     id: str

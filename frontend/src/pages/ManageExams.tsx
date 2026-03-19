@@ -133,11 +133,24 @@ export default function ManageExams() {
         }
     };
 
-    const handleMergeSetup = () => {
+    const handleMergeSetup = async () => {
         const selected = exams.filter(e => selectedExamIds.has(e.id));
         if (selected.length < 2) return;
 
-        const mergedQuestions = selected.flatMap(e => e.questions || []);
+        setSaving(true);
+        try {
+            const token = localStorage.getItem("access_token");
+            const fullExams = await Promise.all(
+                selected.map(async (e) => {
+                    const res = await fetch(`${API_BASE_URL}/exams/${e.id}`, {
+                        headers: { "Authorization": `Bearer ${token}` }
+                    });
+                    if (res.ok) return await res.json();
+                    return e;
+                })
+            );
+
+            const mergedQuestions = fullExams.flatMap(e => e.questions || []);
         const mergedDuration = selected.reduce((sum, e) => sum + (e.duration || 30), 0);
         const topics = Array.from(new Set(selected.map(e => e.topic).filter(Boolean)));
 
@@ -155,6 +168,11 @@ export default function ManageExams() {
             duration: mergedDuration,
             questions: mergedQuestions
         });
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setSaving(false);
+        }
     };
 
     const handlePublishMerged = async () => {
@@ -404,8 +422,8 @@ export default function ManageExams() {
 
                         <div style={{ display: 'flex', gap: 10 }}>
                             {selectedExamIds.size >= 2 && (
-                                <button className="merge-btn" onClick={handleMergeSetup}>
-                                    <Icons.Merge size={12} /> Merge Marked
+                                <button className="merge-btn" onClick={handleMergeSetup} disabled={saving}>
+                                    <Icons.Merge size={12} /> {saving ? "Loading..." : "Merge Marked"}
                                 </button>
                             )}
                             <a href="/#/create-exam" className="create-btn">
@@ -465,7 +483,7 @@ export default function ManageExams() {
                                                     </span>
                                                 </td>
                                                 <td>{exam.duration}m</td>
-                                                <td>{exam.questions?.length || 0}</td>
+                                                <td>{exam.num_questions || 0}</td>
                                                 <td>
                                                     {exam.proctoring_enabled ? (
                                                         <div className="mgmt-proctor-pill" style={{ color: 'var(--primary)', background: 'color-mix(in srgb, var(--primary) 10%, var(--bg))', display: 'inline-flex', width: 'fit-content' }}>

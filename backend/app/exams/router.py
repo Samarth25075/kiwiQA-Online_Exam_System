@@ -40,6 +40,19 @@ async def read_exam_stats(current_admin: Annotated[AdminUser, Depends(check_perm
     """Returns each exam along with the count of candidates assigned to it."""
     return get_exams_with_candidate_counts(db)
 
+@router.get("/{exam_id}", response_model=ExamResponse)
+async def read_exam(
+    exam_id: str,
+    current_admin: Annotated[AdminUser, Depends(check_permission("manage exam"))],
+    db: Session = Depends(get_db)
+):
+    """Fetch a single exam with all questions."""
+    from app.exams.service import get_exam_by_id
+    exam = get_exam_by_id(db, exam_id)
+    if not exam:
+        raise HTTPException(status_code=404, detail="Exam not found")
+    return exam
+
 @router.delete("/{exam_id}")
 async def remove_exam(
     exam_id: str,

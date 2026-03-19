@@ -106,7 +106,7 @@ def assign_exam_to_candidate(db: Session, candidate_id: str, exam_id: str) -> Di
         db.commit()
         db.refresh(c)
         if redis_client:
-            redis_client.delete("all_candidates_list", "exams_with_counts")
+            redis_client.delete("all_candidates_list", "all_candidates_list_summary", "exams_with_counts")
         return _to_full_dict(c)
     return None
 
@@ -121,7 +121,7 @@ def update_candidate_status(db: Session, token: str, status: str) -> bool:
         c.status = status
         db.commit()
         if redis_client:
-            redis_client.delete("all_candidates_list", "exams_with_counts")
+            redis_client.delete("all_candidates_list", "all_candidates_list_summary", "exams_with_counts")
         return True
     return False
 
@@ -147,7 +147,7 @@ def delete_candidate(db: Session, candidate_id: str) -> bool:
         db.delete(c)
         db.commit()
         if redis_client:
-            redis_client.delete("all_candidates_list", "exams_with_counts")
+            redis_client.delete("all_candidates_list", "all_candidates_list_summary", "exams_with_counts")
         return True
     return False
 
@@ -165,7 +165,7 @@ def update_candidate_details(db: Session, candidate_id: str, data: Dict) -> Dict
         db.commit()
         db.refresh(c)
         if redis_client:
-            redis_client.delete("all_candidates_list", "exams_with_counts")
+            redis_client.delete("all_candidates_list", "all_candidates_list_summary", "exams_with_counts")
         return _to_full_dict(c)
     return None
 
@@ -186,7 +186,7 @@ def update_candidate_result(db: Session, token: str, score: int, total: int, vio
             
         db.commit()
         if redis_client:
-            redis_client.delete("all_candidates_list", "exams_with_counts")
+            redis_client.delete("all_candidates_list", "all_candidates_list_summary", "exams_with_counts")
         return True
     return False
 
@@ -212,7 +212,7 @@ def cleanup_candidate_screenshots(db: Session, candidate_id: str) -> bool:
             
         db.commit()
         if redis_client:
-            redis_client.delete("all_candidates_list", "exams_with_counts")
+            redis_client.delete("all_candidates_list", "all_candidates_list_summary", "exams_with_counts")
         return True
     return False
 
@@ -232,6 +232,6 @@ def reset_candidate_for_retest(db: Session, candidate_id: str) -> Dict | None:
         db.commit()
         db.refresh(c)
         if redis_client:
-            redis_client.delete("all_candidates_list", "exams_with_counts")
+            redis_client.delete("all_candidates_list", "all_candidates_list_summary", "exams_with_counts")
         return _to_full_dict(c)
     return None
