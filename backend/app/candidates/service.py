@@ -112,7 +112,7 @@ def assign_exam_to_candidate(db: Session, candidate_id: str, exam_id: str) -> Di
 
 def get_candidate_by_token(db: Session, token: str) -> Dict | None:
     c = db.query(Candidate).filter(Candidate.token == token).first()
-    return _to_dict(c)
+    return _to_full_dict(c) if c else None
 
 def update_candidate_status(db: Session, token: str, status: str) -> bool:
     from app.core.redis import redis_client
