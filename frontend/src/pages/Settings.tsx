@@ -154,7 +154,15 @@ export default function Settings() {
     // ── Apply theme ────────────────────────────────────────────────────────
     const applyTheme = (id: string) => {
         setActiveTheme(id);
+        
+        // Always save to global key for current session persistence
         localStorage.setItem("kiwi-theme", id);
+        
+        // Save to user-specific key if profile exists
+        if (profile?.email) {
+            localStorage.setItem(`kiwi-theme-${profile.email}`, id);
+        }
+
         if (id === "default") {
             document.documentElement.removeAttribute("data-theme");
         } else {

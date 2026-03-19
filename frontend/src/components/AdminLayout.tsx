@@ -42,19 +42,38 @@ interface AdminLayoutProps {
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     const navigate = useNavigate();
     const location = useLocation();
-    const [profile, setProfile] = React.useState<{ role: string; permissions: string[] } | null>(null);
+    const [profile, setProfile] = React.useState<{ email: string; role: string; permissions: string[] } | null>(null);
     const [popup, setPopup] = React.useState<{ isOpen: boolean; title: string; message: string } | null>(null);
     const [sidebarOpen, setSidebarOpen] = React.useState(false);
 
-    // ── Apply saved theme on every page that uses this layout ──
+    // ── Apply saved theme (Global then User-Specific) ──
     useEffect(() => {
-        const saved = localStorage.getItem("kiwi-theme") || "default";
-        if (saved === "default") {
+        // First application of global/last-used theme
+        const globalSaved = localStorage.getItem("kiwi-theme") || "default";
+        if (globalSaved === "default") {
             document.documentElement.removeAttribute("data-theme");
         } else {
-            document.documentElement.setAttribute("data-theme", saved);
+            document.documentElement.setAttribute("data-theme", globalSaved);
         }
     }, []);
+
+    // When profile is available, apply user-specific theme
+    useEffect(() => {
+        if (profile?.email) {
+            // Get user theme or default specifically for this user
+            const userTheme = localStorage.getItem(`kiwi-theme-${profile.email}`) || "default";
+            
+            // Apply the user's theme
+            if (userTheme === "default") {
+                document.documentElement.removeAttribute("data-theme");
+            } else {
+                document.documentElement.setAttribute("data-theme", userTheme);
+            }
+            
+            // Sync the global key so it persists for this session
+            localStorage.setItem("kiwi-theme", userTheme);
+        }
+    }, [profile]);
 
     const handleLogout = async () => {
         const token = localStorage.getItem("access_token");
@@ -69,6 +88,12 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
             }
         }
         localStorage.removeItem("access_token");
+        sessionStorage.removeItem("admin-profile");
+        
+        // Reset theme to default on logout to prevent theme bleeding between users
+        localStorage.removeItem("kiwi-theme");
+        document.documentElement.removeAttribute("data-theme");
+        
         navigate("/");
     };
 
