@@ -111,7 +111,7 @@ export default function CandidateReport() {
     );
 
     const { candidate, stats, questions, proctoring, exam_title } = report;
-    const scorePct = Math.round((candidate.score / candidate.total_questions) * 100);
+    const scorePct = Math.round((candidate.score / (candidate.total_marks || candidate.total_questions || 1)) * 100);
 
     return (
         <AdminLayout>
@@ -133,8 +133,8 @@ export default function CandidateReport() {
 
                 <div className="stats-grid" style={{ marginBottom: 24 }}>
                     <div className="stat-pill">
-                        <div className="stat-val">{candidate.score} / {candidate.total_questions}</div>
-                        <div className="stat-label">Correct Answers</div>
+                        <div className="stat-val">{candidate.score} / {candidate.total_marks || candidate.total_questions}</div>
+                        <div className="stat-label">Total Weighted Score</div>
                     </div>
                     <div className="stat-pill">
                         <div className="stat-val">{candidate.violations}</div>
@@ -156,9 +156,8 @@ export default function CandidateReport() {
                                 <th style={{ textAlign: 'center' }}>Score</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            {Object.entries(stats).map(([cat, data]: [string, any]) => {
-                                const pct = Math.round((data.correct / data.total) * 100);
+                        <tbody>                             {Object.entries(stats).map(([cat, data]: [string, any]) => {
+                                const pct = Math.round((data.correct / (data.total || 1)) * 100);
                                 return (
                                     <tr key={cat}>
                                         <td style={{ fontWeight: 700 }}>{cat}</td>
@@ -171,7 +170,7 @@ export default function CandidateReport() {
                                             </div>
                                         </td>
                                         <td style={{ textAlign: 'center', fontWeight: 800, color: 'var(--text-muted)' }}>
-                                            {data.correct} / {data.total}
+                                            {data.correct.toFixed(1)} / {data.total.toFixed(1)}
                                         </td>
                                     </tr>
                                 );
@@ -213,10 +212,11 @@ export default function CandidateReport() {
                     <h2 className="section-title">📝 Question Breakdown</h2>
                     {questions.map((q, idx) => {
                         const isCorrect = q.selected_index !== null && q.options[q.selected_index]?.is_correct;
+                        const marksAwarded = isCorrect ? (q.marks || 1) : 0;
                         return (
                             <div key={idx} className={`q-item ${isCorrect ? 'correct' : 'incorrect'}`}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                                    <span style={{ fontSize: 10, fontWeight: 900, color: 'var(--primary)', textTransform: 'uppercase' }}>Question {idx + 1} • {q.category}</span>
+                                    <span style={{ fontSize: 10, fontWeight: 900, color: 'var(--primary)', textTransform: 'uppercase' }}>Question {idx + 1} • {q.category} • {marksAwarded} / {q.marks || 1} Marks</span>
                                     {q.selected_index === null && <span style={{ fontSize: 10, color: '#e11d48', fontWeight: 700, marginLeft: 'auto' }}>NOT ANSWERED</span>}
                                 </div>
                                 <div className="q-text">{q.text}</div>

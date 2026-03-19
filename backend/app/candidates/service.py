@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 from typing import List, Dict
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload, defer
 from app.models import Candidate
 
 def _to_summary_dict(c: Candidate) -> Dict:
@@ -20,6 +20,7 @@ def _to_summary_dict(c: Candidate) -> Dict:
         "exam_title": c.exam.title if c.exam else "No Exam Assigned",
         "score": c.score,
         "total_questions": c.total_questions,
+        "total_marks": c.total_marks,
         "violations": c.violations if c.violations is not None else 0
     }
 
@@ -50,8 +51,15 @@ def get_all_candidates(db: Session) -> List[Dict]:
     if cached:
         return cached
 
-    # Use joinedload and fetch only essential columns
-    candidates = db.query(Candidate).options(joinedload(Candidate.exam)).order_by(Candidate.id.desc()).all()
+    # Use joinedload and fetch only essential columns (skip base64/heavy JSON)
+    candidates = db.query(Candidate).options(
+        joinedload(Candidate.exam),
+        defer(Candidate.profile_photo),
+        defer(Candidate.answers),
+        defer(Candidate.screenshot_start),
+        defer(Candidate.screenshot_mid),
+        defer(Candidate.screenshot_end)
+    ).order_by(Candidate.id.desc()).all()
     res = [_to_summary_dict(c) for c in candidates]
     
     set_cached_data("all_candidates_list_summary", res, expire=300)
@@ -114,6 +122,20 @@ def get_candidate_by_token(db: Session, token: str) -> Dict | None:
     c = db.query(Candidate).filter(Candidate.token == token).first()
     return _to_full_dict(c) if c else None
 
+def get_candidate_by_token_summary(db: Session, token: str) -> Dict | None:
+    """Optimized fetch that avoids loading heavy deferred fields."""
+    c = db.query(Candidate).filter(Candidate.token == token).first()
+    return _to_summary_dict(c) if c else None
+
+def is_device_used_for_exam(db: Session, device_id: str, exclude_email: str, exam_id: str) -> bool:
+    """Direct database check for device usage instead of fetching all candidates."""
+    exists = db.query(Candidate).filter(
+        Candidate.device_id == device_id,
+        Candidate.email != exclude_email,
+        Candidate.assigned_exam_id == exam_id
+    ).first() is not None
+    return exists
+
 def update_candidate_status(db: Session, token: str, status: str) -> bool:
     from app.core.redis import redis_client
     c = db.query(Candidate).filter(Candidate.token == token).first()
@@ -169,12 +191,13 @@ def update_candidate_details(db: Session, candidate_id: str, data: Dict) -> Dict
         return _to_full_dict(c)
     return None
 
-def update_candidate_result(db: Session, token: str, score: int, total: int, violations: int = 0, answers: list = None, screenshots: dict = None) -> bool:
+def update_candidate_result(db: Session, token: str, score: float, total: int, total_marks: float, violations: int = 0, answers: list = None, screenshots: dict = None) -> bool:
     from app.core.redis import redis_client
     c = db.query(Candidate).filter(Candidate.token == token).first()
     if c:
         c.score = score
         c.total_questions = total
+        c.total_marks = total_marks
         c.violations = violations
         c.status = "Completed"
         if answers is not None:

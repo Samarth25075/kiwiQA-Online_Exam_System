@@ -177,14 +177,28 @@ export default function AdminDashboard() {
             const ok = await fetchInitialData();
             if (!ok || cancelled) return;
 
-            pollId = setInterval(async () => {
+            // Poll every 5s instead of 15s for better responsiveness
+            pollId = setInterval(() => {
                 if (!localStorage.getItem("access_token")) { cleanup(); navigate("/"); return; }
-                await fetchCandidates();
-                await fetchExamStats();
-                await fetchAdminOtp();
-            }, 15000);
+                // Fetch in parallel
+                Promise.all([
+                    fetchCandidates(),
+                    fetchExamStats(),
+                    fetchAdminOtp()
+                ]).catch(console.error);
+            }, 5000);
 
             timerId = setInterval(() => setNow(new Date()), 1000);
+        };
+
+        const handleFocus = () => {
+            if (!cancelled && localStorage.getItem("access_token")) {
+                Promise.all([
+                    fetchCandidates(),
+                    fetchExamStats(),
+                    fetchAdminOtp()
+                ]).catch(console.error);
+            }
         };
 
         const cleanup = () => {
@@ -193,8 +207,21 @@ export default function AdminDashboard() {
             if (timerId) clearInterval(timerId);
         };
 
+        // Cross-tab synchronization
+        const bc = new BroadcastChannel("exam_portal_updates");
+        bc.onmessage = (msg) => {
+            if (msg.data === "refresh_dashboard") {
+                console.log("INFO: Refreshing dashboard due to cross-tab update");
+                handleFocus();
+            }
+        };
+
         startPolling();
-        return cleanup;
+        return () => {
+            cleanup();
+            bc.close();
+            window.removeEventListener("focus", handleFocus);
+        };
     }, []);
 
     // ─── Auth ────────────────────────────────────────────────────────────────────
@@ -238,7 +265,7 @@ export default function AdminDashboard() {
     const fetchCandidates = async () => {
         if (!getToken()) return;
         try {
-            const res = await fetch(`${API_BASE_URL}/candidates`, { headers: authHeaders() });
+            const res = await fetch(`${API_BASE_URL}/candidates?bypass_cache=true&v=${Date.now()}`, { headers: authHeaders() });
             if (res.status === 401) { handleAuthFailure(); return; }
             if (res.ok) {
                 const data: Candidate[] = await res.json();
@@ -256,7 +283,7 @@ export default function AdminDashboard() {
     const fetchExamStats = async () => {
         if (!getToken()) return;
         try {
-            const res = await fetch(`${API_BASE_URL}/exams/stats`, { headers: authHeaders() });
+            const res = await fetch(`${API_BASE_URL}/exams/stats?bypass_cache=true&v=${Date.now()}`, { headers: authHeaders() });
             if (res.status === 401) { handleAuthFailure(); return; }
             if (res.ok) setExamStats(await res.json());
         } catch (err) {
@@ -300,12 +327,16 @@ export default function AdminDashboard() {
     };
 
     const putExamExpiry = async (examId: string, body: object) => {
+        // Optimistically update the state
+        setExamStats(prev => prev.map(stat => 
+            stat.id === examId ? { ...stat, ...body } : stat
+        ));
+
         await fetch(`${API_BASE_URL}/exams/${examId}/expiry`, {
             method: "PUT",
             headers: authHeaders(),
             body: JSON.stringify(body),
         });
-        fetchExamStats();
     };
 
     const handleActivateLink = (examId: string) => {

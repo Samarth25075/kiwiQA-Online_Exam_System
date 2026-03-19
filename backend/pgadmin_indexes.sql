@@ -18,5 +18,8 @@ CREATE INDEX IF NOT EXISTS ix_candidates_status ON candidates (status);
 -- 'email' is an important lookup for admin searches
 CREATE INDEX IF NOT EXISTS ix_candidates_email ON candidates (email);
 
+-- 'device_id' is used to prevent multiple candidates from using the same device for the same exam
+CREATE INDEX IF NOT EXISTS ix_candidates_device_id ON candidates (device_id);
+
 -- Optional but recommended: Add a partial index if searching for completed candidates is your heaviest query:
 CREATE INDEX IF NOT EXISTS ix_candidates_completed ON candidates (status) WHERE status = 'Completed';

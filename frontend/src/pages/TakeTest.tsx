@@ -19,6 +19,8 @@ interface Question {
     options: Option[];
     image?: string;
     image_required?: boolean;
+    marks?: number;
+    category?: string;
     originalIndex?: number;
 }
 
@@ -1377,15 +1379,18 @@ export default function TakeTest() {
             }
 
             let score = 0;
+            let totalMarks = 0;
             const answersArray: any[] = [];
             shuffledQuestions.forEach((q, idx) => {
+                const qMarks = q.marks ?? 1;
+                totalMarks += qMarks;
                 const answerIdx = answers[idx];
                 answersArray.push({
                     question_index: q.originalIndex ?? idx,
                     selected_option_index: answerIdx !== undefined ? q.options[answerIdx].originalIndex : null
                 });
                 if (answerIdx !== undefined && q.options[answerIdx].is_correct) {
-                    score++;
+                    score += qMarks;
                 }
             });
 
@@ -1395,6 +1400,7 @@ export default function TakeTest() {
                 body: JSON.stringify({
                     score: score,
                     total_questions: shuffledQuestions.length,
+                    total_marks: totalMarks,
                     violations: violationsRef.current,
                     screenshot: base64Image, // backward compatibility
                     screenshot_start: snapshotStart,

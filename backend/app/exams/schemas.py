@@ -12,6 +12,7 @@ class Question(BaseModel):
     options: List[Option]
     explanation: Optional[str] = None
     category: Optional[str] = "General"
+    marks: float = 1.0
     image: Optional[str] = None
     image_required: bool = False
 

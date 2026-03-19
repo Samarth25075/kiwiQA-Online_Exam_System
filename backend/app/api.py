@@ -22,6 +22,7 @@ from .auth.router import router as auth_router
 from .candidates.admin_router import router as candidates_admin_router
 from .candidates.public_router import router as candidates_public_router
 from .exams.router import router as exams_router
+from .categories.router import router as categories_router
 from .exams.service import check_and_delete_expired_exams
 
 app = FastAPI(
@@ -74,6 +75,7 @@ app.include_router(auth_router)       # /login, /me
 app.include_router(candidates_admin_router)
 app.include_router(candidates_public_router, prefix="/candidates")
 app.include_router(exams_router)       # /exams
+app.include_router(categories_router)
 
 # ── Background Cleanup ────────────────────────
 @app.on_event("startup")
@@ -98,7 +100,8 @@ async def startup_event():
                 existing_cols = [c['name'] for c in inspector.get_columns('candidates')]
                 new_cols = [
                     ("answers", "JSONB" if "postgresql" in DATABASE_URL else "JSON"),
-                    ("screenshot_start", "TEXT"), ("screenshot_mid", "TEXT"), ("screenshot_end", "TEXT")
+                    ("screenshot_start", "TEXT"), ("screenshot_mid", "TEXT"), ("screenshot_end", "TEXT"),
+                    ("total_marks", "FLOAT DEFAULT 0")
                 ]
                 for col_name, col_type in new_cols:
                     if col_name not in existing_cols:
@@ -168,7 +171,7 @@ async def startup_event():
     # 4. Initialize FastAPICache with Redis
     try:
         from app.core.config import REDIS_URL
-        redis_cache = redis.from_url(REDIS_URL, encoding="utf8", decode_responses=True)
+        redis_cache = redis.from_url(REDIS_URL, encoding="utf8", decode_responses=True, socket_connect_timeout=1, socket_timeout=1)
         FastAPICache.init(RedisBackend(redis_cache), prefix="fastapi-cache")
         print("INFO: FastAPICache initialized with Redis.")
     except Exception as e:
@@ -177,14 +180,17 @@ async def startup_event():
     # 3. Start background cleanup loop
     async def cleanup_loop():
         from app.database import SessionLocal
+        from app.core.redis import redis_client
         while True:
             try:
                 db = SessionLocal()
-                check_and_delete_expired_exams(db)
+                deleted_any = check_and_delete_expired_exams(db)
                 db.close()
+                if deleted_any and redis_client:
+                    redis_client.delete("all_exams_list", "exams_with_counts")
             except Exception as e:
                 print(f"ERROR in background cleanup: {e}")
-            await asyncio.sleep(60)
+            await asyncio.sleep(30)
     asyncio.create_task(cleanup_loop())
 
 # ── Health check ──────────────────────────────

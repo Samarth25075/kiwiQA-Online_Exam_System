@@ -4,10 +4,10 @@ from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from app.auth.router import get_current_admin, check_permission
 from app.auth.schemas import AdminUser
 from app.exams.schemas import ExamCreate, ExamResponse, ExamFinalize, Question, ExamStatsResponse
-from fastapi_cache.decorator import cache
 from app.exams.service import save_exam, generate_questions, get_all_exams, delete_exam, get_exams_with_candidate_counts
 from sqlalchemy.orm import Session
 from app.database import get_db
+# Remove redundant FastAPICache, using service-level caching instead
 
 router = APIRouter(prefix="/exams", tags=["exams"])
 
@@ -26,16 +26,19 @@ async def add_exam(
     db: Session = Depends(get_db)
 ):
     """Finalize and save the exam."""
-    return save_exam(db, exam_in)
+    res = save_exam(db, exam_in)
+    return res
 
 @router.get("", response_model=List[ExamResponse])
-@cache(expire=60)
-async def read_exams(current_admin: Annotated[AdminUser, Depends(check_permission("manage exam"))], db: Session = Depends(get_db)):
+async def read_exams(
+    current_admin: Annotated[AdminUser, Depends(check_permission("manage exam"))], 
+    db: Session = Depends(get_db),
+    bypass_cache: bool = False
+):
     """List all generated exams."""
-    return get_all_exams(db)
+    return get_all_exams(db, bypass_cache=bypass_cache)
 
 @router.get("/stats", response_model=List[ExamStatsResponse])
-@cache(expire=60)
 async def read_exam_stats(current_admin: Annotated[AdminUser, Depends(check_permission("manage exam"))], db: Session = Depends(get_db)):
     """Returns each exam along with the count of candidates assigned to it."""
     return get_exams_with_candidate_counts(db)

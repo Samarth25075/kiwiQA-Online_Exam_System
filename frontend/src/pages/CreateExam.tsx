@@ -15,6 +15,8 @@ interface Question {
   text: string;
   options: Option[];
   explanation?: string;
+  category?: string;
+  marks?: number;
   image?: string;
   image_required?: boolean;
 }
@@ -205,6 +207,16 @@ export default function CreateExam() {
   const [questions, setQuestions] = useState<Question[] | null>(null);
   const [editingIdx, setEditingIdx] = useState<number | null>(null);
   const [aiTipIndex, setAiTipIndex] = useState(0);
+  const [categories, setCategories] = useState<{id: number, name: string}[]>([]);
+  const [showNewCategoryInput, setShowNewCategoryInput] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
+
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/categories`, { headers: authHeaders() })
+      .then(r => r.json())
+      .then(data => setCategories(data))
+      .catch(console.error);
+  }, []);
 
   const handleImageUpload = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -332,11 +344,15 @@ export default function CreateExam() {
         body: JSON.stringify({ ...buildPayload(), questions }),
       });
       if (!res.ok) throw new Error();
-      setPopup({
-        isOpen: true, type: "alert", title: "Published",
-        message: "Exam has been saved and is ready to deploy.",
-        onConfirm: () => navigate("/manage-exams")
-      });
+        setPopup({
+          isOpen: true, type: "alert", title: "Published",
+          message: "Exam has been saved and is ready to deploy.",
+          onConfirm: () => {
+             // Notify other tabs/dashboard
+             new BroadcastChannel("exam_portal_updates").postMessage("refresh_dashboard");
+             navigate("/manage-exams");
+          }
+        });
     } catch {
       setPopup({
         isOpen: true, type: "alert", title: "Save Failed",
@@ -1336,6 +1352,57 @@ export default function CreateExam() {
                             </div>
                          </div>
 
+                         
+                         <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginTop: 12 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--bg)', padding: '6px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--line)' }}>
+                               <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--ink-2)' }}>Marks:</span>
+                               <input type="number" step="0.5" min="0" className="form-input" style={{ width: 80, height: 32, padding: '0 8px' }} value={q.marks ?? 1} onChange={e => {
+                                  let val = parseFloat(e.target.value);
+                                  if (isNaN(val)) val = 0;
+                                  const nq = [...questions]; nq[idx].marks = val; setQuestions(nq);
+                               }} />
+                            </div>
+                            
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--bg)', padding: '6px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--line)', flex: 1 }}>
+                               <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--ink-2)' }}>Category:</span>
+                               {showNewCategoryInput ? (
+                                  <div style={{ display: 'flex', gap: 6, flex: 1 }}>
+                                     <input autoFocus className="form-input" style={{ height: 32, flex: 1 }} value={newCategoryName} onChange={e => setNewCategoryName(e.target.value)} placeholder="New Category Name" />
+                                     <button className="btn btn-publish" type="button" style={{ height: 32, padding: '0 12px' }} onClick={async () => {
+                                        if (!newCategoryName.trim()) { setShowNewCategoryInput(false); return; }
+                                        try {
+                                           const res = await fetch(`${API_BASE_URL}/categories`, {
+                                              method: 'POST', headers: authHeaders(), body: JSON.stringify({ name: newCategoryName })
+                                           });
+                                           if (res.ok) {
+                                              const newCat = await res.json();
+                                              setCategories(prev => [...prev, newCat]);
+                                              const nq = [...questions]; nq[idx].category = newCat.name; setQuestions(nq);
+                                           }
+                                        } catch (e) { console.error(e); }
+                                        setShowNewCategoryInput(false);
+                                        setNewCategoryName("");
+                                     }}><Icons.Check /></button>
+                                     <button className="btn btn-secondary" type="button" style={{ height: 32, padding: '0 12px' }} onClick={() => setShowNewCategoryInput(false)}><Icons.X /></button>
+                                  </div>
+                               ) : (
+                                  <select className="form-input" style={{ height: 32, flex: 1 }} value={q.category || "General"} onChange={e => {
+                                     if (e.target.value === "ADD_NEW") {
+                                        setShowNewCategoryInput(true);
+                                     } else {
+                                        const nq = [...questions]; nq[idx].category = e.target.value; setQuestions(nq);
+                                     }
+                                  }}>
+                                     <option value="General">General</option>
+                                     {categories.filter(c => c.name !== 'General').map(c => (
+                                        <option key={c.id} value={c.name}>{c.name}</option>
+                                     ))}
+                                     <option value="ADD_NEW" style={{ fontWeight: 'bold', color: 'var(--teal)' }}>+ Add New Category</option>
+                                  </select>
+                               )}
+                            </div>
+                         </div>
+                         
                          {q.image && (
                             <div style={{ position: 'relative', width: 'fit-content' }}>
                                <img src={q.image} alt="Question" style={{ maxWidth: '200px', borderRadius: 8, border: '1px solid var(--line)' }} />
@@ -1401,7 +1468,15 @@ export default function CreateExam() {
                       <div className="q-header">
                         <div className="q-num">{idx + 1}</div>
                         <div className="q-text">
-                            <div style={{ marginBottom: q.image ? 12 : 0 }}>{q.text}</div>
+                            <div style={{ marginBottom: q.image ? 12 : 6 }}>
+                               <span style={{ marginRight: 8 }}>{q.text}</span>
+                               <span style={{ fontSize: '11px', background: 'var(--teal-light)', color: 'var(--teal)', padding: '2px 8px', borderRadius: '100px', fontWeight: 700, whiteSpace: 'nowrap' }}>
+                                   {q.marks ?? 1} Marks
+                               </span>
+                               <span style={{ fontSize: '11px', background: 'var(--bg)', color: 'var(--ink-2)', border: '1px solid var(--line)', padding: '2px 8px', borderRadius: '100px', fontWeight: 600, marginLeft: 6, whiteSpace: 'nowrap' }}>
+                                   {q.category || 'General'}
+                               </span>
+                            </div>
                             {q.image && <img src={q.image} alt="Question" style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: 8, display: 'block', marginBottom: 12 }} />}
                             {q.image_required && (
                                 <span style={{ fontSize: '11px', background: 'var(--teal-light)', color: 'var(--teal)', padding: '2px 8px', borderRadius: '100px', fontWeight: 700, textTransform: 'uppercase' }}>
@@ -1410,7 +1485,10 @@ export default function CreateExam() {
                             )}
                         </div>
                         <div style={{ display: 'flex', gap: 6 }}>
-                          <button className="q-delete" type="button" onClick={() => setEditingIdx(idx)} title="Edit question">
+                          <button className="q-delete" type="button" onClick={() => {
+                             setEditingIdx(idx);
+                             setShowNewCategoryInput(false);
+                          }} title="Edit question">
                             <Icons.Edit />
                           </button>
                           <button className="q-delete" type="button" onClick={() => deleteQuestion(idx)} title="Remove question">

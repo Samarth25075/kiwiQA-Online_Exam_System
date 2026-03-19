@@ -12,7 +12,8 @@ from app.candidates.schemas import (
 from app.candidates.service import (
     get_candidate_by_token, update_candidate_status, 
     update_candidate_result, update_candidate_details,
-    get_all_candidates, create_candidate, assign_exam_to_candidate
+    get_all_candidates, create_candidate, assign_exam_to_candidate,
+    get_candidate_by_token_summary, is_device_used_for_exam
 )
 from .utils import (
     _format_candidate, send_screenshot_email, send_otp_email, 
@@ -66,7 +67,7 @@ async def submit_test(token: str, result: CandidateResult, background_tasks: Bac
         except: pass
 
     success = update_candidate_result(
-        db, token, result.score, result.total_questions, result.violations, 
+        db, token, result.score, result.total_questions, result.total_marks, result.violations, 
         answers=result.answers, screenshots=screenshots
     )
     
@@ -98,7 +99,8 @@ async def resend_test_results(token: str, background_tasks: BackgroundTasks, db:
 @router.get("/test/{token}")
 async def get_test(token: str, device_id: Optional[str] = None, db: Session = Depends(get_db)):
     """Public endpoint for candidates to fetch their assigned exam."""
-    candidate = get_candidate_by_token(db, token)
+    # Use optimized summary fetch
+    candidate = get_candidate_by_token_summary(db, token)
     if not candidate or not candidate.get("assigned_exam_id"):
         raise HTTPException(status_code=404, detail="Test not found or not assigned")
     
@@ -106,10 +108,9 @@ async def get_test(token: str, device_id: Optional[str] = None, db: Session = De
         raise HTTPException(status_code=403, detail="Your exam has already been submitted and cannot be retaken.")
 
     if device_id:
-        all_cands = get_all_candidates(db)
-        for c in all_cands:
-            if c.get("device_id") == device_id and c["email"] != candidate["email"] and c.get("assigned_exam_id") == candidate.get("assigned_exam_id"):
-                raise HTTPException(status_code=403, detail="This device has already been used by another candidate for this exam.")
+        # Optimized direct DB check instead of O(n) scan
+        if is_device_used_for_exam(db, device_id, candidate["email"], candidate["assigned_exam_id"]):
+            raise HTTPException(status_code=403, detail="This device has already been used by another candidate for this exam.")
 
         saved_device = candidate.get("device_id")
         if not saved_device:
@@ -130,14 +131,26 @@ async def get_test(token: str, device_id: Optional[str] = None, db: Session = De
 @router.post("/enroll/{exam_id}/request-otp")
 async def request_enroll_otp(exam_id: str, req: CandidateEnrollOTPRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db), device_id: Optional[str] = None):
     """Generate and send an OTP for candidate self-enrollment."""
+    from app.models import Candidate
     get_exam_and_check_expiry(db, exam_id)
-    existing = get_all_candidates(db)
     
-    if any(c["email"] == req.email and c.get("assigned_exam_id") == exam_id for c in existing):
+    # Optimized direct DB checks
+    already_registered = db.query(Candidate).filter(
+        Candidate.email == req.email,
+        Candidate.assigned_exam_id == exam_id
+    ).first() is not None
+    
+    if already_registered:
         raise HTTPException(status_code=400, detail="You are already registered for this specific exam.")
 
     if device_id:
-        if any(c.get("device_id") == device_id and c["email"] != req.email and c.get("assigned_exam_id") == exam_id for c in existing):
+        device_conflict = db.query(Candidate).filter(
+            Candidate.device_id == device_id,
+            Candidate.email != req.email,
+            Candidate.assigned_exam_id == exam_id
+        ).first() is not None
+        
+        if device_conflict:
              raise HTTPException(status_code=403, detail="This device has already been used to register for this exam.")
 
     otp = str(random.randint(100000, 999999))

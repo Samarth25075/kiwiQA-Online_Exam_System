@@ -4,7 +4,7 @@ from .config import REDIS_URL
 
 # Create redis client
 try:
-    redis_client = redis.from_url(REDIS_URL, decode_responses=True)
+    redis_client = redis.from_url(REDIS_URL, decode_responses=True, socket_connect_timeout=1, socket_timeout=1)
     # Test connection
     redis_client.ping()
     print("INFO: Connected to Redis successfully.")

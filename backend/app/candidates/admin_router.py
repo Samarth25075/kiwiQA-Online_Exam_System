@@ -9,10 +9,12 @@ from app.core.config import BACKEND_URL, FRONTEND_URL
 from app.auth.router import get_current_admin, check_permission
 from app.auth.schemas import AdminUser
 from app.candidates.schemas import CandidateCreate, CandidateResponse, CandidateAssign
+from app.models import Candidate
 from app.candidates.service import (
     get_all_candidates, create_candidate, assign_exam_to_candidate, 
     delete_candidate, update_candidate_details,
-    reset_candidate_for_retest, cleanup_candidate_screenshots
+    reset_candidate_for_retest, cleanup_candidate_screenshots,
+    _to_full_dict, _to_summary_dict
 )
 from app.exams.service import get_exam_by_id
 from .utils import _format_candidate, send_invitation_email, send_email
@@ -108,8 +110,10 @@ async def get_candidate_report(
     db: Session = Depends(get_db)
 ):
     """Generate a detailed report for a candidate including proctoring and performance stats."""
-    candidates = get_all_candidates(db)
-    candidate = next((c for c in candidates if str(c["id"]) == str(candidate_id)), None)
+    candidate_obj = db.query(Candidate).filter(Candidate.id == int(candidate_id)).first()
+    if not candidate_obj:
+        raise HTTPException(status_code=404, detail="Candidate not found")
+    candidate = _to_full_dict(candidate_obj)
     
     if not candidate:
         raise HTTPException(status_code=404, detail="Candidate not found")
@@ -129,14 +133,15 @@ async def get_candidate_report(
 
     for idx, q in enumerate(questions):
         cat = q.get("category", "General")
+        marks = q.get("marks", 1.0)
         if cat not in stats:
             stats[cat] = {"correct": 0, "total": 0}
-        stats[cat]["total"] += 1
+        stats[cat]["total"] += marks
         selected = ans_lookup.get(idx)
         if selected is not None:
              options = q.get("options", [])
              if 0 <= selected < len(options) and options[selected].get("is_correct"):
-                 stats[cat]["correct"] += 1
+                 stats[cat]["correct"] += marks
 
     report_questions = []
     for idx, q in enumerate(questions):
@@ -145,6 +150,7 @@ async def get_candidate_report(
             "options": q["options"],
             "selected_index": ans_lookup.get(idx),
             "category": q.get("category", "General"),
+            "marks": q.get("marks", 1.0),
             "explanation": q.get("explanation")
         })
 
@@ -186,11 +192,11 @@ async def send_candidate_link(
     db: Session = Depends(get_db)
 ):
     """Send (or resend) the unique exam link to the candidate's email."""
-    candidates = get_all_candidates(db)
-    candidate = next((c for c in candidates if str(c["id"]) == str(candidate_id)), None)
-    
-    if not candidate:
+    # Optimized direct fetch from DB
+    candidate_obj = db.query(Candidate).filter(Candidate.id == int(candidate_id)).first()
+    if not candidate_obj:
         raise HTTPException(status_code=404, detail="Candidate not found")
+    candidate = _to_summary_dict(candidate_obj)
     if not candidate.get("assigned_exam_id"):
         raise HTTPException(status_code=400, detail="No exam assigned to this candidate yet.")
 

@@ -35,8 +35,9 @@ class Candidate(CandidateBase):
     joined_date: str
     token: str
     assigned_exam_id: Optional[str] = None
-    score: Optional[int] = None
+    score: Optional[float] = None
     total_questions: Optional[int] = None
+    total_marks: Optional[float] = None
     violations: Optional[int] = 0
     device_id: Optional[str] = None
 
@@ -44,8 +45,9 @@ class CandidateAssign(BaseModel):
     exam_id: str
 
 class CandidateResult(BaseModel):
-    score: int
+    score: float
     total_questions: int
+    total_marks: float
     violations: int = 0
     answers: Optional[list] = None # List of {question_index, selected_option_index}
     screenshot: Optional[str] = None # Legacy

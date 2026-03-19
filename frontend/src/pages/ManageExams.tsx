@@ -66,13 +66,28 @@ export default function ManageExams() {
 
     useEffect(() => {
         fetchExams();
+
+        // Cross-tab synchronization
+        const bc = new BroadcastChannel("exam_portal_updates");
+        bc.onmessage = (msg) => {
+            if (msg.data === "refresh_dashboard") {
+                console.log("INFO: Refreshing Management UI due to cross-tab update");
+                fetchExams(true); // Bypass cache on notification
+            }
+        };
+
+        return () => bc.close();
     }, []);
 
-    const fetchExams = async () => {
+    const fetchExams = async (bypassCache: boolean = false) => {
         const token = localStorage.getItem("access_token");
         if (!token) { navigate("/"); return; }
         try {
-            const res = await fetch(`${API_BASE_URL}/exams`, {
+            const url = new URL(`${API_BASE_URL}/exams`);
+            if (bypassCache) url.searchParams.append("bypass_cache", "true");
+            url.searchParams.append("v", Date.now().toString()); // Cache breaker
+
+            const res = await fetch(url.toString(), {
                 headers: { "Authorization": `Bearer ${token}` }
             });
 
@@ -110,7 +125,19 @@ export default function ManageExams() {
                         method: "DELETE",
                         headers: { "Authorization": `Bearer ${token}` }
                     });
-                    if (res.ok) fetchExams();
+                    if (res.ok) {
+                        // Optimistically remove from state
+                        setExams(prev => prev.filter(e => e.id !== id));
+                        setSelectedExamIds(prev => {
+                            const next = new Set(prev);
+                            next.delete(id);
+                            return next;
+                        });
+                        // Notify other tabs/dashboard
+                        new BroadcastChannel("exam_portal_updates").postMessage("refresh_dashboard");
+                    } else {
+                        throw new Error();
+                    }
                 } catch {
                     setPopup({ isOpen: true, type: 'alert', title: 'Error', message: 'Failed to delete exam.', onConfirm: () => setPopup(null) });
                 }
@@ -205,6 +232,8 @@ export default function ManageExams() {
                         setPopup(null);
                         setMergedExam(null);
                         setSelectedExamIds(new Set());
+                        // Optimistically fetch or just rely on the fact that we'll re-fetch anyway
+                        // But let's at least clear the local state to show it's gone
                         fetchExams();
                     }
                 });

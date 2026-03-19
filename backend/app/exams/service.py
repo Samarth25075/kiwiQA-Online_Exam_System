@@ -322,9 +322,9 @@ def save_exam(db: Session, exam_in: ExamFinalize) -> Dict:
     
     # Invalidate cache
     if redis_client:
-        redis_client.delete("all_exams_list", "exams_with_counts")
+        redis_client.delete("all_exams_list", "exams_with_counts", "all_candidates_list_summary")
         
-    return _to_dict(new_exam)
+    return _to_full_dict(new_exam)
 
 def create_exam(db: Session, exam_in: ExamCreate) -> Dict:
     from app.core.redis import redis_client
@@ -348,9 +348,9 @@ def create_exam(db: Session, exam_in: ExamCreate) -> Dict:
     db.refresh(new_exam)
     
     if redis_client:
-        redis_client.delete("all_exams_list", "exams_with_counts")
+        redis_client.delete("all_exams_list", "exams_with_counts", "all_candidates_list_summary")
         
-    return _to_dict(new_exam)
+    return _to_full_dict(new_exam)
 
 def get_all_exams(db: Session, bypass_cache: bool = False) -> List[Dict]:
     from app.core.redis import get_cached_data, set_cached_data
@@ -360,7 +360,8 @@ def get_all_exams(db: Session, bypass_cache: bool = False) -> List[Dict]:
         if cached:
             return cached
 
-    exams = db.query(Exam).order_by(Exam.created_at.desc()).all()
+    from sqlalchemy.orm import defer
+    exams = db.query(Exam).options(defer(Exam.questions)).order_by(Exam.created_at.desc()).all()
     res = [_to_summary_dict(e) for e in exams]
     
     set_cached_data("all_exams_list", res, expire=300)
@@ -377,7 +378,7 @@ def delete_exam(db: Session, exam_id: str) -> bool:
         db.delete(exam)
         db.commit()
         if redis_client:
-            redis_client.delete("all_exams_list", "exams_with_counts", "all_candidates_list")
+            redis_client.delete("all_exams_list", "exams_with_counts", "all_candidates_list", "all_candidates_list_summary")
         return True
     return False
 
@@ -404,9 +405,9 @@ def get_exams_with_candidate_counts(db: Session) -> List[Dict]:
         return cached
 
     from app.candidates.service import get_all_candidates
-    # Always get fresh exams for dashboard stats
+    # Always get fresh exams and candidates for dashboard stats
     exams = get_all_exams(db, bypass_cache=True)
-    candidates = get_all_candidates(db)
+    candidates = get_all_candidates(db, bypass_cache=True)
 
     from collections import defaultdict
     candidates_by_exam = defaultdict(list)
@@ -434,7 +435,8 @@ def get_exams_with_candidate_counts(db: Session) -> List[Dict]:
             else:
                 try:
                     score = float(c.get("score", "0") or 0)
-                    total = float(c.get("total_questions", "1") or 1)
+                    # Prefer total_marks for weighted scoring, fallback to total_questions
+                    total = float(c.get("total_marks") or c.get("total_questions") or 1)
                     if (score / total * 100) >= passing_score_pct:
                         passed += 1
                     else:
@@ -484,3 +486,4 @@ def check_and_delete_expired_exams(db: Session):
                 
     if deleted_any:
         db.commit()
+    return deleted_any
