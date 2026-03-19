@@ -13,6 +13,7 @@ interface ReportData {
         selected_index: number | null;
         category: string;
         explanation?: string;
+        marks?: number;
     }>;
     proctoring: {
         start: string | null;
