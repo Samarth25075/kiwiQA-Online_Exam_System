@@ -1456,24 +1456,20 @@ export default function TakeTest() {
         }
     };
 
-    // FIX #10: Show a clear message instead of redirecting to about:blank
     const handleTabClose = () => {
         window.close();
 
         setTimeout(() => {
             if (!window.closed) {
-                window.open('', '_self', '');
-                window.close();
+                window.open('about:blank', '_self');
             }
         }, 300);
 
         setTimeout(() => {
             if (!window.closed) {
-                // Don't redirect to about:blank — just show a polite instruction
-                // The sensitive content is already gone (exam is finished/state cleared)
-                console.warn("Window could not be closed automatically.");
+                window.location.href = "about:blank";
             }
-        }, 800);
+        }, 600);
     };
 
     const handleSelect = (qIdx: number, oIdx: number) => {
