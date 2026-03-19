@@ -25,7 +25,7 @@ class ExamBase(BaseModel):
     link_expiry: Optional[str] = None
     auto_delete: Optional[str] = None
     proctoring_enabled: bool = True
-    proctoring_type: str = "video"  # "video", "screen", or "both"
+    proctoring_type: Optional[str] = "video"  # "video", "screen", or "both"
     passing_score: int = 50  # passing percentage (0-100)
 
 class ExamCreate(ExamBase):
@@ -54,4 +54,4 @@ class ExamStatsResponse(BaseModel):
     link_expiry: Optional[str] = None
     auto_delete: Optional[str] = None
     proctoring_enabled: bool = True
-    proctoring_type: str = "video"
+    proctoring_type: Optional[str] = "video"
