@@ -19,7 +19,8 @@ from fastapi_cache.decorator import cache
 import redis.asyncio as redis
 
 from .auth.router import router as auth_router
-from .candidates.router import router as candidates_router
+from .candidates.admin_router import router as candidates_admin_router
+from .candidates.public_router import router as candidates_public_router
 from .exams.router import router as exams_router
 from .exams.service import check_and_delete_expired_exams
 
@@ -70,7 +71,8 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 # ── Routers ───────────────────────────────────
 app.include_router(auth_router)       # /login, /me
-app.include_router(candidates_router)  # /candidates
+app.include_router(candidates_admin_router)
+app.include_router(candidates_public_router, prefix="/candidates")
 app.include_router(exams_router)       # /exams
 
 # ── Background Cleanup ────────────────────────
