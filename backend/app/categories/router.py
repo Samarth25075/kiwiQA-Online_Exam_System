@@ -25,3 +25,14 @@ async def add_category(
 ):
     """Create a new question category."""
     return create_category(db, category_in)
+
+@router.delete("/{name}")
+async def remove_category(
+    name: str,
+    current_admin: Annotated[AdminUser, Depends(check_permission("manage exam"))],
+    db: Session = Depends(get_db)
+):
+    """Delete a question category."""
+    from app.categories.service import delete_category
+    delete_category(db, name)
+    return {"message": f"Category '{name}' deleted"}

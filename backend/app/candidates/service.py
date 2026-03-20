@@ -5,8 +5,24 @@ from sqlalchemy.orm import Session, joinedload, defer
 from app.models import Candidate
 
 def _to_summary_dict(c: Candidate) -> Dict:
-    """Lightweight mapping for list views (excludes base64/JSON)."""
+    """Lightweight mapping for list views (excludes base64/JSON if possible, but includes performance metadata)."""
     if not c: return None
+    
+    # Calculate incorrect question indices (1-indexed) if answers are available
+    incorrect_nums = []
+    if c.status == "Completed" and c.answers and c.exam and c.exam.questions:
+        try:
+            questions = c.exam.questions
+            ans_lookup = {a.get("question_index"): a.get("selected_index") for a in c.answers if "question_index" in a}
+            for idx, q in enumerate(questions):
+                selected = ans_lookup.get(idx)
+                # If no choice made or choice is different from correct one
+                correct_idx = next((i for i, opt in enumerate(q.get("options", [])) if opt.get("is_correct")), None)
+                if selected is None or selected != correct_idx:
+                    incorrect_nums.append(idx + 1)
+        except Exception as e:
+            print(f"Error calculating incorrect_nums: {e}")
+            
     return {
         "id": str(c.id),
         "candidate_id": c.candidate_id,
@@ -21,7 +37,8 @@ def _to_summary_dict(c: Candidate) -> Dict:
         "score": c.score,
         "total_questions": c.total_questions,
         "total_marks": c.total_marks,
-        "violations": c.violations if c.violations is not None else 0
+        "violations": c.violations if c.violations is not None else 0,
+        "incorrect_question_nums": incorrect_nums
     }
 
 def _to_full_dict(c: Candidate) -> Dict:
@@ -45,8 +62,9 @@ def _to_full_dict(c: Candidate) -> Dict:
 def get_all_candidates(db: Session, **kwargs) -> List[Dict]:
     bypass_cache = kwargs.get("bypass_cache", False)
     """Fetch all candidates from DB. Supports bypass_cache for real-time dashboard updates."""
-    from sqlalchemy.orm import joinedload
+    from sqlalchemy.orm import joinedload, undefer
     from app.core.redis import get_cached_data, set_cached_data
+    from app.models import Exam
     
     # Cache key for summary list
     if not bypass_cache:
@@ -54,16 +72,20 @@ def get_all_candidates(db: Session, **kwargs) -> List[Dict]:
         if cached:
             return cached
 
-    # Use joinedload and fetch only essential columns (skip base64/heavy JSON)
+    # Use joinedload and fetch essential result data needed for 'incorrect question numbers'
+    # We undefer answers and exam.questions to calculate the metadata on the fly
     candidates = db.query(Candidate).options(
-        joinedload(Candidate.exam),
+        joinedload(Candidate.exam).undefer(Exam.questions),
+        undefer(Candidate.answers),
         defer(Candidate.profile_photo),
-        defer(Candidate.answers),
         defer(Candidate.screenshot_start),
         defer(Candidate.screenshot_mid),
         defer(Candidate.screenshot_end)
     ).order_by(Candidate.id.desc()).all()
     res = [_to_summary_dict(c) for c in candidates]
+    
+    set_cached_data("all_candidates_list_summary", res, expire=300)
+    return res
     
     set_cached_data("all_candidates_list_summary", res, expire=300)
     return res

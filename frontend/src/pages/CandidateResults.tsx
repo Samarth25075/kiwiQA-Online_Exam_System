@@ -767,70 +767,83 @@ export default function CandidateResults() {
                                                 <th>Exam</th>
                                                 <th>Exam Date</th>
                                                 <th>Score</th>
+                                                <th>Incorrect Qs</th>
                                                 <th>Performance</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {group.items.map(candidate => {
-                                                const { score, total, pct } = calcScore(candidate);
-                                                const exam = exams[candidate.assigned_exam_id ?? ""] || { title: "Unknown Exam", passing_score: 50 };
-                                                const violations = parseInt(candidate.violations || "0", 10);
-                                                const isEliminated = violations >= 3;
-                                                const isPassed = pct >= exam.passing_score && !isEliminated;
+                                    {group.items.map(candidate => {
+                                        const { score, total, pct } = calcScore(candidate);
+                                        const exam = exams[candidate.assigned_exam_id ?? ""] || { title: "Unknown Exam", passing_score: 50 };
+                                        const violations = parseInt(candidate.violations || "0", 10);
+                                        const isEliminated = violations >= 3;
+                                        const isPassed = pct >= exam.passing_score && !isEliminated;
 
-                                                return (
-                                                    <tr key={candidate.id}>
-                                                        <td>
-                                                            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                                                                <div className="res-avatar">
-                                                                    {candidate.profile_photo ? (
-                                                                        <img src={candidate.profile_photo} alt={candidate.name} />
-                                                                    ) : (
-                                                                        candidate.name.charAt(0).toUpperCase()
-                                                                    )}
-                                                                </div>
-                                                                <div>
-                                                                    <div className="res-id">{candidate.candidate_id || `CAND-${candidate.id}`}</div>
-                                                                    <div className="candidate-name">{candidate.name}</div>
-                                                                    <div className="candidate-email">{candidate.email}</div>
-                                                                </div>
-                                                            </div>
-                                                        </td>
+                                        return (
+                                            <tr key={candidate.id}>
+                                                <td>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                                        <div className="res-avatar">
+                                                            {candidate.profile_photo ? (
+                                                                <img src={candidate.profile_photo} alt={candidate.name} />
+                                                            ) : (
+                                                                candidate.name.charAt(0).toUpperCase()
+                                                            )}
+                                                        </div>
+                                                        <div>
+                                                            <div className="res-id">{candidate.candidate_id || `CAND-${candidate.id}`}</div>
+                                                            <div className="candidate-name">{candidate.name}</div>
+                                                            <div className="candidate-email">{candidate.email}</div>
+                                                        </div>
+                                                    </div>
+                                                </td>
 
-                                                        <td>
-                                                            <span className="exam-title">{exam.title}</span>
-                                                        </td>
+                                                <td>
+                                                    <span className="exam-title">{exam.title}</span>
+                                                </td>
 
-                                                        <td>
-                                                            <span className="date-text">{formatDate(candidate.joined_date)}</span>
-                                                        </td>
+                                                <td>
+                                                    <span className="date-text">{formatDate(candidate.joined_date)}</span>
+                                                </td>
 
-                                                        <td>
-                                                            <div className="score-wrap">
-                                                                <span className="score-value">{score}</span>
-                                                                <span className="score-sep">/</span>
-                                                                <span className="score-total">{total}</span>
-                                                            </div>
-                                                        </td>
+                                                <td>
+                                                    <div className="score-wrap">
+                                                        <span className="score-value">{score}</span>
+                                                        <span className="score-sep">/</span>
+                                                        <span className="score-total">{total}</span>
+                                                    </div>
+                                                </td>
 
-                                                        <td>
-                                                            <div className="perf-cell">
-                                                                <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                                                                    <ScoreBadge pct={pct} />
-                                                                    <span className={`pass-fail-badge ${isEliminated ? 'eliminated' : isPassed ? 'pass' : 'fail'}`}>
-                                                                        {isEliminated ? 'Eliminated' : isPassed ? 'Passed' : 'Failed'}
-                                                                    </span>
-                                                                </div>
-                                                                <ProgressBar pct={pct} />
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                );
-                                            })}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
+                                                <td>
+                                                    <div style={{ maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                                        {(candidate as any).incorrect_question_nums?.length > 0 ? (
+                                                            <span style={{ fontSize: '11px', color: '#dc2626', fontWeight: 600, background: '#fef2f2', padding: '2px 6px', borderRadius: '4px', border: '1px solid #fee2e2' }}>
+                                                                {(candidate as any).incorrect_question_nums.join(", ")}
+                                                            </span>
+                                                        ) : (
+                                                            <span style={{ fontSize: '11px', color: '#059669', fontWeight: 600 }}>None</span>
+                                                        )}
+                                                    </div>
+                                                </td>
+
+                                                <td>
+                                                    <div className="perf-cell">
+                                                        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                                                            <ScoreBadge pct={pct} />
+                                                            <span className={`pass-fail-badge ${isEliminated ? 'eliminated' : isPassed ? 'pass' : 'fail'}`}>
+                                                                {isEliminated ? 'Eliminated' : isPassed ? 'Passed' : 'Failed'}
+                                                            </span>
+                                                        </div>
+                                                        <ProgressBar pct={pct} />
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                         ))
                     )}
                 </div>

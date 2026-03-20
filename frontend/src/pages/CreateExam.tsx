@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import AdminLayout from "../components/AdminLayout";
 import CustomPopup, { PopupType } from "../components/CustomPopup";
@@ -198,7 +198,7 @@ export default function CreateExam() {
   const [difficulty, setDifficulty] = useState<DifficultyLevel>("Beginner");
   const [duration, setDuration] = useState(30);
   const [numQuestions, setNumQuestions] = useState(10);
-  const [creationMode, setCreationMode] = useState<"ai" | "manual" | "file">("ai");
+  const [creationMode, setCreationMode] = useState<"bank" | "manual" | "file">("bank");
   const [proctoringEnabled, setProctoringEnabled] = useState(true);
   const [proctoringType, setProctoringType] = useState<ProctoringType>("video");
   const [passingScore, setPassingScore] = useState(50);
@@ -207,15 +207,75 @@ export default function CreateExam() {
   const [questions, setQuestions] = useState<Question[] | null>(null);
   const [editingIdx, setEditingIdx] = useState<number | null>(null);
   const [aiTipIndex, setAiTipIndex] = useState(0);
-  const [categories, setCategories] = useState<{id: number, name: string}[]>([]);
+  const [categories, setCategories] = useState<{ id: number, name: string }[]>([]);
   const [showNewCategoryInput, setShowNewCategoryInput] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
+  const [bankCategories, setBankCategories] = useState<string[]>([]);
+  const [selectedBankCats, setSelectedBankCats] = useState<string[]>([]);
+  const [editingCat, setEditingCat] = useState<string | null>(null);
+  const [showBankAdd, setShowBankAdd] = useState(false);
+  const [newBankCatName, setNewBankCatName] = useState("");
+  const [showAllBankCats, setShowAllBankCats] = useState(false);
+  const [bankStats, setBankStats] = useState<Record<string, { count: number, total_marks: number }>>({});
+  const [catConfigs, setCatConfigs] = useState<Record<string, { count: number, marks: number, showBreakdown?: boolean, breakdown?: Record<number, number> }>>({});
+  const bankSectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/categories`, { headers: authHeaders() })
+    const handleClickOutside = (e: MouseEvent) => {
+      if (bankSectionRef.current && !bankSectionRef.current.contains(e.target as Node)) {
+        setEditingCat(null);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const fetchBankStats = () => {
+    fetch(`${API_BASE_URL}/exams/bank/stats`, { headers: authHeaders() })
       .then(r => r.json())
+      .then(stats => {
+        setBankStats(stats);
+        
+        // SYNC: We want to show ALL categories in the bank section, 
+        // even if they have 0 questions (so they appear after creation)
+        fetch(`${API_BASE_URL}/categories`, { headers: authHeaders() })
+          .then(r => r.json())
+          .then(allCats => {
+            setCategories(allCats);
+            const allNames = allCats.map((c: any) => c.name);
+            const statsNames = Object.keys(stats);
+            // Unique names from both
+            const combined = Array.from(new Set([...allNames, ...statsNames]));
+            setBankCategories(combined);
+          });
+      })
+      .catch(console.error);
+  };
+
+  useEffect(() => {
+    const handleUnauthorized = (e: any) => {
+      if (e.detail?.status === 401) {
+        setPopup({
+          isOpen: true,
+          type: "alert",
+          title: "Session Expired",
+          message: "Your session has expired. Please log in again.",
+          onConfirm: () => navigate("/login")
+        });
+      }
+    };
+    window.addEventListener('api-unauthorized', handleUnauthorized);
+    
+    fetch(`${API_BASE_URL}/categories`, { headers: authHeaders() })
+      .then(r => {
+        if (r.status === 401) { window.dispatchEvent(new CustomEvent('api-unauthorized', { detail: { status: 401 } })); return []; }
+        return r.json();
+      })
       .then(data => setCategories(data))
       .catch(console.error);
+    fetchBankStats();
+    
+    return () => window.removeEventListener('api-unauthorized', handleUnauthorized);
   }, []);
 
   const handleImageUpload = (file: File): Promise<string> => {
@@ -230,44 +290,66 @@ export default function CreateExam() {
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    
+
     const reader = new FileReader();
     reader.onload = (evt) => {
       try {
         const text = evt.target?.result as string;
         let parsedQuestions: Question[] = [];
-        
+
         if (file.name.endsWith('.json')) {
           const data = JSON.parse(text);
           parsedQuestions = Array.isArray(data) ? data : data.questions || [];
-        } else {
-           const lines = text.split('\n').filter(l => l.trim().length > 0);
-           for(let i=1; i<lines.length; i++) {
-              const row = lines[i].split(',').map(cell => cell.trim().replace(/^"|"$/g, ''));
-              if(!row[0] || !row[1]) continue;
-              let options = [];
-              options.push({text: row[1], is_correct: row[5]?.toUpperCase() === 'A'});
-              options.push({text: row[2], is_correct: row[5]?.toUpperCase() === 'B'});
-              if(row[3]) options.push({text: row[3], is_correct: row[5]?.toUpperCase() === 'C'});
-              if(row[4]) options.push({text: row[4], is_correct: row[5]?.toUpperCase() === 'D'});
-              parsedQuestions.push({
-                 text: row[0],
-                 options
-              });
-           }
+          
+          // SYNC: Find new categories in the uploaded file and PERSIST them
+          const fileCats = Array.from(new Set(parsedQuestions.map(q => q.category).filter(Boolean)));
+          const existingNames = categories.map(c => c.name.toLowerCase());
+          fileCats.forEach(cat => {
+            if (cat && !existingNames.includes(cat.toLowerCase())) {
+              fetch(`${API_BASE_URL}/categories`, {
+                method: 'POST',
+                headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: cat })
+              })
+              .then(r => r.json())
+              .then(savedCat => {
+                setCategories((prev: any[]) => {
+                  const alreadyHave = prev.some(c => c.name === savedCat.name);
+                  return alreadyHave ? prev : [...prev, savedCat];
+                });
+              })
+              .catch(console.error);
+            }
+          });
         }
-        
+ else {
+          const lines = text.split('\n').filter(l => l.trim().length > 0);
+          for (let i = 1; i < lines.length; i++) {
+            const row = lines[i].split(',').map(cell => cell.trim().replace(/^"|"$/g, ''));
+            if (!row[0] || !row[1]) continue;
+            let options = [];
+            options.push({ text: row[1], is_correct: row[5]?.toUpperCase() === 'A' });
+            options.push({ text: row[2], is_correct: row[5]?.toUpperCase() === 'B' });
+            if (row[3]) options.push({ text: row[3], is_correct: row[5]?.toUpperCase() === 'C' });
+            if (row[4]) options.push({ text: row[4], is_correct: row[5]?.toUpperCase() === 'D' });
+            parsedQuestions.push({
+              text: row[0],
+              options
+            });
+          }
+        }
+
         if (parsedQuestions.length > 0) {
-           setQuestions(parsedQuestions);
+          setQuestions(parsedQuestions);
         } else {
-           throw new Error("No questions found");
+          throw new Error("No questions found");
         }
       } catch (err) {
         setPopup({ isOpen: true, type: "alert", title: "Error", message: "Failed to parse file. Ensure it is a valid format.", onConfirm: () => setPopup(null) });
       }
     };
     reader.readAsText(file);
-    e.target.value = ''; 
+    e.target.value = '';
   };
   const [popup, setPopup] = useState<{
     isOpen: boolean; type: PopupType; title?: string;
@@ -289,12 +371,15 @@ export default function CreateExam() {
     proctoring_enabled: proctoringEnabled,
     proctoring_type: proctoringType,
     passing_score: passingScore,
+    source: creationMode === "bank" ? "Bank" : "AI",
+    bank_categories: selectedBankCats,
+    category_configs: catConfigs
   });
 
   const handleGenerate = async (e?: React.FormEvent) => {
     e?.preventDefault();
     if (!title.trim() || !subject.trim()) return;
-    
+
     if (creationMode === "manual") {
       setQuestions([{
         text: "New Question",
@@ -307,12 +392,12 @@ export default function CreateExam() {
       setEditingIdx(0);
       return;
     }
-    
+
     if (creationMode === "file") {
       document.getElementById('exam-upload-input')?.click();
       return;
     }
-    
+
     setLoading(true);
     setQuestions(null);
     try {
@@ -344,15 +429,15 @@ export default function CreateExam() {
         body: JSON.stringify({ ...buildPayload(), questions }),
       });
       if (!res.ok) throw new Error();
-        setPopup({
-          isOpen: true, type: "alert", title: "Published",
-          message: "Exam has been saved and is ready to deploy.",
-          onConfirm: () => {
-             // Notify other tabs/dashboard
-             new BroadcastChannel("exam_portal_updates").postMessage("refresh_dashboard");
-             navigate("/manage-exams");
-          }
-        });
+      setPopup({
+        isOpen: true, type: "alert", title: "Published",
+        message: "Exam has been saved and is ready to deploy.",
+        onConfirm: () => {
+          // Notify other tabs/dashboard
+          new BroadcastChannel("exam_portal_updates").postMessage("refresh_dashboard");
+          navigate("/manage-exams");
+        }
+      });
     } catch {
       setPopup({
         isOpen: true, type: "alert", title: "Save Failed",
@@ -548,6 +633,63 @@ export default function CreateExam() {
         }
 
         .section-card-header {
+          padding: 24px 24px 0;
+        }
+
+        .bank-cat-chip {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 10px 16px;
+          background: var(--bg);
+          border: 1px solid var(--line);
+          border-radius: 12px;
+          cursor: pointer;
+          transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+          position: relative;
+          min-width: 140px;
+        }
+
+        .bank-cat-chip:hover {
+          border-color: var(--teal);
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px color-mix(in srgb, var(--primary) 10%, transparent);
+        }
+
+        .bank-cat-chip.active {
+          background: var(--teal-light);
+          border-color: var(--teal);
+          box-shadow: inset 0 0 0 1px var(--teal);
+        }
+
+        .bank-cat-chip .cat-name {
+          font-size: 14px;
+          font-weight: 700;
+          color: var(--ink);
+        }
+
+        .bank-cat-chip.active .cat-name {
+          color: var(--teal);
+        }
+
+        .cat-delete-btn {
+          width: 20px;
+          height: 20px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
+          background: var(--bg-neutral);
+          color: var(--ink-3);
+          transition: all 0.2s;
+          margin-left: auto;
+        }
+
+        .cat-delete-btn:hover {
+          background: var(--danger-bg);
+          color: var(--danger);
+          transform: rotate(90deg);
+        }
           padding: 20px 24px 0;
         }
 
@@ -1136,9 +1278,9 @@ export default function CreateExam() {
                     <div className="diff-card-name" style={{ color: 'var(--ink)' }}>✋ Manual Entry</div>
                     <div className="diff-card-desc">Start from scratch and build your questions completely by hand.</div>
                   </div>
-                  <div className={`diff-card ${creationMode === 'ai' ? "diff-card--active" : ""}`} onClick={() => setCreationMode('ai')}>
-                    <div className="diff-card-name" style={{ color: 'var(--teal)' }}>✨ AI Generation</div>
-                    <div className="diff-card-desc">Automatically generate questions using our AI engine based on topic.</div>
+                  <div className={`diff-card ${creationMode === 'bank' ? "diff-card--active" : ""}`} onClick={() => setCreationMode('bank')}>
+                    <div className="diff-card-name" style={{ color: 'var(--teal)' }}>📚 Inbuilt Question Bank</div>
+                    <div className="diff-card-desc">Automatically generate questions using our predefined question bank.</div>
                   </div>
                   <div className={`diff-card ${creationMode === 'file' ? "diff-card--active" : ""}`} onClick={() => setCreationMode('file')}>
                     <div className="diff-card-name" style={{ color: 'var(--ink)' }}>📁 Upload File</div>
@@ -1184,15 +1326,347 @@ export default function CreateExam() {
                         setDuration(val ? Number(val) : 0);
                       }} required />
                   </div>
-                  {creationMode === 'ai' && (
-                    <div className="form-field">
-                      <label className="form-label">Number of Questions</label>
-                      <input className="form-input" type="text" value={numQuestions}
-                        onChange={e => {
-                          const val = e.target.value.replace(/\D/g, "");
-                          setNumQuestions(val ? Number(val) : 0);
-                        }} required />
-                    </div>
+                  {creationMode === 'bank' && (
+                    <>
+                      <div className="form-field" style={{ gridColumn: 'span 2' }}>
+                        <div className="form-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span>Select Bank Categories (Select Multiple)</span>
+                        </div>
+                          {bankCategories.length === 0 && !showBankAdd && (
+                            <div style={{ width: '100%', padding: '24px', textAlign: 'center', background: 'var(--bg)', borderRadius: 12, border: '1px dashed var(--line)' }}>
+                               <p style={{ color: 'var(--ink-3)', fontSize: '13px', marginBottom: 12 }}>No categories found in the bank.</p>
+                               <button 
+                                 type="button" 
+                                 className="btn btn-secondary" 
+                                 onClick={() => setShowBankAdd(true)}
+                               >
+                                 <Icons.Plus /> Add First Category
+                               </button>
+                            </div>
+                          )}
+
+                          {showBankAdd && (
+                            <div style={{ width: '100%', padding: '16px', background: 'var(--teal-light)', borderRadius: 12, border: '1px solid var(--teal)', display: 'flex', gap: 8, alignItems: 'center' }}>
+                              <input 
+                                autoFocus
+                                className="form-input" 
+                                style={{ height: 36, flex: 1 }}
+                                value={newBankCatName}
+                                onChange={e => setNewBankCatName(e.target.value)}
+                                placeholder="New category name..."
+                              />
+                               <button 
+                                 type="button" 
+                                 className="btn btn-publish" 
+                                 style={{ height: 36, padding: '0 12px' }}
+                                 onClick={async () => {
+                                   if(!newBankCatName.trim()) { setShowBankAdd(false); return; }
+                                   try {
+                                     // Add to DB
+                                     const res = await fetch(`${API_BASE_URL}/categories`, {
+                                       method: 'POST', headers: authHeaders(), body: JSON.stringify({ name: newBankCatName })
+                                     });
+                                     if(res.ok) {
+                                       // It will be picked up by fetchBankStats because we SYNC them
+                                       // But let's proactively add it to local state too
+                                       setBankCategories(prev => [...prev, newBankCatName]);
+                                       setNewBankCatName("");
+                                       setShowBankAdd(false);
+                                       fetchBankStats();
+                                     }
+                                   } catch(e) { console.error(e); }
+                                 }}
+                               >
+                                 <Icons.Check /> Add
+                               </button>
+                               <button 
+                                 type="button" 
+                                 className="btn btn-secondary" 
+                                 style={{ height: 36, padding: '0 12px' }}
+                                 onClick={() => setShowBankAdd(false)}
+                               >
+                                 <Icons.X />
+                               </button>
+                            </div>
+                          )}
+
+                        <div ref={bankSectionRef} style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '4px', position: 'relative' }}>
+                          {(showAllBankCats ? bankCategories : bankCategories.slice(0, 4)).map(cat => {
+                            const isSelected = selectedBankCats.includes(cat);
+                            const statsForCat = bankStats[cat] || { count: 0, total_marks: 0 };
+                            return (
+                                <div
+                                 key={cat}
+                                 className={`bank-cat-chip ${isSelected ? "active" : ""} ${editingCat === cat ? "editing" : ""}`}
+                                 style={{ 
+                                   height: editingCat === cat ? 'auto' : '62px', 
+                                   alignItems: editingCat === cat ? 'flex-start' : 'center',
+                                   padding: editingCat === cat ? '12px' : '10px 14px' 
+                                 }}
+                                 onClick={() => {
+                                   if (!isSelected) {
+                                     setSelectedBankCats(prev => [...prev, cat]);
+                                     setEditingCat(cat);
+                                     if (!catConfigs[cat]) {
+                                       setCatConfigs(prev => ({ ...prev, [cat]: { count: 5, marks: 5 } }));
+                                     }
+                                   } else {
+                                     // If we click the card while it's selected, just make sure it's expanded
+                                     setEditingCat(cat);
+                                   }
+                                 }}
+                                >
+                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 6, flex: 1, width: '100%' }}>
+                                   <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
+                                      <span className="cat-name">{cat}</span>
+                                      {!isSelected && (
+                                         <span
+                                           className="cat-delete-btn"
+                                           onClick={(e) => {
+                                             e.stopPropagation();
+                                             if (window.confirm(`Delete category "${cat}" and all its questions from the bank?`)) {
+                                               fetch(`${API_BASE_URL}/exams/bank/categories/${encodeURIComponent(cat)}`, { method: 'DELETE', headers: authHeaders() })
+                                                 .then(() => {
+                                                   setBankCategories(prev => prev.filter(c => c !== cat));
+                                                   setSelectedBankCats(prev => prev.filter(c => c !== cat));
+                                                   setCategories(prev => prev.filter(c => c.name !== cat));
+                                                   fetch(`${API_BASE_URL}/categories/${encodeURIComponent(cat)}`, { method: 'DELETE', headers: authHeaders() })
+                                                   .then(() => fetchBankStats());
+                                                 })
+                                                 .catch(console.error);
+                                             }
+                                           }}
+                                         >
+                                           <span style={{ fontSize: '14px', fontWeight: 'bold' }}>×</span>
+                                         </span>
+                                      )}
+                                      {isSelected && (
+                                        <div style={{ display: 'flex', gap: 4 }}>
+                                          <button 
+                                            type="button" 
+                                            onClick={(e) => { e.stopPropagation(); setSelectedBankCats(prev => prev.filter(c => c !== cat)); }}
+                                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--teal)', display: 'flex' }}
+                                          >
+                                            <Icons.X size={14} />
+                                          </button>
+                                        </div>
+                                      )}
+                                   </div>
+
+                                   {editingCat !== cat ? (
+                                      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                                        {isSelected ? (
+                                           <div style={{ display: 'flex', gap: 6, fontSize: '11px', color: 'var(--teal)', fontWeight: 700 }}>
+                                              <span>{catConfigs[cat]?.count || 0} Qs</span>
+                                              <span>•</span>
+                                              <span>{catConfigs[cat]?.marks || 0} Marks</span>
+                                           </div>
+                                        ) : (
+                                           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, fontSize: '10px', opacity: 0.7, fontWeight: 500 }}>
+                                              <span style={{ background: 'var(--bg-neutral)', padding: '2px 6px', borderRadius: '4px' }}>Bank: {statsForCat.count} Qs</span>
+                                              <span style={{ background: 'var(--bg-neutral)', padding: '2px 6px', borderRadius: '4px' }}>{statsForCat.total_marks} Marks</span>
+                                           </div>
+                                        )}
+                                      </div>
+                                   ) : (
+                                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: '100%', marginTop: 4 }}>
+                                        <div style={{ display: 'flex', gap: 6, fontSize: '10px', fontWeight: 700, color: 'var(--teal)' }}>
+                                           <span>CHOSEN: {catConfigs[cat]?.count || 0} Qs</span>
+                                           <span>•</span>
+                                           <span>{catConfigs[cat]?.marks || 0} Marks</span>
+                                        </div>
+                                        <div style={{ display: 'flex', gap: 8, width: '100%' }}>
+                                          <div style={{ flex: 1 }}>
+                                            <label style={{ fontSize: '9px', textTransform: 'uppercase', fontWeight: 800, color: 'var(--teal)', display: 'block', marginBottom: 2 }}>Questions</label>
+                                            <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+                                              <input 
+                                                type="number"
+                                                autoFocus
+                                                onClick={e => e.stopPropagation()}
+                                                className="form-input"
+                                                style={{ height: 28, fontSize: '12px', padding: '0 8px', borderColor: 'var(--teal)', background: 'white', flex: 1 }}
+                                                value={catConfigs[cat]?.count ?? ""}
+                                                onChange={e => {
+                                                  const valStr = e.target.value;
+                                                  const val = valStr === "" ? 1 : Number(valStr);
+                                                  const max = bankStats[cat]?.count || 1;
+                                                  const safeVal = Math.max(1, Math.min(val, max));
+                                                  setCatConfigs(prev => {
+                                                    const current = prev[cat] || { count: 0, marks: 0 };
+                                                    const newMarks = (current.marks === current.count || current.marks === 0) ? safeVal : current.marks;
+                                                    return { ...prev, [cat]: { count: safeVal, marks: newMarks } };
+                                                  });
+                                                }}
+                                              />
+                                              <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  const max = bankStats[cat]?.count || 0;
+                                                  setCatConfigs(prev => ({ ...prev, [cat]: { ...(prev[cat] || { marks: max }), count: max } }));
+                                                }}
+                                                style={{ padding: '4px 8px', fontSize: '9px', fontWeight: 800, background: 'var(--teal-light)', color: 'var(--teal-dark)', border: '1px solid var(--teal)', borderRadius: '4px', cursor: 'pointer' }}
+                                              >
+                                                MAX
+                                              </button>
+                                            </div>
+                                            <span style={{ fontSize: '9px', opacity: 0.6 }}>Available: {bankStats[cat]?.count || 0}</span>
+                                          </div>
+                                          <div style={{ flex: 1 }}>
+                                            <label style={{ fontSize: '9px', textTransform: 'uppercase', fontWeight: 800, color: 'var(--teal)', display: 'block', marginBottom: 2 }}>Total Marks</label>
+                                            <input 
+                                              type="number"
+                                              onClick={e => e.stopPropagation()}
+                                              className="form-input"
+                                              style={{ height: 28, fontSize: '12px', padding: '0 8px', borderColor: 'var(--teal)', background: 'white' }}
+                                              value={catConfigs[cat]?.marks ?? ""}
+                                              onChange={e => {
+                                                const valStr = e.target.value;
+                                                const val = valStr === "" ? 1 : Number(valStr);
+                                                setCatConfigs(prev => ({ ...prev, [cat]: { ...(prev[cat] || { count: 1 }), marks: val } }));
+                                              }}
+                                            />
+                                          </div>
+                                        </div>
+
+                                        {/* Detailed Breakdown Toggle */}
+                                        <div style={{ marginTop: 8, borderTop: '1px dashed var(--line)', paddingTop: 8 }}>
+                                          <button 
+                                            type="button"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              const current = catConfigs[cat] || { count: 1, marks: 1 };
+                                              setCatConfigs(prev => ({
+                                                ...prev,
+                                                [cat]: { ...current, showBreakdown: !current.showBreakdown }
+                                              }));
+                                            }}
+                                            style={{ background: 'none', border: 'none', padding: 0, color: 'var(--teal)', fontSize: '10px', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
+                                          >
+                                            {catConfigs[cat]?.showBreakdown ? '← Simple Mode' : '⚡ Detailed Breakdown (1, 2, 3 pts)'}
+                                          </button>
+
+                                          {catConfigs[cat]?.showBreakdown && (
+                                            <div style={{ display: 'flex', gap: 6, marginTop: 8, animation: 'ceIn 0.2s ease' }}>
+                                              {[1, 2, 3].map(m => (
+                                                <div key={m} style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                                                  <label style={{ fontSize: '8px', textTransform: 'uppercase', fontWeight: 800, color: 'var(--ink-3)', textAlign: 'center' }}>{m} Pt</label>
+                                                  <input 
+                                                    type="number"
+                                                    min="0"
+                                                    style={{ height: 24, fontSize: '11px', textAlign: 'center', border: '1px solid var(--line)', borderRadius: '4px', outline: 'none', background: 'var(--bg-neutral)' }}
+                                                    value={catConfigs[cat]?.breakdown?.[m] || 0}
+                                                    onChange={e => {
+                                                      const val = Math.max(0, parseInt(e.target.value) || 0);
+                                                      setCatConfigs(prev => {
+                                                        const current = prev[cat] || { count: 0, marks: 0, breakdown: {} };
+                                                        const newBreakdown = { ...(current.breakdown || {}), [m]: val };
+                                                        
+                                                        // Auto-calculate totals
+                                                        const newCount = Object.values(newBreakdown).reduce((a, b) => a + b, 0);
+                                                        const newMarks = Object.entries(newBreakdown).reduce((sum, [mark, qty]) => sum + (Number(mark) * qty), 0);
+                                                        
+                                                        return {
+                                                          ...prev,
+                                                          [cat]: { ...current, breakdown: newBreakdown, count: newCount, marks: newMarks }
+                                                        };
+                                                      });
+                                                    }}
+                                                  />
+                                                </div>
+                                              ))}
+                                            </div>
+                                          )}
+                                        </div>
+
+                                        <button 
+                                          type="button"
+                                          className="btn btn-secondary"
+                                          style={{ height: 24, fontSize: '10px', marginTop: 8, width: '100%' }}
+                                          onClick={(e) => { e.stopPropagation(); setEditingCat(null); }}
+                                        >
+                                          Done
+                                        </button>
+                                      </div>
+                                   )}
+                                 </div>
+                                </div>
+                            );
+                          })}
+                            {bankCategories.length > 0 && !showBankAdd && (
+                              <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', padding: '12px 16px', background: 'var(--teal-light)', borderRadius: '12px', border: '1px solid var(--teal)' }}>
+                                <div style={{ display: 'flex', gap: 20 }}>
+                                   <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                      <span style={{ fontSize: '10px', textTransform: 'uppercase', fontWeight: 800, color: 'var(--teal-dark)', opacity: 0.8 }}>Questions Budget</span>
+                                      <span style={{ fontSize: '18px', fontWeight: 800, color: selectedBankCats.reduce((sum, cat) => sum + (catConfigs[cat]?.count || 0), 0) > numQuestions ? 'var(--red)' : 'var(--teal-dark)' }}>
+                                         {selectedBankCats.reduce((sum, cat) => sum + (catConfigs[cat]?.count || 0), 0)} / {numQuestions}
+                                      </span>
+                                   </div>
+                                   <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                      <span style={{ fontSize: '10px', textTransform: 'uppercase', fontWeight: 800, color: 'var(--teal-dark)', opacity: 0.8 }}>Total Exam Marks</span>
+                                      <span style={{ fontSize: '18px', fontWeight: 800, color: 'var(--teal-dark)' }}>
+                                         {selectedBankCats.reduce((sum, cat) => sum + (catConfigs[cat]?.marks || 0), 0)} pts
+                                      </span>
+                                   </div>
+                                </div>
+                                <div style={{ display: 'flex', gap: 8 }}>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const newTotal = selectedBankCats.reduce((sum, cat) => sum + (catConfigs[cat]?.count || 0), 0);
+                                      setNumQuestions(newTotal);
+                                    }}
+                                    style={{ padding: '4px 10px', fontSize: '10px', fontWeight: 700, borderRadius: '6px', border: '1px solid var(--teal)', background: 'white', color: 'var(--teal)', cursor: 'pointer' }}
+                                    title="Set the Global Limit to match your current selection"
+                                  >
+                                    SYNC LIMIT
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => setShowBankAdd(true)}
+                                    style={{ 
+                                      display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: '12px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', border: 'none', background: 'var(--teal)', color: 'white', transition: 'all 0.2s' 
+                                    }}
+                                    onMouseOver={e => e.currentTarget.style.transform = 'translateY(-1px)'}
+                                    onMouseOut={e => e.currentTarget.style.transform = 'none'}
+                                  >
+                                     <Icons.Plus size={16} /> Add Category
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                           {bankCategories.length > 4 && (
+                            <button 
+                              type="button"
+                              onClick={() => setShowAllBankCats(!showAllBankCats)}
+                              style={{ 
+                                background: 'none', 
+                                border: '1px solid var(--line)', 
+                                padding: '4px 12px', 
+                                borderRadius: '100px', 
+                                fontSize: '11px', 
+                                fontWeight: 700, 
+                                color: 'var(--ink-2)', 
+                                cursor: 'pointer' 
+                              }}
+                            >
+                              {showAllBankCats ? "Show Less" : "See All"}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                      {creationMode === 'bank' && (
+                        <div className="form-field">
+                          <label className="form-label">Global Question Limit</label>
+                          <p style={{ fontSize: '11px', color: 'var(--ink-3)', marginTop: -8, marginBottom: 8 }}>This will balance your selected category counts.</p>
+                          <input className="form-input" type="text" value={numQuestions}
+                            onChange={e => {
+                              const val = e.target.value.replace(/\D/g, "");
+                              setNumQuestions(val ? Number(val) : 0);
+                            }} required />
+                        </div>
+                      )}
+                    </>
                   )}
                   <div className="form-field">
                     <label className="form-label">Passing Score (%)</label>
@@ -1264,7 +1738,7 @@ export default function CreateExam() {
               <div className="btn-row">
                 <button className="btn btn-generate" type="submit"
                   disabled={!title.trim() || !subject.trim()}>
-                  {creationMode === 'ai' ? <><Icons.Sparkles /> Generate AI Exam</> : creationMode === 'manual' ? <><Icons.Check /> Start Manual Entry</> : <><Icons.Check /> Process Uploaded File</>}
+                  {creationMode === 'bank' ? <><Icons.Sparkles /> Generate From Bank</> : creationMode === 'manual' ? <><Icons.Check /> Start Manual Entry</> : <><Icons.Check /> Process Uploaded File</>}
                 </button>
               </div>
             </form>
@@ -1292,6 +1766,7 @@ export default function CreateExam() {
                   { label: "Topic", value: subject },
                   { label: "Difficulty", value: difficulty },
                   { label: "Questions", value: `${questions.length}` },
+                  { label: "Total Marks", value: `${questions.reduce((sum, q) => sum + (q.marks ?? 1), 0)}` },
                   { label: "Duration", value: `${duration} min` },
                 ].map(item => (
                   <div key={item.label} className="summary-item">
@@ -1308,7 +1783,7 @@ export default function CreateExam() {
                   {creationMode === 'manual' ? 'Build Questions' : 'Review Questions'}
                 </h2>
                 <div className="review-actions">
-                  {creationMode === 'ai' && (
+                  {creationMode === 'bank' && (
                     <button className="btn btn-secondary" onClick={() => handleGenerate()}>
                       <Icons.Refresh /> Regenerate
                     </button>
@@ -1326,168 +1801,176 @@ export default function CreateExam() {
               {questions.map((q, idx) => (
                 <div className="q-card" key={idx}>
                   {editingIdx === idx ? (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                         <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                            <input className="form-input" style={{ flex: 1, fontWeight: 600, fontSize: 16 }} value={q.text} onChange={e => {
-                                const nq = [...questions]; nq[idx].text = e.target.value; setQuestions(nq);
-                            }} placeholder="Question Text" />
-                            
-                            <div style={{ display: 'flex', gap: 6 }}>
-                                <input type="file" id={`q-img-${idx}`} style={{ display: 'none' }} accept="image/*" onChange={async (e) => {
-                                   const file = e.target.files?.[0];
-                                   if (file) {
-                                      const base64 = await handleImageUpload(file);
-                                      const nq = [...questions]; nq[idx].image = base64; setQuestions(nq);
-                                   }
-                                }} />
-                                <button className="q-delete" type="button" onClick={() => document.getElementById(`q-img-${idx}`)?.click()} title="Upload question image">
-                                   <Icons.Camera />
-                                </button>
-                                <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '13px', fontWeight: 600, color: 'var(--ink-2)', cursor: 'pointer', background: 'var(--bg)', padding: '8px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--line)' }}>
-                                    <input type="checkbox" checked={q.image_required} onChange={e => {
-                                        const nq = [...questions]; nq[idx].image_required = e.target.checked; setQuestions(nq);
-                                    }} />
-                                    📷 Add Image
-                                </label>
-                            </div>
-                         </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                      <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                        <input className="form-input" style={{ flex: 1, fontWeight: 600, fontSize: 16 }} value={q.text} onChange={e => {
+                          const nq = [...questions]; nq[idx].text = e.target.value; setQuestions(nq);
+                        }} placeholder="Question Text" />
 
-                         
-                         <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginTop: 12 }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--bg)', padding: '6px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--line)' }}>
-                               <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--ink-2)' }}>Marks:</span>
-                               <input type="number" step="0.5" min="0" className="form-input" style={{ width: 80, height: 32, padding: '0 8px' }} value={q.marks ?? 1} onChange={e => {
-                                  let val = parseFloat(e.target.value);
-                                  if (isNaN(val)) val = 0;
-                                  const nq = [...questions]; nq[idx].marks = val; setQuestions(nq);
-                               }} />
-                            </div>
-                            
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--bg)', padding: '6px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--line)', flex: 1 }}>
-                               <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--ink-2)' }}>Category:</span>
-                               {showNewCategoryInput ? (
-                                  <div style={{ display: 'flex', gap: 6, flex: 1 }}>
-                                     <input autoFocus className="form-input" style={{ height: 32, flex: 1 }} value={newCategoryName} onChange={e => setNewCategoryName(e.target.value)} placeholder="New Category Name" />
-                                     <button className="btn btn-publish" type="button" style={{ height: 32, padding: '0 12px' }} onClick={async () => {
-                                        if (!newCategoryName.trim()) { setShowNewCategoryInput(false); return; }
-                                        try {
-                                           const res = await fetch(`${API_BASE_URL}/categories`, {
-                                              method: 'POST', headers: authHeaders(), body: JSON.stringify({ name: newCategoryName })
-                                           });
-                                           if (res.ok) {
-                                              const newCat = await res.json();
-                                              setCategories(prev => [...prev, newCat]);
-                                              const nq = [...questions]; nq[idx].category = newCat.name; setQuestions(nq);
-                                           }
-                                        } catch (e) { console.error(e); }
-                                        setShowNewCategoryInput(false);
-                                        setNewCategoryName("");
-                                     }}><Icons.Check /></button>
-                                     <button className="btn btn-secondary" type="button" style={{ height: 32, padding: '0 12px' }} onClick={() => setShowNewCategoryInput(false)}><Icons.X /></button>
-                                  </div>
-                               ) : (
-                                  <select className="form-input" style={{ height: 32, flex: 1 }} value={q.category || "General"} onChange={e => {
-                                     if (e.target.value === "ADD_NEW") {
-                                        setShowNewCategoryInput(true);
-                                     } else {
-                                        const nq = [...questions]; nq[idx].category = e.target.value; setQuestions(nq);
-                                     }
-                                  }}>
-                                     <option value="General">General</option>
-                                     {categories.filter(c => c.name !== 'General').map(c => (
-                                        <option key={c.id} value={c.name}>{c.name}</option>
-                                     ))}
-                                     <option value="ADD_NEW" style={{ fontWeight: 'bold', color: 'var(--teal)' }}>+ Add New Category</option>
-                                  </select>
-                               )}
-                            </div>
-                         </div>
-                         
-                         {q.image && (
-                            <div style={{ position: 'relative', width: 'fit-content' }}>
-                               <img src={q.image} alt="Question" style={{ maxWidth: '200px', borderRadius: 8, border: '1px solid var(--line)' }} />
-                               <button className="q-delete" style={{ position: 'absolute', top: -10, right: -10, width: 24, height: 24 }} onClick={() => {
-                                  const nq = [...questions]; delete nq[idx].image; setQuestions(nq);
-                               }}><Icons.X /></button>
-                            </div>
-                         )}
-                         
-                         <div style={{ paddingLeft: 10, marginTop: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
-                             {q.options.map((opt, oIdx) => (
-                                 <div key={oIdx} style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                                    <input type="radio" checked={opt.is_correct} style={{ width: 16, height: 16, accentColor: 'var(--primary)', cursor: 'pointer' }} onChange={() => {
-                                       const nq = [...questions];
-                                       nq[idx].options = nq[idx].options.map((o, i) => ({...o, is_correct: i === oIdx}));
-                                       setQuestions(nq);
-                                    }} />
-                                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                                        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                                            <input className="form-input" style={{ flex: 1 }} value={opt.text} onChange={e => {
-                                               const nq = [...questions]; nq[idx].options[oIdx].text = e.target.value; setQuestions(nq);
-                                            }} placeholder={`Option ${String.fromCharCode(65 + oIdx)}`} />
-                                            
-                                            <input type="file" id={`o-img-${idx}-${oIdx}`} style={{ display: 'none' }} accept="image/*" onChange={async (e) => {
-                                               const file = e.target.files?.[0];
-                                               if (file) {
-                                                  const base64 = await handleImageUpload(file);
-                                                  const nq = [...questions]; nq[idx].options[oIdx].image = base64; setQuestions(nq);
-                                               }
-                                            }} />
-                                            <button className="q-delete" type="button" onClick={() => document.getElementById(`o-img-${idx}-${oIdx}`)?.click()} title="Upload option image">
-                                               <Icons.Camera />
-                                            </button>
-                                            
-                                            <button className="q-delete" type="button" onClick={() => {
-                                               const nq = [...questions]; nq[idx].options.splice(oIdx, 1); setQuestions(nq);
-                                            }}><Icons.Trash /></button>
-                                        </div>
-                                        {opt.image && (
-                                            <div style={{ position: 'relative', width: 'fit-content' }}>
-                                                <img src={opt.image} alt="Option" style={{ maxWidth: '100px', borderRadius: 4, border: '1px solid var(--line)' }} />
-                                                <button className="q-delete" style={{ position: 'absolute', top: -5, right: -5, width: 20, height: 20 }} onClick={() => {
-                                                    const nq = [...questions]; delete nq[idx].options[oIdx].image; setQuestions(nq);
-                                                }}><Icons.X /></button>
-                                            </div>
-                                        )}
-                                    </div>
-                                 </div>
-                             ))}
-                         </div>
-                         
-                         <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
-                            <button className="btn btn-secondary" type="button" onClick={() => {
-                               const nq = [...questions]; nq[idx].options.push({text: "", is_correct: false}); setQuestions(nq);
-                            }}><Icons.Plus /> Add Option</button>
-                            <button className="btn btn-publish" type="button" style={{ marginLeft: 'auto' }} onClick={() => setEditingIdx(null)}>
-                               <Icons.Save /> Save Question
-                            </button>
-                         </div>
+                        <div style={{ display: 'flex', gap: 6 }}>
+                          <input type="file" id={`q-img-${idx}`} style={{ display: 'none' }} accept="image/*" onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const base64 = await handleImageUpload(file);
+                              const nq = [...questions]; nq[idx].image = base64; setQuestions(nq);
+                            }
+                          }} />
+                          <button className="q-delete" type="button" onClick={() => document.getElementById(`q-img-${idx}`)?.click()} title="Upload question image">
+                            <Icons.Camera />
+                          </button>
+                          <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '13px', fontWeight: 600, color: 'var(--ink-2)', cursor: 'pointer', background: 'var(--bg)', padding: '8px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--line)' }}>
+                            <input type="checkbox" checked={q.image_required} onChange={e => {
+                              const nq = [...questions]; nq[idx].image_required = e.target.checked; setQuestions(nq);
+                            }} />
+                            📷 Add Image
+                          </label>
+                        </div>
                       </div>
-                   ) : (
+
+
+                      <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginTop: 12 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--bg)', padding: '6px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--line)' }}>
+                          <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--ink-2)' }}>Marks:</span>
+                          <input type="number" step="0.5" min="0" className="form-input" style={{ width: 80, height: 32, padding: '0 8px' }} value={q.marks ?? 1} onChange={e => {
+                            let val = parseFloat(e.target.value);
+                            if (isNaN(val)) val = 0;
+                            const nq = [...questions]; nq[idx].marks = val; setQuestions(nq);
+                          }} />
+                        </div>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--bg)', padding: '6px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--line)', flex: 1 }}>
+                          <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--ink-2)' }}>Category:</span>
+                          {showNewCategoryInput ? (
+                            <div style={{ display: 'flex', gap: 6, flex: 1 }}>
+                              <input autoFocus className="form-input" style={{ height: 32, flex: 1 }} value={newCategoryName} onChange={e => setNewCategoryName(e.target.value)} placeholder="New Category Name" />
+                              <button className="btn btn-publish" type="button" style={{ height: 32, padding: '0 12px' }} onClick={async () => {
+                                if (!newCategoryName.trim()) { setShowNewCategoryInput(false); return; }
+                                try {
+                                  const res = await fetch(`${API_BASE_URL}/categories`, {
+                                    method: 'POST', headers: authHeaders(), body: JSON.stringify({ name: newCategoryName })
+                                  });
+                                  if (res.ok) {
+                                    const newCat = await res.json();
+                                    setCategories(prev => {
+                                      if (prev.some(c => c.name === newCat.name)) return prev;
+                                      return [...prev, newCat];
+                                    });
+                                    // SYNC: Also add to bank categories list for selection
+                                    setBankCategories(prev => {
+                                      if (prev.includes(newCat.name)) return prev;
+                                      return [...prev, newCat.name];
+                                    });
+                                    const nq = [...questions]; nq[idx].category = newCat.name; setQuestions(nq);
+                                  }
+                                } catch (e) { console.error(e); }
+                                setShowNewCategoryInput(false);
+                                setNewCategoryName("");
+                              }}><Icons.Check /></button>
+                              <button className="btn btn-secondary" type="button" style={{ height: 32, padding: '0 12px' }} onClick={() => setShowNewCategoryInput(false)}><Icons.X /></button>
+                            </div>
+                          ) : (
+                            <select className="form-input" style={{ height: 32, flex: 1 }} value={q.category || "General"} onChange={e => {
+                              if (e.target.value === "ADD_NEW") {
+                                setShowNewCategoryInput(true);
+                              } else {
+                                const nq = [...questions]; nq[idx].category = e.target.value; setQuestions(nq);
+                              }
+                            }}>
+                              <option value="General">General</option>
+                              {categories.filter(c => c.name !== 'General').map(c => (
+                                <option key={c.id} value={c.name}>{c.name}</option>
+                              ))}
+                              <option value="ADD_NEW" style={{ fontWeight: 'bold', color: 'var(--teal)' }}>+ Add New Category</option>
+                            </select>
+                          )}
+                        </div>
+                      </div>
+
+                      {q.image && (
+                        <div style={{ position: 'relative', width: 'fit-content' }}>
+                          <img src={q.image} alt="Question" style={{ maxWidth: '200px', borderRadius: 8, border: '1px solid var(--line)' }} />
+                          <button className="q-delete" style={{ position: 'absolute', top: -10, right: -10, width: 24, height: 24 }} onClick={() => {
+                            const nq = [...questions]; delete nq[idx].image; setQuestions(nq);
+                          }}><Icons.X /></button>
+                        </div>
+                      )}
+
+                      <div style={{ paddingLeft: 10, marginTop: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                        {q.options.map((opt, oIdx) => (
+                          <div key={oIdx} style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                            <input type="radio" checked={opt.is_correct} style={{ width: 16, height: 16, accentColor: 'var(--primary)', cursor: 'pointer' }} onChange={() => {
+                              const nq = [...questions];
+                              nq[idx].options = nq[idx].options.map((o, i) => ({ ...o, is_correct: i === oIdx }));
+                              setQuestions(nq);
+                            }} />
+                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                              <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                                <input className="form-input" style={{ flex: 1 }} value={opt.text} onChange={e => {
+                                  const nq = [...questions]; nq[idx].options[oIdx].text = e.target.value; setQuestions(nq);
+                                }} placeholder={`Option ${String.fromCharCode(65 + oIdx)}`} />
+
+                                <input type="file" id={`o-img-${idx}-${oIdx}`} style={{ display: 'none' }} accept="image/*" onChange={async (e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) {
+                                    const base64 = await handleImageUpload(file);
+                                    const nq = [...questions]; nq[idx].options[oIdx].image = base64; setQuestions(nq);
+                                  }
+                                }} />
+                                <button className="q-delete" type="button" onClick={() => document.getElementById(`o-img-${idx}-${oIdx}`)?.click()} title="Upload option image">
+                                  <Icons.Camera />
+                                </button>
+
+                                <button className="q-delete" type="button" onClick={() => {
+                                  const nq = [...questions]; nq[idx].options.splice(oIdx, 1); setQuestions(nq);
+                                }}><Icons.Trash /></button>
+                              </div>
+                              {opt.image && (
+                                <div style={{ position: 'relative', width: 'fit-content' }}>
+                                  <img src={opt.image} alt="Option" style={{ maxWidth: '100px', borderRadius: 4, border: '1px solid var(--line)' }} />
+                                  <button className="q-delete" style={{ position: 'absolute', top: -5, right: -5, width: 20, height: 20 }} onClick={() => {
+                                    const nq = [...questions]; delete nq[idx].options[oIdx].image; setQuestions(nq);
+                                  }}><Icons.X /></button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
+                        <button className="btn btn-secondary" type="button" onClick={() => {
+                          const nq = [...questions]; nq[idx].options.push({ text: "", is_correct: false }); setQuestions(nq);
+                        }}><Icons.Plus /> Add Option</button>
+                        <button className="btn btn-publish" type="button" style={{ marginLeft: 'auto' }} onClick={() => setEditingIdx(null)}>
+                          <Icons.Save /> Save Question
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
                     <>
                       <div className="q-header">
                         <div className="q-num">{idx + 1}</div>
                         <div className="q-text">
-                            <div style={{ marginBottom: q.image ? 12 : 6 }}>
-                               <span style={{ marginRight: 8 }}>{q.text}</span>
-                               <span style={{ fontSize: '11px', background: 'var(--teal-light)', color: 'var(--teal)', padding: '2px 8px', borderRadius: '100px', fontWeight: 700, whiteSpace: 'nowrap' }}>
-                                   {q.marks ?? 1} Marks
-                               </span>
-                               <span style={{ fontSize: '11px', background: 'var(--bg)', color: 'var(--ink-2)', border: '1px solid var(--line)', padding: '2px 8px', borderRadius: '100px', fontWeight: 600, marginLeft: 6, whiteSpace: 'nowrap' }}>
-                                   {q.category || 'General'}
-                               </span>
-                            </div>
-                            {q.image && <img src={q.image} alt="Question" style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: 8, display: 'block', marginBottom: 12 }} />}
-                            {q.image_required && (
-                                <span style={{ fontSize: '11px', background: 'var(--teal-light)', color: 'var(--teal)', padding: '2px 8px', borderRadius: '100px', fontWeight: 700, textTransform: 'uppercase' }}>
-                                    📷 Image Required
-                                </span>
-                            )}
+                          <div style={{ marginBottom: q.image ? 12 : 6 }}>
+                            <span style={{ marginRight: 8 }}>{q.text}</span>
+                            <span style={{ fontSize: '11px', background: 'var(--teal-light)', color: 'var(--teal)', padding: '2px 8px', borderRadius: '100px', fontWeight: 700, whiteSpace: 'nowrap' }}>
+                              {q.marks ?? 1} Marks
+                            </span>
+                            <span style={{ fontSize: '11px', background: 'var(--bg)', color: 'var(--ink-2)', border: '1px solid var(--line)', padding: '2px 8px', borderRadius: '100px', fontWeight: 600, marginLeft: 6, whiteSpace: 'nowrap' }}>
+                              {q.category || 'General'}
+                            </span>
+                          </div>
+                          {q.image && <img src={q.image} alt="Question" style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: 8, display: 'block', marginBottom: 12 }} />}
+                          {q.image_required && (
+                            <span style={{ fontSize: '11px', background: 'var(--teal-light)', color: 'var(--teal)', padding: '2px 8px', borderRadius: '100px', fontWeight: 700, textTransform: 'uppercase' }}>
+                              📷 Image Required
+                            </span>
+                          )}
                         </div>
                         <div style={{ display: 'flex', gap: 6 }}>
                           <button className="q-delete" type="button" onClick={() => {
-                             setEditingIdx(idx);
-                             setShowNewCategoryInput(false);
+                            setEditingIdx(idx);
+                            setShowNewCategoryInput(false);
                           }} title="Edit question">
                             <Icons.Edit />
                           </button>
@@ -1501,8 +1984,8 @@ export default function CreateExam() {
                         {q.options.map((opt, oIdx) => (
                           <div key={oIdx} className={`opt ${opt.is_correct ? "opt--correct" : ""}`} style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 8 }}>
                             <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                                <span className="opt-letter">{String.fromCharCode(65 + oIdx)}.</span>
-                                {opt.text}
+                              <span className="opt-letter">{String.fromCharCode(65 + oIdx)}.</span>
+                              {opt.text}
                             </div>
                             {opt.image && <img src={opt.image} alt="Option" style={{ maxWidth: '100%', maxHeight: '100px', borderRadius: 4, marginLeft: 22 }} />}
                           </div>
@@ -1518,14 +2001,14 @@ export default function CreateExam() {
                   )}
                 </div>
               ))}
-              
-              {creationMode !== 'ai' && (
-                 <button className="btn btn-secondary" type="button" style={{ width: '100%', marginBottom: 20, padding: 16, borderStyle: 'dashed' }} onClick={() => {
-                     setQuestions(prev => [...(prev||[]), { text: "New Question", options: [{text: "Option A", is_correct: true}, {text: "Option B", is_correct: false}], image_required: false }]);
-                     setEditingIdx((questions?.length || 0));
-                 }}>
-                     <Icons.Plus /> Add Another Question
-                 </button>
+
+              {creationMode !== 'bank' && (
+                <button className="btn btn-secondary" type="button" style={{ width: '100%', marginBottom: 20, padding: 16, borderStyle: 'dashed' }} onClick={() => {
+                  setQuestions(prev => [...(prev || []), { text: "New Question", options: [{ text: "Option A", is_correct: true }, { text: "Option B", is_correct: false }], image_required: false }]);
+                  setEditingIdx((questions?.length || 0));
+                }}>
+                  <Icons.Plus /> Add Another Question
+                </button>
               )}
             </>
           )}

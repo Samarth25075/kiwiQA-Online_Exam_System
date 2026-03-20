@@ -74,7 +74,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 app.include_router(auth_router)       # /login, /me
 app.include_router(candidates_admin_router)
 app.include_router(candidates_public_router, prefix="/candidates")
-app.include_router(exams_router)       # /exams
+app.include_router(exams_router, prefix="/exams")       # /exams
 app.include_router(categories_router)
 
 # ── Background Cleanup ────────────────────────

@@ -27,6 +27,9 @@ class ExamBase(BaseModel):
     proctoring_enabled: bool = True
     proctoring_type: Optional[str] = "video"  # "video", "screen", or "both"
     passing_score: int = 50  # passing percentage (0-100)
+    source: Optional[str] = "Bank" # "AI" or "Bank"
+    bank_categories: Optional[List[str]] = []
+    category_configs: Optional[dict] = {}
 
 class ExamCreate(ExamBase):
     pass
@@ -42,7 +45,10 @@ class ExamResponse(ExamBase):
 class ExamStatsResponse(BaseModel):
     id: str
     title: str
+    topic: str = ""
     difficulty: str
+    duration: int = 0
+    num_questions: int = 0
     total_assigned: int
     completed: int
     live: int
@@ -50,6 +56,8 @@ class ExamStatsResponse(BaseModel):
     passed: int = 0
     failed: int = 0
     eliminated: int = 0
+    total_incorrect: int = 0
+    avg_incorrect: float = 0.0
     passing_score: int = 50
     link_expiry: Optional[str] = None
     auto_delete: Optional[str] = None

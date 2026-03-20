@@ -490,11 +490,16 @@ export default function ManageCandidates() {
                                         <td>
                                             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                                                 {group.enrollments.map((en: any) => (
-                                                    <div key={en.id} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                                    <div key={en.id} style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
                                                         <StatusChip status={en.status} />
                                                         <span style={{ fontSize: 11, color: "var(--text-muted)", whiteSpace: 'nowrap', maxWidth: 80, overflow: 'hidden', textOverflow: 'ellipsis' }} title={en.examName}>
                                                             {en.examName}
                                                         </span>
+                                                        {en.incorrect_question_nums?.length > 0 && (
+                                                            <span style={{ fontSize: '9px', color: '#dc2626', fontWeight: 700, background: '#fef2f2', padding: '1px 5px', borderRadius: '4px', border: '1px solid #fee2e2' }} title={`Incorrect Questions: ${en.incorrect_question_nums.join(", ")}`}>
+                                                                Err: {en.incorrect_question_nums.join(",")}
+                                                            </span>
+                                                        )}
                                                         {en.device_id && (
                                                             <Icons.CPU />
                                                         )}

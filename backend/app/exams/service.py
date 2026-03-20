@@ -8,8 +8,171 @@ import google.genai as new_genai
 from google.genai import types as genai_types
 from app.core.config import GOOGLE_API_KEY, QUIZ_API_KEY
 import requests
+import random
 from sqlalchemy.orm import Session
 from app.models import Exam
+
+def _read_bank() -> List[Dict]:
+    """Read questions from local question_bank.json."""
+    bank_path = os.path.join(os.path.dirname(__file__), "..", "question_bank.json")
+    if not os.path.exists(bank_path):
+        return []
+    try:
+        with open(bank_path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except:
+        return []
+
+def get_bank_categories() -> List[str]:
+    """Get unique categories from the inbuilt question bank."""
+    bank = _read_bank()
+    cats = sorted(list(set(q.get("category", "General") for q in bank if q.get("category"))))
+    return cats
+
+def get_bank_stats() -> Dict:
+    """Get count and total marks for each category in the bank."""
+    bank = _read_bank()
+    stats = {}
+    for q in bank:
+        cat = q.get("category", "General")
+        if cat not in stats:
+            stats[cat] = {"count": 0, "total_marks": 0.0}
+        stats[cat]["count"] += 1
+        stats[cat]["total_marks"] += float(q.get("marks", 0.0))
+    return stats
+
+def get_bank_questions(categories: List[str], difficulty: str, count: int, configs: Dict = None) -> List[Dict]:
+    """Fetch questions from bank based on multiple categories and difficulty."""
+    bank = _read_bank()
+    all_selected = []
+    
+    # If no specific configs, fall back to balanced approach
+    if not configs:
+        # Original logic for balanced selection
+        # If no categories, get all
+        if not categories:
+            filtered = bank
+        else:
+            filtered = [q for q in bank if q.get("category") in categories]
+        
+        # Optional difficulty filter
+        if difficulty:
+            diff_filtered = [q for q in filtered if q.get("difficulty", "").lower() == difficulty.lower()]
+            # If we have enough with specific difficulty, use them. Otherwise fallback to categories-only.
+            if len(diff_filtered) >= count:
+                filtered = diff_filtered
+                
+        # Shuffle and pick
+        random.shuffle(filtered)
+        all_selected = filtered[:count]
+    else:
+        print(f"DEBUG: Processing configs: {configs}", flush=True)
+        for cat in categories:
+            cfg = configs.get(cat, {})
+            cat_count = int(cfg.get("count", 0))
+            cat_total_marks = float(cfg.get("total_marks", cfg.get("marks", 0.0)))
+            print(f"DEBUG: Category {cat} - Count: {cat_count}, Marks: {cat_total_marks}", flush=True)
+            
+            if cat_count <= 0:
+                continue
+
+            # NEW: Filter by category only. We'll pick difficulty-appropriate ones if they exist, 
+            # but we won't fail the count just because of difficulty.
+            cat_qs = [q for q in bank if q.get("category", "General").lower() == cat.lower()]
+            
+            # Prefer matching difficulty but fall back to any in category to satisfy count
+            pref_qs = [q for q in cat_qs if q.get("difficulty", "").lower() == difficulty.lower()]
+            other_qs = [q for q in cat_qs if q.get("difficulty", "").lower() != difficulty.lower()]
+            
+            combined_qs = pref_qs + other_qs
+            random.shuffle(combined_qs)
+            
+            selected_for_cat = combined_qs[:cat_count]
+            
+            # NEW: Support for explicit mark breakdown (e.g. 5 questions of 1 mark, 3 of 2, etc.)
+            breakdown = cfg.get("breakdown", {})
+            if breakdown:
+                # Flat list of marks to assign, e.g. [1, 1, 1, 2, 2, 3]
+                marks_to_assign = []
+                for m_val, m_qty in breakdown.items():
+                    try:
+                        val = float(m_val)
+                        qty = int(m_qty)
+                        marks_to_assign.extend([val] * qty)
+                    except: continue
+                
+                # Assign in order to our selected questions
+                for i, s in enumerate(selected_for_cat):
+                    if i < len(marks_to_assign):
+                        s["marks"] = marks_to_assign[i]
+                    else:
+                        s["marks"] = 1.0 # Fallback
+            
+            # Intelligent Mark Distribution (Legacy or if no breakdown provided):
+            elif cat_total_marks > 0:
+                # Calculate base marks per question (whole number)
+                base_marks = int(cat_total_marks // cat_count)
+                # Remainder to distribute (e.g., 2 if 12 marks and 5 questions)
+                remainder = int(cat_total_marks % cat_count)
+                # Any fractional decimal (e.g., .5 if 10.5 marks)
+                decimal_part = round(cat_total_marks - (base_marks * cat_count + remainder), 2)
+                
+                for i, s in enumerate(selected_for_cat):
+                    # Start with base
+                    q_marks = float(base_marks)
+                    
+                    # Add one point if we are within the remainder index
+                    if i < remainder:
+                        q_marks += 1.0
+                    
+                    # If there's a decimal, add it to the very first question
+                    if i == 0 and decimal_part > 0:
+                        q_marks += decimal_part
+                        
+                    s["marks"] = round(q_marks, 2)
+            else:
+                for s in selected_for_cat:
+                    s["marks"] = 1.0
+            
+            all_selected.extend(selected_for_cat)
+
+    return all_selected
+
+def add_to_bank(question: Dict) -> bool:
+    """Add a single question to the bank."""
+    bank = _read_bank()
+    bank.append(question)
+    bank_path = os.path.join(os.path.dirname(__file__), "..", "question_bank.json")
+    try:
+        with open(bank_path, "w", encoding="utf-8") as f:
+            json.dump(bank, f, indent=2)
+        return True
+    except:
+        return False
+
+def upload_to_bank(questions: List[Dict]) -> bool:
+    """Bulk upload questions to the bank."""
+    bank = _read_bank()
+    bank.extend(questions)
+    bank_path = os.path.join(os.path.dirname(__file__), "..", "question_bank.json")
+    try:
+        with open(bank_path, "w", encoding="utf-8") as f:
+            json.dump(bank, f, indent=2)
+        return True
+    except:
+        return False
+
+def delete_bank_category(category_name: str) -> bool:
+    """Delete a category and all its questions from the bank."""
+    bank = _read_bank()
+    new_bank = [q for q in bank if q.get('category', '').lower() != category_name.lower()]
+    bank_path = os.path.join(os.path.dirname(__file__), "..", "question_bank.json")
+    try:
+        with open(bank_path, "w", encoding="utf-8") as f:
+            json.dump(new_bank, f, indent=2)
+        return True
+    except:
+        return False
 
 def _generate_with_quiz_api(topic: str, difficulty: str, count: int) -> Optional[List[Dict]]:
     """Generate questions using QuizAPI.io."""
@@ -143,13 +306,13 @@ def _generate_with_gemini(topic: str, difficulty: str, count: int) -> Optional[L
         print(f"ERROR: AI Generation failed: {e}")
         return None
 
-def _generate_mock_questions(topic: str, difficulty: str, count: int) -> List[Dict]:
+def _generate_mock_questions(topic: str, difficulty: str, count: int, source: str = "ai") -> List[Dict]:
     """Generates questions using QuizAPI, then Gemini, then high-quality templates.
     Uses Redis to cache results for faster subsequent loads.
     """
     from app.core.redis import get_cached_data, set_cached_data
     
-    cache_key = f"exam_questions:{topic.lower().replace(' ', '_')}:{difficulty.lower()}:{count}"
+    cache_key = f"exam_questions:{topic.lower().replace(' ', '_')}:{difficulty.lower()}:{count}:{source}"
     cached = get_cached_data(cache_key)
     if cached:
         print(f"INFO: Loading questions from Redis cache for {topic}")
@@ -159,7 +322,7 @@ def _generate_mock_questions(topic: str, difficulty: str, count: int) -> List[Di
     questions = _generate_with_quiz_api(topic, difficulty, count)
     
     # 2. Try Gemini
-    if not questions:
+    if not questions and source == "ai":
         questions = _generate_with_gemini(topic, difficulty, count)
         
     if not questions: questions = []
@@ -272,7 +435,14 @@ def _generate_mock_questions(topic: str, difficulty: str, count: int) -> List[Di
     return questions[:count]
 
 def generate_questions(exam_in: ExamCreate) -> List[Dict]:
-    return _generate_mock_questions(exam_in.topic, exam_in.difficulty, exam_in.num_questions)
+    if getattr(exam_in, 'source', 'AI').lower() == 'bank':
+        return get_bank_questions(
+            getattr(exam_in, 'bank_categories', []) or [],
+            exam_in.difficulty,
+            exam_in.num_questions,
+            getattr(exam_in, 'category_configs', {})
+        )
+    return _generate_mock_questions(exam_in.topic, exam_in.difficulty, exam_in.num_questions, 'ai')
 
 def _to_summary_dict(exam: Exam) -> Dict:
     """Lightweight mapping for list views (excludes heavy JSON questions)."""
@@ -307,7 +477,7 @@ def save_exam(db: Session, exam_in: ExamFinalize) -> Dict:
         topic=exam_in.topic,
         difficulty=exam_in.difficulty,
         duration=exam_in.duration,
-        num_questions=exam_in.num_questions,
+        num_questions=len(exam_in.questions),
         created_at=datetime.now().isoformat(),
         link_expiry=exam_in.link_expiry,
         auto_delete=exam_in.auto_delete,
@@ -336,7 +506,7 @@ def create_exam(db: Session, exam_in: ExamCreate) -> Dict:
         topic=exam_in.topic,
         difficulty=exam_in.difficulty,
         duration=exam_in.duration,
-        num_questions=exam_in.num_questions,
+        num_questions=len(questions),
         created_at=datetime.now().isoformat(),
         proctoring_enabled=getattr(exam_in, 'proctoring_enabled', True),
         proctoring_type=getattr(exam_in, 'proctoring_type', 'video'),
@@ -370,6 +540,36 @@ def get_all_exams(db: Session, bypass_cache: bool = False) -> List[Dict]:
 def get_exam_by_id(db: Session, exam_id: str) -> Dict | None:
     exam = db.query(Exam).filter(Exam.id == exam_id).first()
     return _to_full_dict(exam)
+
+def duplicate_exam(db: Session, exam_id: str) -> Dict | None:
+    from app.core.redis import redis_client
+    exam = db.query(Exam).filter(Exam.id == exam_id).first()
+    if not exam:
+        return None
+        
+    new_exam = Exam(
+        id=str(uuid.uuid4()),
+        title=f"Copy of {exam.title}",
+        topic=exam.topic,
+        difficulty=exam.difficulty,
+        duration=exam.duration,
+        num_questions=exam.num_questions,
+        created_at=datetime.now().isoformat(),
+        link_expiry=exam.link_expiry,
+        auto_delete=exam.auto_delete,
+        proctoring_enabled=exam.proctoring_enabled,
+        proctoring_type=exam.proctoring_type,
+        passing_score=exam.passing_score,
+        questions=exam.questions # JSON is safe to copy
+    )
+    db.add(new_exam)
+    db.commit()
+    db.refresh(new_exam)
+    
+    if redis_client:
+        redis_client.delete("all_exams_list", "exams_with_counts", "all_candidates_list_summary")
+        
+    return _to_full_dict(new_exam)
 
 def delete_exam(db: Session, exam_id: str) -> bool:
     from app.core.redis import redis_client
@@ -428,6 +628,7 @@ def get_exams_with_candidate_counts(db: Session, bypass_cache: bool = False) -> 
         failed = 0
         eliminated = 0
         
+        total_incorrect = 0
         for c in completed_cands:
             vios = int(float(c.get("violations", "0") or 0)) 
             if vios >= 3:
@@ -436,19 +637,27 @@ def get_exams_with_candidate_counts(db: Session, bypass_cache: bool = False) -> 
             else:
                 try:
                     score = float(c.get("score", "0") or 0)
-                    # Prefer total_marks for weighted scoring, fallback to total_questions
-                    total = float(c.get("total_marks") or c.get("total_questions") or 1)
-                    if (score / total * 100) >= passing_score_pct:
+                    total_qs = float(c.get("total_questions") or 1)
+                    total_incorrect += (total_qs - score)
+                    
+                    # Prefer total_marks for weighted scoring, fallback to total_questions for pass/fail check
+                    total_m = float(c.get("total_marks") or c.get("total_questions") or 1)
+                    if (score / total_m * 100) >= passing_score_pct:
                         passed += 1
                     else:
                         failed += 1
                 except:
                     failed += 1
 
+        avg_incorrect = round(total_incorrect / len(completed_cands), 1) if completed_cands else 0
+
         result.append({
             "id": exam["id"],
             "title": exam["title"],
+            "topic": exam.get("topic") or "",
             "difficulty": exam["difficulty"],
+            "duration": exam.get("duration") or 0,
+            "num_questions": exam.get("num_questions") or 0,
             "total_assigned": len(assigned),
             "completed": len(completed_cands),
             "live": len([c for c in assigned if c.get("status", "").lower() == "live"]),
@@ -456,6 +665,8 @@ def get_exams_with_candidate_counts(db: Session, bypass_cache: bool = False) -> 
             "passed": passed,
             "failed": failed,
             "eliminated": eliminated,
+            "total_incorrect": int(total_incorrect),
+            "avg_incorrect": avg_incorrect,
             "passing_score": passing_score_pct,
             "link_expiry": exam.get("link_expiry"),
             "auto_delete": exam.get("auto_delete"),

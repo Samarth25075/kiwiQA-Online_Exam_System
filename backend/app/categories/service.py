@@ -18,3 +18,10 @@ def create_category(db: Session, category_in: CategoryCreate):
     db.commit()
     db.refresh(db_category)
     return db_category
+
+def delete_category(db: Session, category_name: str):
+    cat = db.query(QuestionCategory).filter(QuestionCategory.name == category_name).first()
+    if cat:
+        db.delete(cat)
+        db.commit()
+    return True

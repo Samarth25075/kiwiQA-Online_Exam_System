@@ -25,6 +25,9 @@ const Icons = {
     ),
     Shield: ({ size = 14 }) => (
         <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+    ),
+    Copy: ({ size = 14 }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
     )
 };
 
@@ -47,7 +50,11 @@ interface Exam {
     difficulty: string;
     duration: number;
     num_questions?: number;
-    created_at: string;
+    created_at?: string;
+    total_assigned?: number;
+    completed?: number;
+    avg_incorrect?: number;
+    total_incorrect?: number;
     questions?: Question[];
     proctoring_enabled: boolean;
     proctoring_type: string;
@@ -65,9 +72,7 @@ export default function ManageExams() {
     const [popup, setPopup] = useState<{ isOpen: boolean; type: PopupType; title?: string; message: string; onConfirm: () => void; onCancel?: () => void; confirmText?: string; } | null>(null);
 
     useEffect(() => {
-        fetchExams();
-
-        // Cross-tab synchronization
+        fetchExams(true); // Bypass cache on initial load to ensure new fields are loaded
         const bc = new BroadcastChannel("exam_portal_updates");
         bc.onmessage = (msg) => {
             if (msg.data === "refresh_dashboard") {
@@ -83,7 +88,7 @@ export default function ManageExams() {
         const token = localStorage.getItem("access_token");
         if (!token) { navigate("/"); return; }
         try {
-            const url = new URL(`${API_BASE_URL}/exams`);
+            const url = new URL(`${API_BASE_URL}/exams/stats`);
             if (bypassCache) url.searchParams.append("bypass_cache", "true");
             url.searchParams.append("v", Date.now().toString()); // Cache breaker
 
@@ -144,6 +149,28 @@ export default function ManageExams() {
             },
             onCancel: () => setPopup(null)
         });
+    };
+
+    const handleDuplicate = async (id: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        setSaving(true);
+        const token = localStorage.getItem("access_token");
+        try {
+            const res = await fetch(`${API_BASE_URL}/exams/${id}/duplicate`, {
+                method: "POST",
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+            if (res.ok) {
+                fetchExams(true);
+                setPopup({ isOpen: true, type: 'alert', title: 'Success', message: 'Exam duplicated successfully!', onConfirm: () => setPopup(null) });
+            } else {
+                throw new Error();
+            }
+        } catch {
+            setPopup({ isOpen: true, type: 'alert', title: 'Error', message: 'Failed to duplicate exam.', onConfirm: () => setPopup(null) });
+        } finally {
+            setSaving(false);
+        }
     };
 
     const toggleSelection = (id: string) => {
@@ -523,10 +550,19 @@ export default function ManageExams() {
                                                         <div className="mgmt-proctor-pill" style={{ display: 'inline-flex', width: 'fit-content' }}>Standard</div>
                                                     )}
                                                 </td>
-                                                <td style={{ textAlign: "right" }}>
+                                                <td style={{ textAlign: "right", display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                                                     <button
                                                         className="delete-btn"
-                                                        style={{ padding: '6px 12px' }}
+                                                        style={{ padding: '6px 10px', borderColor: '#e2e8f0', color: 'var(--text-muted)' }}
+                                                        onClick={(e) => handleDuplicate(exam.id, e)}
+                                                        title="Duplicate Assessment"
+                                                        disabled={saving}
+                                                    >
+                                                        <Icons.Copy size={14} />
+                                                    </button>
+                                                    <button
+                                                        className="delete-btn"
+                                                        style={{ padding: '6px 10px' }}
                                                         onClick={(e) => handleDelete(exam.id, e)}
                                                         title="Delete Assessment"
                                                     >

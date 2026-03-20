@@ -1,15 +1,17 @@
 # app/exams/router.py
-from typing import List, Annotated, Optional
+from typing import List, Annotated, Optional, Dict
 from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from app.auth.router import get_current_admin, check_permission
 from app.auth.schemas import AdminUser
 from app.exams.schemas import ExamCreate, ExamResponse, ExamFinalize, Question, ExamStatsResponse
-from app.exams.service import save_exam, generate_questions, get_all_exams, delete_exam, get_exams_with_candidate_counts
+from app.exams.service import save_exam, generate_questions, get_all_exams, delete_exam, get_exams_with_candidate_counts, get_bank_categories, get_bank_stats, get_exam_by_id, add_to_bank, upload_to_bank
 from sqlalchemy.orm import Session
 from app.database import get_db
 # Remove redundant FastAPICache, using service-level caching instead
 
-router = APIRouter(prefix="/exams", tags=["exams"])
+router = APIRouter(tags=["exams"])
+
+
 
 @router.post("/preview", response_model=List[Question])
 async def preview_exam(
@@ -47,6 +49,39 @@ async def read_exam_stats(
     """Returns each exam along with the count of candidates assigned to it."""
     return get_exams_with_candidate_counts(db, bypass_cache=bypass_cache)
 
+@router.get("/bank/categories", response_model=List[str])
+async def read_bank_categories(
+    current_admin: Annotated[AdminUser, Depends(check_permission("manage exam"))]
+):
+    """Get unique categories from the inbuilt question bank."""
+    return get_bank_categories()
+
+@router.get("/bank/stats")
+async def read_bank_stats(
+    current_admin: Annotated[AdminUser, Depends(check_permission("manage exam"))]
+):
+    """Get category-wise stats (count, marks) from the question bank."""
+    return get_bank_stats()
+
+@router.post("/bank/add")
+async def add_individual_question_to_bank(
+    question: Dict,
+    current_admin: Annotated[AdminUser, Depends(check_permission("manage exam"))]
+):
+    """Add a single question to the inbuilt bank."""
+    if add_to_bank(question):
+        return {"message": "Question added to bank"}
+    raise HTTPException(status_code=500, detail="Failed to update bank")
+
+@router.post("/bank/upload")
+async def upload_bulk_questions_to_bank(
+    questions: List[Dict],
+    current_admin: Annotated[AdminUser, Depends(check_permission("manage exam"))]
+):
+    """Upload a list of questions to the inbuilt bank."""
+    if upload_to_bank(questions):
+        return {"message": f"{len(questions)} questions uploaded to bank"}
+    raise HTTPException(status_code=500, detail="Failed to update bank")
 @router.get("/{exam_id}", response_model=ExamResponse)
 async def read_exam(
     exam_id: str,
@@ -59,6 +94,18 @@ async def read_exam(
     if not exam:
         raise HTTPException(status_code=404, detail="Exam not found")
     return exam
+@router.post("/{exam_id}/duplicate", response_model=ExamResponse)
+async def copy_exam(
+    exam_id: str,
+    current_admin: Annotated[AdminUser, Depends(check_permission("manage exam"))],
+    db: Session = Depends(get_db)
+):
+    """Create a duplicate of an existing exam."""
+    from app.exams.service import duplicate_exam
+    res = duplicate_exam(db, exam_id)
+    if not res:
+        raise HTTPException(status_code=404, detail="Exam not found")
+    return res
 
 @router.delete("/{exam_id}")
 async def remove_exam(
@@ -99,3 +146,14 @@ async def update_exam_expiry(
     check_and_delete_expired_exams(db)
     
     return {"message": "Expiry and/or deletion schedule updated"}
+
+
+@router.delete("/bank/categories/{name}")
+async def remove_bank_category(
+    name: str,
+    current_admin: Annotated[AdminUser, Depends(check_permission("manage exam"))]
+):
+    """Delete a category and all its questions from the bank."""
+    from app.exams.service import delete_bank_category
+    delete_bank_category(name)
+    return {"message": f"Category '{name}' deleted from bank"}

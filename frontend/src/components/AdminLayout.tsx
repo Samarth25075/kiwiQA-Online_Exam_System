@@ -165,8 +165,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
 
     const navItems = [
         { path: "/dashboard", label: "Dashboard", icon: Icons.Dashboard, perm: null },
-        { path: "/create-exam", label: "Generate AI Exam", icon: Icons.Generate, perm: "generate exam", task: "Generate AI Exam" },
-        { path: "/manage-exams", label: "Manage AI Exams", icon: Icons.Exams, perm: "manage exam", task: "Manage AI Exams" },
+        { path: "/create-exam", label: "Create Exam", icon: Icons.Generate, perm: "generate exam", task: "Create Exam" },
+        { path: "/manage-exams", label: "Manage Exams", icon: Icons.Exams, perm: "manage exam", task: "Manage Exams" },
         { path: "/manage-candidates", label: "Candidates", icon: Icons.Users, perm: "manage candidates", task: "Candidates" },
         { path: "/candidate-results", label: "Results", icon: Icons.Results, perm: "manage candidates", task: "Results" },
         { path: "/settings", label: "Settings", icon: Icons.Settings, perm: null },

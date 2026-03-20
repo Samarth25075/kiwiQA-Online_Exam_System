@@ -135,10 +135,14 @@ async def get_candidate_report(
         cat = q.get("category", "General")
         marks = q.get("marks", 1.0)
         if cat not in stats:
-            stats[cat] = {"correct": 0, "total": 0}
+            stats[cat] = {"correct": 0, "total": 0, "count": 0, "attempted": 0}
+        
+        stats[cat]["count"] += 1
         stats[cat]["total"] += marks
+        
         selected = ans_lookup.get(idx)
         if selected is not None:
+             stats[cat]["attempted"] += 1
              options = q.get("options", [])
              if 0 <= selected < len(options) and options[selected].get("is_correct"):
                  stats[cat]["correct"] += marks
@@ -157,6 +161,7 @@ async def get_candidate_report(
     return {
         "candidate": candidate,
         "exam_title": exam["title"],
+        "passing_score": exam.get("passing_score", 50),
         "stats": stats,
         "questions": report_questions,
         "proctoring": {
