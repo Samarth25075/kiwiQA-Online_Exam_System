@@ -189,9 +189,20 @@ export default function ManageCandidates() {
         }
     };
 
-    const copyToClipboard = (text: string) => {
+    const copyToClipboard = (text: string, id: number) => {
         navigator.clipboard.writeText(text);
-        setPopup({ isOpen: true, type: 'alert', title: 'Copied', message: 'Candidate test link copied to clipboard.', onConfirm: () => setPopup(null) });
+        setPopup({
+            isOpen: true,
+            type: 'confirm',
+            title: 'Link Copied!',
+            message: 'Test link copied to clipboard. Would you like to also send this link to the candidate via email?',
+            confirmText: 'Send Email',
+            onConfirm: () => {
+                setPopup(null);
+                handleSendLink(id);
+            },
+            onCancel: () => setPopup(null)
+        });
     };
 
     // Memoized grouping of candidates by email
@@ -527,7 +538,7 @@ export default function ManageCandidates() {
                                                             <>
                                                                 <button 
                                                                     className="mc-action-btn mc-btn-copy" 
-                                                                    onClick={() => copyToClipboard(`${window.location.origin}/#/test/${en.token}`)} 
+                                                                    onClick={() => copyToClipboard(`${window.location.origin}/#/test/${en.token}`, en.id)} 
                                                                     title="Copy Unique Test Link"
                                                                 >
                                                                     <Icons.Copy />

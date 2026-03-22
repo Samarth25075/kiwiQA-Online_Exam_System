@@ -3,8 +3,9 @@ from typing import List, Annotated, Optional, Dict
 from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from app.auth.router import get_current_admin, check_permission
 from app.auth.schemas import AdminUser
-from app.exams.schemas import ExamCreate, ExamResponse, ExamFinalize, Question, ExamStatsResponse
+from app.exams.schemas import ExamCreate, ExamResponse, ExamFinalize, Question, ExamStatsResponse, SendExamLinkRequest
 from app.exams.service import save_exam, generate_questions, get_all_exams, delete_exam, get_exams_with_candidate_counts, get_bank_categories, get_bank_stats, get_exam_by_id, add_to_bank, upload_to_bank
+from app.core.email import send_email
 from sqlalchemy.orm import Session
 from app.database import get_db
 # Remove redundant FastAPICache, using service-level caching instead
@@ -82,6 +83,15 @@ async def upload_bulk_questions_to_bank(
     if upload_to_bank(questions):
         return {"message": f"{len(questions)} questions uploaded to bank"}
     raise HTTPException(status_code=500, detail="Failed to update bank")
+@router.get("/invitations/tracking")
+async def read_invitation_tracking(
+    current_admin: Annotated[AdminUser, Depends(check_permission("manage candidates"))],
+    db: Session = Depends(get_db)
+):
+    """Get detailed tracking of exam invitations vs candidate attempts."""
+    from app.exams.service import get_invitation_tracking
+    return get_invitation_tracking(db)
+
 @router.get("/{exam_id}", response_model=ExamResponse)
 async def read_exam(
     exam_id: str,
@@ -118,6 +128,46 @@ async def remove_exam(
     if not success:
         raise HTTPException(status_code=404, detail="Exam not found")
     return {"message": "Exam deleted"}
+
+@router.post("/{exam_id}/send-link")
+async def send_exam_link_custom(
+    exam_id: str,
+    payload: SendExamLinkRequest,
+    background_tasks: BackgroundTasks,
+    current_admin: Annotated[AdminUser, Depends(check_permission("manage exam"))],
+    db: Session = Depends(get_db)
+):
+    """Send an exam link to multiple emails manually via custom message."""
+    exam = get_exam_by_id(db, exam_id)
+    if not exam:
+        raise HTTPException(status_code=404, detail="Exam not found")
+        
+    subject = f"Invitation: {exam['title']}"
+    content = payload.message if payload.message else f"You have been invited to take the exam: {exam['title']}.\n\nPlease access it here: {payload.link}"
+    
+    from app.models import ExamInvitation
+    from datetime import datetime
+    
+    saved_count = 0
+    for email in payload.emails:
+        safe_email = email.strip()
+        if safe_email:
+            background_tasks.add_task(send_email, safe_email, subject, content)
+            
+            # Save invitation to DB
+            invitation = ExamInvitation(
+                exam_id=exam_id,
+                email=safe_email,
+                sent_at=datetime.now().isoformat()
+            )
+            db.add(invitation)
+            saved_count += 1
+            
+    if saved_count > 0:
+        db.commit()
+            
+    return {"message": f"Emails queued for {saved_count} recipient(s)."}
+
 
 from pydantic import BaseModel
 

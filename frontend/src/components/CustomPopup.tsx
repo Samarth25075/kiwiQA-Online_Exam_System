@@ -28,6 +28,20 @@ export default function CustomPopup({
     return (
         <div className="custom-popup-overlay">
             <div className="custom-popup-box">
+                <div className="custom-popup-icon">
+                    {type === 'confirm' ? (
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                            <polyline points="22 4 12 14.01 9 11.01" />
+                        </svg>
+                    ) : (
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="12" cy="12" r="10" />
+                            <line x1="12" y1="16" x2="12" y2="12" />
+                            <line x1="12" y1="8" x2="12.01" y2="8" />
+                        </svg>
+                    )}
+                </div>
                 {title && <h3 className="custom-popup-title">{title}</h3>}
                 <div className="custom-popup-message">{message}</div>
                 <div className="custom-popup-actions">
@@ -58,14 +72,26 @@ export default function CustomPopup({
                     width: 90%;
                     max-width: 420px;
                     border-radius: 16px;
-                    padding: 32px 24px;
+                    padding: 40px 32px;
                     box-shadow: 0 20px 40px rgba(0,0,0,0.2);
                     animation: modalPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
                     text-align: center;
                     border: 1px solid var(--border, #e2e8f0);
                 }
+                .custom-popup-icon {
+                    width: 64px;
+                    height: 64px;
+                    border-radius: 50%;
+                    background: linear-gradient(135deg, color-mix(in srgb, var(--primary, #1c848f) 10%, #fff), color-mix(in srgb, var(--primary, #1c848f) 20%, #fff));
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin: 0 auto 24px;
+                    color: var(--primary, #1c848f);
+                    border: 2px solid var(--primary, #1c848f);
+                }
                 .custom-popup-title {
-                    margin: 0 0 16px;
+                    margin: 0 0 12px;
                     font-size: 20px;
                     color: var(--text, #1e293b);
                     font-weight: 800;
@@ -84,10 +110,11 @@ export default function CustomPopup({
                     justify-content: center;
                 }
                 .custom-popup-btn {
+                    flex: 1;
                     padding: 12px 24px;
                     border: none;
                     border-radius: 8px;
-                    font-weight: 600;
+                    font-weight: 700;
                     font-size: 14px;
                     cursor: pointer;
                     transition: all 0.2s;

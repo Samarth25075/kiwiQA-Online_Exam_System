@@ -515,7 +515,7 @@ const STYLES = `
 .sec-overlay {
   position: fixed;
   inset: 0;
-  z-index: 9999;
+  z-index: 99999;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -530,20 +530,19 @@ const STYLES = `
 }
 
 .sec-modal {
-  background: var(--bg);
-  border-radius: 20px;
-  padding: 48px 40px 40px;
-  max-width: 480px;
+  background: #ffffff;
   width: 90%;
-  text-align: center;
-  box-shadow: 0 32px 64px rgba(0,0,0,0.25);
-  border: 2px solid var(--primary);
+  max-width: 420px;
+  border-radius: 16px;
+  padding: 32px 24px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
   animation: modalPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  position: relative;
+  text-align: center;
+  border: 1px solid var(--border, #e2e8f0);
 }
 
 @keyframes modalPop {
-  from { opacity: 0; transform: scale(0.85) translateY(20px); }
+  from { opacity: 0; transform: scale(0.9) translateY(10px); }
   to   { opacity: 1; transform: scale(1) translateY(0); }
 }
 
@@ -551,14 +550,13 @@ const STYLES = `
   width: 72px;
   height: 72px;
   border-radius: 50%;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--primary) 15%, var(--bg)), color-mix(in srgb, var(--primary) 25%, var(--bg)));
+  background: linear-gradient(135deg, color-mix(in srgb, var(--primary) 10%, #fff), color-mix(in srgb, var(--primary) 20%, #fff));
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto 24px;
   font-size: 32px;
-  border: 3px solid var(--primary);
-  box-shadow: 0 0 0 8px color-mix(in srgb, var(--primary) 8%, transparent);
+  border: 2px solid var(--primary);
 }
 
 .sec-label {
@@ -568,27 +566,25 @@ const STYLES = `
   letter-spacing: 0.12em;
   color: var(--primary);
   margin-bottom: 12px;
-  background: color-mix(in srgb, var(--primary) 12%, var(--bg));
+  background: color-mix(in srgb, var(--primary) 8%, #fff);
   display: inline-block;
   padding: 4px 14px;
   border-radius: 100px;
-  border: 1px solid color-mix(in srgb, var(--primary) 25%, var(--bg));
 }
 
 .sec-heading {
-  font-family: 'Red Hat Display', sans-serif;
-  font-size: 26px;
-  font-weight: 800;
-  color: var(--primary);
   margin: 0 0 16px;
-  line-height: 1.2;
+  font-size: 20px;
+  color: var(--text, #1e293b);
+  font-weight: 800;
+  font-family: var(--font-heading, sans-serif);
 }
 
 .sec-body {
   font-size: 15px;
-  color: #64748b;
-  line-height: 1.7;
-  margin-bottom: 8px;
+  color: var(--text-muted, #64748b);
+  margin-bottom: 24px;
+  line-height: 1.6;
 }
 
 .sec-violation-bar {
@@ -600,37 +596,37 @@ const STYLES = `
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 14px 20px;
-  margin: 20px 0 28px;
+  margin: 0 0 28px;
 }
 
 .sec-vio-dot {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  border: 2px solid var(--border);
-  background: var(--bg);
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: #fff;
   transition: all 0.3s;
 }
 
 .sec-vio-dot.active {
   background: var(--primary);
   border-color: var(--primary);
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary) 20%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 20%, transparent);
 }
 
 .sec-dismiss-btn {
   width: 100%;
-  padding: 16px;
+  padding: 12px 24px;
   background: var(--primary);
   color: white;
   border: none;
-  border-radius: 12px;
-  font-family: 'Poppins', sans-serif;
+  border-radius: 8px;
+  font-family: var(--font-body);
   font-weight: 700;
-  font-size: 15px;
+  font-size: 14px;
   cursor: pointer;
   transition: all 0.2s;
-  box-shadow: 0 4px 16px color-mix(in srgb, var(--primary) 35%, transparent);
+  box-shadow: 0 4px 12px rgba(28, 132, 143, 0.25);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -638,8 +634,9 @@ const STYLES = `
 }
 
 .sec-dismiss-btn:hover {
+  background: var(--primary-hover);
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px color-mix(in srgb, var(--primary) 45%, transparent);
+  box-shadow: 0 6px 16px rgba(28, 132, 143, 0.35);
 }
 
 .sec-dismiss-btn:active {
@@ -771,6 +768,33 @@ export default function TakeTest() {
       } else {
         document.documentElement.setAttribute("data-theme", saved);
       }
+    }, []);
+
+    // ─── Block Inspect / Developer Tools ────────────────────────────────────
+    useEffect(() => {
+        const handleContextMenu = (e: MouseEvent) => {
+            e.preventDefault();
+        };
+
+        const handleKeyDown = (e: KeyboardEvent) => {
+            // Block F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C, Ctrl+U
+            if (
+                e.key === "F12" ||
+                (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "J" || e.key === "C")) ||
+                (e.ctrlKey && e.key === "u")
+            ) {
+                e.preventDefault();
+                return false;
+            }
+        };
+
+        document.addEventListener("contextmenu", handleContextMenu);
+        document.addEventListener("keydown", handleKeyDown);
+
+        return () => {
+            document.removeEventListener("contextmenu", handleContextMenu);
+            document.removeEventListener("keydown", handleKeyDown);
+        };
     }, []);
 
     const [currentIdx, setCurrentIdx] = useState(0);

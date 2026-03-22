@@ -10,7 +10,7 @@ from app.core.config import GOOGLE_API_KEY, QUIZ_API_KEY
 import requests
 import random
 from sqlalchemy.orm import Session
-from app.models import Exam
+from app.models import Exam, Candidate, ExamInvitation
 
 def _read_bank() -> List[Dict]:
     """Read questions from local question_bank.json."""
@@ -606,9 +606,15 @@ def get_exams_with_candidate_counts(db: Session, bypass_cache: bool = False) -> 
             return cached
 
     from app.candidates.service import get_all_candidates
+    from sqlalchemy import func
+    
     # Always get fresh exams and candidates for dashboard stats
     exams = get_all_exams(db, bypass_cache=True)
     candidates = get_all_candidates(db, bypass_cache=True)
+    
+    # Get invite counts per exam
+    invite_rows = db.query(ExamInvitation.exam_id, func.count(ExamInvitation.id)).group_by(ExamInvitation.exam_id).all()
+    invite_counts = {row[0]: row[1] for row in invite_rows}
 
     from collections import defaultdict
     candidates_by_exam = defaultdict(list)
@@ -662,6 +668,7 @@ def get_exams_with_candidate_counts(db: Session, bypass_cache: bool = False) -> 
             "completed": len(completed_cands),
             "live": len([c for c in assigned if c.get("status", "").lower() == "live"]),
             "not_started": len([c for c in assigned if c.get("status", "").lower() not in ("completed", "live")]),
+            "total_invited": invite_counts.get(exam["id"], 0),
             "passed": passed,
             "failed": failed,
             "eliminated": eliminated,
@@ -699,3 +706,50 @@ def check_and_delete_expired_exams(db: Session):
     if deleted_any:
         db.commit()
     return deleted_any
+
+def get_invitation_tracking(db: Session):
+    """Returns detailed tracking of who was invited and if they sat for the exam."""
+    exams = db.query(Exam).all()
+    
+    result = []
+    for exam in exams:
+        invitations = db.query(ExamInvitation).filter(ExamInvitation.exam_id == exam.id).all()
+        candidates = db.query(Candidate).filter(Candidate.assigned_exam_id == exam.id).all()
+        
+        # Build map of email to candidate status for faster lookup
+        # Some candidates might be enrolled without invitation (public link), 
+        # but we only care about those who WERE invited for this specific report.
+        enrolled_status_map = {c.email.lower(): c.status for c in candidates}
+        
+        invitation_details = []
+        sat_count = 0
+        not_sat_count = 0
+        
+        for inv in invitations:
+            email_lower = inv.email.lower()
+            if email_lower in enrolled_status_map:
+                status = "Sat"
+                sat_count += 1
+                # If they sat, they might be in different stages
+                cand_status = enrolled_status_map[email_lower]
+                detail_status = f"Sat ({cand_status})"
+            else:
+                status = "Not Sat"
+                not_sat_count += 1
+                detail_status = "Not Sat"
+                
+            invitation_details.append({
+                "email": inv.email,
+                "sent_at": inv.sent_at,
+                "status": detail_status
+            })
+            
+        result.append({
+            "exam_id": exam.id,
+            "exam_title": exam.title,
+            "total_invited": len(invitations),
+            "sat_count": sat_count,
+            "not_sat_count": not_sat_count,
+            "details": invitation_details
+        })
+    return result

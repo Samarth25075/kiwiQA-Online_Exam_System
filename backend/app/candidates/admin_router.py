@@ -206,6 +206,18 @@ async def send_candidate_link(
         raise HTTPException(status_code=400, detail="No exam assigned to this candidate yet.")
 
     test_link = f"{FRONTEND_URL}/#/test/{candidate['token']}"
+    
+    # Record the invitation for tracking
+    from app.models import ExamInvitation
+    from datetime import datetime
+    inv = ExamInvitation(
+        exam_id=candidate['assigned_exam_id'],
+        email=candidate['email'],
+        sent_at=datetime.now().isoformat()
+    )
+    db.add(inv)
+    db.commit()
+
     background_tasks.add_task(send_invitation_email, candidate['email'], candidate['name'], test_link)
     return {"message": "Exam link sent successfully"}
 

@@ -168,6 +168,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         { path: "/create-exam", label: "Create Exam", icon: Icons.Generate, perm: "generate exam", task: "Create Exam" },
         { path: "/manage-exams", label: "Manage Exams", icon: Icons.Exams, perm: "manage exam", task: "Manage Exams" },
         { path: "/manage-candidates", label: "Candidates", icon: Icons.Users, perm: "manage candidates", task: "Candidates" },
+        { path: "/invitation-tracking", label: "Invites Tracking", icon: Icons.Results, perm: "manage candidates", task: "Invites" },
         { path: "/candidate-results", label: "Results", icon: Icons.Results, perm: "manage candidates", task: "Results" },
         { path: "/settings", label: "Settings", icon: Icons.Settings, perm: null },
     ];
@@ -445,7 +446,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                     ))}
 
                     <span className="al-nav-label">People</span>
-                    {navItems.slice(3, 5).map(item => (
+                    {navItems.slice(3, 6).map(item => (
                         <div
                             key={item.path}
                             className={`al-nav-item ${isActive(item.path) ? "active" : ""} ${item.perm && !hasPermission(item.perm) ? "locked" : ""}`}
@@ -458,7 +459,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                     ))}
 
                     <span className="al-nav-label">System</span>
-                    {navItems.slice(5).map(item => (
+                    {navItems.slice(6).map(item => (
                         <div
                             key={item.path}
                             className={`al-nav-item ${isActive(item.path) ? "active" : ""}`}

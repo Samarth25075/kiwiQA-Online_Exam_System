@@ -53,6 +53,7 @@ class ExamStatsResponse(BaseModel):
     completed: int
     live: int
     not_started: int
+    total_invited: int = 0
     passed: int = 0
     failed: int = 0
     eliminated: int = 0
@@ -63,3 +64,8 @@ class ExamStatsResponse(BaseModel):
     auto_delete: Optional[str] = None
     proctoring_enabled: bool = True
     proctoring_type: Optional[str] = "video"
+
+class SendExamLinkRequest(BaseModel):
+    emails: List[str]
+    link: str
+    message: Optional[str] = None

@@ -12,6 +12,7 @@ const EnrollCandidate = lazy(() => import('./pages/EnrollCandidate'));
 const ManageCandidates = lazy(() => import('./pages/ManageCandidates'));
 const CandidateResults = lazy(() => import('./pages/CandidateResults'));
 const CandidateReport = lazy(() => import('./pages/CandidateReport'));
+const InvitationTracking = lazy(() => import('./pages/InvitationTracking'));
 const Settings = lazy(() => import('./pages/Settings'));
 
 // Loading fallback
@@ -53,6 +54,7 @@ function App() {
             <Route path="/manage-exams" element={<ManageExams />} />
             <Route path="/manage-candidates" element={<ManageCandidates />} />
             <Route path="/candidate-results" element={<CandidateResults />} />
+            <Route path="/invitation-tracking" element={<InvitationTracking />} />
             <Route path="/report/:candidateId" element={<CandidateReport />} />
             <Route path="/settings" element={<Settings />} />
           </Route>

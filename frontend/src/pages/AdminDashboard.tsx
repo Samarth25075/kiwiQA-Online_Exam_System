@@ -106,6 +106,30 @@ const Icons = {
             <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
         </svg>
     ),
+    Mail: ({ size = 14 }: { size?: number }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+            <polyline points="22,6 12,13 2,6" />
+        </svg>
+    ),
+    List: ({ size = 14 }: { size?: number }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="8" y1="6" x2="21" y2="6" />
+            <line x1="8" y1="12" x2="21" y2="12" />
+            <line x1="8" y1="18" x2="21" y2="18" />
+            <line x1="3" y1="6" x2="3.01" y2="6" />
+            <line x1="3" y1="12" x2="3.01" y2="12" />
+            <line x1="3" y1="18" x2="3.01" y2="18" />
+        </svg>
+    ),
+    Grid: ({ size = 14 }: { size?: number }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="3" width="7" height="7" />
+            <rect x="14" y="3" width="7" height="7" />
+            <rect x="14" y="14" width="7" height="7" />
+            <rect x="3" y="14" width="7" height="7" />
+        </svg>
+    ),
 };
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
@@ -141,6 +165,7 @@ interface ExamStat {
     passed: number;
     failed: number;
     eliminated: number;
+    total_invited?: number;
     passing_score: number;
     link_expiry?: string;
     auto_delete?: string;
@@ -150,6 +175,7 @@ interface ExamStat {
 
 // ─── Dashboard Component ───────────────────────────────────────────────────────
 export default function AdminDashboard() {
+    const [viewMode, setViewMode] = useState<'card' | 'grid'>('grid');
     const [profile, setProfile] = useState<AdminProfile | null>(null);
     const [examStats, setExamStats] = useState<ExamStat[]>([]);
     const [loading, setLoading] = useState(true);
@@ -162,6 +188,65 @@ export default function AdminDashboard() {
     const [copyingId, setCopyingId] = useState<string | null>(null);
     const [now, setNow] = useState(new Date());
     const navigate = useNavigate();
+
+    const [sendLinkModal, setSendLinkModal] = useState<{ isOpen: boolean; examId: string; publicLink: string; emails: string; message: string; loading: boolean }>({
+        isOpen: false,
+        examId: "",
+        publicLink: "",
+        emails: "",
+        message: "",
+        loading: false
+    });
+
+    const handleSendLinkSubmit = async () => {
+        if (!sendLinkModal.emails.trim()) return;
+        setSendLinkModal(prev => ({ ...prev, loading: true }));
+        try {
+            const emailList = sendLinkModal.emails.split(",").map(e => e.trim()).filter(e => e.length > 0);
+            const body = {
+                emails: emailList,
+                link: sendLinkModal.publicLink,
+                message: sendLinkModal.message
+            };
+            const res = await fetch(`${API_BASE_URL}/exams/${sendLinkModal.examId}/send-link`, {
+                method: "POST",
+                headers: {
+                    ...authHeaders(),
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(body)
+            });
+            if (res.ok) {
+                setPopup({
+                    isOpen: true,
+                    type: "alert",
+                    title: "Success",
+                    message: `Link sent to ${emailList.length} recipient(s).`,
+                    onConfirm: () => setPopup(null)
+                });
+                setSendLinkModal(prev => ({ ...prev, isOpen: false }));
+            } else {
+                const err = await res.json();
+                setPopup({
+                    isOpen: true,
+                    type: "alert",
+                    title: "Error",
+                    message: err.detail || "Failed to send link",
+                    onConfirm: () => setPopup(null)
+                });
+            }
+        } catch (e) {
+            setPopup({
+                isOpen: true,
+                type: "alert",
+                title: "Error",
+                message: "An error occurred while sending emails.",
+                onConfirm: () => setPopup(null)
+            });
+        } finally {
+            setSendLinkModal(prev => ({ ...prev, loading: false }));
+        }
+    };
 
     const [popup, setPopup] = useState<{
         isOpen: boolean;
@@ -347,7 +432,7 @@ export default function AdminDashboard() {
 
     const putExamExpiry = async (examId: string, body: object) => {
         // Optimistically update the state
-        setExamStats(prev => prev.map(stat => 
+        setExamStats(prev => prev.map(stat =>
             stat.id === examId ? { ...stat, ...body } : stat
         ));
 
@@ -1240,6 +1325,48 @@ export default function AdminDashboard() {
         .result-stats { text-align: right; }
         .result-score { font-family: var(--font-mono); font-size: 13px; font-weight: 700; color: var(--slate-700); }
         .result-meta { font-size: 11px; color: var(--slate-400); display: block; }
+
+        /* ── Table View ──────────────────────────────────────────────── */
+        .exam-table-container {
+            width: 100%;
+            overflow-x: auto;
+            padding-bottom: 20px;
+        }
+        .exam-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 10px;
+            text-align: left;
+        }
+        .exam-table th {
+            padding: 0 20px 8px;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--slate-500);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            white-space: nowrap;
+        }
+        .exam-table td {
+            padding: 18px 20px;
+            font-size: 13px;
+            color: var(--slate-900);
+            background: var(--white);
+            vertical-align: middle;
+        }
+        .exam-table td:first-child {
+            border-top-left-radius: var(--radius-lg);
+            border-bottom-left-radius: var(--radius-lg);
+            box-shadow: -2px 2px 8px rgba(0,0,0,0.03);
+        }
+        .exam-table td:not(:first-child):not(:last-child) {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        }
+        .exam-table td:last-child {
+            border-top-right-radius: var(--radius-lg);
+            border-bottom-right-radius: var(--radius-lg);
+            box-shadow: 2px 2px 8px rgba(0,0,0,0.03);
+        }
       `}</style>
 
             {/* ── Top Bar ─────────────────────────────────────────────────────────── */}
@@ -1361,25 +1488,40 @@ export default function AdminDashboard() {
                     </div>
                 </div>
 
-                {/* Section Header */}
                 <div className="section-header">
                     <div>
                         <h3 className="section-title">Assessment Control</h3>
                         <p className="section-subtitle">Manage evaluation links, expiry, and lifecycle policies.</p>
                     </div>
-                    <button 
-                        className={`btn btn-refresh ${refreshing ? 'refreshing' : ''}`} 
-                        onClick={handleManualRefresh}
-                        disabled={refreshing}
-                        title="Force sync with database"
-                    >
-                        <Icons.Refresh size={14} className={refreshing ? 'spin' : ''} />
-                        {refreshing ? 'Syncing...' : 'Refresh'}
-                    </button>
+                    <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', background: 'var(--slate-50)', padding: '2px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--slate-200)' }}>
+                            <button
+                                onClick={() => setViewMode('card')}
+                                style={{ padding: '6px 12px', background: viewMode === 'card' ? 'var(--white)' : 'transparent', border: 'none', borderRadius: '4px', cursor: 'pointer', boxShadow: viewMode === 'card' ? 'var(--shadow-xs)' : 'none', fontWeight: 600, fontSize: '12px', color: viewMode === 'card' ? 'var(--slate-900)' : 'var(--slate-500)', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '6px' }}
+                            >
+                                <Icons.Grid size={14} /> Cards
+                            </button>
+                            <button
+                                onClick={() => setViewMode('grid')}
+                                style={{ padding: '6px 12px', background: viewMode === 'grid' ? 'var(--white)' : 'transparent', border: 'none', borderRadius: '4px', cursor: 'pointer', boxShadow: viewMode === 'grid' ? 'var(--shadow-xs)' : 'none', fontWeight: 600, fontSize: '12px', color: viewMode === 'grid' ? 'var(--slate-900)' : 'var(--slate-500)', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '6px' }}
+                            >
+                                <Icons.List size={14} /> Grid Layout
+                            </button>
+                        </div>
+                        <button
+                            className={`btn btn-refresh ${refreshing ? 'refreshing' : ''}`}
+                            onClick={handleManualRefresh}
+                            disabled={refreshing}
+                            title="Force sync with database"
+                        >
+                            <Icons.Refresh size={14} className={refreshing ? 'spin' : ''} />
+                            {refreshing ? 'Syncing...' : 'Refresh'}
+                        </button>
+                    </div>
                 </div>
 
                 {/* Exam Cards */}
-                <div className="exam-grid">
+                <div className="exam-grid" style={{ display: viewMode === 'grid' ? 'block' : 'grid' }}>
                     {examStats.length === 0 ? (
                         <div className="empty-state">
                             <div className="empty-icon">📋</div>
@@ -1387,111 +1529,287 @@ export default function AdminDashboard() {
                             <p className="empty-subtitle">Create your first assessment to begin evaluating candidates.</p>
                         </div>
                     ) : (
-                        examStats.map(exam => {
-                            const countdown = formatCountdown(exam.link_expiry);
-                            const isExpired = countdown === "Expired";
-                            const isActive = !!countdown && !isExpired;
-                            const publicLink = `${window.location.origin}/#/enroll/${exam.id}`;
-                            const completionRate = exam.total_assigned > 0
-                                ? Math.round((exam.completed / exam.total_assigned) * 100)
-                                : 0;
+                        viewMode === 'grid' ? (
+                            <div className="exam-table-container">
+                                <table className="exam-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Assessment Name</th>
+                                            <th>Audience</th>
+                                            <th>Performance</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {examStats.map(exam => {
+                                            const countdown = formatCountdown(exam.link_expiry);
+                                            const isExpired = countdown === "Expired";
+                                            const isActive = !!countdown && !isExpired;
+                                            const publicLink = `${window.location.origin}/#/enroll/${exam.id}`;
+                                            const completionRate = exam.total_assigned > 0
+                                                ? Math.round((exam.completed / exam.total_assigned) * 100)
+                                                : 0;
 
-                            return (
-                                <div key={exam.id} className="exam-card">
+                                            return (
+                                                <tr key={exam.id}>
+                                                    <td>
+                                                        <div style={{ fontWeight: 600, color: 'var(--slate-900)' }}>{exam.title}</div>
+                                                        <div style={{ fontSize: '11px', color: 'var(--slate-500)', marginTop: '4px' }}>{exam.id.slice(0, 8)} • {exam.difficulty}</div>
+                                                    </td>
+                                                    <td>
+                                                        <div style={{ display: 'flex', gap: '4px', flexDirection: 'column' }}>
+                                                            <span className="badge" style={{ background: "var(--slate-50)", color: "var(--slate-600)", border: "1px solid var(--slate-200)", width: "fit-content" }}>
+                                                                <Icons.Users size={12} /> {exam.total_assigned} Enrolled
+                                                            </span>
+                                                            {(exam.total_invited ?? 0) > 0 && (
+                                                                <span className="badge" style={{ background: "#fdf4ff", color: "#a21caf", border: "1px solid #f5d0fe", width: "fit-content" }}>
+                                                                    <Icons.Mail size={12} /> {exam.total_invited} Sent
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div style={{ display: 'flex', gap: '8px', fontSize: '12px' }}>
+                                                            <span style={{ color: 'var(--success)', fontWeight: 600 }}>P: {exam.passed}</span>
+                                                            <span style={{ color: 'var(--danger)', fontWeight: 600 }}>F: {exam.failed}</span>
+                                                            <span style={{ color: 'var(--amber)', fontWeight: 600 }}>E: {exam.eliminated}</span>
+                                                        </div>
+                                                        <div style={{ marginTop: 8, maxWidth: "150px" }}>
+                                                            <div className="progress-wrap" style={{ marginBottom: 4 }}>
+                                                                <span className="progress-label" style={{ fontSize: '10px' }}>Completion</span>
+                                                                <span className="progress-pct" style={{ fontSize: '10px' }}>{completionRate}%</span>
+                                                            </div>
+                                                            <div className="progress-track" style={{ height: '3px' }}>
+                                                                <div className="progress-fill" style={{ width: `${completionRate}%` }} />
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        {isActive ? (
+                                                            <span className="badge" style={{ background: '#f0fdf9', color: '#065f46', border: '1px solid #a7f3d0' }}>Live • {countdown}</span>
+                                                        ) : isExpired ? (
+                                                            <span className="badge" style={{ background: 'var(--slate-100)', color: 'var(--slate-500)' }}>Expired</span>
+                                                        ) : (
+                                                            <span className="badge" style={{ background: 'var(--slate-100)', color: 'var(--slate-600)' }}>Inactive</span>
+                                                        )}
+                                                    </td>
+                                                    <td>
+                                                        {isActive ? (
+                                                            <div style={{ display: 'flex', gap: '6px' }}>
+                                                                <button
+                                                                    className={`btn btn-copy ${copyingId === exam.id ? "copied" : ""}`}
+                                                                    onClick={() => copyLink(publicLink, exam.id)}
+                                                                    style={{ padding: '6px 10px', boxShadow: 'none' }}
+                                                                >
+                                                                    {copyingId === exam.id ? <Icons.Check size={12} /> : <Icons.Copy size={12} />}
+                                                                </button>
+                                                                <button
+                                                                    className="btn btn-copy"
+                                                                    onClick={() => setSendLinkModal({ isOpen: true, examId: exam.id, publicLink, emails: "", message: "", loading: false })}
+                                                                    style={{ background: "var(--teal)", padding: '6px 10px', boxShadow: 'none' }}
+                                                                >
+                                                                    <Icons.Mail size={12} />
+                                                                </button>
+                                                            </div>
+                                                        ) : (
+                                                            <div className="activate-row" style={{ minWidth: "150px" }}>
+                                                                <input
+                                                                    id={`time-${exam.id}`}
+                                                                    type="text"
+                                                                    className="field-input"
+                                                                    defaultValue={24}
+                                                                    onInput={(e: any) => e.target.value = e.target.value.replace(/\D/g, '')}
+                                                                    style={{ width: "40px", padding: '4px' }}
+                                                                />
+                                                                <select id={`mode-${exam.id}`} className="field-select" defaultValue="hrs" style={{ padding: '4px' }}>
+                                                                    <option value="hrs">hrs</option>
+                                                                    <option value="mins">mins</option>
+                                                                </select>
+                                                                <button
+                                                                    className="btn btn-activate"
+                                                                    onClick={() => runIfPermitted("manage exam", "Manage Exams", () => handleActivateLink(exam.id))}
+                                                                    style={{ padding: '4px 8px' }}
+                                                                >
+                                                                    <Icons.Check size={12} />
+                                                                </button>
+                                                            </div>
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+                        ) : (
+                            examStats.map(exam => {
+                                const countdown = formatCountdown(exam.link_expiry);
+                                const isExpired = countdown === "Expired";
+                                const isActive = !!countdown && !isExpired;
+                                const publicLink = `${window.location.origin}/#/enroll/${exam.id}`;
+                                const completionRate = exam.total_assigned > 0
+                                    ? Math.round((exam.completed / exam.total_assigned) * 100)
+                                    : 0;
 
-                                    {/* Card Header */}
-                                    <div>
-                                        <h4 className="exam-card-title">{exam.title}</h4>
-                                        <div className="exam-card-meta">
-                                            <span className="badge" style={{ background: "var(--slate-50)", color: "var(--slate-600)", padding: "4px 10px", fontSize: "12px", border: "1px solid var(--slate-200)", display: "flex", alignItems: "center", gap: "6px" }}>
-                                                <Icons.Users size={14} /> {exam.total_assigned} Candidates
-                                            </span>
+                                return (
+                                    <div key={exam.id} className="exam-card">
+
+                                        {/* Card Header */}
+                                        <div>
+                                            <h4 className="exam-card-title">{exam.title}</h4>
+                                            <div className="exam-card-meta" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                                <span className="badge" style={{ background: "var(--slate-50)", color: "var(--slate-600)", padding: "4px 10px", fontSize: "12px", border: "1px solid var(--slate-200)", display: "flex", alignItems: "center", gap: "6px" }}>
+                                                    <Icons.Users size={14} /> {exam.total_assigned} Enrolled
+                                                </span>
+                                                {(exam.total_invited ?? 0) > 0 && (
+                                                    <span className="badge" style={{ background: "#fdf4ff", color: "#a21caf", padding: "4px 10px", fontSize: "12px", border: "1px solid #f5d0fe", display: "flex", alignItems: "center", gap: "6px", whiteSpace: "nowrap" }}>
+                                                        <Icons.Mail size={14} /> {exam.total_invited} Sent Link
+                                                    </span>
+                                                )}
+                                                {(exam.total_invited ?? 0) > 0 && (
+                                                    <span className="badge" style={{ background: "#eff6ff", color: "#1d4ed8", padding: "4px 10px", fontSize: "12px", border: "1px solid #bfdbfe", display: "flex", alignItems: "center", gap: "6px", whiteSpace: "nowrap" }}>
+                                                        <Icons.Activity size={14} /> {Math.max(0, (exam.total_invited || 0) - exam.total_assigned)} Did Not Attempt
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
-                                    </div>
 
-                                    <hr className="divider" />
+                                        <hr className="divider" />
 
-                                    {/* Counters */}
-                                    <div>
-                                        <div className="exam-counters">
-                                            <div className="exam-counter">
-                                                <div className="exam-counter-value" style={{ color: "var(--success)" }}>{exam.passed}</div>
-                                                <div className="exam-counter-label">Pass</div>
+                                        {/* Counters */}
+                                        <div>
+                                            <div className="exam-counters">
+                                                <div className="exam-counter">
+                                                    <div className="exam-counter-value" style={{ color: "var(--success)" }}>{exam.passed}</div>
+                                                    <div className="exam-counter-label">Pass</div>
+                                                </div>
+                                                <div className="exam-counter">
+                                                    <div className="exam-counter-value" style={{ color: "var(--danger)" }}>{exam.failed}</div>
+                                                    <div className="exam-counter-label">Fail</div>
+                                                </div>
+                                                <div className="exam-counter">
+                                                    <div className="exam-counter-value" style={{ color: "var(--amber)" }}>{exam.eliminated}</div>
+                                                    <div className="exam-counter-label">Eliminated</div>
+                                                </div>
                                             </div>
-                                            <div className="exam-counter">
-                                                <div className="exam-counter-value" style={{ color: "var(--danger)" }}>{exam.failed}</div>
-                                                <div className="exam-counter-label">Fail</div>
-                                            </div>
-                                            <div className="exam-counter">
-                                                <div className="exam-counter-value" style={{ color: "var(--amber)" }}>{exam.eliminated}</div>
-                                                <div className="exam-counter-label">Eliminated</div>
+
+                                            <div style={{ marginTop: 12 }}>
+                                                <div className="progress-wrap">
+                                                    <span className="progress-label">Completion</span>
+                                                    <span className="progress-pct">{completionRate}%</span>
+                                                </div>
+                                                <div className="progress-track">
+                                                    <div className="progress-fill" style={{ width: `${completionRate}%` }} />
+                                                </div>
                                             </div>
                                         </div>
 
-                                        <div style={{ marginTop: 12 }}>
-                                            <div className="progress-wrap">
-                                                <span className="progress-label">Completion</span>
-                                                <span className="progress-pct">{completionRate}%</span>
-                                            </div>
-                                            <div className="progress-track">
-                                                <div className="progress-fill" style={{ width: `${completionRate}%` }} />
-                                            </div>
-                                        </div>
-                                    </div>
+                                        <hr className="divider" />
 
-                                    <hr className="divider" />
-
-                                    {/* Link Controls */}
-                                    {isActive ? (
-                                        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                                            <div className="active-link-row">
+                                        {/* Link Controls */}
+                                        {isActive ? (
+                                            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                                                <div className="active-link-row">
+                                                    <button
+                                                        className={`btn btn-copy ${copyingId === exam.id ? "copied" : ""}`}
+                                                        onClick={() => copyLink(publicLink, exam.id)}
+                                                        style={{ flex: 1 }}
+                                                    >
+                                                        {copyingId === exam.id
+                                                            ? <><Icons.Check size={13} /> Copied</>
+                                                            : <><Icons.Copy size={13} /> Copy Link</>
+                                                        }
+                                                    </button>
+                                                    <button
+                                                        className="btn btn-copy"
+                                                        onClick={() => setSendLinkModal({ isOpen: true, examId: exam.id, publicLink, emails: "", message: "", loading: false })}
+                                                        style={{ flex: 1, background: "var(--teal)" }}
+                                                    >
+                                                        <Icons.Mail size={13} /> Send Link
+                                                    </button>
+                                                </div>
+                                                <div className="expiry-banner">
+                                                    <Icons.Clock size={13} />
+                                                    Link expires in
+                                                    <span className="expiry-timer">{countdown}</span>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="activate-row">
+                                                <input
+                                                    id={`time-${exam.id}`}
+                                                    type="text"
+                                                    className="field-input"
+                                                    defaultValue={24}
+                                                    onInput={(e: any) => e.target.value = e.target.value.replace(/\D/g, '')}
+                                                />
+                                                <select id={`mode-${exam.id}`} className="field-select" defaultValue="hrs">
+                                                    <option value="hrs">hrs</option>
+                                                    <option value="mins">mins</option>
+                                                </select>
                                                 <button
-                                                    className={`btn btn-copy ${copyingId === exam.id ? "copied" : ""}`}
-                                                    onClick={() => copyLink(publicLink, exam.id)}
-                                                    style={{ width: '100%' }}
+                                                    className="btn btn-activate"
+                                                    onClick={() => runIfPermitted("manage exam", "Manage Exams", () => handleActivateLink(exam.id))}
                                                 >
-                                                    {copyingId === exam.id
-                                                        ? <><Icons.Check size={13} /> Copied</>
-                                                        : <><Icons.Copy size={13} /> Copy Link</>
-                                                    }
+                                                    Activate Link
                                                 </button>
                                             </div>
-                                            <div className="expiry-banner">
-                                                <Icons.Clock size={13} />
-                                                Link expires in
-                                                <span className="expiry-timer">{countdown}</span>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <div className="activate-row">
-                                            <input
-                                                id={`time-${exam.id}`}
-                                                type="text"
-                                                className="field-input"
-                                                defaultValue={24}
-                                                onInput={(e: any) => e.target.value = e.target.value.replace(/\D/g, '')}
-                                            />
-                                            <select id={`mode-${exam.id}`} className="field-select" defaultValue="hrs">
-                                                <option value="hrs">hrs</option>
-                                                <option value="mins">mins</option>
-                                            </select>
-                                            <button
-                                                className="btn btn-activate"
-                                                onClick={() => runIfPermitted("manage exam", "Manage Exams", () => handleActivateLink(exam.id))}
-                                            >
-                                                Activate Link
-                                            </button>
-                                        </div>
-                                    )}
+                                        )}
 
 
 
-                                </div>
-                            );
-                        })
-                    )}
+                                    </div>
+                                );
+                            })
+                        ))}
                 </div>
             </div>
+
+            {sendLinkModal.isOpen && (
+                <div className="candidates-modal-overlay" onClick={() => !sendLinkModal.loading && setSendLinkModal(prev => ({ ...prev, isOpen: false }))}>
+                    <div className="candidates-modal" style={{ maxWidth: 500 }} onClick={e => e.stopPropagation()}>
+                        <div className="candidates-modal-header">
+                            <h3 className="candidates-modal-title">Send Exam Link</h3>
+                            <button className="candidates-modal-close" onClick={() => setSendLinkModal(prev => ({ ...prev, isOpen: false }))} disabled={sendLinkModal.loading}>
+                                <Icons.X size={18} />
+                            </button>
+                        </div>
+                        <div className="candidates-modal-body">
+                            <div style={{ marginBottom: 15 }}>
+                                <label style={{ display: 'block', marginBottom: 5, fontSize: 14, fontWeight: 600 }}>Recipient Emails (comma separated)</label>
+                                <textarea
+                                    className="field-input"
+                                    style={{ width: '100%', minHeight: 80, textAlign: 'left', borderRadius: 6 }}
+                                    placeholder="email1@example.com, email2@example.com"
+                                    value={sendLinkModal.emails}
+                                    onChange={e => setSendLinkModal(prev => ({ ...prev, emails: e.target.value }))}
+                                    disabled={sendLinkModal.loading}
+                                />
+                            </div>
+                            <div style={{ marginBottom: 15 }}>
+                                <label style={{ display: 'block', marginBottom: 5, fontSize: 14, fontWeight: 600 }}>Custom Message (Optional)</label>
+                                <textarea
+                                    className="field-input"
+                                    style={{ width: '100%', minHeight: 80, textAlign: 'left', borderRadius: 6 }}
+                                    placeholder={`You have been invited to take the exam: ${examStats.find(e => e.id === sendLinkModal.examId)?.title || ''}`}
+                                    value={sendLinkModal.message}
+                                    onChange={e => setSendLinkModal(prev => ({ ...prev, message: e.target.value }))}
+                                    disabled={sendLinkModal.loading}
+                                />
+                            </div>
+                            <button
+                                className="btn confirm-btn"
+                                style={{ width: '100%', padding: '10px', background: 'var(--teal)', color: 'white', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 600 }}
+                                onClick={handleSendLinkSubmit}
+                                disabled={sendLinkModal.loading || !sendLinkModal.emails.trim()}
+                            >
+                                {sendLinkModal.loading ? 'Sending...' : 'Send Link'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {showExamPopup && (
                 <div className="candidates-modal-overlay" onClick={() => setShowExamPopup(false)}>

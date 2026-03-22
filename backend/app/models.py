@@ -72,3 +72,11 @@ class QuestionCategory(Base):
     __tablename__ = "question_categories"
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, unique=True, index=True)
+
+class ExamInvitation(Base):
+    __tablename__ = "exam_invitations"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    exam_id = Column(String, ForeignKey("exams.id", ondelete="CASCADE"), index=True)
+    email = Column(String, index=True)
+    sent_at = Column(String)

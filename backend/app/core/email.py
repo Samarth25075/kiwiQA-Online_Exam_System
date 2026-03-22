@@ -19,11 +19,26 @@ def send_email(to_email: str, subject: str, content: str, attachments: Optional[
 
     url = "https://api.sendgrid.com/v3/mail/send"
 
+    # Simple conversion of plain text into HTML
+    html_content = content.replace("\n", "<br>")
+
     payload = {
         "personalizations": [{"to": [{"email": to_email}]}],
         "from": {"email": SMTP_EMAIL},
         "subject": subject,
-        "content": [{"type": "text/plain", "value": content}]
+        "content": [
+            {"type": "text/plain", "value": content},
+            {"type": "text/html", "value": f"<html><body>{html_content}</body></html>"}
+        ],
+        "tracking_settings": {
+            "click_tracking": {
+                "enable": False,
+                "enable_text": False
+            },
+            "open_tracking": {
+                "enable": False
+            }
+        }
     }
 
     if attachments:
