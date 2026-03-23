@@ -64,6 +64,11 @@ const Icons = {
       <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
     </svg>
   ),
+  Help: () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+    </svg>
+  ),
 };
 
 // ─── Loader Dots ───────────────────────────────────────────────────────────────
@@ -562,6 +567,19 @@ export default function AdminLogin() {
           </div>
 
           <div className="login-form-footer">
+            <div style={{ marginBottom: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+              <span style={{ color: 'var(--teal)', display: 'flex', alignItems: 'center' }}><Icons.Help /></span>
+              <a 
+                href="/Userguide.html" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                style={{ color: 'var(--teal)', textDecoration: 'none', fontWeight: 600, fontSize: '13px' }}
+                onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'}
+                onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}
+              >
+                View User Guide
+              </a>
+            </div>
             Secure access · Enterprise grade · Powered by KiwiQA
           </div>
         </div>
