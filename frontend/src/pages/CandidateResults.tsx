@@ -122,6 +122,77 @@ export default function CandidateResults() {
     return { total, passed, failed, eliminated };
   }, [candidates, exams]);
 
+  const exportToCSV = () => {
+    if (filteredCandidates.length === 0) {
+      alert("No data available to export.");
+      return;
+    }
+    // Collect data from filtered candidates
+    const headers = [
+      "Candidate Name", 
+      "Email Address", 
+      "Candidate ID", 
+      "Assessment Domain", 
+      "Attempt Date", 
+      "Violations", 
+      "Score Obtained", 
+      "Total Questions", 
+      "Percentage", 
+      "Status"
+    ];
+    
+    const rows = filteredCandidates.map(c => {
+      const { score, total, pct } = calcScore(c);
+      const exam = exams[c.assigned_exam_id || ""] || { title: "Archived Exam", passing_score: 50 };
+      const violations = parseInt(c.violations || "0");
+      
+      let status: "Passed" | "Failed" | "Eliminated";
+      if (violations >= 3) status = "Eliminated";
+      else if (pct >= exam.passing_score) status = "Passed";
+      else status = "Failed";
+
+      return [
+        c.name,
+        c.email,
+        c.candidate_id || `CAND-${c.id}`,
+        exam.title,
+        formatDate(c.joined_date),
+        violations,
+        score,
+        total,
+        `${pct}%`,
+        status
+      ];
+    });
+
+    // Generate CSV content
+    const csvContent = [
+      headers.join(","),
+      ...rows.map(row => 
+        row.map(val => `"${String(val).replace(/"/g, '""')}"`).join(",")
+      )
+    ].join("\r\n");
+
+    try {
+      // Create and trigger download
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      const filename = `Assessment_Results_${new Date().toISOString().split('T')[0]}.csv`;
+      
+      link.setAttribute("href", url);
+      link.setAttribute("download", filename);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Failed to export data:", err);
+      alert("Failed to export data. Please try again.");
+    }
+  };
+
   if (loading) {
     return (
       <AdminLayout>
@@ -443,6 +514,17 @@ export default function CandidateResults() {
             opacity: 0.5;
         }
         .cr-empty h3 { color: var(--text); margin-bottom: 8px; }
+
+        .cr-export-btn:hover {
+            border-color: var(--primary) !important;
+            color: var(--primary) !important;
+            background: var(--bg-neutral) !important;
+            transform: translateY(-1.5px);
+            box-shadow: var(--shadow-md);
+        }
+        .cr-export-btn:active {
+            transform: translateY(0);
+        }
       `}</style>
 
       <div className="cr-wrap">
@@ -452,8 +534,18 @@ export default function CandidateResults() {
             <p>Comprehensive performance monitoring and candidate analytics.</p>
           </div>
           <button 
-            className="cr-tab active" 
-            style={{ display: 'flex', alignItems: 'center', gap: 8, height: 40, border: '1.5px solid var(--border)', background: 'var(--bg)', cursor: 'default' }}
+            className="cr-tab active cr-export-btn" 
+            onClick={exportToCSV}
+            style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: 8, 
+                height: 40, 
+                border: '1.5px solid var(--border)', 
+                background: 'var(--bg)',
+                cursor: 'pointer',
+                transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
+            }}
           >
             <Icons.Download /> Export Data
           </button>
