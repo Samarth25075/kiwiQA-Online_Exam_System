@@ -88,7 +88,7 @@ const QuestionBank: React.FC = () => {
             });
             if (res.ok) {
                 const data = await res.json();
-                setStats(data);
+                setStats(Array.isArray(data) ? data : []);
             } else {
                 setError(`Failed to load stats: ${res.status}`);
             }
@@ -108,8 +108,10 @@ const QuestionBank: React.FC = () => {
             });
             if (res.ok) {
                 const data = await res.json();
-                setQuestions(data);
+                setQuestions(Array.isArray(data) ? data : []);
                 setSelectedCategory(category);
+            } else {
+                setError("Failed to fetch questions");
             }
         } catch (err) {
             setError("Failed to fetch questions");
