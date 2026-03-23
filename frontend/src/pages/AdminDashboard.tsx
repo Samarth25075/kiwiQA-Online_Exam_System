@@ -1469,10 +1469,7 @@ export default function AdminDashboard() {
                         </button>
                     </div>
 
-                    <div className="db-banner-status">
-                        <div className="db-status-dot" />
-                        <span className="db-status-text">Live</span>
-                    </div>
+
                 </div>
 
                 {/* Stat Cards */}
@@ -1604,113 +1601,110 @@ export default function AdminDashboard() {
 
                                             return (
                                                 <tr key={exam.id}>
-                                                     <td>
-                                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                                                             <div style={{ fontWeight: 800, color: 'var(--slate-900)', fontSize: '15px', letterSpacing: '-0.01em' }}>{exam.title}</div>
-                                                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                                 <span className="exam-id-chip" style={{ fontSize: '9px', padding: '1px 5px' }}>{exam.id.slice(0, 8)}</span>
-                                                                 <span style={{ fontSize: '11px', color: 'var(--slate-500)', fontWeight: 600 }}>•</span>
-                                                                 <span style={{ fontSize: '11px', color: 'var(--slate-500)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{exam.difficulty}</span>
-                                                             </div>
-                                                         </div>
-                                                     </td>
-                                                     <td>
-                                                         <div style={{ display: 'flex', gap: '8px' }}>
-                                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                                     <div style={{ width: 28, height: 28, borderRadius: '8px', background: 'var(--slate-50)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                                         <Icons.Users size={14} />
-                                                                     </div>
-                                                                     <span style={{ fontSize: '13px', fontWeight: 700 }}>{exam.total_assigned} <span style={{ color: 'var(--slate-400)', fontWeight: 500, fontSize: '11px' }}>Enrolled</span></span>
-                                                                 </div>
-                                                                 {(exam.total_invited ?? 0) > 0 && (
-                                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                                         <div style={{ width: 28, height: 28, borderRadius: '8px', background: '#fdf4ff', color: '#a21caf', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                                             <Icons.Mail size={14} />
-                                                                         </div>
-                                                                         <span style={{ fontSize: '13px', fontWeight: 700 }}>{exam.total_invited} <span style={{ color: 'var(--slate-400)', fontWeight: 500, fontSize: '11px' }}>Sent</span></span>
-                                                                     </div>
-                                                                 )}
-                                                             </div>
-                                                         </div>
-                                                     </td>
-                                                     <td>
-                                                         <div style={{ display: 'flex', gap: '6px', marginBottom: 12 }}>
-                                                             <div className="perf-chip p">P: {exam.passed}</div>
-                                                             <div className="perf-chip f">F: {exam.failed}</div>
-                                                             <div className="perf-chip e">E: {exam.eliminated}</div>
-                                                         </div>
-                                                         <div style={{ width: '100%', maxWidth: '160px' }}>
-                                                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                                                                 <span style={{ fontSize: '10px', fontWeight: 800, color: 'var(--slate-400)', textTransform: 'uppercase' }}>Completion</span>
-                                                                 <span style={{ fontSize: '10px', fontWeight: 800, color: 'var(--teal)' }}>{completionRate}%</span>
-                                                             </div>
-                                                             <div style={{ height: 4, background: 'var(--slate-100)', borderRadius: 2, overflow: 'hidden' }}>
-                                                                 <div style={{ width: `${completionRate}%`, height: '100%', background: 'var(--teal)', borderRadius: 2 }} />
-                                                             </div>
-                                                         </div>
-                                                     </td>
-                                                     <td>
-                                                         {isActive ? (
-                                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                                                 <span className="badge" style={{ background: '#ecfdf5', color: '#059669', border: '1px solid #10b98133', borderRadius: '8px', padding: '6px 12px', fontSize: '11px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                                     <div className="db-status-dot" style={{ width: 6, height: 6, boxShadow: '0 0 0 2px rgba(5, 150, 105, 0.1)' }} />
-                                                                     LIVE
-                                                                 </span>
-                                                                 <span style={{ fontSize: '12px', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--slate-500)', marginLeft: 4 }}>{countdown}</span>
-                                                             </div>
-                                                         ) : isExpired ? (
-                                                             <span className="badge" style={{ background: 'var(--slate-100)', color: 'var(--slate-500)', borderRadius: '8px', padding: '6px 12px' }}>
-                                                                 Expired
-                                                             </span>
-                                                         ) : (
-                                                             <span className="badge" style={{ background: 'var(--slate-50)', color: 'var(--slate-400)', border: '1px solid var(--slate-100)', borderRadius: '8px', padding: '6px 12px' }}>
-                                                                 Inactive
-                                                             </span>
-                                                         )}
-                                                     </td>
-                                                     <td>
-                                                         {isActive ? (
-                                                             <div style={{ display: 'flex', gap: '10px' }}>
-                                                                 <button
-                                                                     className={`action-icon-btn ${copyingId === exam.id ? "primary" : ""}`}
-                                                                     onClick={() => copyLink(publicLink, exam.id)}
-                                                                     title="Copy Enrollment Link"
-                                                                 >
-                                                                     {copyingId === exam.id ? <Icons.Check size={16} /> : <Icons.Copy size={16} />}
-                                                                 </button>
-                                                                 <button
-                                                                     className="action-icon-btn primary"
-                                                                     onClick={() => setSendLinkModal({ isOpen: true, examId: exam.id, publicLink, emails: "", message: "", loading: false })}
-                                                                     title="Email Pro Links"
-                                                                 >
-                                                                     <Icons.Mail size={16} />
-                                                                 </button>
-                                                             </div>
-                                                         ) : (
-                                                             <div className="activate-row" style={{ background: 'var(--slate-50)', padding: '6px', borderRadius: '12px', border: '1px solid var(--slate-100)' }}>
-                                                                 <input
-                                                                     id={`time-${exam.id}`}
-                                                                     type="text"
-                                                                     className="field-input"
-                                                                     defaultValue={24}
-                                                                     onInput={(e: any) => e.target.value = e.target.value.replace(/\D/g, '')}
-                                                                     style={{ width: "38px", height: '32px', border: 'none', background: 'transparent' }}
-                                                                 />
-                                                                 <select id={`mode-${exam.id}`} className="field-select" defaultValue="hrs" style={{ border: 'none', background: 'transparent', fontSize: '11px', fontWeight: 700 }}>
-                                                                     <option value="hrs">hrs</option>
-                                                                     <option value="mins">mins</option>
-                                                                 </select>
-                                                                 <button
-                                                                     className="action-icon-btn primary"
-                                                                     onClick={() => runIfPermitted("manage exam", "Manage Exams", () => handleActivateLink(exam.id))}
-                                                                     style={{ width: 32, height: 32, borderRadius: '8px' }}
-                                                                 >
-                                                                     <Icons.Check size={14} />
-                                                                 </button>
-                                                             </div>
-                                                         )}
-                                                     </td>
+                                                    <td>
+                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                                            <div style={{ fontWeight: 800, color: 'var(--slate-900)', fontSize: '15px', letterSpacing: '-0.01em' }}>{exam.title}</div>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                                <span className="exam-id-chip" style={{ fontSize: '9px', padding: '1px 5px' }}>{exam.id.slice(0, 8)}</span>
+                                                                <span style={{ fontSize: '11px', color: 'var(--slate-500)', fontWeight: 600 }}>•</span>
+                                                                <span style={{ fontSize: '11px', color: 'var(--slate-500)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{exam.difficulty}</span>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div style={{ display: 'flex', gap: '8px' }}>
+                                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                                    <div style={{ width: 28, height: 28, borderRadius: '8px', background: 'var(--slate-50)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                        <Icons.Users size={14} />
+                                                                    </div>
+                                                                    <span style={{ fontSize: '13px', fontWeight: 700 }}>{exam.total_assigned} <span style={{ color: 'var(--slate-400)', fontWeight: 500, fontSize: '11px' }}>Enrolled</span></span>
+                                                                </div>
+                                                                {(exam.total_invited ?? 0) > 0 && (
+                                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                                        <div style={{ width: 28, height: 28, borderRadius: '8px', background: '#fdf4ff', color: '#a21caf', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                            <Icons.Mail size={14} />
+                                                                        </div>
+                                                                        <span style={{ fontSize: '13px', fontWeight: 700 }}>{exam.total_invited} <span style={{ color: 'var(--slate-400)', fontWeight: 500, fontSize: '11px' }}>Sent</span></span>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div style={{ display: 'flex', gap: '6px', marginBottom: 12 }}>
+                                                            <div className="perf-chip p">P: {exam.passed}</div>
+                                                            <div className="perf-chip f">F: {exam.failed}</div>
+                                                            <div className="perf-chip e">E: {exam.eliminated}</div>
+                                                        </div>
+                                                        <div style={{ width: '100%', maxWidth: '160px' }}>
+                                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                                                                <span style={{ fontSize: '10px', fontWeight: 800, color: 'var(--slate-400)', textTransform: 'uppercase' }}>Completion</span>
+                                                                <span style={{ fontSize: '10px', fontWeight: 800, color: 'var(--teal)' }}>{completionRate}%</span>
+                                                            </div>
+                                                            <div style={{ height: 4, background: 'var(--slate-100)', borderRadius: 2, overflow: 'hidden' }}>
+                                                                <div style={{ width: `${completionRate}%`, height: '100%', background: 'var(--teal)', borderRadius: 2 }} />
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        {isActive ? (
+                                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                                                {/* LIVE Badge removed */}
+                                                                <span style={{ fontSize: '12px', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--slate-500)', marginLeft: 4 }}>{countdown}</span>
+                                                            </div>
+                                                        ) : isExpired ? (
+                                                            <span className="badge" style={{ background: 'var(--slate-100)', color: 'var(--slate-500)', borderRadius: '8px', padding: '6px 12px' }}>
+                                                                Expired
+                                                            </span>
+                                                        ) : (
+                                                            <span className="badge" style={{ background: 'var(--slate-50)', color: 'var(--slate-400)', border: '1px solid var(--slate-100)', borderRadius: '8px', padding: '6px 12px' }}>
+                                                                Inactive
+                                                            </span>
+                                                        )}
+                                                    </td>
+                                                    <td>
+                                                        {isActive ? (
+                                                            <div style={{ display: 'flex', gap: '10px' }}>
+                                                                <button
+                                                                    className={`action-icon-btn ${copyingId === exam.id ? "primary" : ""}`}
+                                                                    onClick={() => copyLink(publicLink, exam.id)}
+                                                                    title="Copy Enrollment Link"
+                                                                >
+                                                                    {copyingId === exam.id ? <Icons.Check size={16} /> : <Icons.Copy size={16} />}
+                                                                </button>
+                                                                <button
+                                                                    className="action-icon-btn primary"
+                                                                    onClick={() => setSendLinkModal({ isOpen: true, examId: exam.id, publicLink, emails: "", message: "", loading: false })}
+                                                                    title="Email Pro Links"
+                                                                >
+                                                                    <Icons.Mail size={16} />
+                                                                </button>
+                                                            </div>
+                                                        ) : (
+                                                            <div className="activate-row" style={{ background: 'var(--slate-50)', padding: '6px', borderRadius: '12px', border: '1px solid var(--slate-100)' }}>
+                                                                <input
+                                                                    id={`time-${exam.id}`}
+                                                                    type="text"
+                                                                    className="field-input"
+                                                                    defaultValue={24}
+                                                                    onInput={(e: any) => e.target.value = e.target.value.replace(/\D/g, '')}
+                                                                    style={{ width: "38px", height: '32px', border: 'none', background: 'transparent' }}
+                                                                />
+                                                                <select id={`mode-${exam.id}`} className="field-select" defaultValue="hrs" style={{ border: 'none', background: 'transparent', fontSize: '11px', fontWeight: 700 }}>
+                                                                    <option value="hrs">hrs</option>
+                                                                    <option value="mins">mins</option>
+                                                                </select>
+                                                                <button
+                                                                    className="action-icon-btn primary"
+                                                                    onClick={() => runIfPermitted("manage exam", "Manage Exams", () => handleActivateLink(exam.id))}
+                                                                    style={{ width: 32, height: 32, borderRadius: '8px' }}
+                                                                >
+                                                                    <Icons.Check size={14} />
+                                                                </button>
+                                                            </div>
+                                                        )}
+                                                    </td>
                                                 </tr>
                                             );
                                         })}

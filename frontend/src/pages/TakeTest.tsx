@@ -1157,6 +1157,29 @@ export default function TakeTest() {
 
         const handleExit = () => updateStatus('Completed');
 
+        const handlePopState = (e: PopStateEvent) => {
+            if (startedRef.current && !finishedRef.current) {
+                // Trap the user on the current page
+                window.history.pushState(null, "", window.location.href);
+                
+                const now = Date.now();
+                if (now - lastViolationTimeRef.current < 1000) return;
+                lastViolationTimeRef.current = now;
+
+                const next = addViolation();
+                setWarningPopup({
+                    message: `Using the browser's Back or Forward buttons is strictly prohibited during the exam. (Violation ${next}/3)`,
+                    isTerminal: next >= 3,
+                });
+
+                if (next >= 3) {
+                    finishedRef.current = true;
+                    setFinished(true);
+                    updateStatus('Completed');
+                }
+            }
+        };
+
         // FIX #4 & #5: Check started/finished via refs; check proctoring_type from testData ref
         const handleVisible = () => {
             if (!needsScreen) return;
@@ -1283,6 +1306,8 @@ export default function TakeTest() {
             window.addEventListener('contextmenu', handleContextMenu);
             window.addEventListener('blur', handleBlur);
             window.addEventListener('beforeunload', handleBeforeUnload);
+            window.addEventListener('popstate', handlePopState);
+            window.history.pushState(null, "", window.location.href);
             document.addEventListener('fullscreenchange', handleFullscreenChange);
         }
 
@@ -1297,6 +1322,7 @@ export default function TakeTest() {
             window.removeEventListener('contextmenu', handleContextMenu);
             window.removeEventListener('blur', handleBlur);
             window.removeEventListener('beforeunload', handleBeforeUnload);
+            window.removeEventListener('popstate', handlePopState);
             document.removeEventListener('fullscreenchange', handleFullscreenChange);
         };
         // FIX #5: Include testData so handlers see the correct proctoring config

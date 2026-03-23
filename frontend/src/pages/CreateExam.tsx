@@ -500,6 +500,8 @@ export default function CreateExam() {
           --shadow-md:  var(--shadow, 0 4px 16px rgba(0,0,0,0.1));
           --transition: 0.2s cubic-bezier(0.4,0,0.2,1);
         }
+        
+        .req-star { color: #ef4444; margin-left: 2px; font-weight: 700; }
 
         *, *::before, *::after { box-sizing: border-box; }
 
@@ -1321,19 +1323,19 @@ export default function CreateExam() {
               >
                 <div className="form-grid">
                   <div className="form-field">
-                    <label className="form-label">Exam Title</label>
+                    <label className="form-label">Exam Title <span className="req-star">*</span></label>
                     <input className="form-input" value={title} onChange={e => setTitle(e.target.value)}
                       placeholder="e.g. Advanced Python Patterns" required />
                   </div>
                   <div className="form-field">
-                    <label className="form-label">Subject Topic</label>
+                    <label className="form-label">Subject Topic <span className="req-star">*</span></label>
                     <input className="form-input" value={subject} onChange={e => setSubject(e.target.value)}
                       placeholder="e.g. React Hooks & Performance" required />
                   </div>
                 </div>
                 <div className="form-grid" style={{ marginBottom: 0 }}>
                   <div className="form-field">
-                    <label className="form-label">Duration (minutes)</label>
+                    <label className="form-label">Duration (minutes) <span className="req-star">*</span></label>
                     <input className="form-input" type="text" value={duration}
                       onChange={e => {
                         const val = e.target.value.replace(/\D/g, "");
@@ -1499,16 +1501,17 @@ export default function CreateExam() {
                                                 onClick={e => e.stopPropagation()}
                                                 className="form-input"
                                                 style={{ height: 28, fontSize: '12px', padding: '0 8px', borderColor: 'var(--teal)', background: 'white', flex: 1 }}
-                                                value={catConfigs[cat]?.count ?? ""}
+                                                value={catConfigs[cat]?.count || ""}
                                                 onChange={e => {
                                                   const valStr = e.target.value;
-                                                  const val = valStr === "" ? 1 : Number(valStr);
-                                                  const max = bankStats[cat]?.count || 1;
-                                                  const safeVal = Math.max(1, Math.min(val, max));
+                                                  const val = valStr === "" ? 0 : Number(valStr);
+                                                  const max = bankStats[cat]?.count || 0;
+                                                  const safeVal = Math.min(val, max);
                                                   setCatConfigs(prev => {
                                                     const current = prev[cat] || { count: 0, marks: 0 };
+                                                    // Auto-predict marks if it's 1:1 or first time
                                                     const newMarks = (current.marks === current.count || current.marks === 0) ? safeVal : current.marks;
-                                                    return { ...prev, [cat]: { count: safeVal, marks: newMarks } };
+                                                    return { ...prev, [cat]: { ...current, count: safeVal, marks: newMarks } };
                                                   });
                                                 }}
                                               />
@@ -1574,7 +1577,14 @@ export default function CreateExam() {
                                                       const val = Math.max(0, parseInt(e.target.value) || 0);
                                                       setCatConfigs(prev => {
                                                         const current = prev[cat] || { count: 0, marks: 0, breakdown: {} };
-                                                        const newBreakdown = { ...(current.breakdown || {}), [m]: val };
+                                                        const otherBreakdownSum = [1, 2, 3]
+                                                          .filter(x => x !== m)
+                                                          .reduce((sum, x) => sum + (current.breakdown?.[x] || 0), 0);
+                                                        
+                                                        const maxAllowedForThisLevel = (bankStats[cat]?.count || 0) - otherBreakdownSum;
+                                                        const safeVal = Math.min(val, Math.max(0, maxAllowedForThisLevel));
+
+                                                        const newBreakdown = { ...(current.breakdown || {}), [m]: safeVal };
                                                         
                                                         // Auto-calculate totals
                                                         const newCount = Object.values(newBreakdown).reduce((a, b) => a + b, 0);
@@ -1671,19 +1681,24 @@ export default function CreateExam() {
                       </div>
                       {creationMode === 'bank' && (
                         <div className="form-field">
-                          <label className="form-label">Global Question Limit</label>
+                          <label className="form-label">Global Question Limit <span className="req-star">*</span></label>
                           <p style={{ fontSize: '11px', color: 'var(--ink-3)', marginTop: -8, marginBottom: 8 }}>This will balance your selected category counts.</p>
                           <input className="form-input" type="text" value={numQuestions}
                             onChange={e => {
                               const val = e.target.value.replace(/\D/g, "");
-                              setNumQuestions(val ? Number(val) : 0);
+                              let n = val ? Number(val) : 0;
+                              if (creationMode === 'bank') {
+                                const totalAvailable = selectedBankCats.reduce((sum, c) => sum + (bankStats[c]?.count || 0), 0);
+                                if (n > totalAvailable) n = totalAvailable;
+                              }
+                              setNumQuestions(n);
                             }} required />
                         </div>
                       )}
                     </>
                   )}
                   <div className="form-field">
-                    <label className="form-label">Passing Score (%)</label>
+                    <label className="form-label">Passing Score (%) <span className="req-star">*</span></label>
                     <input className="form-input" type="text" value={passingScore}
                       onChange={e => {
                         const val = e.target.value.replace(/\D/g, "");
