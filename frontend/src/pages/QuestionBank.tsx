@@ -5,25 +5,25 @@ import CustomPopup from '../components/CustomPopup';
 
 const Icons = {
     Bank: () => (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 21h18"/><path d="M3 7v1a3 3 0 0 0 6 0v-1m0 1a3 3 0 0 0 6 0v-1m0 1a3 3 0 0 0 6 0v-1M3 10v6a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-6"/><path d="M9 21v-4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v4"/><path d="m19 7-7-4-7 4"/></svg>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 21h18" /><path d="M3 7v1a3 3 0 0 0 6 0v-1m0 1a3 3 0 0 0 6 0v-1m0 1a3 3 0 0 0 6 0v-1M3 10v6a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-6" /><path d="M9 21v-4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v4" /><path d="m19 7-7-4-7 4" /></svg>
     ),
     Category: () => (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" /></svg>
     ),
     Edit: () => (
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
     ),
     Delete: () => (
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /><line x1="10" y1="11" x2="10" y2="17" /><line x1="14" y1="11" x2="14" y2="17" /></svg>
     ),
     ChevronRight: () => (
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
     ),
     Back: () => (
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></svg>
     ),
     Plus: () => (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
     ),
     Grid: ({ size = 16 }) => (
         <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
@@ -199,7 +199,7 @@ const QuestionBank: React.FC = () => {
             const token = localStorage.getItem("access_token");
             const res = await fetch(`${API_BASE_URL}/exams/bank/questions/${editingQuestion.q_id}`, {
                 method: 'PUT',
-                headers: { 
+                headers: {
                     "Authorization": `Bearer ${token}`,
                     "Content-Type": "application/json"
                 },
@@ -223,7 +223,7 @@ const QuestionBank: React.FC = () => {
             const token = localStorage.getItem("access_token");
             const res = await fetch(`${API_BASE_URL}/exams/bank/add`, {
                 method: 'POST',
-                headers: { 
+                headers: {
                     "Authorization": `Bearer ${token}`,
                     "Content-Type": "application/json"
                 },
@@ -260,7 +260,7 @@ const QuestionBank: React.FC = () => {
             const token = localStorage.getItem("access_token");
             const res = await fetch(`${API_BASE_URL}/categories`, {
                 method: 'POST',
-                headers: { 
+                headers: {
                     "Authorization": `Bearer ${token}`,
                     "Content-Type": "application/json"
                 },
@@ -606,7 +606,7 @@ const QuestionBank: React.FC = () => {
                 <header className="qb-header">
                     <div className="qb-title-group">
                         {selectedCategory && (
-                            <button 
+                            <button
                                 onClick={handleBack}
                                 style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '8px', color: 'var(--slate-500)' }}
                             >
@@ -618,8 +618,8 @@ const QuestionBank: React.FC = () => {
                                 {selectedCategory ? selectedCategory : "Question Bank"}
                             </h2>
                             <p className="qb-subtitle">
-                                {selectedCategory 
-                                    ? `Manage questions for ${selectedCategory}` 
+                                {selectedCategory
+                                    ? `Manage questions for ${selectedCategory}`
                                     : "Organize and curate your exam questions by category."}
                             </p>
                         </div>
@@ -640,11 +640,11 @@ const QuestionBank: React.FC = () => {
                                 <Icons.List size={13} /> Detailed Grid
                             </button>
                         </div>
-                        <button 
+                        <button
                             className="btn-add-q"
                             onClick={() => {
                                 if (selectedCategory) {
-                                    setNewQuestion({...newQuestion, category: selectedCategory});
+                                    setNewQuestion({ ...newQuestion, category: selectedCategory });
                                     setIsAdding(true);
                                 } else {
                                     setIsQuickAdding(true);
@@ -699,7 +699,7 @@ const QuestionBank: React.FC = () => {
                                     </div>
 
                                     {/* Delete Category Button */}
-                                    <button 
+                                    <button
                                         className="btn-delete-cat"
                                         onClick={(e) => {
                                             e.stopPropagation();
@@ -766,7 +766,7 @@ const QuestionBank: React.FC = () => {
                                             </td>
                                             <td>
                                                 <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                                                    <button 
+                                                    <button
                                                         onClick={(e) => { e.stopPropagation(); handleDeleteCategory(s.category); }}
                                                         style={{ width: 32, height: 32, borderRadius: '8px', background: 'rgba(239, 68, 68, 0.05)', border: 'none', color: '#ef4444', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: '0.2s' }}
                                                         onMouseOver={e => { (e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'); }}
@@ -804,9 +804,9 @@ const QuestionBank: React.FC = () => {
                                     <div className="q-options">
                                         {q.options.map((opt, idx) => (
                                             <div key={idx} className={`opt-item ${opt.is_correct ? 'correct' : ''}`}>
-                                                <div 
+                                                <div
                                                     className="opt-dot"
-                                                    style={{ background: opt.is_correct ? '#10b981' : '#cbd5e1' }} 
+                                                    style={{ background: opt.is_correct ? '#10b981' : '#cbd5e1' }}
                                                 />
                                                 {opt.text}
                                             </div>
@@ -862,7 +862,7 @@ const QuestionBank: React.FC = () => {
                                             </td>
                                             <td>
                                                 <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                                                    <button 
+                                                    <button
                                                         onClick={() => setEditingQuestion(q)}
                                                         style={{ width: 32, height: 32, borderRadius: '8px', background: 'var(--slate-50)', border: 'none', color: 'var(--slate-600)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: '0.2s' }}
                                                         onMouseOver={e => { (e.currentTarget.style.background = 'var(--slate-100)'); (e.currentTarget.style.color = 'var(--primary)'); }}
@@ -870,7 +870,7 @@ const QuestionBank: React.FC = () => {
                                                     >
                                                         <Icons.Edit />
                                                     </button>
-                                                    <button 
+                                                    <button
                                                         onClick={() => handleDelete(q.q_id)}
                                                         style={{ width: 32, height: 32, borderRadius: '8px', background: 'rgba(239, 68, 68, 0.05)', border: 'none', color: '#ef4444', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: '0.2s' }}
                                                         onMouseOver={e => { (e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'); }}
@@ -907,21 +907,21 @@ const QuestionBank: React.FC = () => {
                                     </div>
                                     <div className="form-group">
                                         <label className="form-label">Question Text</label>
-                                        <textarea 
-                                            className="form-textarea" 
-                                            rows={3} 
+                                        <textarea
+                                            className="form-textarea"
+                                            rows={3}
                                             value={editingQuestion.text}
-                                            onChange={e => setEditingQuestion({...editingQuestion, text: e.target.value})}
+                                            onChange={e => setEditingQuestion({ ...editingQuestion, text: e.target.value })}
                                             required
                                         />
                                     </div>
                                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                                         <div className="form-group">
                                             <label className="form-label">Difficulty Level</label>
-                                            <select 
+                                            <select
                                                 className="form-select"
                                                 value={editingQuestion.difficulty}
-                                                onChange={e => setEditingQuestion({...editingQuestion, difficulty: e.target.value})}
+                                                onChange={e => setEditingQuestion({ ...editingQuestion, difficulty: e.target.value })}
                                             >
                                                 <option>Beginner</option>
                                                 <option>Intermediate</option>
@@ -930,11 +930,11 @@ const QuestionBank: React.FC = () => {
                                         </div>
                                         <div className="form-group">
                                             <label className="form-label">Marks</label>
-                                            <input 
-                                                type="number" 
-                                                className="form-input" 
+                                            <input
+                                                type="number"
+                                                className="form-input"
                                                 value={editingQuestion.marks}
-                                                onChange={e => setEditingQuestion({...editingQuestion, marks: parseInt(e.target.value)})}
+                                                onChange={e => setEditingQuestion({ ...editingQuestion, marks: parseInt(e.target.value) })}
                                             />
                                         </div>
                                     </div>
@@ -946,62 +946,62 @@ const QuestionBank: React.FC = () => {
                                         {editingQuestion.options.map((opt, idx) => (
                                             <div key={idx} className="option-input-group">
                                                 <div style={{ padding: '0 8px' }}>
-                                                    <input 
-                                                        type="radio" 
+                                                    <input
+                                                        type="radio"
                                                         className="radio-custom"
-                                                        name="is_correct" 
+                                                        name="is_correct"
                                                         checked={opt.is_correct}
                                                         onChange={() => {
                                                             const newOpts = editingQuestion.options.map((o, i) => ({
                                                                 ...o, is_correct: i === idx
                                                             }));
-                                                            setEditingQuestion({...editingQuestion, options: newOpts});
+                                                            setEditingQuestion({ ...editingQuestion, options: newOpts });
                                                         }}
                                                     />
                                                 </div>
-                                                <input 
-                                                    className="form-input" 
+                                                <input
+                                                    className="form-input"
                                                     style={{ border: 'none', background: 'transparent', padding: '10px 0' }}
                                                     value={opt.text}
                                                     onChange={e => {
                                                         const newOpts = [...editingQuestion.options];
                                                         newOpts[idx].text = e.target.value;
-                                                        setEditingQuestion({...editingQuestion, options: newOpts});
+                                                        setEditingQuestion({ ...editingQuestion, options: newOpts });
                                                     }}
                                                     required
                                                 />
                                             </div>
                                         ))}
                                     </div>
-                                    
+
                                     <div className="form-section-title">
                                         ADDITIONAL DETAILS
                                     </div>
                                     <div className="form-group">
                                         <label className="form-label">Explanation (Optional)</label>
-                                        <textarea 
-                                            className="form-textarea" 
-                                            rows={2} 
+                                        <textarea
+                                            className="form-textarea"
+                                            rows={2}
                                             value={editingQuestion.explanation || ''}
-                                            onChange={e => setEditingQuestion({...editingQuestion, explanation: e.target.value})}
+                                            onChange={e => setEditingQuestion({ ...editingQuestion, explanation: e.target.value })}
                                             placeholder="Explain why this answer is correct..."
                                         />
                                     </div>
                                 </form>
                             </div>
                             <div className="modal-footer">
-                                <button 
-                                    type="button" 
+                                <button
+                                    type="button"
                                     onClick={() => setEditingQuestion(null)}
                                     style={{ padding: '12px 24px', borderRadius: '12px', background: 'white', border: '1px solid var(--slate-200)', cursor: 'pointer', fontWeight: 600, color: 'var(--slate-600)' }}
                                 >
                                     Cancel
                                 </button>
-                                <button 
+                                <button
                                     form="edit-q-form"
                                     type="submit"
-                                    style={{ 
-                                        padding: '12px 24px', borderRadius: '12px', background: 'var(--primary)', color: 'white', 
+                                    style={{
+                                        padding: '12px 24px', borderRadius: '12px', background: 'var(--primary)', color: 'white',
                                         border: 'none', cursor: 'pointer', fontWeight: 700,
                                         boxShadow: '0 4px 12px rgba(28, 132, 143, 0.2)'
                                     }}
@@ -1032,37 +1032,37 @@ const QuestionBank: React.FC = () => {
                                     </div>
                                     <div className="form-group">
                                         <label className="form-label">Category Name</label>
-                                        <input 
-                                            className="form-input" 
+                                        <input
+                                            className="form-input"
                                             placeholder="e.g. Logical Reasoning"
                                             value={newQuestion.category}
-                                            onChange={e => setNewQuestion({...newQuestion, category: e.target.value})}
+                                            onChange={e => setNewQuestion({ ...newQuestion, category: e.target.value })}
                                             required
                                         />
                                     </div>
-                                    
+
                                     <div className="form-section-title">
                                         QUESTION CONTENT
                                     </div>
                                     <div className="form-group">
                                         <label className="form-label">Question Text</label>
-                                        <textarea 
-                                            className="form-textarea" 
-                                            rows={3} 
+                                        <textarea
+                                            className="form-textarea"
+                                            rows={3}
                                             placeholder="Type your question here..."
                                             value={newQuestion.text}
-                                            onChange={e => setNewQuestion({...newQuestion, text: e.target.value})}
+                                            onChange={e => setNewQuestion({ ...newQuestion, text: e.target.value })}
                                             required
                                         />
                                     </div>
-                                    
+
                                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                                         <div className="form-group">
                                             <label className="form-label">Difficulty Level</label>
-                                            <select 
+                                            <select
                                                 className="form-select"
                                                 value={newQuestion.difficulty}
-                                                onChange={e => setNewQuestion({...newQuestion, difficulty: e.target.value})}
+                                                onChange={e => setNewQuestion({ ...newQuestion, difficulty: e.target.value })}
                                             >
                                                 <option>Beginner</option>
                                                 <option>Intermediate</option>
@@ -1071,11 +1071,11 @@ const QuestionBank: React.FC = () => {
                                         </div>
                                         <div className="form-group">
                                             <label className="form-label">Marks</label>
-                                            <input 
-                                                type="number" 
-                                                className="form-input" 
+                                            <input
+                                                type="number"
+                                                className="form-input"
                                                 value={newQuestion.marks}
-                                                onChange={e => setNewQuestion({...newQuestion, marks: parseInt(e.target.value)})}
+                                                onChange={e => setNewQuestion({ ...newQuestion, marks: parseInt(e.target.value) })}
                                             />
                                         </div>
                                     </div>
@@ -1087,64 +1087,64 @@ const QuestionBank: React.FC = () => {
                                         {newQuestion.options?.map((opt, idx) => (
                                             <div key={idx} className="option-input-group">
                                                 <div style={{ padding: '0 8px' }}>
-                                                    <input 
-                                                        type="radio" 
+                                                    <input
+                                                        type="radio"
                                                         className="radio-custom"
-                                                        name="is_correct_new" 
+                                                        name="is_correct_new"
                                                         checked={opt.is_correct}
                                                         onChange={() => {
                                                             const newOpts = newQuestion.options?.map((o, i) => ({
                                                                 ...o, is_correct: i === idx
                                                             }));
-                                                            setNewQuestion({...newQuestion, options: newOpts});
+                                                            setNewQuestion({ ...newQuestion, options: newOpts });
                                                         }}
                                                     />
                                                 </div>
-                                                <input 
-                                                    className="form-input" 
+                                                <input
+                                                    className="form-input"
                                                     style={{ border: 'none', background: 'transparent', padding: '10px 0' }}
                                                     placeholder={`Option ${idx + 1}`}
                                                     value={opt.text}
                                                     onChange={e => {
                                                         const newOpts = [...(newQuestion.options || [])];
                                                         newOpts[idx].text = e.target.value;
-                                                        setNewQuestion({...newQuestion, options: newOpts});
+                                                        setNewQuestion({ ...newQuestion, options: newOpts });
                                                     }}
                                                     required
                                                 />
                                             </div>
                                         ))}
                                     </div>
-                                    
+
                                     <div className="form-section-title">
                                         ADDITIONAL DETAILS
                                     </div>
                                     <div className="form-group">
                                         <label className="form-label">Explanation (Optional)</label>
-                                        <textarea 
-                                            className="form-textarea" 
-                                            rows={2} 
+                                        <textarea
+                                            className="form-textarea"
+                                            rows={2}
                                             placeholder="Explain why this answer is correct..."
                                             value={newQuestion.explanation || ''}
-                                            onChange={e => setNewQuestion({...newQuestion, explanation: e.target.value})}
+                                            onChange={e => setNewQuestion({ ...newQuestion, explanation: e.target.value })}
                                         />
                                     </div>
                                 </form>
                             </div>
                             <div className="modal-footer">
-                                <button 
-                                    type="button" 
+                                <button
+                                    type="button"
                                     onClick={() => setIsAdding(false)}
                                     style={{ padding: '12px 24px', borderRadius: '12px', background: 'white', border: '1px solid var(--slate-200)', cursor: 'pointer', fontWeight: 600, color: 'var(--slate-600)' }}
                                 >
                                     Cancel
                                 </button>
-                                <button 
+                                <button
                                     form="add-q-form"
                                     type="submit"
-                                    style={{ 
-                                        padding: '12px 24px', borderRadius: '12px', background: 'var(--primary)', color: 'white', 
-                                        border: 'none', cursor: 'pointer', fontWeight: 700, 
+                                    style={{
+                                        padding: '12px 24px', borderRadius: '12px', background: 'var(--primary)', color: 'white',
+                                        border: 'none', cursor: 'pointer', fontWeight: 700,
                                         boxShadow: '0 4px 12px rgba(28, 132, 143, 0.2)'
                                     }}
                                 >
@@ -1156,7 +1156,7 @@ const QuestionBank: React.FC = () => {
                 )}
 
                 {popup && (
-                    <CustomPopup 
+                    <CustomPopup
                         isOpen={popup.isOpen}
                         title={popup.title}
                         message={popup.message}
@@ -1184,8 +1184,8 @@ const QuestionBank: React.FC = () => {
                                 <form id="quick-add-cat-form" onSubmit={handleQuickCreate}>
                                     <div className="form-group">
                                         <label className="form-label">Category Name</label>
-                                        <input 
-                                            className="form-input" 
+                                        <input
+                                            className="form-input"
                                             placeholder="e.g. Cognitive Psychology"
                                             value={quickCategoryName}
                                             onChange={e => setQuickCategoryName(e.target.value)}
@@ -1196,18 +1196,18 @@ const QuestionBank: React.FC = () => {
                                 </form>
                             </div>
                             <div className="modal-footer">
-                                <button 
-                                    type="button" 
+                                <button
+                                    type="button"
                                     onClick={() => setIsQuickAdding(false)}
                                     style={{ padding: '12px 20px', borderRadius: '12px', background: 'white', border: '1px solid var(--slate-200)', cursor: 'pointer', fontWeight: 600 }}
                                 >
                                     Cancel
                                 </button>
-                                <button 
+                                <button
                                     form="quick-add-cat-form"
                                     type="submit"
-                                    style={{ 
-                                        padding: '12px 20px', borderRadius: '12px', background: 'var(--primary)', color: 'white', 
+                                    style={{
+                                        padding: '12px 20px', borderRadius: '12px', background: 'var(--primary)', color: 'white',
                                         border: 'none', cursor: 'pointer', fontWeight: 700,
                                         boxShadow: '0 4px 12px rgba(28, 132, 143, 0.2)'
                                     }}

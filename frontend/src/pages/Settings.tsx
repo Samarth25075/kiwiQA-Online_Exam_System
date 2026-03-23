@@ -841,6 +841,11 @@ export default function Settings() {
                             )}
                         </div>
                         <div className="st-card-body">
+                            {memberMsg && (
+                                <div className={`st-msg ${memberMsg.type}`} style={{ marginBottom: '20px' }}>
+                                    {memberMsg.text}
+                                </div>
+                            )}
                             {showAddMember && (
                                 <form className="st-member-form" onSubmit={handleAddMember}>
                                     <div className="st-field"><label className="st-field-label">Full Name</label><input className="st-pw-input" value={memberForm.full_name} onChange={e => setMemberForm(p => ({ ...p, full_name: e.target.value }))} required /></div>
