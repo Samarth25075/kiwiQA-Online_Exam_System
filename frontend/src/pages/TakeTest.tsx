@@ -1157,7 +1157,7 @@ export default function TakeTest() {
 
         const handleExit = () => updateStatus('Completed');
 
-        const handlePopState = (e: PopStateEvent) => {
+        const handlePopState = (_e: PopStateEvent) => {
             if (startedRef.current && !finishedRef.current) {
                 // Trap the user on the current page
                 window.history.pushState(null, "", window.location.href);
