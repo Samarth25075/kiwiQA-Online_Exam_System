@@ -815,8 +815,8 @@ export default function TakeTest() {
     const [modelsLoaded, setModelsLoaded] = useState(false);
     const [closeCountdown, setCloseCountdown] = useState<number | null>(null);
     const [resendTimer, setResendTimer] = useState(0);
-    const [snapshotStart, setSnapshotStart] = useState<string | null>(null);
-    const [snapshotMid, setSnapshotMid] = useState<string | null>(null);
+    const snapshotStartRef = useRef<string | null>(null);
+    const snapshotMidRef = useRef<string | null>(null);
     const midCapturedRef = useRef(false);
 
     // ── Refs ──────────────────────────────────────────────────────────────
@@ -1360,7 +1360,7 @@ export default function TakeTest() {
         // Take START snapshot
         if (needsVideo) {
             const shot = takeSnapshot();
-            if (shot) setSnapshotStart(shot);
+            if (shot) snapshotStartRef.current = shot;
         }
 
         setStarted(true);
@@ -1383,7 +1383,7 @@ export default function TakeTest() {
                 if (testData?.exam.duration && next <= Math.floor((testData.exam.duration * 60) / 2) && !midCapturedRef.current) {
                     const shot = takeSnapshot();
                     if (shot) {
-                        setSnapshotMid(shot);
+                        snapshotMidRef.current = shot;
                         midCapturedRef.current = true;
                     }
                 }
@@ -1435,6 +1435,11 @@ export default function TakeTest() {
                 }
             });
 
+            // Last resort: If mid snapshot is null but we are finishing, take it now
+            if (!snapshotMidRef.current && needsVideo) {
+                snapshotMidRef.current = takeSnapshot();
+            }
+
             fetch(`${API_BASE_URL}/candidates/test/${token}/submit`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -1444,8 +1449,8 @@ export default function TakeTest() {
                     total_marks: totalMarks,
                     violations: violationsRef.current,
                     screenshot: base64Image, // backward compatibility
-                    screenshot_start: snapshotStart,
-                    screenshot_mid: snapshotMid,
+                    screenshot_start: snapshotStartRef.current,
+                    screenshot_mid: snapshotMidRef.current,
                     screenshot_end: base64Image,
                     answers: answersArray
                 })

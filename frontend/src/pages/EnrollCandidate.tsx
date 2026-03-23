@@ -152,8 +152,13 @@ export default function EnrollCandidate() {
             setError("Please enter a valid email address.");
             return;
         }
+        const phoneDigits = phone.replace(/\D/g, "");
         if (!phone.trim()) {
             setError("Please enter your mobile number.");
+            return;
+        }
+        if (phoneDigits.length !== 10) {
+            setError("Mobile number must be exactly 10 digits.");
             return;
         }
 
@@ -585,10 +590,14 @@ export default function EnrollCandidate() {
                                     <input
                                         className="form-input"
                                         type="tel"
-                                        placeholder="+91 98765 43210"
+                                        placeholder="9876543210"
                                         value={phone}
                                         required
-                                        onChange={e => setPhone(e.target.value)}
+                                        maxLength={10}
+                                        onChange={e => {
+                                            const val = e.target.value.replace(/\D/g, "").slice(0, 10);
+                                            setPhone(val);
+                                        }}
                                     />
                                 </div>
                             </div>
