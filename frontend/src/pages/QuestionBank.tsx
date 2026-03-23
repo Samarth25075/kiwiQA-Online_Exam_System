@@ -289,9 +289,9 @@ const QuestionBank: React.FC = () => {
                         display: flex;
                         justify-content: space-between;
                         align-items: center;
-                        margin-bottom: 32px;
-                        padding-bottom: 24px;
-                        border-bottom: 1px solid var(--slate-100);
+                        margin-bottom: var(--space-32);
+                        padding-bottom: var(--space-24);
+                        border-bottom: 1px solid var(--border);
                     }
                     .qb-title-group {
                         display: flex;
@@ -300,11 +300,10 @@ const QuestionBank: React.FC = () => {
                     }
                     .qb-title {
                         margin: 0;
-                        font-size: 24px;
-                        font-weight: 800;
-                        color: var(--slate-900);
-                        font-family: 'Outfit', sans-serif;
-                        letter-spacing: -0.02em;
+                        font-size: var(--font-size-title);
+                        font-weight: 700;
+                        color: var(--text);
+                        font-family: var(--font-heading);
                     }
                     .qb-subtitle {
                         margin: 2px 0 0;
@@ -315,8 +314,8 @@ const QuestionBank: React.FC = () => {
                     /* Category Cards */
                     .category-grid {
                         display: grid;
-                        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-                        gap: 20px;
+                        grid-template-columns: repeat(auto-fill, 240px);
+                        gap: var(--space-16);
                         animation: fadeIn 0.4s ease-out;
                     }
                     @keyframes fadeIn {
@@ -324,17 +323,17 @@ const QuestionBank: React.FC = () => {
                         to { opacity: 1; transform: translateY(0); }
                     }
                     .category-card {
-                        background: white;
-                        border: 1px solid var(--slate-100);
-                        border-radius: 16px;
-                        padding: 24px;
+                        background: var(--bg);
+                        border: 1px solid var(--border);
+                        border-radius: var(--radius-lg);
+                        padding: var(--space-16);
+                        height: 120px;
                         cursor: pointer;
                         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                         display: flex;
                         flex-direction: column;
-                        gap: 16px;
-                        position: relative;
-                        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02), 0 2px 4px -1px rgba(0,0,0,0.02);
+                        justify-content: space-between;
+                        box-shadow: var(--shadow-sm);
                     }
                     .category-card:hover {
                         transform: translateY(-6px);
@@ -342,31 +341,40 @@ const QuestionBank: React.FC = () => {
                         box-shadow: 0 20px 25px -5px rgba(28, 132, 143, 0.1), 0 10px 10px -5px rgba(28, 132, 143, 0.04);
                     }
                     .category-icon {
-                        width: 48px;
-                        height: 48px;
-                        background: linear-gradient(135deg, rgba(28, 132, 143, 0.1) 0%, rgba(28, 132, 143, 0.05) 100%);
+                        width: 32px;
+                        height: 32px;
+                        background: var(--primary-light);
                         color: var(--primary);
-                        border-radius: 14px;
+                        border-radius: var(--radius-md);
                         display: flex;
                         align-items: center;
                         justify-content: center;
                     }
+                    .category-icon svg {
+                        width: 16px;
+                        height: 16px;
+                    }
                     .category-name {
                         margin: 0;
-                        font-size: 18px;
+                        font-size: var(--font-size-emph);
                         font-weight: 700;
-                        color: var(--slate-800);
-                        font-family: 'Outfit', sans-serif;
+                        color: var(--text);
+                        font-family: var(--font-heading);
                     }
                     .category-meta {
                         display: flex;
-                        gap: 16px;
-                        padding-top: 14px;
-                        border-top: 1px solid var(--slate-50);
-                        font-size: 13px;
-                        color: var(--slate-500);
+                        gap: var(--space-12);
+                        padding-top: var(--space-8);
+                        border-top: 1px solid var(--border);
+                        font-size: var(--font-size-badge);
+                        color: var(--text-muted);
+                        font-weight: 500;
                     }
-                    .meta-item strong { color: var(--slate-800); }
+                    .meta-item strong { 
+                        color: var(--text); 
+                        font-family: var(--font-mono);
+                        font-weight: 700;
+                    }
 
                     /* Questions Styling */
                     .question-list {
@@ -706,21 +714,6 @@ const QuestionBank: React.FC = () => {
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             handleDeleteCategory(s.category);
-                                        }}
-                                        style={{
-                                            position: 'absolute',
-                                            top: '12px',
-                                            right: '12px',
-                                            background: 'rgba(239, 68, 68, 0.05)',
-                                            color: '#ef4444',
-                                            border: 'none',
-                                            borderRadius: '8px',
-                                            padding: '6px',
-                                            cursor: 'pointer',
-                                            transition: 'all 0.2s',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center'
                                         }}
                                         title="Delete Category"
                                     >

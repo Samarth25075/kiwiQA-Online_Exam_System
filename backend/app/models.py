@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, Boolean, JSON, ForeignKey, Float
+from sqlalchemy import Column, Integer, String, Text, Boolean, JSON, ForeignKey, Float, UniqueConstraint
 from sqlalchemy.orm import relationship, deferred
 from app.database import Base
 
@@ -80,3 +80,7 @@ class ExamInvitation(Base):
     exam_id = Column(String, ForeignKey("exams.id", ondelete="CASCADE"), index=True)
     email = Column(String, index=True)
     sent_at = Column(String)
+
+    __table_args__ = (
+        UniqueConstraint('exam_id', 'email', name='_exam_email_uc'),
+    )

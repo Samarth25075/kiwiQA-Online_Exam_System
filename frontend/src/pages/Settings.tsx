@@ -88,6 +88,7 @@ const Icons = {
             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
         </svg>
     ),
+
 };
 
 export default function Settings() {
@@ -99,6 +100,8 @@ export default function Settings() {
     const [activeTheme, setActiveTheme] = useState<string>(() =>
         localStorage.getItem("kiwi-theme") || "default"
     );
+
+
 
     // Password change
     const [pwForm, setPwForm] = useState({ current: "", newPw: "", confirm: "" });
@@ -153,6 +156,10 @@ export default function Settings() {
             setMembersLoading(false);
         }
     };
+
+
+
+
 
     // ── Apply theme ────────────────────────────────────────────────────────
     const applyTheme = (id: string) => {
@@ -279,24 +286,24 @@ export default function Settings() {
         <AdminLayout>
             <style>{`
                 .st-header {
-                    height: 80px;
+                    height: 64px;
                     background: var(--bg);
                     border-bottom: 1px solid var(--border);
                     display: flex;
                     align-items: center;
-                    padding: 0 40px;
+                    padding: 0 var(--space-32);
                 }
                 .st-header-title {
                     font-family: var(--font-heading);
-                    font-size: 24px;
+                    font-size: var(--font-size-title);
                     font-weight: 700;
                     color: var(--text);
                 }
                 .st-content {
-                    padding: 32px 40px;
+                    padding: var(--space-24) var(--space-32);
                     display: grid;
                     grid-template-columns: repeat(2, 1fr);
-                    gap: 32px;
+                    gap: var(--space-24);
                     max-width: 1200px;
                     margin: 0 auto;
                 }
@@ -317,24 +324,24 @@ export default function Settings() {
                 .st-card {
                     background: var(--bg);
                     border: 1px solid var(--border);
-                    border-radius: var(--radius);
+                    border-radius: var(--radius-lg);
                     box-shadow: var(--shadow-sm);
                     overflow: hidden;
                 }
                 .st-card-header {
-                    padding: 20px 28px;
+                    padding: var(--space-16) var(--space-24);
                     border-bottom: 1px solid var(--border);
                     background: var(--bg-neutral);
                 }
                 .st-card-title {
                     font-family: var(--font-heading);
-                    font-size: 16px;
+                    font-size: var(--font-size-header);
                     font-weight: 700;
                     color: var(--text);
                     margin: 0;
                     display: flex;
                     align-items: center;
-                    gap: 10px;
+                    gap: var(--space-8);
                 }
                 .st-card-title svg { color: var(--primary); }
                 .st-card-sub {
@@ -344,7 +351,7 @@ export default function Settings() {
                     padding-left: 26px;
                 }
                 .st-card-body {
-                    padding: 28px;
+                    padding: var(--space-24);
                 }
 
                 /* ── Profile fields ──────────────────────────────────────── */
@@ -356,7 +363,7 @@ export default function Settings() {
                 .st-field {
                     display: flex;
                     flex-direction: column;
-                    gap: 6px;
+                    gap: var(--space-8);
                 }
                 .st-field-label {
                     font-size: 13px;
@@ -478,7 +485,7 @@ export default function Settings() {
                 /* ── Password form ────────────────────────────────────────── */
                 .st-pw-grid {
                     display: grid;
-                    gap: 20px;
+                    gap: var(--space-16);
                 }
                 .st-pw-field {
                     display: flex;
@@ -679,6 +686,8 @@ export default function Settings() {
                     cursor: pointer;
                 }
                 .st-add-btn:hover { background: var(--primary-hover); }
+
+
             `}</style>
 
             {/* ── Page Header ── */}
@@ -793,6 +802,8 @@ export default function Settings() {
                         </form>
                     </div>
                 </div>
+
+
 
                 {/* ── Appearance ── */}
                 <div className="st-card st-full-width">

@@ -299,7 +299,7 @@ export default function AdminLogin() {
         }
 
         .login-logo-wrap { margin-bottom: 32px; }
-        .login-logo { height: 34px; object-fit: contain; }
+        .login-logo { height: 54px; object-fit: contain; }
 
         .login-heading {
           font-family: var(--font-serif);

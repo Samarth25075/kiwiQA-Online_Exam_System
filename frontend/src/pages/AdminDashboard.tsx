@@ -582,8 +582,8 @@ export default function AdminDashboard() {
         }
 
         .db-topbar-title {
-          font-family: var(--font-serif);
-          font-size: 17px;
+          font-family: var(--font-heading);
+          font-size: var(--font-size-emph);
           color: var(--slate-900);
           letter-spacing: -0.01em;
           margin: 0;
@@ -592,19 +592,19 @@ export default function AdminDashboard() {
         .db-topbar-right {
           display: flex;
           align-items: center;
-          gap: 12px;
+          gap: var(--space-12);
         }
 
         .db-role-badge {
-          font-size: 11px;
+          font-size: var(--font-size-badge);
           font-weight: 600;
           letter-spacing: 0.04em;
           text-transform: uppercase;
-          padding: 4px 10px;
-          border-radius: 100px;
-          background: var(--teal-light);
-          color: var(--teal);
-          border: 1px solid var(--teal-mid);
+          padding: var(--space-4) var(--space-8);
+          border-radius: var(--radius-sm);
+          background: var(--primary-light);
+          color: var(--primary);
+          border: 1px solid var(--border);
         }
 
         .db-role-badge.muted {
@@ -660,7 +660,7 @@ export default function AdminDashboard() {
         .db-content {
           max-width: 1440px;
           margin: 0 auto;
-          padding: 28px 28px 48px;
+          padding: 16px 24px 32px;
           animation: dbFadeIn 0.35s ease;
         }
 
@@ -671,29 +671,28 @@ export default function AdminDashboard() {
 
         /* ── Welcome Banner ──────────────────────────────────────────── */
         .db-banner {
-          background: var(--white);
-          border: 1px solid var(--slate-100);
+          background: var(--bg);
+          border: 1px solid var(--border);
           border-radius: var(--radius-lg);
-          padding: 24px 28px;
-          margin-bottom: 24px;
-          box-shadow: var(--shadow-sm);
+          padding: var(--space-16) var(--space-24);
+          margin-bottom: var(--space-24);
+          box-shadow: var(--shadow);
           display: flex;
           align-items: center;
           justify-content: space-between;
-          gap: 24px;
+          gap: var(--space-24);
         }
 
         .db-banner-greeting {
-          font-family: var(--font-serif);
-          font-size: 22px;
-          color: var(--slate-900);
-          margin: 0 0 6px;
-          letter-spacing: -0.02em;
+          font-family: var(--font-heading);
+          font-size: var(--font-size-title);
+          color: var(--text);
+          margin: 0 0 var(--space-8);
         }
 
         .db-banner-subtitle {
-          font-size: 13.5px;
-          color: var(--slate-500);
+          font-size: var(--font-size-body);
+          color: var(--text-muted);
           line-height: 1.5;
           margin: 0;
           max-width: 560px;
@@ -708,8 +707,8 @@ export default function AdminDashboard() {
           flex-shrink: 0;
           display: flex;
           align-items: center;
-          gap: 8px;
-          padding: 10px 16px;
+          gap: var(--space-8);
+          padding: var(--space-8) var(--space-16);
           border-radius: var(--radius-md);
           border: 1px solid #d1fae5;
           background: #f0fdf9;
@@ -742,18 +741,18 @@ export default function AdminDashboard() {
           display: inline-flex;
           align-items: center;
           gap: 7px;
-          padding: 9px 18px;
+          padding: 7px 16px;
           background: var(--teal);
           color: var(--white);
           border: none;
           border-radius: var(--radius-md);
           font-family: var(--font-sans);
-          font-size: 13px;
+          font-size: 12.5px;
           font-weight: 600;
           cursor: pointer;
           transition: background var(--transition), box-shadow var(--transition), transform var(--transition);
           box-shadow: 0 2px 8px rgba(15,113,115,0.25);
-          margin-top: 16px;
+          margin-top: 10px;
           outline: none;
         }
 
@@ -768,18 +767,18 @@ export default function AdminDashboard() {
         /* ── Stat Cards ──────────────────────────────────────────────── */
         .db-stats {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-          gap: 16px;
-          margin-bottom: 28px;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: var(--space-16);
+          margin-bottom: var(--space-24);
         }
 
         .stat-card {
-          background: var(--white);
-          border: 1px solid var(--slate-100);
+          background: var(--bg);
+          border: 1px solid var(--border);
           border-radius: var(--radius-lg);
-          padding: 20px;
-          box-shadow: var(--shadow-sm);
-          transition: box-shadow var(--transition), transform var(--transition);
+          padding: var(--space-16);
+          box-shadow: var(--shadow);
+          transition: transform 0.2s, box-shadow 0.2s;
           position: relative;
           overflow: hidden;
         }
@@ -803,13 +802,13 @@ export default function AdminDashboard() {
         }
 
         .stat-icon {
-          width: 38px;
-          height: 38px;
+          width: 32px;
+          height: 32px;
           border-radius: var(--radius-md);
           display: flex;
           align-items: center;
           justify-content: center;
-          margin-bottom: 14px;
+          margin-bottom: 12px;
         }
 
         .stat-label {
@@ -826,11 +825,10 @@ export default function AdminDashboard() {
 
         .stat-value {
           font-family: var(--font-mono);
-          font-size: 28px;
+          font-size: var(--font-size-title); /* 24px */
           font-weight: 700;
-          color: var(--slate-900);
+          color: var(--text);
           line-height: 1;
-          letter-spacing: -0.03em;
         }
 
         .stat-hint {
@@ -870,19 +868,19 @@ export default function AdminDashboard() {
         .exam-grid {
           display: grid;
           grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-          gap: 16px;
+          gap: var(--space-16);
         }
 
         .exam-card {
-          background: var(--white);
-          border: 1px solid var(--slate-100);
+          background: var(--bg);
+          border: 1px solid var(--border);
           border-radius: var(--radius-lg);
-          padding: 20px;
-          box-shadow: var(--shadow-sm);
+          padding: var(--space-16);
+          box-shadow: var(--shadow);
           display: flex;
           flex-direction: column;
-          gap: 16px;
-          transition: box-shadow var(--transition), border-color var(--transition), transform var(--transition);
+          gap: var(--space-16);
+          transition: all 0.2s;
         }
 
         .exam-card:hover {
@@ -893,10 +891,11 @@ export default function AdminDashboard() {
 
         /* ── Exam Card Header ─────────────────────────────────────────── */
         .exam-card-title {
-          font-size: 15px;
-          font-weight: 600;
-          color: var(--slate-900);
-          margin: 0 0 10px;
+          font-family: var(--font-heading);
+          font-size: var(--font-size-emph);
+          font-weight: 700;
+          color: var(--text);
+          margin: 0 0 var(--space-8);
           line-height: 1.35;
         }
 
@@ -941,7 +940,7 @@ export default function AdminDashboard() {
           background: var(--slate-50);
           border: 1px solid var(--slate-100);
           border-radius: var(--radius-md);
-          padding: 10px 12px;
+          padding: 8px 10px;
           text-align: center;
           transition: border-color var(--transition), background var(--transition);
         }
@@ -953,9 +952,9 @@ export default function AdminDashboard() {
 
         .exam-counter-value {
           font-family: var(--font-mono);
-          font-size: 20px;
+          font-size: var(--font-size-emph); /* 16px emphasized */
           font-weight: 700;
-          color: var(--slate-900);
+          color: var(--text);
           line-height: 1;
         }
 

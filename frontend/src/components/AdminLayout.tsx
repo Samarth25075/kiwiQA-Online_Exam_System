@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import CustomPopup from "./CustomPopup";
 import API_BASE_URL from "../config";
@@ -175,7 +175,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         { path: "/invitation-tracking", label: "Invites Tracking", icon: Icons.Results, perm: "manage candidates", task: "Invites" },
         { path: "/candidate-results", label: "Results", icon: Icons.Results, perm: "manage candidates", task: "Results" },
         { path: "/settings", label: "Settings", icon: Icons.Settings, perm: null },
-        { path: "/user-guide", label: "User Guide", icon: Icons.Help, perm: null },
+        { path: "/user-guide", label: "User Guide", icon: Icons.Help, perm: null, isExternal: true, externalPath: "/Userguide.html" },
     ];
 
     useEffect(() => {
@@ -185,6 +185,38 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         } else {
             document.title = "KiwiQA Assessment Hub";
         }
+    }, [location.pathname]);
+
+    // ── Restore accessibility preferences on every page load ───────────────
+    useEffect(() => {
+        // Font size
+        const savedFont = localStorage.getItem("kiwi-font-size") || "normal";
+        document.documentElement.setAttribute("data-font-size", savedFont);
+
+        // High contrast (overrides theme)
+        const savedHC = localStorage.getItem("kiwi-high-contrast") === "true";
+        if (savedHC) {
+            document.documentElement.setAttribute("data-theme", "high-contrast");
+        }
+
+        // Reduced motion
+        const savedRM = localStorage.getItem("kiwi-reduced-motion") === "true";
+        document.documentElement.setAttribute("data-reduced-motion", String(savedRM));
+    }, []);
+
+    const focusMain = () => {
+        const main = document.getElementById("main-content");
+        if (main) main.focus();
+    };
+
+    // ── Focus main content after every route change ────────────────────────
+    const isFirstNav = useRef(true);
+    useEffect(() => {
+        if (isFirstNav.current) {
+            isFirstNav.current = false;
+            return;
+        }
+        focusMain();
     }, [location.pathname]);
 
     return (
@@ -201,7 +233,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
 
                 /* ── Sidebar ── */
                 .al-sidebar {
-                    width: 200px;
+                    width: 240px;
                     flex-shrink: 0;
                     background: var(--sidebar-bg, #0f172a);
                     display: flex;
@@ -248,19 +280,19 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
 
                 /* ── Logo ── */
                 .al-logo-area {
-                    padding: 20px 16px 16px;
+                    padding: var(--space-24) var(--space-16);
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     cursor: pointer;
                     border-bottom: 1px solid rgba(255,255,255,0.06);
-                    margin-bottom: 8px;
+                    margin-bottom: var(--space-8);
                 }
                 .al-logo-area img {
-                    height: 34px;
+                    height: 48px;
                     width: auto;
+                    max-width: 160px;
                     object-fit: contain;
-                    filter: brightness(1.1);
                 }
 
                 /* ── Nav ── */
@@ -282,12 +314,12 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                 .al-nav-item {
                     display: flex;
                     align-items: center;
-                    gap: 10px;
-                    padding: 9px 12px;
-                    margin-bottom: 2px;
-                    border-radius: 10px;
+                    gap: var(--space-8);
+                    padding: var(--space-8) var(--space-16);
+                    margin-bottom: var(--space-4);
+                    border-radius: var(--radius-md);
                     cursor: pointer;
-                    font-size: 12px;
+                    font-size: var(--font-size-body);
                     font-weight: 600;
                     color: rgba(255,255,255,0.5);
                     transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
@@ -298,14 +330,21 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                     user-select: none;
                 }
 
+                .al-nav-item:focus-visible {
+                    outline: 2px solid var(--primary);
+                    outline-offset: -2px;
+                    background: rgba(255,255,255,0.07);
+                    color: rgba(255,255,255,0.9);
+                }
+
                 .al-nav-item:hover {
                     background: rgba(255,255,255,0.07);
                     color: rgba(255,255,255,0.9);
                 }
 
                 .al-nav-item.active {
-                    background: linear-gradient(135deg, color-mix(in srgb, var(--primary) 30%, transparent) 0%, color-mix(in srgb, var(--primary) 15%, transparent) 100%);
-                    color: var(--primary);
+                    background: var(--primary);
+                    color: var(--white);
                     font-weight: 700;
                 }
 
@@ -347,18 +386,17 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
 
                 .al-logout-btn {
                     width: 100%;
-                    padding: 9px 12px;
+                    padding: var(--space-8) var(--space-16);
                     background: rgba(255,255,255,0.03);
                     border: 1px solid rgba(255,255,255,0.08);
                     color: rgba(255,255,255,0.5);
-                    font-size: 12px;
+                    font-size: var(--font-size-body);
                     font-weight: 600;
-                    font-family: 'Inter', sans-serif;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    gap: 8px;
-                    border-radius: 10px;
+                    gap: var(--space-8);
+                    border-radius: var(--radius-md);
                     cursor: pointer;
                     transition: all 0.25s;
                 }
@@ -382,14 +420,14 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                 .al-mobile-header {
                     display: none;
                     background: var(--bg);
-                    padding: 10px 16px;
+                    padding: var(--space-16) var(--space-24);
                     border-bottom: 1px solid var(--border);
                     align-items: center;
                     justify-content: space-between;
                     position: sticky;
                     top: 0;
                     z-index: 800;
-                    box-shadow: var(--shadow-sm);
+                    height: 64px;
                 }
 
                 @media (max-width: 1024px) {
@@ -400,27 +438,38 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                     background: var(--bg-neutral);
                     border: 1px solid var(--border);
                     color: var(--text);
-                    width: 36px;
-                    height: 36px;
+                    width: 32px;
+                    height: 32px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    border-radius: 8px;
+                    border-radius: var(--radius-sm);
                     cursor: pointer;
-                    transition: all 0.2s;
                 }
-                .al-menu-toggle:hover { background: var(--border); }
 
                 .al-content-inner {
                     flex: 1;
-                    padding: 0;
+                    padding: 16px 24px 32px;
+                    max-width: 1440px;
+                    margin: 0 auto;
+                    width: 100%;
                 }
             `}</style>
 
+            {/* ── Skip to content (keyboard accessibility) ── */}
+            <a href="#main-content" className="skip-to-content">Skip to main content</a>
+
             <div className={`al-sidebar-overlay ${sidebarOpen ? 'open' : ''}`} onClick={() => setSidebarOpen(false)} />
 
-            <aside className={`al-sidebar ${sidebarOpen ? 'open' : ''}`}>
-                <div className="al-logo-area" onClick={() => { navigate("/dashboard"); setSidebarOpen(false); }}>
+            <aside className={`al-sidebar ${sidebarOpen ? 'open' : ''}`} aria-label="Main navigation">
+                <div
+                    className="al-logo-area"
+                    onClick={() => { navigate("/dashboard"); setSidebarOpen(false); }}
+                    onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { navigate("/dashboard"); setSidebarOpen(false); } }}
+                    tabIndex={0}
+                    role="button"
+                    aria-label="Go to Dashboard"
+                >
                     <img src={logo} alt="KiwiQA Logo" />
                 </div>
 
@@ -429,8 +478,12 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                     {navItems.slice(0, 1).map(item => (
                         <div
                             key={item.path}
+                            role="button"
+                            tabIndex={0}
                             className={`al-nav-item ${isActive(item.path) ? "active" : ""}`}
                             onClick={() => { navigate(item.path); setSidebarOpen(false); }}
+                            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate(item.path); setSidebarOpen(false); focusMain(); } }}
+                            aria-current={isActive(item.path) ? 'page' : undefined}
                         >
                             <span className="al-nav-icon"><item.icon /></span>
                             {item.label}
@@ -441,8 +494,13 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                     {navItems.slice(1, 4).map(item => (
                         <div
                             key={item.path}
+                            role="button"
+                            tabIndex={0}
                             className={`al-nav-item ${isActive(item.path) ? "active" : ""} ${item.perm && !hasPermission(item.perm) ? "locked" : ""}`}
                             onClick={() => item.perm ? navTo(item.path, item.perm, item.task!) : (navigate(item.path), setSidebarOpen(false))}
+                            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); item.perm ? navTo(item.path, item.perm, item.task!) : (navigate(item.path), setSidebarOpen(false)); } }}
+                            aria-current={isActive(item.path) ? 'page' : undefined}
+                            aria-disabled={item.perm && !hasPermission(item.perm) ? true : undefined}
                         >
                             <span className="al-nav-icon"><item.icon /></span>
                             {item.label}
@@ -454,8 +512,13 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                     {navItems.slice(4, 7).map(item => (
                         <div
                             key={item.path}
+                            role="button"
+                            tabIndex={0}
                             className={`al-nav-item ${isActive(item.path) ? "active" : ""} ${item.perm && !hasPermission(item.perm) ? "locked" : ""}`}
                             onClick={() => item.perm ? navTo(item.path, item.perm, item.task!) : (navigate(item.path), setSidebarOpen(false))}
+                            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); item.perm ? navTo(item.path, item.perm, item.task!) : (navigate(item.path), setSidebarOpen(false)); } }}
+                            aria-current={isActive(item.path) ? 'page' : undefined}
+                            aria-disabled={item.perm && !hasPermission(item.perm) ? true : undefined}
                         >
                             <span className="al-nav-icon"><item.icon /></span>
                             {item.label}
@@ -467,8 +530,29 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                     {navItems.slice(7).map(item => (
                         <div
                             key={item.path}
+                            role="button"
+                            tabIndex={0}
                             className={`al-nav-item ${isActive(item.path) ? "active" : ""}`}
-                            onClick={() => { navigate(item.path); setSidebarOpen(false); }}
+                            onClick={() => {
+                                if (item.isExternal) {
+                                    window.open(item.externalPath, "_blank");
+                                } else {
+                                    navigate(item.path);
+                                }
+                                setSidebarOpen(false);
+                            }}
+                            onKeyDown={e => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                    e.preventDefault();
+                                    if (item.isExternal) {
+                                        window.open(item.externalPath, "_blank");
+                                    } else {
+                                        navigate(item.path);
+                                    }
+                                    setSidebarOpen(false);
+                                }
+                            }}
+                            aria-current={isActive(item.path) ? 'page' : undefined}
                         >
                             <span className="al-nav-icon"><item.icon /></span>
                             {item.label}
@@ -485,13 +569,13 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
 
             <main className="al-main-content">
                 <header className="al-mobile-header">
-                    <img src={logo} alt="Logo" style={{ height: 28 }} />
+                    <img src={logo} alt="Logo" style={{ height: 40 }} />
                     <button className="al-menu-toggle" onClick={() => setSidebarOpen(true)}>
                         <Icons.Menu />
                     </button>
                 </header>
 
-                <div className="al-content-inner">
+                <div className="al-content-inner" id="main-content" tabIndex={-1}>
                     {children}
                 </div>
 

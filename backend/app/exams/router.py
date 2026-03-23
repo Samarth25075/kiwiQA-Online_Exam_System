@@ -181,20 +181,42 @@ async def send_exam_link_custom(
     
     from app.models import ExamInvitation
     from datetime import datetime
+    from sqlalchemy import and_
     
     saved_count = 0
+    already_sent_emails = []
+    
+    # Pre-check for duplicates to give a clean error if any are already invited
+    from sqlalchemy import func
     for email in payload.emails:
         safe_email = email.strip()
         if safe_email:
+            existing = db.query(ExamInvitation).filter(
+                and_(ExamInvitation.exam_id == exam_id, func.lower(ExamInvitation.email) == safe_email.lower())
+            ).first()
+            if existing:
+                already_sent_emails.append(safe_email)
+    
+    if already_sent_emails:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Restriction: You have already sent an invitation to {', '.join(already_sent_emails)} for this test."
+        )
+
+    # If no duplicates, proceed with sending all
+    for email in payload.emails:
+        safe_email = email.strip()
+        if safe_email:
+            # Send email
             background_tasks.add_task(send_email, safe_email, subject, content)
             
             # Save invitation to DB
-            invitation = ExamInvitation(
+            new_invite = ExamInvitation(
                 exam_id=exam_id,
                 email=safe_email,
                 sent_at=datetime.now().isoformat()
             )
-            db.add(invitation)
+            db.add(new_invite)
             saved_count += 1
             
     if saved_count > 0:

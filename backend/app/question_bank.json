@@ -7798,31 +7798,5 @@
     ],
     "explanation": "SoftAssert allows multiple assertions to be verified in a single test without stopping on first failure.",
     "q_id": "37991ba7"
-  },
-  {
-    "category": "Python",
-    "difficulty": "Beginner",
-    "text": "What is Python",
-    "marks": 3,
-    "explanation": "",
-    "options": [
-      {
-        "text": "Programming language ",
-        "is_correct": false
-      },
-      {
-        "text": "Coding",
-        "is_correct": true
-      },
-      {
-        "text": "maths",
-        "is_correct": false
-      },
-      {
-        "text": "data",
-        "is_correct": false
-      }
-    ],
-    "q_id": "68cf2301"
   }
 ]

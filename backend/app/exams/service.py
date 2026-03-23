@@ -699,8 +699,11 @@ def get_exams_with_candidate_counts(db: Session, bypass_cache: bool = False) -> 
     exams = get_all_exams(db, bypass_cache=True)
     candidates = get_all_candidates(db, bypass_cache=True)
     
-    # Get invite counts per exam
-    invite_rows = db.query(ExamInvitation.exam_id, func.count(ExamInvitation.id)).group_by(ExamInvitation.exam_id).all()
+    # Get invite counts per exam (unique emails only)
+    invite_rows = db.query(
+        ExamInvitation.exam_id, 
+        func.count(func.distinct(ExamInvitation.email))
+    ).group_by(ExamInvitation.exam_id).all()
     invite_counts = {row[0]: row[1] for row in invite_rows}
 
     from collections import defaultdict
@@ -809,15 +812,20 @@ def get_invitation_tracking(db: Session):
         enrolled_status_map = {c.email.lower(): c.status for c in candidates}
         
         invitation_details = []
+        unique_invites = {}
+        for inv in invitations:
+            email_lower = inv.email.lower()
+            # If multiple records exist, keep only the latest one
+            if email_lower not in unique_invites or inv.sent_at > unique_invites[email_lower].sent_at:
+                unique_invites[email_lower] = inv
+
         sat_count = 0
         not_sat_count = 0
         
-        for inv in invitations:
-            email_lower = inv.email.lower()
+        for email_lower, inv in unique_invites.items():
             if email_lower in enrolled_status_map:
                 status = "Sat"
                 sat_count += 1
-                # If they sat, they might be in different stages
                 cand_status = enrolled_status_map[email_lower]
                 detail_status = f"Sat ({cand_status})"
             else:
@@ -834,7 +842,7 @@ def get_invitation_tracking(db: Session):
         result.append({
             "exam_id": exam.id,
             "exam_title": exam.title,
-            "total_invited": len(invitations),
+            "total_invited": len(unique_invites),
             "sat_count": sat_count,
             "not_sat_count": not_sat_count,
             "details": invitation_details

@@ -111,10 +111,7 @@ export default function EnrollCandidate() {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [phone, setPhone] = useState("");
-    const [dob, setDob] = useState("");
-    const [gender, setGender] = useState("");
-    const [address, setAddress] = useState("");
-    const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
+    const [agreedToConsent, setAgreedToConsent] = useState(false);
     const [otp, setOtp] = useState("");
     const [step, setStep] = useState<"details" | "otp">("details");
     const [loading, setLoading] = useState(false);
@@ -142,19 +139,24 @@ export default function EnrollCandidate() {
         return () => clearInterval(id);
     }, [resendTimer]);
 
-    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
 
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            setProfilePhoto(reader.result as string);
-        };
-        reader.readAsDataURL(file);
-    };
 
     const handleRequestOtp = async (e?: React.FormEvent) => {
         e?.preventDefault();
+
+        if (!name.trim()) {
+            setError("Please enter your full name.");
+            return;
+        }
+        if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            setError("Please enter a valid email address.");
+            return;
+        }
+        if (!phone.trim()) {
+            setError("Please enter your mobile number.");
+            return;
+        }
+
         setLoading(true);
         setError("");
         try {
@@ -167,11 +169,7 @@ export default function EnrollCandidate() {
                     body: JSON.stringify({
                         name,
                         email,
-                        phone_number: phone,
-                        dob,
-                        gender,
-                        address,
-                        profile_photo: profilePhoto
+                        phone_number: phone
                     })
                 }
             );
@@ -205,10 +203,6 @@ export default function EnrollCandidate() {
                         email,
                         otp,
                         phone_number: phone,
-                        dob,
-                        gender,
-                        address,
-                        profile_photo: profilePhoto,
                         device_id: deviceId
                     })
                 }
@@ -309,7 +303,7 @@ export default function EnrollCandidate() {
         }
 
         /* ── Header ───────────────────────────────────── */
-        .enroll-logo { height: 34px; object-fit: contain; display: block; margin: 0 auto 28px; }
+        .enroll-logo { height: 52px; object-fit: contain; display: block; margin: 0 auto 28px; }
 
         .enroll-heading {
           font-family: var(--font-serif);
@@ -553,48 +547,7 @@ export default function EnrollCandidate() {
                             </div>
                         )}
 
-                        <form className="enroll-form" onSubmit={handleRequestOtp} noValidate>
-                            {/* Profile Photo Upload */}
-                            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
-                                <div style={{ position: 'relative' }}>
-                                    <div style={{
-                                        width: 100,
-                                        height: 100,
-                                        borderRadius: '50%',
-                                        background: 'var(--bg-neutral)',
-                                        border: '2px dashed var(--line)',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        overflow: 'hidden',
-                                        cursor: 'pointer'
-                                    }} onClick={() => document.getElementById('profile-upload')?.click()}>
-                                        {profilePhoto ? (
-                                            <img src={profilePhoto} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                        ) : (
-                                            <Icons.Camera />
-                                        )}
-                                    </div>
-                                    {profilePhoto && (
-                                        <button
-                                            type="button"
-                                            onClick={(e) => { e.stopPropagation(); setProfilePhoto(null); }}
-                                            style={{ position: 'absolute', top: 0, right: 0, background: 'var(--danger)', color: 'white', border: 'none', borderRadius: '50%', width: 20, height: 20, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                                        >
-                                            <Icons.X />
-                                        </button>
-                                    )}
-                                    <input
-                                        id="profile-upload"
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={handleImageUpload}
-                                        style={{ display: 'none' }}
-                                    />
-                                    <p style={{ textAlign: 'center', fontSize: 10, marginTop: 4, color: 'var(--ink-3)' }}>Profile Photo</p>
-                                </div>
-                            </div>
-
+                        <form className="enroll-form" onSubmit={handleRequestOtp}>
                             <div className="form-field">
                                 <label className="form-label">Full Name</label>
                                 <div className="form-input-wrap">
@@ -625,68 +578,36 @@ export default function EnrollCandidate() {
                                 </div>
                             </div>
 
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-                                <div className="form-field">
-                                    <label className="form-label">Mobile Number</label>
-                                    <div className="form-input-wrap">
-                                        <span className="form-input-icon"><Icons.Phone /></span>
-                                        <input
-                                            className="form-input"
-                                            type="tel"
-                                            placeholder="+91 98765 43210"
-                                            value={phone}
-                                            required
-                                            onChange={e => setPhone(e.target.value)}
-                                        />
-                                    </div>
-                                </div>
-                                <div className="form-field">
-                                    <label className="form-label">Date of Birth</label>
-                                    <div className="form-input-wrap">
-                                        <span className="form-input-icon"><Icons.Calendar /></span>
-                                        <input
-                                            className="form-input"
-                                            type="date"
-                                            value={dob}
-                                            required
-                                            onChange={e => setDob(e.target.value)}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-                                <div className="form-field">
-                                    <label className="form-label">Gender</label>
-                                    <select
+                            <div className="form-field">
+                                <label className="form-label">Mobile Number</label>
+                                <div className="form-input-wrap">
+                                    <span className="form-input-icon"><Icons.Phone /></span>
+                                    <input
                                         className="form-input"
-                                        style={{ paddingLeft: 14 }}
-                                        value={gender}
-                                        onChange={e => setGender(e.target.value)}
+                                        type="tel"
+                                        placeholder="+91 98765 43210"
+                                        value={phone}
                                         required
-                                    >
-                                        <option value="">Select Gender</option>
-                                        <option value="Male">Male</option>
-                                        <option value="Female">Female</option>
-                                        <option value="Other">Other</option>
-                                    </select>
-                                </div>
-                                <div className="form-field">
-                                    <label className="form-label">Address (Optional)</label>
-                                    <div className="form-input-wrap">
-                                        <span className="form-input-icon"><Icons.MapPin /></span>
-                                        <input
-                                            className="form-input"
-                                            type="text"
-                                            placeholder="City, Country"
-                                            value={address}
-                                            onChange={e => setAddress(e.target.value)}
-                                        />
-                                    </div>
+                                        onChange={e => setPhone(e.target.value)}
+                                    />
                                 </div>
                             </div>
 
-                            <button className="btn btn-primary" type="submit" disabled={loading} style={{ marginTop: 12 }}>
+                            <div className="form-field" style={{ marginTop: 8 }}>
+                                <label className="decl-check-row" style={{ display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer' }}>
+                                    <input 
+                                        type="checkbox" 
+                                        checked={agreedToConsent} 
+                                        onChange={e => setAgreedToConsent(e.target.checked)}
+                                        style={{ width: 17, height: 17, accentColor: 'var(--teal)', cursor: 'pointer', marginTop: 3 }}
+                                    />
+                                    <span style={{ fontSize: 13, color: 'var(--ink-2)', lineHeight: 1.5 }}>
+                                        I consent to securely store my data for assessment purposes. We ensure your data privacy and security.
+                                    </span>
+                                </label>
+                            </div>
+
+                            <button className="btn btn-primary" type="submit" disabled={loading || !agreedToConsent} style={{ marginTop: 12 }}>
                                 {loading ? "Sending code…" : <><Icons.Send /> Register & Continue</>}
                             </button>
                         </form>
@@ -749,10 +670,7 @@ export default function EnrollCandidate() {
                                 {loading ? "Verifying…" : "Start Exam"}
                             </button>
 
-                            <button className="btn btn-ghost" type="button" disabled={loading}
-                                onClick={() => { setStep("details"); setError(""); setOtp(""); }}>
-                                <Icons.ChevronLeft /> Back
-                            </button>
+
                         </form>
                     </>
                 )}
