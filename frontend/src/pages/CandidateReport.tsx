@@ -91,7 +91,7 @@ const STYLES = `
 
 .score-cell { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--primary); }
 
-.proctor-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.proctor-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
 .proctor-frame { background: var(--bg-neutral); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; position: relative; aspect-ratio: 4/3; box-shadow: var(--shadow-sm); }
 .proctor-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
 .proctor-frame:hover .proctor-img { transform: scale(1.05); }
@@ -348,10 +348,6 @@ export default function CandidateReport() {
                                 <div className="proctor-frame">
                                     {proctoring.mid ? <img src={proctoring.mid} className="proctor-img" alt="Mid" /> : <div style={{ display: 'grid', placeItems: 'center', height: '100%', color: 'var(--text-muted)' }}>No Record</div>}
                                     <div className="proctor-label">SESSION PROGRESSION PHASE</div>
-                                </div>
-                                <div className="proctor-frame">
-                                    {proctoring.end ? <img src={proctoring.end} className="proctor-img" alt="End" /> : <div style={{ display: 'grid', placeItems: 'center', height: '100%', color: 'var(--text-muted)' }}>No Record</div>}
-                                    <div className="proctor-label">SESSION TERMINATION PHASE</div>
                                 </div>
                             </div>
                             <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 16, fontStyle: 'italic', fontWeight: 500 }}>

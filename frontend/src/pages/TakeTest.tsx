@@ -1363,7 +1363,7 @@ export default function TakeTest() {
                 const next = (prev !== null && prev > 0) ? prev - 1 : 0;
                 
                 // Take MID snapshot (around 50% time left)
-                if (testData?.exam.duration && next === Math.floor((testData.exam.duration * 60) / 2) && !midCapturedRef.current) {
+                if (testData?.exam.duration && next <= Math.floor((testData.exam.duration * 60) / 2) && !midCapturedRef.current) {
                     const shot = takeSnapshot();
                     if (shot) {
                         setSnapshotMid(shot);
