@@ -343,11 +343,11 @@ export default function CandidateReport() {
                             <div className="proctor-grid">
                                 <div className="proctor-frame">
                                     {proctoring.start ? <img src={proctoring.start} className="proctor-img" alt="Start" /> : <div style={{ display: 'grid', placeItems: 'center', height: '100%', color: 'var(--text-muted)' }}>No Record</div>}
-                                    <div className="proctor-label">SESSION START PHASE</div>
+                                    <div className="proctor-label">START PHASE · {new Date(candidate.joined_date).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</div>
                                 </div>
                                 <div className="proctor-frame">
                                     {proctoring.mid ? <img src={proctoring.mid} className="proctor-img" alt="Mid" /> : <div style={{ display: 'grid', placeItems: 'center', height: '100%', color: 'var(--text-muted)' }}>No Record</div>}
-                                    <div className="proctor-label">SESSION PROGRESSION PHASE</div>
+                                    <div className="proctor-label">PROGRESSION PHASE · {new Date(new Date(candidate.joined_date).getTime() + (report.stats[Object.keys(report.stats)[0]]?.total ? 1800000 : 0)).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</div>
                                 </div>
                             </div>
                             <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 16, fontStyle: 'italic', fontWeight: 500 }}>

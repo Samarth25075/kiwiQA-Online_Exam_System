@@ -1312,7 +1312,24 @@ export default function TakeTest() {
                 canvas.height = videoRef.current.videoHeight || 480;
                 const ctx = canvas.getContext("2d");
                 if (ctx) {
+                    // Draw video frame
                     ctx.drawImage(videoRef.current, 0, 0);
+                    
+                    // Add Date/Time Overlay (Top-right)
+                    const now = new Date();
+                    const timestamp = now.toLocaleDateString('en-GB') + ' ' + now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                    
+                    ctx.font = "bold 16px Inter, sans-serif";
+                    const textWidth = ctx.measureText(timestamp).width;
+                    
+                    // Draw semi-transparent background for text
+                    ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+                    ctx.fillRect(canvas.width - textWidth - 30, 10, textWidth + 20, 25);
+                    
+                    // Draw text
+                    ctx.fillStyle = "white";
+                    ctx.fillText(timestamp, canvas.width - textWidth - 20, 28);
+                    
                     return canvas.toDataURL("image/png");
                 }
             } catch (e) { console.error("Snapshot error:", e); }
