@@ -13,14 +13,27 @@ from sqlalchemy.orm import Session
 from app.models import Exam, Candidate, ExamInvitation
 
 def _read_bank() -> List[Dict]:
-    """Read questions from local question_bank.json."""
-    bank_path = os.path.join(os.path.dirname(__file__), "..", "question_bank.json")
+    """Read questions from local question_bank.json with improved path resolution."""
+    # Use absolute path based on the location of this file (app/exams/service.py)
+    # Location: backend/app/exams/service.py -> backend/app/question_bank.json
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    bank_path = os.path.join(base_dir, "question_bank.json")
+
     if not os.path.exists(bank_path):
-        return []
+        print(f"ERROR: Question bank not found at {bank_path}", flush=True)
+        # Fallback to current working directory based structure
+        cwd_fallback = os.path.join(os.getcwd(), "backend", "app", "question_bank.json")
+        if os.path.exists(cwd_fallback):
+            bank_path = cwd_fallback
+        else:
+            return []
+
     try:
         with open(bank_path, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except:
+            data = json.load(f)
+            return data if isinstance(data, list) else []
+    except Exception as e:
+        print(f"ERROR: Failed to read question bank: {e}", flush=True)
         return []
 
 def get_bank_categories(db: Session = None) -> List[str]:
