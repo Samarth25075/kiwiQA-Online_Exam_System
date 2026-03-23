@@ -32,6 +32,9 @@ const Icons = {
     ),
     Menu: () => (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    ),
+    Help: () => (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
     )
 };
 
@@ -167,10 +170,12 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         { path: "/dashboard", label: "Dashboard", icon: Icons.Dashboard, perm: null },
         { path: "/create-exam", label: "Create Exam", icon: Icons.Generate, perm: "generate exam", task: "Create Exam" },
         { path: "/manage-exams", label: "Manage Exams", icon: Icons.Exams, perm: "manage exam", task: "Manage Exams" },
+        { path: "/question-bank", label: "Question Bank", icon: Icons.Exams, perm: "manage exam", task: "Question Bank" },
         { path: "/manage-candidates", label: "Candidates", icon: Icons.Users, perm: "manage candidates", task: "Candidates" },
         { path: "/invitation-tracking", label: "Invites Tracking", icon: Icons.Results, perm: "manage candidates", task: "Invites" },
         { path: "/candidate-results", label: "Results", icon: Icons.Results, perm: "manage candidates", task: "Results" },
         { path: "/settings", label: "Settings", icon: Icons.Settings, perm: null },
+        { path: "/user-guide", label: "User Guide", icon: Icons.Help, perm: null },
     ];
 
     useEffect(() => {
@@ -433,7 +438,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                     ))}
 
                     <span className="al-nav-label">Assessments</span>
-                    {navItems.slice(1, 3).map(item => (
+                    {navItems.slice(1, 4).map(item => (
                         <div
                             key={item.path}
                             className={`al-nav-item ${isActive(item.path) ? "active" : ""} ${item.perm && !hasPermission(item.perm) ? "locked" : ""}`}
@@ -446,7 +451,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                     ))}
 
                     <span className="al-nav-label">People</span>
-                    {navItems.slice(3, 6).map(item => (
+                    {navItems.slice(4, 7).map(item => (
                         <div
                             key={item.path}
                             className={`al-nav-item ${isActive(item.path) ? "active" : ""} ${item.perm && !hasPermission(item.perm) ? "locked" : ""}`}
@@ -459,7 +464,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                     ))}
 
                     <span className="al-nav-label">System</span>
-                    {navItems.slice(6).map(item => (
+                    {navItems.slice(7).map(item => (
                         <div
                             key={item.path}
                             className={`al-nav-item ${isActive(item.path) ? "active" : ""}`}

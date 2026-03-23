@@ -23,23 +23,47 @@ def _read_bank() -> List[Dict]:
     except:
         return []
 
-def get_bank_categories() -> List[str]:
-    """Get unique categories from the inbuilt question bank."""
+def get_bank_categories(db: Session = None) -> List[str]:
+    """Get unique categories from the inbuilt question bank and database."""
     bank = _read_bank()
-    cats = sorted(list(set(q.get("category", "General") for q in bank if q.get("category"))))
-    return cats
+    bank_cats = set(q.get("category", "General") for q in bank if q.get("category"))
+    
+    if db:
+        from app.models import QuestionCategory
+        db_cats = [c.name for c in db.query(QuestionCategory).all()]
+        bank_cats.update(db_cats)
+        
+    return sorted(list(bank_cats))
 
-def get_bank_stats() -> Dict:
-    """Get count and total marks for each category in the bank."""
+def get_bank_stats(db: Session = None) -> List[Dict]:
+    """Get category-wise stats (count, marks) from the question bank including empty ones from DB."""
     bank = _read_bank()
-    stats = {}
+    stats_map = {}
+    
+    # Pre-populate with all known categories from DB if session provided
+    if db:
+        from app.models import QuestionCategory
+        all_cats = db.query(QuestionCategory).all()
+        for c in all_cats:
+            stats_map[c.name] = {"count": 0, "total_marks": 0.0}
+    
+    # Feed from bank
     for q in bank:
         cat = q.get("category", "General")
-        if cat not in stats:
-            stats[cat] = {"count": 0, "total_marks": 0.0}
-        stats[cat]["count"] += 1
-        stats[cat]["total_marks"] += float(q.get("marks", 0.0))
-    return stats
+        if cat not in stats_map:
+            stats_map[cat] = {"count": 0, "total_marks": 0.0}
+        stats_map[cat]["count"] += 1
+        stats_map[cat]["total_marks"] += float(q.get("marks", 0.0))
+    
+    # Convert map to list
+    stats_list = []
+    for cat, data in stats_map.items():
+        stats_list.append({
+            "category": cat,
+            "count": data["count"],
+            "total_marks": round(data["total_marks"], 2)
+        })
+    return sorted(stats_list, key=lambda x: x["category"])
 
 def get_bank_questions(categories: List[str], difficulty: str, count: int, configs: Dict = None) -> List[Dict]:
     """Fetch questions from bank based on multiple categories and difficulty."""
@@ -138,8 +162,58 @@ def get_bank_questions(categories: List[str], difficulty: str, count: int, confi
 
     return all_selected
 
+def get_bank_questions_by_category(category_name: str) -> List[Dict]:
+    """Get all questions in a specific category from the bank."""
+    bank = _read_bank()
+    if not category_name:
+        return bank
+    return [q for q in bank if q.get('category', '').lower() == category_name.lower()]
+
+def update_bank_question(q_id: str, updated_q: Dict) -> bool:
+    """Update a specific question in the bank by its q_id."""
+    bank = _read_bank()
+    found = False
+    for i, q in enumerate(bank):
+        if q.get('q_id') == q_id:
+            # Preserve q_id if not provided in updated_q
+            if 'q_id' not in updated_q:
+                updated_q['q_id'] = q_id
+            bank[i] = updated_q
+            found = True
+            break
+    
+    if not found:
+        return False
+        
+    bank_path = os.path.join(os.path.dirname(__file__), "..", "question_bank.json")
+    try:
+        with open(bank_path, "w", encoding="utf-8") as f:
+            json.dump(bank, f, indent=2)
+        return True
+    except:
+        return False
+
+def delete_bank_question(q_id: str) -> bool:
+    """Delete a specific question from the bank by its q_id."""
+    bank = _read_bank()
+    new_bank = [q for q in bank if q.get('q_id') != q_id]
+    
+    if len(new_bank) == len(bank):
+        return False # No question was removed
+        
+    bank_path = os.path.join(os.path.dirname(__file__), "..", "question_bank.json")
+    try:
+        with open(bank_path, "w", encoding="utf-8") as f:
+            json.dump(new_bank, f, indent=2)
+        return True
+    except:
+        return False
+
 def add_to_bank(question: Dict) -> bool:
     """Add a single question to the bank."""
+    if 'q_id' not in question:
+        import uuid
+        question['q_id'] = str(uuid.uuid4())[:8]
     bank = _read_bank()
     bank.append(question)
     bank_path = os.path.join(os.path.dirname(__file__), "..", "question_bank.json")
@@ -753,3 +827,20 @@ def get_invitation_tracking(db: Session):
             "details": invitation_details
         })
     return result
+
+def delete_category_questions(category_name: str) -> bool:
+    """Remove all questions belonging to a specific category from the bank JSON."""
+    bank = _read_bank()
+    if not bank: return True
+    initial_len = len(bank)
+    bank = [q for q in bank if q.get("category") != category_name]
+    
+    if len(bank) < initial_len:
+        bank_path = os.path.join(os.path.dirname(__file__), "..", "question_bank.json")
+        try:
+            with open(bank_path, "w", encoding="utf-8") as f:
+                json.dump(bank, f, indent=4)
+            return True
+        except:
+            return False
+    return True

@@ -293,11 +293,24 @@ export default function Settings() {
                     color: var(--text);
                 }
                 .st-content {
-                    padding: 40px;
-                    display: flex;
-                    flex-direction: column;
+                    padding: 32px 40px;
+                    display: grid;
+                    grid-template-columns: repeat(2, 1fr);
                     gap: 32px;
-                    max-width: 860px;
+                    max-width: 1200px;
+                    margin: 0 auto;
+                }
+                .st-full-width {
+                    grid-column: span 2;
+                }
+                @media (max-width: 1024px) {
+                    .st-content {
+                        grid-template-columns: 1fr;
+                        padding: 24px;
+                    }
+                    .st-full-width {
+                        grid-column: span 1;
+                    }
                 }
 
                 /* ── Section card — matches mc-form-card ─────────────────── */
@@ -643,45 +656,15 @@ export default function Settings() {
                     padding: 2px 8px;
                     background: var(--bg-neutral);
                     border: 1px solid var(--border);
-                    border-radius: 4px;
-                    font-size: 11px;
-                    font-weight: 600;
-                    margin-right: 4px;
-                    margin-bottom: 4px;
-                }
-
-                /* ── Add Member Form ─────────────────────────────────────── */
-                .st-member-form {
-                    display: grid;
-                    grid-template-columns: 1fr 1fr;
-                    gap: 16px;
-                    background: var(--bg-neutral);
-                    padding: 20px;
-                    border-radius: var(--radius);
+                       padding: 8px 16px;
+                    background: transparent;
+                    color: var(--text-muted);
                     border: 1px solid var(--border);
-                    margin-bottom: 24px;
-                }
-                .st-form-full { grid-column: 1 / -1; }
-                
-                .st-checkbox-group {
-                    display: flex;
-                    flex-wrap: wrap;
-                    gap: 12px;
-                    margin-top: 8px;
-                }
-                .st-checkbox-item {
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
+                    border-radius: var(--radius-sm);
                     font-size: 13px;
+                    font-weight: 600;
                     cursor: pointer;
                 }
-                .st-checkbox-item input {
-                    width: 16px;
-                    height: 16px;
-                    accent-color: var(--primary);
-                }
-
                 .st-add-btn {
                     display: flex;
                     align-items: center;
@@ -696,47 +679,30 @@ export default function Settings() {
                     cursor: pointer;
                 }
                 .st-add-btn:hover { background: var(--primary-hover); }
-                
-                .st-cancel-btn {
-                    padding: 8px 16px;
-                    background: transparent;
-                    color: var(--text-muted);
-                    border: 1px solid var(--border);
-                    border-radius: var(--radius-sm);
-                    font-size: 13px;
-                    font-weight: 600;
-                    cursor: pointer;
-                }
             `}</style>
 
-            {/* ── Page Header ──────────────────────────────────────────────── */}
+            {/* ── Page Header ── */}
             <header className="st-header">
                 <h2 className="st-header-title">Settings</h2>
             </header>
 
             <div className="st-content">
 
-                {/* ── Admin Profile ───────────────────────────────────────── */}
-                <div className="st-card">
+                {/* ── Admin Profile ── */}
+                <div className="st-card" style={{ alignSelf: 'start' }}>
                     <div className="st-card-header">
-                        <div className="st-card-title">
-                            <Icons.User /> Admin Profile
-                        </div>
+                        <div className="st-card-title"><Icons.User /> Admin Profile</div>
                         <div className="st-card-sub">Your account information</div>
                     </div>
                     <div className="st-card-body">
                         <div className="st-profile-grid">
                             <div className="st-field">
                                 <div className="st-field-label">Full Name</div>
-                                <div className="st-field-value">
-                                    <Icons.User /> {profile.full_name}
-                                </div>
+                                <div className="st-field-value"><Icons.User /> {profile.full_name}</div>
                             </div>
                             <div className="st-field">
                                 <div className="st-field-label">Email Address</div>
-                                <div className="st-field-value">
-                                    <Icons.Mail /> {profile.email}
-                                </div>
+                                <div className="st-field-value"><Icons.Mail /> {profile.email}</div>
                             </div>
                             <div className="st-field">
                                 <div className="st-field-label">Role</div>
@@ -747,27 +713,91 @@ export default function Settings() {
                             </div>
                             <div className="st-field">
                                 <div className="st-field-label">Username</div>
-                                <div className="st-field-value">
-                                    <Icons.User /> {profile.username || "—"}
-                                </div>
-                            </div>
-                            <div className="st-field">
-                                <div className="st-field-label">Active Theme</div>
-                                <div className="st-field-value">
-                                    <Icons.Palette />
-                                    {THEMES.find(t => t.id === activeTheme)?.name || "KiwiQA"}
-                                </div>
+                                <div className="st-field-value"><Icons.User /> {profile.username || "—"}</div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* ── Appearance ──────────────────────────────────────────── */}
-                <div className="st-card">
+                {/* ── Security / Password ── */}
+                <div className="st-card" style={{ alignSelf: 'start' }}>
                     <div className="st-card-header">
-                        <div className="st-card-title">
-                            <Icons.Palette /> Appearance
-                        </div>
+                        <div className="st-card-title"><Icons.Lock /> Change Password</div>
+                        <div className="st-card-sub">Update your admin credentials</div>
+                    </div>
+                    <div className="st-card-body">
+                        <form className="st-pw-grid" onSubmit={handlePwSubmit}>
+                            <div className="st-pw-field">
+                                <label className="st-pw-label" htmlFor="st-curr-pw">Current Password</label>
+                                <div className="st-pw-wrap">
+                                    <input
+                                        id="st-curr-pw" className="st-pw-input"
+                                        type={showCurrent ? "text" : "password"}
+                                        placeholder="Enter current password"
+                                        value={pwForm.current}
+                                        onChange={e => setPwForm(p => ({ ...p, current: e.target.value }))}
+                                        required
+                                    />
+                                    <button type="button" className="st-pw-eye" onClick={() => setShowCurrent(v => !v)}>
+                                        {showCurrent ? <Icons.EyeOff /> : <Icons.Eye />}
+                                    </button>
+                                </div>
+                            </div>
+                            <div className="st-pw-field">
+                                <label className="st-pw-label" htmlFor="st-new-pw">New Password</label>
+                                <div className="st-pw-wrap">
+                                    <input
+                                        id="st-new-pw" className="st-pw-input"
+                                        type={showNew ? "text" : "password"}
+                                        placeholder="Min 6 characters"
+                                        value={pwForm.newPw}
+                                        onChange={e => setPwForm(p => ({ ...p, newPw: e.target.value }))}
+                                        required
+                                    />
+                                    <button type="button" className="st-pw-eye" onClick={() => setShowNew(v => !v)}>
+                                        {showNew ? <Icons.EyeOff /> : <Icons.Eye />}
+                                    </button>
+                                </div>
+                                {strength && (
+                                    <div style={{ marginTop: 8 }}>
+                                        <div className="st-strength-track"><div className="st-strength-fill" style={{ width: strength.pct, background: strength.color }} /></div>
+                                        <div className="st-strength-label" style={{ color: strength.color }}>{strength.label}</div>
+                                    </div>
+                                )}
+                            </div>
+                            <div className="st-pw-field">
+                                <label className="st-pw-label" htmlFor="st-conf-pw">Confirm New Password</label>
+                                <div className="st-pw-wrap">
+                                    <input
+                                        id="st-conf-pw" className="st-pw-input"
+                                        type="password" placeholder="Re-enter password"
+                                        value={pwForm.confirm}
+                                        onChange={e => setPwForm(p => ({ ...p, confirm: e.target.value }))}
+                                        required
+                                    />
+                                    {pwForm.confirm && (
+                                        <span className="st-match-icon" style={{ color: pwForm.confirm === pwForm.newPw ? "#22c55e" : "var(--primary)" }}>
+                                            {pwForm.confirm === pwForm.newPw ? "✓" : "✗"}
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
+                            {pwMsg && (
+                                <div className={`st-msg ${pwMsg.type}`}>
+                                    {pwMsg.text}
+                                </div>
+                            )}
+                            <button type="submit" className="st-pw-btn" disabled={pwLoading}>
+                                {pwLoading ? <div className="st-spinner" /> : <Icons.Lock />} Update Password
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                {/* ── Appearance ── */}
+                <div className="st-card st-full-width">
+                    <div className="st-card-header">
+                        <div className="st-card-title"><Icons.Palette /> Appearance</div>
                         <div className="st-card-sub">Choose your preferred colour theme</div>
                     </div>
                     <div className="st-card-body">
@@ -779,37 +809,17 @@ export default function Settings() {
                             {THEMES.map(theme => {
                                 const isActive = activeTheme === theme.id;
                                 return (
-                                    <div
-                                        key={theme.id}
-                                        className={`st-theme-card${isActive ? " st-theme-active" : ""}`}
-                                        onClick={() => applyTheme(theme.id)}
-                                        title={`Switch to ${theme.name}`}
-                                    >
-                                        {/* mini preview */}
+                                    <div key={theme.id} className={`st-theme-card${isActive ? " st-theme-active" : ""}`} onClick={() => applyTheme(theme.id)}>
                                         <div className="st-theme-preview" style={{ background: theme.bgNeutral }}>
                                             <div className="st-preview-sidebar" style={{ background: theme.primary }} />
                                             <div className="st-preview-main">
-                                                <div className="st-preview-bar" style={{ background: theme.primary, opacity: 0.9, width: "100%" }} />
-                                                <div className="st-preview-bar" style={{ background: theme.secondary, opacity: 0.6, width: "70%" }} />
-                                                <div className="st-preview-bar" style={{ background: theme.primary, opacity: 0.25, width: "45%" }} />
+                                                <div className="st-preview-bar" style={{ background: theme.primary, width: "100%" }} />
+                                                <div className="st-preview-bar" style={{ background: theme.secondary, width: "70%" }} />
                                             </div>
                                         </div>
-
-                                        {/* footer */}
                                         <div className="st-theme-foot" style={{ background: theme.bg }}>
-                                            <div>
-                                                <div className="st-theme-name" style={{ color: theme.dark ? "#e2e8f0" : "#1a202c" }}>
-                                                    {theme.name}
-                                                </div>
-                                                <div className="st-theme-desc" style={{ color: theme.dark ? "#94a3b8" : "#64748b" }}>
-                                                    {theme.description}
-                                                </div>
-                                            </div>
-                                            {isActive && (
-                                                <div className="st-theme-check">
-                                                    <Icons.Check />
-                                                </div>
-                                            )}
+                                            <div className="st-theme-name" style={{ color: theme.dark ? "#e2e8f0" : "#1a202c" }}>{theme.name}</div>
+                                            {isActive && <div className="st-theme-check"><Icons.Check /></div>}
                                         </div>
                                     </div>
                                 );
@@ -818,274 +828,70 @@ export default function Settings() {
                     </div>
                 </div>
 
-                {/* ── Change Password ─────────────────────────────────────── */}
-                <div className="st-card">
-                    <div className="st-card-header">
-                        <div className="st-card-title">
-                            <Icons.Lock /> Change Password
-                        </div>
-                        <div className="st-card-sub">Update your admin account password</div>
-                    </div>
-                    <div className="st-card-body">
-                        <form className="st-pw-grid" onSubmit={handlePwSubmit}>
-
-                            {/* Current Password */}
-                            <div className="st-pw-field">
-                                <label className="st-pw-label" htmlFor="st-curr-pw">Current Password</label>
-                                <div className="st-pw-wrap">
-                                    <input
-                                        id="st-curr-pw"
-                                        className="st-pw-input"
-                                        type={showCurrent ? "text" : "password"}
-                                        placeholder="Enter your current password"
-                                        value={pwForm.current}
-                                        onChange={e => setPwForm(p => ({ ...p, current: e.target.value }))}
-                                        required
-                                    />
-                                    <button type="button" className="st-pw-eye"
-                                        onClick={() => setShowCurrent(v => !v)}
-                                        aria-label="Toggle visibility">
-                                        {showCurrent ? <Icons.EyeOff /> : <Icons.Eye />}
-                                    </button>
-                                </div>
-                            </div>
-
-                            {/* New Password */}
-                            <div className="st-pw-field">
-                                <label className="st-pw-label" htmlFor="st-new-pw">New Password</label>
-                                <div className="st-pw-wrap">
-                                    <input
-                                        id="st-new-pw"
-                                        className="st-pw-input"
-                                        type={showNew ? "text" : "password"}
-                                        placeholder="Minimum 6 characters"
-                                        value={pwForm.newPw}
-                                        onChange={e => setPwForm(p => ({ ...p, newPw: e.target.value }))}
-                                        required
-                                    />
-                                    <button type="button" className="st-pw-eye"
-                                        onClick={() => setShowNew(v => !v)}
-                                        aria-label="Toggle visibility">
-                                        {showNew ? <Icons.EyeOff /> : <Icons.Eye />}
-                                    </button>
-                                </div>
-                                {strength && (
-                                    <>
-                                        <div className="st-strength-track">
-                                            <div className="st-strength-fill"
-                                                style={{ width: strength.pct, background: strength.color }} />
-                                        </div>
-                                        <div className="st-strength-label" style={{ color: strength.color }}>
-                                            {strength.label}
-                                        </div>
-                                    </>
-                                )}
-                            </div>
-
-                            {/* Confirm Password */}
-                            <div className="st-pw-field">
-                                <label className="st-pw-label" htmlFor="st-conf-pw">Confirm New Password</label>
-                                <div className="st-pw-wrap">
-                                    <input
-                                        id="st-conf-pw"
-                                        className="st-pw-input"
-                                        type="password"
-                                        placeholder="Re-enter new password"
-                                        value={pwForm.confirm}
-                                        onChange={e => setPwForm(p => ({ ...p, confirm: e.target.value }))}
-                                        required
-                                    />
-                                    {pwForm.confirm && (
-                                        <span
-                                            className="st-match-icon"
-                                            style={{ color: pwForm.confirm === pwForm.newPw ? "#22c55e" : "var(--primary)" }}
-                                        >
-                                            {pwForm.confirm === pwForm.newPw ? "✓" : "✗"}
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Status message */}
-                            {pwMsg && (
-                                <div className={`st-msg ${pwMsg.type}`}>
-                                    {pwMsg.type === "success" ? <Icons.Check /> : (
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                            <circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" />
-                                        </svg>
-                                    )}
-                                    {pwMsg.text}
-                                </div>
-                            )}
-
-                            <div>
-                                <button
-                                    id="st-update-pw-btn"
-                                    type="submit"
-                                    className="st-pw-btn"
-                                    disabled={pwLoading}
-                                >
-                                    {pwLoading ? (
-                                        <><div className="st-spinner" /> Updating...</>
-                                    ) : (
-                                        <><Icons.Lock /> Update Password</>
-                                    )}
-                                </button>
-                            </div>
-
-                        </form>
-                    </div>
-                </div>
-
-                {/* ── Team Management ─────────────────────────────────────── */}
+                {/* ── Team Management ── */}
                 {profile.role === "admin" && (
-                    <div className="st-card">
+                    <div className="st-card st-full-width">
                         <div className="st-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div>
-                                <div className="st-card-title">
-                                    <Icons.Users /> Team Management
-                                </div>
+                                <div className="st-card-title"><Icons.Users /> Team Management</div>
                                 <div className="st-card-sub">Manage portal members and their authorities</div>
                             </div>
                             {!showAddMember && (
-                                <button className="st-add-btn" onClick={() => setShowAddMember(true)}>
-                                    <Icons.Plus /> Add Member
-                                </button>
+                                <button className="st-add-btn" onClick={() => setShowAddMember(true)}><Icons.Plus /> Add Member</button>
                             )}
                         </div>
                         <div className="st-card-body">
-
                             {showAddMember && (
                                 <form className="st-member-form" onSubmit={handleAddMember}>
-                                    <div className="st-field">
-                                        <label className="st-field-label">Full Name</label>
-                                        <input
-                                            className="st-pw-input"
-                                            placeholder="John Doe"
-                                            value={memberForm.full_name}
-                                            onChange={e => setMemberForm(p => ({ ...p, full_name: e.target.value }))}
-                                            required
-                                        />
-                                    </div>
-                                    <div className="st-field">
-                                        <label className="st-field-label">Username (Login ID)</label>
-                                        <input
-                                            className="st-pw-input"
-                                            placeholder="john123"
-                                            value={memberForm.username}
-                                            onChange={e => setMemberForm(p => ({ ...p, username: e.target.value }))}
-                                        />
-                                    </div>
-                                    <div className="st-field">
-                                        <label className="st-field-label">Email Address</label>
-                                        <input
-                                            type="email"
-                                            className="st-pw-input"
-                                            placeholder="john@example.com"
-                                            value={memberForm.email}
-                                            onChange={e => setMemberForm(p => ({ ...p, email: e.target.value }))}
-                                            required
-                                        />
-                                    </div>
-                                    <div className="st-field">
-                                        <label className="st-field-label">Initial Password</label>
-                                        <input
-                                            type="password"
-                                            className="st-pw-input"
-                                            placeholder="••••••••"
-                                            value={memberForm.password}
-                                            onChange={e => setMemberForm(p => ({ ...p, password: e.target.value }))}
-                                            required
-                                        />
-                                    </div>
-                                    <div className="st-field">
-                                        <label className="st-field-label">Role</label>
-                                        <select
-                                            className="st-pw-input"
-                                            value={memberForm.role}
-                                            onChange={e => setMemberForm(p => ({ ...p, role: e.target.value }))}
-                                        >
-                                            <option value="member">Member</option>
-                                            <option value="admin">Admin</option>
-                                        </select>
-                                    </div>
+                                    <div className="st-field"><label className="st-field-label">Full Name</label><input className="st-pw-input" value={memberForm.full_name} onChange={e => setMemberForm(p => ({ ...p, full_name: e.target.value }))} required /></div>
+                                    <div className="st-field"><label className="st-field-label">Username</label><input className="st-pw-input" value={memberForm.username} onChange={e => setMemberForm(p => ({ ...p, username: e.target.value }))} /></div>
+                                    <div className="st-field"><label className="st-field-label">Email</label><input type="email" className="st-pw-input" value={memberForm.email} onChange={e => setMemberForm(p => ({ ...p, email: e.target.value }))} required /></div>
+                                    <div className="st-field"><label className="st-field-label">Password</label><input type="password" className="st-pw-input" value={memberForm.password} onChange={e => setMemberForm(p => ({ ...p, password: e.target.value }))} required /></div>
+                                    <div className="st-field"><label className="st-field-label">Role</label><select className="st-pw-input" value={memberForm.role} onChange={e => setMemberForm(p => ({ ...p, role: e.target.value }))}><option value="member">Member</option><option value="admin">Admin</option></select></div>
                                     <div className="st-form-full">
                                         <label className="st-field-label">Authorities</label>
                                         <div className="st-checkbox-group">
                                             {["generate exam", "manage exam", "manage candidates"].map(perm => (
                                                 <label key={perm} className="st-checkbox-item">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={memberForm.permissions.includes(perm)}
-                                                        onChange={e => {
-                                                            const checked = e.target.checked;
-                                                            setMemberForm(p => ({
-                                                                ...p,
-                                                                permissions: checked
-                                                                    ? [...p.permissions, perm]
-                                                                    : p.permissions.filter(x => x !== perm)
-                                                            }));
-                                                        }}
-                                                    />
-                                                    {perm.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
+                                                    <input type="checkbox" checked={memberForm.permissions.includes(perm)} onChange={e => {
+                                                        const checked = e.target.checked;
+                                                        setMemberForm(p => ({ ...p, permissions: checked ? [...p.permissions, perm] : p.permissions.filter(x => x !== perm) }));
+                                                    }} />
+                                                    {perm}
                                                 </label>
                                             ))}
                                         </div>
                                     </div>
-                                    <div className="st-form-full" style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
+                                    <div className="st-form-full" style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
                                         <button type="submit" className="st-add-btn">Create Account</button>
                                         <button type="button" className="st-cancel-btn" onClick={() => setShowAddMember(false)}>Cancel</button>
                                     </div>
-                                    {memberMsg && (
-                                        <div className={`st-msg ${memberMsg.type} st-form-full`}>
-                                            {memberMsg.text}
-                                        </div>
-                                    )}
                                 </form>
                             )}
 
-                            {membersLoading ? (
-                                <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>Loading members...</div>
-                            ) : (
+                            {membersLoading ? <div>Loading...</div> : (
                                 <table className="st-member-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Member</th>
-                                            <th>Role</th>
-                                            <th>Authorities</th>
-                                            <th style={{ textAlign: 'right' }}>Actions</th>
-                                        </tr>
-                                    </thead>
+                                    <thead><tr><th>Member</th><th>Role</th><th>Authorities</th><th style={{ textAlign: 'right' }}>Actions</th></tr></thead>
                                     <tbody>
                                         {members.map(m => (
                                             <tr key={m.email}>
                                                 <td>
                                                     <div className="st-member-info">
                                                         <span className="st-member-name">{m.full_name}</span>
-                                                        <span className="st-member-email">{m.email} {m.username && <span style={{ opacity: 0.6 }}>({m.username})</span>}</span>
+                                                        <span className="st-member-email">{m.email}</span>
                                                     </div>
                                                 </td>
-                                                <td>
-                                                    <span className="st-role-badge" style={{
-                                                        background: m.role === 'admin' ? 'rgba(28, 132, 143, 0.1)' : 'rgba(100, 116, 139, 0.1)',
-                                                        color: m.role === 'admin' ? 'var(--primary)' : 'var(--text-muted)',
-                                                        border: 'none'
-                                                    }}>
-                                                        {m.role}
-                                                    </span>
-                                                </td>
+                                                <td><span className="st-role-badge">{m.role}</span></td>
                                                 <td>
                                                     {m.permissions.length > 0 ? (
                                                         m.permissions.map(p => <span key={p} className="st-perm-tag">{p}</span>)
                                                     ) : (
-                                                        <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>No special authority</span>
+                                                        <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>No authority</span>
                                                     )}
                                                 </td>
                                                 <td style={{ textAlign: 'right' }}>
                                                     {m.email !== profile.email && (
-                                                        <button className="st-delete-btn" onClick={() => handleDeleteMember(m.email)} title="Remove member">
-                                                            <Icons.Trash />
-                                                        </button>
+                                                        <button className="st-delete-btn" onClick={() => handleDeleteMember(m.email)}><Icons.Trash /></button>
                                                     )}
                                                 </td>
                                             </tr>
@@ -1096,8 +902,8 @@ export default function Settings() {
                         </div>
                     </div>
                 )}
-
             </div>
         </AdminLayout>
     );
 }
+

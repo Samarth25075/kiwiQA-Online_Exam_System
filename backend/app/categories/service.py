@@ -19,7 +19,13 @@ def create_category(db: Session, category_in: CategoryCreate):
     db.refresh(db_category)
     return db_category
 
+from app.exams.service import delete_category_questions
+
 def delete_category(db: Session, category_name: str):
+    # First delete questions from JSON
+    delete_category_questions(category_name)
+    
+    # Then delete the category from DB
     cat = db.query(QuestionCategory).filter(QuestionCategory.name == category_name).first()
     if cat:
         db.delete(cat)

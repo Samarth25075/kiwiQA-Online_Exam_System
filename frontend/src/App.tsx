@@ -13,7 +13,9 @@ const ManageCandidates = lazy(() => import('./pages/ManageCandidates'));
 const CandidateResults = lazy(() => import('./pages/CandidateResults'));
 const CandidateReport = lazy(() => import('./pages/CandidateReport'));
 const InvitationTracking = lazy(() => import('./pages/InvitationTracking'));
+const QuestionBank = lazy(() => import('./pages/QuestionBank'));
 const Settings = lazy(() => import('./pages/Settings'));
+const UserGuide = lazy(() => import('./pages/UserGuide'));
 
 // Loading fallback
 const PageLoading = () => (
@@ -55,8 +57,10 @@ function App() {
             <Route path="/manage-candidates" element={<ManageCandidates />} />
             <Route path="/candidate-results" element={<CandidateResults />} />
             <Route path="/invitation-tracking" element={<InvitationTracking />} />
+            <Route path="/question-bank" element={<QuestionBank />} />
             <Route path="/report/:candidateId" element={<CandidateReport />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/user-guide" element={<UserGuide />} />
           </Route>
 
           {/* Redirect any unknown route back to login */}

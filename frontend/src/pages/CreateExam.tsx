@@ -233,19 +233,33 @@ export default function CreateExam() {
   const fetchBankStats = () => {
     fetch(`${API_BASE_URL}/exams/bank/stats`, { headers: authHeaders() })
       .then(r => r.json())
-      .then(stats => {
-        setBankStats(stats);
+      .then(data => {
+        // The API returns an array: [{category, count, total_marks}, ...]
+        // We need it as a map for quick lookups
+        const statsArray = Array.isArray(data) ? data : [];
+        const statsMap = statsArray.reduce((acc: any, s: any) => {
+          acc[s.category] = { count: s.count, total_marks: s.total_marks };
+          return acc;
+        }, {});
+        
+        setBankStats(statsMap);
         
         // SYNC: We want to show ALL categories in the bank section, 
         // even if they have 0 questions (so they appear after creation)
         fetch(`${API_BASE_URL}/categories`, { headers: authHeaders() })
-          .then(r => r.json())
+          .then(r => {
+            if (r.status === 401) return [];
+            return r.json();
+          })
           .then(allCats => {
+            if (!Array.isArray(allCats)) allCats = [];
             setCategories(allCats);
+            
             const allNames = allCats.map((c: any) => c.name);
-            const statsNames = Object.keys(stats);
-            // Unique names from both
-            const combined = Array.from(new Set([...allNames, ...statsNames]));
+            const statsNames = statsArray.map((s: any) => s.category);
+            
+            // Unique names from both sources
+            const combined = Array.from(new Set([...allNames, ...statsNames])).filter(Boolean);
             setBankCategories(combined);
           });
       })

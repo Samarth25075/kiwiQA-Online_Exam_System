@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from app.auth.router import get_current_admin, check_permission
 from app.auth.schemas import AdminUser
 from app.exams.schemas import ExamCreate, ExamResponse, ExamFinalize, Question, ExamStatsResponse, SendExamLinkRequest
-from app.exams.service import save_exam, generate_questions, get_all_exams, delete_exam, get_exams_with_candidate_counts, get_bank_categories, get_bank_stats, get_exam_by_id, add_to_bank, upload_to_bank
+from app.exams.service import save_exam, generate_questions, get_all_exams, delete_exam, get_exams_with_candidate_counts, get_bank_categories, get_bank_stats, get_exam_by_id, add_to_bank, upload_to_bank, get_bank_questions_by_category, update_bank_question, delete_bank_question
 from app.core.email import send_email
 from sqlalchemy.orm import Session
 from app.database import get_db
@@ -52,17 +52,51 @@ async def read_exam_stats(
 
 @router.get("/bank/categories", response_model=List[str])
 async def read_bank_categories(
-    current_admin: Annotated[AdminUser, Depends(check_permission("manage exam"))]
+    current_admin: Annotated[AdminUser, Depends(check_permission("manage exam"))],
+    db: Session = Depends(get_db)
 ):
     """Get unique categories from the inbuilt question bank."""
-    return get_bank_categories()
+    return get_bank_categories(db)
 
-@router.get("/bank/stats")
+@router.get("/bank/stats", response_model=List[Dict])
 async def read_bank_stats(
-    current_admin: Annotated[AdminUser, Depends(check_permission("manage exam"))]
+    current_admin: Annotated[AdminUser, Depends(check_permission("manage exam"))],
+    db: Session = Depends(get_db)
 ):
     """Get category-wise stats (count, marks) from the question bank."""
-    return get_bank_stats()
+    return get_bank_stats(db)
+
+@router.get("/bank/questions", response_model=List[Dict])
+async def read_bank_questions(
+    current_admin: Annotated[AdminUser, Depends(check_permission("manage exam"))],
+    category: Optional[str] = None
+):
+    """Get all questions in a category from the bank."""
+    from app.exams.service import get_bank_questions_by_category
+    return get_bank_questions_by_category(category)
+
+@router.put("/bank/questions/{q_id}")
+async def update_bank_question_route(
+    q_id: str,
+    question: Dict,
+    current_admin: Annotated[AdminUser, Depends(check_permission("manage exam"))]
+):
+    """Update a specific question in the bank."""
+    from app.exams.service import update_bank_question
+    if update_bank_question(q_id, question):
+        return {"message": "Question updated"}
+    raise HTTPException(status_code=404, detail="Question not found")
+
+@router.delete("/bank/questions/{q_id}")
+async def delete_bank_question_route(
+    q_id: str,
+    current_admin: Annotated[AdminUser, Depends(check_permission("manage exam"))]
+):
+    """Delete a specific question from the bank."""
+    from app.exams.service import delete_bank_question
+    if delete_bank_question(q_id):
+        return {"message": "Question deleted"}
+    raise HTTPException(status_code=404, detail="Question not found")
 
 @router.post("/bank/add")
 async def add_individual_question_to_bank(

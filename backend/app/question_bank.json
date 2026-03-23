@@ -22,7 +22,8 @@
       }
     ],
     "explanation": "Distance = (Difference in time) * (Product of speeds) / (Difference of speeds). Time diff = 11 mins = 11/60 hr. Speed product = 5100. Speed diff = 25. Dist = (11/60) * (5100/25) = 37.4 km.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "9d114e24"
   },
   {
     "category": "Aptitude",
@@ -47,7 +48,8 @@
       }
     ],
     "explanation": "Speed = Distance/Time = 600m / 300s = 2 m/s. To km/hr: 2 * (18/5) = 7.2 km/hr.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "54be1ef7"
   },
   {
     "category": "Aptitude",
@@ -72,7 +74,8 @@
       }
     ],
     "explanation": "If P doubles, SI = P. SI = P*R*T/100, so P = P*R*10/100, giving R = 10%.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "1c568493"
   },
   {
     "category": "Aptitude",
@@ -97,7 +100,8 @@
       }
     ],
     "explanation": "Let numbers be 3x and 5x. (3x+10)/(5x+10) = 5/7. Solving: 21x+70 = 25x+50, 4x=20, x=5. Smaller = 3*5 = 15.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "dd7520bc"
   },
   {
     "category": "Aptitude",
@@ -122,7 +126,8 @@
       }
     ],
     "explanation": "CP = SP * 100 / (100 - loss%) = 440 * 100 / 88 = Rs. 500.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "00eafa14"
   },
   {
     "category": "Aptitude",
@@ -147,7 +152,8 @@
       }
     ],
     "explanation": "30% of 250 = (30/100) * 250 = 75.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "d7166d61"
   },
   {
     "category": "Aptitude",
@@ -172,7 +178,8 @@
       }
     ],
     "explanation": "Prime factorization: 12=2\u00b2\u00d73, 18=2\u00d73\u00b2, 24=2\u00b3\u00d73. LCM = 2\u00b3\u00d73\u00b2 = 72.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "c44d8b89"
   },
   {
     "category": "Aptitude",
@@ -197,7 +204,8 @@
       }
     ],
     "explanation": "Net rate = 1/4 - 1/12 = 3/12 - 1/12 = 2/12 = 1/6. Tank fills in 6 hours.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "212ac212"
   },
   {
     "category": "Aptitude",
@@ -222,7 +230,8 @@
       }
     ],
     "explanation": "Total work = 6 \u00d7 8 = 48 man-days. Days for 4 men = 48 / 4 = 12 days.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "5be6176c"
   },
   {
     "category": "Aptitude",
@@ -247,7 +256,8 @@
       }
     ],
     "explanation": "CI = P[(1+R/100)^T - 1] = 10000[(1.1)^2 - 1] = 10000[1.21-1] = 10000 \u00d7 0.21 = Rs. 2100.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "cabbdd97"
   },
   {
     "category": "Aptitude",
@@ -272,7 +282,8 @@
       }
     ],
     "explanation": "Relative speed = 150 km/hr = 150*(5/18) = 125/3 m/s. Total length = 2 km = 2000 m. Time = 2000/(125/3) = 48 s.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "85c65dae"
   },
   {
     "category": "Aptitude",
@@ -297,7 +308,8 @@
       }
     ],
     "explanation": "Upstream speed = 4 km/hr, Downstream speed = 6 km/hr. Stream speed = (6-4)/2 = 1 km/hr.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "c1a8b1cc"
   },
   {
     "category": "Aptitude",
@@ -322,7 +334,8 @@
       }
     ],
     "explanation": "Boys can be arranged in 4! = 24 ways. 5 gaps created. Girls occupy 3 of 5 gaps: 5P3 = 60 ways. Total = 24 \u00d7 60 = 1440.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "06331819"
   },
   {
     "category": "Aptitude",
@@ -347,7 +360,8 @@
       }
     ],
     "explanation": "Let CP = 100. MP = 140. SP = 140 \u00d7 0.80 = 112. Profit = 12%.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "ee475a9f"
   },
   {
     "category": "Aptitude",
@@ -372,7 +386,8 @@
       }
     ],
     "explanation": "The middle number is the average = 25. Numbers are 21, 23, 25, 27, 29. Largest = 29.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "4e6d9c14"
   },
   {
     "category": "Aptitude",
@@ -397,7 +412,8 @@
       }
     ],
     "explanation": "Work done in 3 days = 3*(1/12+1/15) = 3*(9/60) = 27/60. Remaining = 33/60. B does 1/15 per day. Days = (33/60)/(1/15) = 8.25 days.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "d1a4c3f8"
   },
   {
     "category": "Aptitude",
@@ -422,7 +438,8 @@
       }
     ],
     "explanation": "A leap year has 366 days = 52 weeks + 2 extra days. For 53 Sundays, the 2 extra days must include Sunday. Favorable pairs: (Sat,Sun),(Sun,Mon) = 2. Total = 7. P = 2/7.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "bbbe6cf5"
   },
   {
     "category": "Aptitude",
@@ -447,7 +464,8 @@
       }
     ],
     "explanation": "A = 12000 \u00d7 (1.05)^3 = 12000 \u00d7 1.157625 = Rs. 13,891.50.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "b61a4154"
   },
   {
     "category": "Aptitude",
@@ -472,7 +490,8 @@
       }
     ],
     "explanation": "Passed in at least one = 40 + 30 + 20 = 90%. Failed in both = 100 - 90 = 10%.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "e48d5cf5"
   },
   {
     "category": "Aptitude",
@@ -497,7 +516,8 @@
       }
     ],
     "explanation": "SI = 5000\u00d74\u00d72/100 = 400. CI = 5000[(1.04)^2-1] = 5000\u00d70.0816 = 408. Difference = 8.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "2ea8136b"
   },
   {
     "category": "Aptitude",
@@ -522,7 +542,8 @@
       }
     ],
     "explanation": "36 = 2\u00b2 \u00d7 3\u00b2, 48 = 2\u2074 \u00d7 3. HCF = 2\u00b2 \u00d7 3 = 12.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "c3dc471e"
   },
   {
     "category": "Aptitude",
@@ -547,7 +568,8 @@
       }
     ],
     "explanation": "Average speed = Total distance / Total time = 450 / 5 = 90 km/hr.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "265f23bd"
   },
   {
     "category": "Aptitude",
@@ -572,7 +594,8 @@
       }
     ],
     "explanation": "Let n = 6k+3. n\u00b2 = 36k\u00b2+36k+9 = 6(6k\u00b2+6k+1)+3. Remainder = 3.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "8ac703a7"
   },
   {
     "category": "Aptitude",
@@ -597,7 +620,8 @@
       }
     ],
     "explanation": "Total = 400. After removing 45+55=100, new total = 300, new count = 8. Avg = 300/8 = 37.5.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "b1421f54"
   },
   {
     "category": "Aptitude",
@@ -622,7 +646,8 @@
       }
     ],
     "explanation": "Milk = 40 L, Water = 20 L. For ratio 1:2, 40/(20+x) = 1/2, so 20+x = 80, x = 60 litres.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "fc0c459a"
   },
   {
     "category": "Aptitude",
@@ -647,7 +672,8 @@
       }
     ],
     "explanation": "Cost per shirt = 1500/15 = 100. Cost of 40 = 40 \u00d7 100 = Rs. 4000.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "fe2dc7f9"
   },
   {
     "category": "Aptitude",
@@ -672,7 +698,8 @@
       }
     ],
     "explanation": "42 \u00d7 42 = 1764. So \u221a1764 = 42.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "19640c9b"
   },
   {
     "category": "Aptitude",
@@ -697,7 +724,8 @@
       }
     ],
     "explanation": "New expenditure = 1.20 \u00d7 0.90 = 1.08, i.e., 8% increase.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "2cbe6608"
   },
   {
     "category": "Aptitude",
@@ -722,7 +750,8 @@
       }
     ],
     "explanation": "First 4-digit divisible by 7: 1001. Last: 9996. Count = (9996-1001)/7 + 1 = 8995/7 + 1 = 1285 + 1 = 1286.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "5c3aa363"
   },
   {
     "category": "Aptitude",
@@ -747,7 +776,8 @@
       }
     ],
     "explanation": "2x = 15 - 5 = 10, so x = 5.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "fc8df0ac"
   },
   {
     "category": "Aptitude",
@@ -772,7 +802,8 @@
       }
     ],
     "explanation": "APPLE has 5 letters with P repeated twice. Arrangements = 5!/2! = 60.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "53d80600"
   },
   {
     "category": "Aptitude",
@@ -797,7 +828,8 @@
       }
     ],
     "explanation": "They meet in 200/(60+40) = 2 hours. Train A travels 60\u00d72 = 120 km from A.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "f96f8b83"
   },
   {
     "category": "Aptitude",
@@ -822,7 +854,8 @@
       }
     ],
     "explanation": "SI = P*R*T/100 = 8000*6*3/100 = Rs. 1440.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "2e55aa77"
   },
   {
     "category": "Aptitude",
@@ -847,7 +880,8 @@
       }
     ],
     "explanation": "Market Value = (Income/Yield) \u00d7 100 = (6/8) \u00d7 100 = Rs. 75.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "5ea6ea08"
   },
   {
     "category": "Aptitude",
@@ -872,7 +906,8 @@
       }
     ],
     "explanation": "Differences: 4, 6, 8, 10, 12. Next = 30 + 12 = 42.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "6aaaa226"
   },
   {
     "category": "Aptitude",
@@ -897,7 +932,8 @@
       }
     ],
     "explanation": "C(8,3) = 8! / (3! \u00d7 5!) = 56.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "d0de38ea"
   },
   {
     "category": "Aptitude",
@@ -922,7 +958,8 @@
       }
     ],
     "explanation": "Side = 48/4 = 12 cm. Area = 12\u00b2 = 144 cm\u00b2.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "23e6d94a"
   },
   {
     "category": "Aptitude",
@@ -947,7 +984,8 @@
       }
     ],
     "explanation": "Let ages = 4x, 3x. (4x+6)/(3x+6) = 6/5. 20x+30 = 18x+36. 2x=6, x=3. A's age = 12.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "af4f2a96"
   },
   {
     "category": "Aptitude",
@@ -972,7 +1010,8 @@
       }
     ],
     "explanation": "Favorable outcomes for sum 9: (3,6),(4,5),(5,4),(6,3) = 4. Total = 36. P = 4/36 = 1/9.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "778050f2"
   },
   {
     "category": "Aptitude",
@@ -997,7 +1036,8 @@
       }
     ],
     "explanation": "15% of 80 = 12. 20% of 60 = 12. Total = 12 + 12 = 24.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "0f520145"
   },
   {
     "category": "Aptitude",
@@ -1022,7 +1062,8 @@
       }
     ],
     "explanation": "Half tank fills in 3 hrs. Remaining half with 4 taps: rate = 4/6 = 2/3 per hr. Time = 0.5/(2/3) = 45 min. Total = 3h 45min.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "799fad7d"
   },
   {
     "category": "Aptitude",
@@ -1047,7 +1088,8 @@
       }
     ],
     "explanation": "Work done in 4 days = 4*(1/15+1/20) = 4*(7/60) = 28/60. Remaining = 32/60. B finishes in (32/60)/(1/20) = 10.67 \u2248 10 days.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "d8c37ee8"
   },
   {
     "category": "Aptitude",
@@ -1072,7 +1114,8 @@
       }
     ],
     "explanation": "5/8 \u00d7 100 = 62.5%.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "aaba42c1"
   },
   {
     "category": "Aptitude",
@@ -1097,7 +1140,8 @@
       }
     ],
     "explanation": "log\u2081\u2080 200 = log\u2081\u2080 (2 \u00d7 100) = log\u2081\u2080 2 + log\u2081\u2080 100 = 0.301 + 2 = 2.301.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "e311e274"
   },
   {
     "category": "Aptitude",
@@ -1122,7 +1166,8 @@
       }
     ],
     "explanation": "Perimeter = 2(l+b) = 2(12+8) = 40 cm.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "757d5c35"
   },
   {
     "category": "Aptitude",
@@ -1147,7 +1192,8 @@
       }
     ],
     "explanation": "If principal = P, SI = 2P (to triple). 2P = P*R*10/100. R = 20%.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "33cd66f6"
   },
   {
     "category": "Aptitude",
@@ -1172,7 +1218,8 @@
       }
     ],
     "explanation": "Series: 1\u00b2+1, 2\u00b2+1, 3\u00b2+1, 4\u00b2+1, 5\u00b2+1, 6\u00b2+1 = 37. So 36 is wrong.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "a3709141"
   },
   {
     "category": "Aptitude",
@@ -1197,7 +1244,8 @@
       }
     ],
     "explanation": "Total = 9. Non-red = 5. P = 5/9.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "175b7d1e"
   },
   {
     "category": "QA",
@@ -1222,7 +1270,8 @@
       }
     ],
     "explanation": "STLC stands for Software Testing Life Cycle, which consists of various phases to ensure software quality.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "0ebd5d8c"
   },
   {
     "category": "QA",
@@ -1247,7 +1296,8 @@
       }
     ],
     "explanation": "Smoke Testing is performed to ensure the critical functionalities of the build are working, whereas Sanity Testing is done to check the new functionality or bug fixes.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "5dd2aa5b"
   },
   {
     "category": "QA",
@@ -1272,7 +1322,8 @@
       }
     ],
     "explanation": "Static testing involves reviewing code, documents, and other artifacts without executing the software.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "c29b8312"
   },
   {
     "category": "QA",
@@ -1297,7 +1348,8 @@
       }
     ],
     "explanation": "A test case defines the conditions, inputs, and expected results to verify whether a feature works as intended.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "ac5bd757"
   },
   {
     "category": "QA",
@@ -1322,7 +1374,8 @@
       }
     ],
     "explanation": "Regression testing is performed after changes are made to confirm that previously working functionality is still intact.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "80d00f18"
   },
   {
     "category": "QA",
@@ -1347,7 +1400,8 @@
       }
     ],
     "explanation": "UAT (User Acceptance Testing) is the final phase of testing where end-users verify the system meets their requirements.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "3c73098e"
   },
   {
     "category": "QA",
@@ -1372,7 +1426,8 @@
       }
     ],
     "explanation": "A test plan is a formal document that outlines what will be tested, how it will be tested, and who will test it.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "8eb2b1d6"
   },
   {
     "category": "QA",
@@ -1397,7 +1452,8 @@
       }
     ],
     "explanation": "Negative testing validates that the system handles unexpected or invalid input without crashing.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "2658bfc7"
   },
   {
     "category": "QA",
@@ -1422,7 +1478,8 @@
       }
     ],
     "explanation": "Equivalence Partitioning reduces test cases by grouping inputs that are expected to exhibit similar behavior.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "49c83d50"
   },
   {
     "category": "QA",
@@ -1447,7 +1504,8 @@
       }
     ],
     "explanation": "BVA focuses on testing values at the boundaries of input ranges, since defects often occur at the edges.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "42dcd3f6"
   },
   {
     "category": "QA",
@@ -1472,7 +1530,8 @@
       }
     ],
     "explanation": "Verification ensures the product conforms to specifications; validation ensures it meets user needs.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "d124b11f"
   },
   {
     "category": "QA",
@@ -1497,7 +1556,8 @@
       }
     ],
     "explanation": "Exploratory testing is an unscripted approach where testers explore the application and design tests on the fly.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "b47bc9eb"
   },
   {
     "category": "QA",
@@ -1522,7 +1582,8 @@
       }
     ],
     "explanation": "The defect life cycle includes stages like New, Assigned, Open, Fixed, Retest, Closed, and Reopen.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "17c54a75"
   },
   {
     "category": "QA",
@@ -1547,7 +1608,8 @@
       }
     ],
     "explanation": "Alpha testing is performed by internal employees at the developer's site before the product is released.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "a5aa3e7d"
   },
   {
     "category": "QA",
@@ -1572,7 +1634,8 @@
       }
     ],
     "explanation": "Beta testing is conducted by end-users in their actual environment before the product goes live.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "29ca7731"
   },
   {
     "category": "QA",
@@ -1597,7 +1660,8 @@
       }
     ],
     "explanation": "Test coverage quantifies the percentage of code, requirements, or features exercised by tests.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "ec2f01b3"
   },
   {
     "category": "QA",
@@ -1622,7 +1686,8 @@
       }
     ],
     "explanation": "Mutation testing evaluates the quality of test cases by deliberately introducing faults and checking if tests fail.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "cafe5f8b"
   },
   {
     "category": "QA",
@@ -1647,7 +1712,8 @@
       }
     ],
     "explanation": "Load testing verifies system behavior under expected load, while stress testing identifies the breaking point.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "7a2ba472"
   },
   {
     "category": "QA",
@@ -1672,7 +1738,8 @@
       }
     ],
     "explanation": "POM separates the UI element locators from test logic, improving maintainability and reusability.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "3c12d608"
   },
   {
     "category": "QA",
@@ -1697,7 +1764,8 @@
       }
     ],
     "explanation": "Shift-left testing involves starting testing activities as early as possible to detect defects sooner.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "d529afb6"
   },
   {
     "category": "QA",
@@ -1722,7 +1790,8 @@
       }
     ],
     "explanation": "A test harness automates test execution and can include drivers and stubs to simulate missing components.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "2c0e23bc"
   },
   {
     "category": "QA",
@@ -1747,7 +1816,8 @@
       }
     ],
     "explanation": "The V-model pairs each development phase with a corresponding testing phase, ensuring parallel verification.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "ea2bfce4"
   },
   {
     "category": "QA",
@@ -1772,7 +1842,8 @@
       }
     ],
     "explanation": "A test summary report gives stakeholders an overview of the testing process and product quality.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "1d80eb84"
   },
   {
     "category": "QA",
@@ -1797,7 +1868,8 @@
       }
     ],
     "explanation": "Integration testing checks whether multiple modules work together correctly when combined.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "f6b9d000"
   },
   {
     "category": "QA",
@@ -1822,7 +1894,8 @@
       }
     ],
     "explanation": "Unit testing validates the smallest pieces of code (functions, methods) independently from the rest.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "7fce1c35"
   },
   {
     "category": "QA",
@@ -1847,7 +1920,8 @@
       }
     ],
     "explanation": "End-to-end testing simulates real user scenarios from the entry point to the final output.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "90cabdeb"
   },
   {
     "category": "QA",
@@ -1872,7 +1946,8 @@
       }
     ],
     "explanation": "Mock objects are used in unit testing to simulate dependencies and isolate the unit being tested.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "d7e8f90e"
   },
   {
     "category": "QA",
@@ -1897,7 +1972,8 @@
       }
     ],
     "explanation": "Contract testing ensures that each service in a microservices architecture adheres to its agreed interface contract.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "4fc102f9"
   },
   {
     "category": "QA",
@@ -1922,7 +1998,8 @@
       }
     ],
     "explanation": "Chaos engineering deliberately introduces failures to discover weaknesses before they cause production incidents.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "6829af36"
   },
   {
     "category": "QA",
@@ -1947,7 +2024,8 @@
       }
     ],
     "explanation": "A stub replaces a component that a unit depends on, returning fixed data to isolate the unit under test.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "66602595"
   },
   {
     "category": "QA",
@@ -1972,7 +2050,8 @@
       }
     ],
     "explanation": "In practice, bug and defect are used interchangeably to describe flaws in software.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "f57c9e2c"
   },
   {
     "category": "QA",
@@ -1997,7 +2076,8 @@
       }
     ],
     "explanation": "Performance testing measures responsiveness, throughput, reliability, and scalability under various conditions.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "2e22ecf9"
   },
   {
     "category": "QA",
@@ -2022,7 +2102,8 @@
       }
     ],
     "explanation": "A test environment includes the infrastructure, OS, browser, hardware, and configurations needed for testing.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "ce606312"
   },
   {
     "category": "QA",
@@ -2047,7 +2128,8 @@
       }
     ],
     "explanation": "Risk-based testing focuses effort on areas most likely to fail and most critical to business objectives.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "7184a73d"
   },
   {
     "category": "QA",
@@ -2072,7 +2154,8 @@
       }
     ],
     "explanation": "Postman is widely used for creating and executing API requests and testing REST/SOAP services.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "ee6f4e86"
   },
   {
     "category": "QA",
@@ -2097,7 +2180,8 @@
       }
     ],
     "explanation": "Cross-browser testing ensures web applications work correctly on different browsers like Chrome, Firefox, Safari, and Edge.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "514c3b06"
   },
   {
     "category": "QA",
@@ -2122,7 +2206,8 @@
       }
     ],
     "explanation": "Severity indicates how much the defect affects the system's functionality, ranging from critical to low.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "654293ea"
   },
   {
     "category": "QA",
@@ -2147,7 +2232,8 @@
       }
     ],
     "explanation": "Severity measures impact on functionality; priority indicates how urgently the defect needs to be fixed.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "61cf45d6"
   },
   {
     "category": "Programming",
@@ -2172,7 +2258,8 @@
       }
     ],
     "explanation": "In a balanced binary search tree, each step eliminates half of the remaining nodes, leading to log n steps.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "5ae33a2e"
   },
   {
     "category": "Programming",
@@ -2197,7 +2284,8 @@
       }
     ],
     "explanation": "In a regular function call (not a method call or arrow function), 'this' defaults to the global object or undefined in strict mode.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "56c97ab3"
   },
   {
     "category": "Programming",
@@ -2222,7 +2310,8 @@
       }
     ],
     "explanation": "HTML stands for HyperText Markup Language, the standard language for creating web pages.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "bd4193df"
   },
   {
     "category": "Programming",
@@ -2247,7 +2336,8 @@
       }
     ],
     "explanation": "A variable is a symbolic name associated with a value that can be changed during program execution.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "99554037"
   },
   {
     "category": "Programming",
@@ -2272,7 +2362,8 @@
       }
     ],
     "explanation": "'==' allows type coercion (e.g., '1' == 1 is true), whereas '===' requires both value and type to match.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "e737bdfa"
   },
   {
     "category": "Programming",
@@ -2297,7 +2388,8 @@
       }
     ],
     "explanation": "Loops like for, while, and do-while allow executing a block of code repeatedly based on a condition.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "5da471c4"
   },
   {
     "category": "Programming",
@@ -2322,7 +2414,8 @@
       }
     ],
     "explanation": "Arrays hold multiple elements accessible by index, starting at 0 in most languages.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "fa445e5d"
   },
   {
     "category": "Programming",
@@ -2347,7 +2440,8 @@
       }
     ],
     "explanation": "An object is a self-contained unit containing data (attributes) and behavior (methods) defined by its class.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "e56a6830"
   },
   {
     "category": "Programming",
@@ -2372,7 +2466,8 @@
       }
     ],
     "explanation": "Closures allow inner functions to remember the environment in which they were created.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "5c8280a2"
   },
   {
     "category": "Programming",
@@ -2397,7 +2492,8 @@
       }
     ],
     "explanation": "Stack follows Last In First Out (LIFO); Queue follows First In First Out (FIFO).",
-    "marks": 2
+    "marks": 2,
+    "q_id": "15c89e5b"
   },
   {
     "category": "Programming",
@@ -2422,7 +2518,8 @@
       }
     ],
     "explanation": "Polymorphism allows the same interface to be used for objects of different types, enabling flexible code.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "62f955f7"
   },
   {
     "category": "Programming",
@@ -2447,7 +2544,8 @@
       }
     ],
     "explanation": "SQL (Structured Query Language) is used for managing and querying relational databases.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "e8b9217a"
   },
   {
     "category": "Programming",
@@ -2472,7 +2570,8 @@
       }
     ],
     "explanation": "Recursion solves problems by breaking them into smaller subproblems and calling the function on each.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "2a5f2c4c"
   },
   {
     "category": "Programming",
@@ -2497,7 +2596,8 @@
       }
     ],
     "explanation": "GET requests data from a server; POST sends data to a server for creation or processing.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "abc0eb71"
   },
   {
     "category": "Programming",
@@ -2522,7 +2622,8 @@
       }
     ],
     "explanation": "Encapsulation hides internal state and exposes only necessary interfaces, promoting modularity.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "755ac8da"
   },
   {
     "category": "Programming",
@@ -2547,7 +2648,8 @@
       }
     ],
     "explanation": "Deadlock occurs when threads are circularly waiting on resources, causing all of them to block permanently.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "c3a9d728"
   },
   {
     "category": "Programming",
@@ -2572,7 +2674,8 @@
       }
     ],
     "explanation": "Threads share the same memory space within a process, while processes are isolated from each other.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "97a716a6"
   },
   {
     "category": "Programming",
@@ -2597,7 +2700,8 @@
       }
     ],
     "explanation": "Hash tables offer O(1) average time complexity for insertion, deletion, and lookup.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "f083e3a1"
   },
   {
     "category": "Programming",
@@ -2622,7 +2726,8 @@
       }
     ],
     "explanation": "Design patterns like Singleton, Observer, and Factory provide proven templates for common design challenges.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "9ec11590"
   },
   {
     "category": "Programming",
@@ -2647,7 +2752,8 @@
       }
     ],
     "explanation": "Immutable objects (like strings in Java) cannot be changed; new objects are created instead.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "fec3b4e6"
   },
   {
     "category": "Programming",
@@ -2672,7 +2778,8 @@
       }
     ],
     "explanation": "Big O notation describes worst-case complexity, helping compare algorithms' efficiency at scale.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "c2681624"
   },
   {
     "category": "Programming",
@@ -2697,7 +2804,8 @@
       }
     ],
     "explanation": "Functions encapsulate logic that can be called multiple times with different inputs.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "da0d9436"
   },
   {
     "category": "Programming",
@@ -2722,7 +2830,8 @@
       }
     ],
     "explanation": "CSS (Cascading Style Sheets) controls the visual presentation of HTML elements.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "2e2315b0"
   },
   {
     "category": "Programming",
@@ -2747,7 +2856,8 @@
       }
     ],
     "explanation": "A constructor is a special method called automatically when an instance of a class is instantiated.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "14a92cbc"
   },
   {
     "category": "Programming",
@@ -2772,7 +2882,8 @@
       }
     ],
     "explanation": "Inheritance promotes code reuse by allowing subclasses to extend or override parent class behavior.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "a5c66a65"
   },
   {
     "category": "Programming",
@@ -2797,7 +2908,8 @@
       }
     ],
     "explanation": "Asynchronous programming uses callbacks, promises, or async/await to handle non-blocking operations.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "99490f15"
   },
   {
     "category": "Programming",
@@ -2822,7 +2934,8 @@
       }
     ],
     "explanation": "Interfaces in Java define a contract; any class implementing the interface must provide the method implementations.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "ac171b09"
   },
   {
     "category": "Programming",
@@ -2847,7 +2960,8 @@
       }
     ],
     "explanation": "Null represents the intentional absence of any object value or reference.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "41f805f6"
   },
   {
     "category": "Programming",
@@ -2872,7 +2986,8 @@
       }
     ],
     "explanation": "REST (Representational State Transfer) APIs use HTTP methods (GET, POST, PUT, DELETE) for resource-based operations.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "a045aa7d"
   },
   {
     "category": "Programming",
@@ -2897,7 +3012,8 @@
       }
     ],
     "explanation": "Singleton ensures exactly one instance of a class is created, commonly used for configuration or logging.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "a1afdef3"
   },
   {
     "category": "Programming",
@@ -2922,7 +3038,8 @@
       }
     ],
     "explanation": "Version control systems like Git allow developers to track history, collaborate, and revert to previous states.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "b5845a54"
   },
   {
     "category": "Programming",
@@ -2947,7 +3064,8 @@
       }
     ],
     "explanation": "The Observer pattern establishes a one-to-many relationship, used heavily in event-driven programming.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "0058649c"
   },
   {
     "category": "Programming",
@@ -2972,7 +3090,8 @@
       }
     ],
     "explanation": "DRY is a principle to reduce repetition by abstracting common logic into reusable components.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "9d20b6fc"
   },
   {
     "category": "Programming",
@@ -2997,7 +3116,8 @@
       }
     ],
     "explanation": "Memory leaks degrade performance over time because unused memory is never returned to the system.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "fa34205e"
   },
   {
     "category": "Agile",
@@ -3022,7 +3142,8 @@
       }
     ],
     "explanation": "The Product Owner is the sole person responsible for managing the Product Backlog, which includes prioritizing items to best achieve goals and missions.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "2be01482"
   },
   {
     "category": "Agile",
@@ -3047,7 +3168,8 @@
       }
     ],
     "explanation": "The Sprint Retrospective is an opportunity for the Scrum Team to inspect itself and create a plan for improvements to be enacted during the next Sprint.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "69e81e03"
   },
   {
     "category": "Agile",
@@ -3072,7 +3194,8 @@
       }
     ],
     "explanation": "A Sprint is a fixed-length event in Scrum during which a specific goal must be achieved.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "8a52f57e"
   },
   {
     "category": "Agile",
@@ -3097,7 +3220,8 @@
       }
     ],
     "explanation": "Scrum defines three roles: Product Owner (what to build), Scrum Master (facilitator), and Development Team (builders).",
-    "marks": 1
+    "marks": 1,
+    "q_id": "f497a4c2"
   },
   {
     "category": "Agile",
@@ -3122,7 +3246,8 @@
       }
     ],
     "explanation": "The Daily Scrum (standup) helps identify impediments and keep everyone aligned on daily goals.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "d9578993"
   },
   {
     "category": "Agile",
@@ -3147,7 +3272,8 @@
       }
     ],
     "explanation": "The Product Backlog is a living document owned by the Product Owner, containing all desired features and improvements.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "6f41d056"
   },
   {
     "category": "Agile",
@@ -3172,7 +3298,8 @@
       }
     ],
     "explanation": "User stories follow the format: As a [user], I want [feature] so that [benefit].",
-    "marks": 1
+    "marks": 1,
+    "q_id": "d154a015"
   },
   {
     "category": "Agile",
@@ -3197,7 +3324,8 @@
       }
     ],
     "explanation": "The Agile Manifesto (2001) outlines 4 values and 12 principles for flexible, people-focused software development.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "a3fa0ad0"
   },
   {
     "category": "Agile",
@@ -3222,7 +3350,8 @@
       }
     ],
     "explanation": "During Sprint Planning, the team collaborates on the sprint goal and determines what can be delivered.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "fe197254"
   },
   {
     "category": "Agile",
@@ -3247,7 +3376,8 @@
       }
     ],
     "explanation": "DoD ensures consistency and quality by defining the checklist that must be met before declaring a story done.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "cfadb15a"
   },
   {
     "category": "Agile",
@@ -3272,7 +3402,8 @@
       }
     ],
     "explanation": "Velocity helps teams forecast how much work they can take on in future sprints.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "55d3cd43"
   },
   {
     "category": "Agile",
@@ -3297,7 +3428,8 @@
       }
     ],
     "explanation": "Kanban visualizes workflow with columns (To Do, In Progress, Done) and limits Work In Progress (WIP).",
-    "marks": 2
+    "marks": 2,
+    "q_id": "ffde4626"
   },
   {
     "category": "Agile",
@@ -3322,7 +3454,8 @@
       }
     ],
     "explanation": "Scrum prescribes roles, ceremonies, and sprint cadence; Kanban is more flexible with continuous delivery.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "74993d0d"
   },
   {
     "category": "Agile",
@@ -3347,7 +3480,8 @@
       }
     ],
     "explanation": "The burndown chart provides a visual representation of work left and ideal progress over the sprint timeline.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "4b8a4538"
   },
   {
     "category": "Agile",
@@ -3372,7 +3506,8 @@
       }
     ],
     "explanation": "Backlog refinement ensures the team has a well-understood and prioritized backlog ready for sprint planning.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "9f8d41fc"
   },
   {
     "category": "Agile",
@@ -3397,7 +3532,8 @@
       }
     ],
     "explanation": "SAFe helps large organizations align multiple Agile teams toward common business objectives.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "dd79c1f5"
   },
   {
     "category": "Agile",
@@ -3422,7 +3558,8 @@
       }
     ],
     "explanation": "The Scrum Master is a servant-leader who ensures the team follows Scrum and removes obstacles.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "84c83b70"
   },
   {
     "category": "Agile",
@@ -3447,7 +3584,8 @@
       }
     ],
     "explanation": "Technical debt accumulates when shortcuts are taken; it must be paid back through refactoring.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "5c026383"
   },
   {
     "category": "Agile",
@@ -3472,7 +3610,8 @@
       }
     ],
     "explanation": "Sprint Review focuses on 'what' was built; Retrospective focuses on 'how' the team worked together.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "18221db3"
   },
   {
     "category": "Agile",
@@ -3497,7 +3636,8 @@
       }
     ],
     "explanation": "CI detects integration errors early by running automated builds and tests on every code commit.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "bf805781"
   },
   {
     "category": "Agile",
@@ -3522,7 +3662,8 @@
       }
     ],
     "explanation": "The four Agile values prioritize people, working software, collaboration, and adaptability over rigid processes.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "1aa9cbc7"
   },
   {
     "category": "Agile",
@@ -3547,7 +3688,8 @@
       }
     ],
     "explanation": "Story points are relative measures using sequences like Fibonacci numbers to estimate user story complexity.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "9f55a03f"
   },
   {
     "category": "Agile",
@@ -3572,7 +3714,8 @@
       }
     ],
     "explanation": "MVP is a key Agile concept enabling teams to validate hypotheses with minimal effort before full investment.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "a47579d6"
   },
   {
     "category": "Agile",
@@ -3597,7 +3740,8 @@
       }
     ],
     "explanation": "WIP limits reduce multitasking, expose bottlenecks, and help teams focus on completing work rather than starting it.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "b6f53e09"
   },
   {
     "category": "Agile",
@@ -3622,7 +3766,8 @@
       }
     ],
     "explanation": "CD extends CI by automating the release process so deployable software is always ready.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "80661779"
   },
   {
     "category": "Agile",
@@ -3647,7 +3792,8 @@
       }
     ],
     "explanation": "INVEST is a checklist to evaluate whether a user story is well-formed and ready for development.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "42960fae"
   },
   {
     "category": "Agile",
@@ -3672,7 +3818,8 @@
       }
     ],
     "explanation": "A release plan aligns the team and stakeholders on delivery timelines and priorities for upcoming product increments.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "45abfba2"
   },
   {
     "category": "Agile",
@@ -3697,7 +3844,8 @@
       }
     ],
     "explanation": "Agile adapts to change through iterations; Waterfall completes each phase before moving to the next.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "cac604a4"
   },
   {
     "category": "Agile",
@@ -3722,7 +3870,8 @@
       }
     ],
     "explanation": "Spikes are used when a team needs to investigate before committing to an estimate for a user story.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "5ca071ba"
   },
   {
     "category": "Agile",
@@ -3747,7 +3896,8 @@
       }
     ],
     "explanation": "The Sprint Goal gives the team focus and flexibility in how to achieve the intended outcome of the sprint.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "428a13b8"
   },
   {
     "category": "Agile",
@@ -3772,7 +3922,8 @@
       }
     ],
     "explanation": "Pair programming improves code quality, knowledge sharing, and reduces bugs through continuous peer review.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "12e6e62e"
   },
   {
     "category": "Agile",
@@ -3797,7 +3948,8 @@
       }
     ],
     "explanation": "Epics are high-level features or requirements that are split into user stories for sprint execution.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "ce5b2493"
   },
   {
     "category": "Aptitude",
@@ -3822,7 +3974,8 @@
       }
     ],
     "explanation": "7\u00b3 = 7 \u00d7 7 \u00d7 7 = 343.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "60a2acbf"
   },
   {
     "category": "Aptitude",
@@ -3847,7 +4000,8 @@
       }
     ],
     "explanation": "Let walking distance = x. x/4 + (24-x)/8 = 4. 2x + 24 - x = 32. x = 8 km.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "41b11f35"
   },
   {
     "category": "QA",
@@ -3872,7 +4026,8 @@
       }
     ],
     "explanation": "Usability testing evaluates how user-friendly the software is by observing real users interacting with it.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "11656c6d"
   },
   {
     "category": "QA",
@@ -3897,7 +4052,8 @@
       }
     ],
     "explanation": "TDD follows a red-green-refactor cycle: write a failing test, write code to pass it, then refactor.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "f3587054"
   },
   {
     "category": "QA",
@@ -3922,7 +4078,8 @@
       }
     ],
     "explanation": "Code coverage identifies untested code; statement coverage checks lines, branch coverage checks decision paths.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "62b903d6"
   },
   {
     "category": "QA",
@@ -3947,7 +4104,8 @@
       }
     ],
     "explanation": "Checklists help testers verify that no important test areas are missed.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "8247a667"
   },
   {
     "category": "QA",
@@ -3972,7 +4130,8 @@
       }
     ],
     "explanation": "Accessibility testing verifies compliance with standards like WCAG to support users with visual, auditory, or motor impairments.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "c0c35abf"
   },
   {
     "category": "QA",
@@ -3997,7 +4156,8 @@
       }
     ],
     "explanation": "Flaky tests undermine confidence in the test suite because they pass and fail randomly.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "63fb48d2"
   },
   {
     "category": "QA",
@@ -4022,7 +4182,8 @@
       }
     ],
     "explanation": "Compatibility testing ensures software performs well across various platforms, browsers, and configurations.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "f2c1b3dd"
   },
   {
     "category": "QA",
@@ -4047,7 +4208,8 @@
       }
     ],
     "explanation": "A reproducible defect can be reliably triggered, making it easier to investigate and fix.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "9948731b"
   },
   {
     "category": "QA",
@@ -4072,7 +4234,8 @@
       }
     ],
     "explanation": "Security testing covers areas like authentication, authorization, SQL injection, XSS, and data encryption.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "a0f8c7b5"
   },
   {
     "category": "QA",
@@ -4097,7 +4260,8 @@
       }
     ],
     "explanation": "Ad hoc testing relies on the tester's intuition and experience rather than formal test cases.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "3f17e5b5"
   },
   {
     "category": "QA",
@@ -4122,7 +4286,8 @@
       }
     ],
     "explanation": "Black-box focuses on inputs/outputs; white-box requires knowledge of the source code and internal logic.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "154d3781"
   },
   {
     "category": "Programming",
@@ -4147,7 +4312,8 @@
       }
     ],
     "explanation": "A compiler converts high-level source code into machine-readable binary code.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "4ff6ceb7"
   },
   {
     "category": "Programming",
@@ -4172,7 +4338,8 @@
       }
     ],
     "explanation": "Exceptions signal errors or unusual conditions and can be caught and handled with try-catch blocks.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "09ca5690"
   },
   {
     "category": "Programming",
@@ -4197,7 +4364,8 @@
       }
     ],
     "explanation": "Foreign keys enforce referential integrity between related tables in a relational database.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "abca6198"
   },
   {
     "category": "Programming",
@@ -4222,7 +4390,8 @@
       }
     ],
     "explanation": "APIs define how software components should interact, enabling integration between different systems.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "e5d1fb82"
   },
   {
     "category": "Programming",
@@ -4247,7 +4416,8 @@
       }
     ],
     "explanation": "Dependency injection promotes loose coupling, testability, and separation of concerns.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "8d49e28c"
   },
   {
     "category": "Programming",
@@ -4272,7 +4442,8 @@
       }
     ],
     "explanation": "Caching reduces latency and database load by keeping results of expensive operations in memory.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "f089a33e"
   },
   {
     "category": "Programming",
@@ -4297,7 +4468,8 @@
       }
     ],
     "explanation": "Comments are ignored by the compiler/interpreter and serve as documentation for human readers.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "f61d5e58"
   },
   {
     "category": "Programming",
@@ -4322,7 +4494,8 @@
       }
     ],
     "explanation": "Linked lists allow efficient insertion and deletion but do not support random access like arrays.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "c2268c48"
   },
   {
     "category": "Programming",
@@ -4347,7 +4520,8 @@
       }
     ],
     "explanation": "Microservices enable independent deployment, scaling, and development of each service.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "a27cd2c3"
   },
   {
     "category": "Programming",
@@ -4372,7 +4546,8 @@
       }
     ],
     "explanation": "The try block contains code that might throw an exception; catch handles the exception if one occurs.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "88c811b6"
   },
   {
     "category": "Programming",
@@ -4397,7 +4572,8 @@
       }
     ],
     "explanation": "Boolean values represent logical conditions and are fundamental to control flow in programs.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "3e7ec0e3"
   },
   {
     "category": "Programming",
@@ -4422,7 +4598,8 @@
       }
     ],
     "explanation": "Abstract classes provide partial implementation; interfaces define a contract with no default behavior (prior to Java 8).",
-    "marks": 3
+    "marks": 3,
+    "q_id": "0af1666a"
   },
   {
     "category": "Programming",
@@ -4447,7 +4624,8 @@
       }
     ],
     "explanation": "SOLID principles guide developers toward maintainable, flexible, and scalable object-oriented design.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "419f8174"
   },
   {
     "category": "Programming",
@@ -4472,7 +4650,8 @@
       }
     ],
     "explanation": "Event-driven programming is widely used in GUIs, web apps, and real-time systems.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "4a2afdf5"
   },
   {
     "category": "Programming",
@@ -4497,7 +4676,8 @@
       }
     ],
     "explanation": "Debugging involves identifying the source of a bug and correcting it to restore expected behavior.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "68956545"
   },
   {
     "category": "Programming",
@@ -4522,7 +4702,8 @@
       }
     ],
     "explanation": "With a library you're in control; a framework inverts control and calls your code (Inversion of Control).",
-    "marks": 2
+    "marks": 2,
+    "q_id": "a95e6491"
   },
   {
     "category": "Agile",
@@ -4547,7 +4728,8 @@
       }
     ],
     "explanation": "Themes group related work together at a strategic level above epics.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "f85bae6d"
   },
   {
     "category": "Agile",
@@ -4572,7 +4754,8 @@
       }
     ],
     "explanation": "A product roadmap communicates the strategic direction and planned features to stakeholders.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "7c12ddff"
   },
   {
     "category": "Agile",
@@ -4597,7 +4780,8 @@
       }
     ],
     "explanation": "The Scrum Master is responsible for removing impediments that block the team.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "89146b22"
   },
   {
     "category": "Agile",
@@ -4622,7 +4806,8 @@
       }
     ],
     "explanation": "FDD breaks projects into small, deliverable features and uses short iterations to deliver them.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "c588b891"
   },
   {
     "category": "Agile",
@@ -4647,7 +4832,8 @@
       }
     ],
     "explanation": "PI Planning is a critical SAFe event that synchronizes all teams for the upcoming 8\u201312 week increment.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "b681f413"
   },
   {
     "category": "Agile",
@@ -4672,7 +4858,8 @@
       }
     ],
     "explanation": "Each sprint produces an increment that meets the Definition of Done and adds value to the product.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "a3de1869"
   },
   {
     "category": "Agile",
@@ -4697,7 +4884,8 @@
       }
     ],
     "explanation": "User stories capture requirements from a user perspective; tasks break down the implementation work.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "eaab3f3b"
   },
   {
     "category": "Agile",
@@ -4722,7 +4910,8 @@
       }
     ],
     "explanation": "Agile improves development practices; DevOps bridges development and operations for faster, reliable delivery.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "aa01c60e"
   },
   {
     "category": "Agile",
@@ -4747,7 +4936,8 @@
       }
     ],
     "explanation": "Acceptance criteria give the team a clear, testable definition of what 'done' looks like for each story.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "9c63b4cd"
   },
   {
     "category": "Agile",
@@ -4772,7 +4962,8 @@
       }
     ],
     "explanation": "The cone of uncertainty illustrates why early estimates are unreliable and why iterative refinement is important.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "2c452c7d"
   },
   {
     "category": "Agile",
@@ -4797,7 +4988,8 @@
       }
     ],
     "explanation": "Stakeholders collaborate with the Product Owner to define requirements and provide feedback during Sprint Reviews.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "49b25c91"
   },
   {
     "category": "Agile",
@@ -4822,7 +5014,8 @@
       }
     ],
     "explanation": "Agile embraces change because it enables teams to deliver maximum value as understanding of needs evolves.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "4e908ded"
   },
   {
     "category": "Agile",
@@ -4847,7 +5040,8 @@
       }
     ],
     "explanation": "Yesterday's weather is a simple heuristic: assume the next sprint's output will be similar to the last.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "2efd10b6"
   },
   {
     "category": "Agile",
@@ -4872,7 +5066,8 @@
       }
     ],
     "explanation": "Lean principles (from Toyota) applied to software focus on value stream optimization and continuous improvement.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "fe136e46"
   },
   {
     "category": "Agile",
@@ -4897,7 +5092,8 @@
       }
     ],
     "explanation": "DoR ensures user stories are sufficiently detailed and estimated before being pulled into a sprint.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "e8b2e181"
   },
   {
     "category": "Agile",
@@ -4922,7 +5118,8 @@
       }
     ],
     "explanation": "The Scrum board makes work visible and helps the team track sprint progress at a glance.",
-    "marks": 1
+    "marks": 1,
+    "q_id": "058c4cfe"
   },
   {
     "category": "Agile",
@@ -4947,7 +5144,8 @@
       }
     ],
     "explanation": "Inspect and adapt is a core Agile pillar encouraging continuous feedback loops to improve both product and process.",
-    "marks": 3
+    "marks": 3,
+    "q_id": "1594899a"
   },
   {
     "category": "Agile",
@@ -4972,7 +5170,8 @@
       }
     ],
     "explanation": "The sprint goal helps the team stay aligned and guides decisions if unexpected work arises during the sprint.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "e353e1f2"
   },
   {
     "category": "QA",
@@ -4997,7 +5196,8 @@
       }
     ],
     "explanation": "Functional testing validates features against requirements; non-functional covers performance, security, usability, etc.",
-    "marks": 2
+    "marks": 2,
+    "q_id": "2e0cb021"
   },
   {
     "category": "Manual Testing",
@@ -5022,7 +5222,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Manual testing involves a human tester executing test cases step by step without any automation tools."
+    "explanation": "Manual testing involves a human tester executing test cases step by step without any automation tools.",
+    "q_id": "258fa01e"
   },
   {
     "category": "Manual Testing",
@@ -5047,7 +5248,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "A test case defines what to test, how to test it, and what the expected outcome should be."
+    "explanation": "A test case defines what to test, how to test it, and what the expected outcome should be.",
+    "q_id": "a545b6ca"
   },
   {
     "category": "Manual Testing",
@@ -5072,7 +5274,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "A test plan serves as a blueprint that guides the entire testing process."
+    "explanation": "A test plan serves as a blueprint that guides the entire testing process.",
+    "q_id": "535eb99b"
   },
   {
     "category": "Manual Testing",
@@ -5097,7 +5300,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Regression testing confirms that recent code changes haven't introduced new bugs in existing features."
+    "explanation": "Regression testing confirms that recent code changes haven't introduced new bugs in existing features.",
+    "q_id": "1d06522c"
   },
   {
     "category": "Manual Testing",
@@ -5122,7 +5326,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Smoke testing ensures the build is stable enough for further detailed testing."
+    "explanation": "Smoke testing ensures the build is stable enough for further detailed testing.",
+    "q_id": "d6a46e52"
   },
   {
     "category": "Manual Testing",
@@ -5147,7 +5352,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Sanity testing is a narrow, focused test performed after receiving a software build to verify specific functionality."
+    "explanation": "Sanity testing is a narrow, focused test performed after receiving a software build to verify specific functionality.",
+    "q_id": "b855e1f3"
   },
   {
     "category": "Manual Testing",
@@ -5172,7 +5378,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Exploratory testing allows testers to discover unexpected defects by exploring the application freely."
+    "explanation": "Exploratory testing allows testers to discover unexpected defects by exploring the application freely.",
+    "q_id": "3573d97f"
   },
   {
     "category": "Manual Testing",
@@ -5197,7 +5404,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "UAT is the final validation phase where real users confirm the software works for their use cases."
+    "explanation": "UAT is the final validation phase where real users confirm the software works for their use cases.",
+    "q_id": "2b0fdde8"
   },
   {
     "category": "Manual Testing",
@@ -5222,7 +5430,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "The defect life cycle tracks the journey of a bug from when it is found until it is verified and closed."
+    "explanation": "The defect life cycle tracks the journey of a bug from when it is found until it is verified and closed.",
+    "q_id": "ec0ae11f"
   },
   {
     "category": "Manual Testing",
@@ -5247,7 +5456,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Negative testing verifies that the system does not crash and provides appropriate error messages for invalid inputs."
+    "explanation": "Negative testing verifies that the system does not crash and provides appropriate error messages for invalid inputs.",
+    "q_id": "65ece9a9"
   },
   {
     "category": "Manual Testing",
@@ -5272,7 +5482,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Positive testing validates the happy path by ensuring the system works correctly under normal conditions."
+    "explanation": "Positive testing validates the happy path by ensuring the system works correctly under normal conditions.",
+    "q_id": "66e963e0"
   },
   {
     "category": "Manual Testing",
@@ -5297,7 +5508,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "STLC defines the phases of testing: Requirement Analysis, Test Planning, Test Design, Execution, Defect Reporting, and Closure."
+    "explanation": "STLC defines the phases of testing: Requirement Analysis, Test Planning, Test Design, Execution, Defect Reporting, and Closure.",
+    "q_id": "7e7cd9f5"
   },
   {
     "category": "Manual Testing",
@@ -5322,7 +5534,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Test scenarios are broader than test cases and represent user goals or workflows to be validated."
+    "explanation": "Test scenarios are broader than test cases and represent user goals or workflows to be validated.",
+    "q_id": "f3b20571"
   },
   {
     "category": "Manual Testing",
@@ -5347,7 +5560,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Black-box testers focus on inputs and outputs without knowing the underlying implementation."
+    "explanation": "Black-box testers focus on inputs and outputs without knowing the underlying implementation.",
+    "q_id": "22ee1537"
   },
   {
     "category": "Manual Testing",
@@ -5372,7 +5586,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "White-box testing validates internal code paths, branches, and logic."
+    "explanation": "White-box testing validates internal code paths, branches, and logic.",
+    "q_id": "b8cd9168"
   },
   {
     "category": "Manual Testing",
@@ -5397,7 +5612,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Retesting specifically targets previously failed test cases to verify that the reported defect is resolved."
+    "explanation": "Retesting specifically targets previously failed test cases to verify that the reported defect is resolved.",
+    "q_id": "e95e8fb9"
   },
   {
     "category": "Manual Testing",
@@ -5422,7 +5638,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "End-to-end testing validates the complete business flow across all integrated components of the system."
+    "explanation": "End-to-end testing validates the complete business flow across all integrated components of the system.",
+    "q_id": "62bbb10d"
   },
   {
     "category": "Manual Testing",
@@ -5447,7 +5664,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Compatibility testing ensures the application delivers consistent behavior across various environments."
+    "explanation": "Compatibility testing ensures the application delivers consistent behavior across various environments.",
+    "q_id": "b38f78d2"
   },
   {
     "category": "Manual Testing",
@@ -5472,7 +5690,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "BVA tests minimum, maximum, and just-outside boundary values since bugs often occur at input boundaries."
+    "explanation": "BVA tests minimum, maximum, and just-outside boundary values since bugs often occur at input boundaries.",
+    "q_id": "da49d014"
   },
   {
     "category": "Manual Testing",
@@ -5497,7 +5716,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Equivalence partitioning reduces test cases by testing one representative value from each partition."
+    "explanation": "Equivalence partitioning reduces test cases by testing one representative value from each partition.",
+    "q_id": "80465eea"
   },
   {
     "category": "Manual Testing",
@@ -5522,7 +5742,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "A cosmetic bug on the homepage may have low severity but high priority due to business visibility."
+    "explanation": "A cosmetic bug on the homepage may have low severity but high priority due to business visibility.",
+    "q_id": "06fcc1b9"
   },
   {
     "category": "Manual Testing",
@@ -5547,7 +5768,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Integration testing ensures that individually tested units work correctly when combined together."
+    "explanation": "Integration testing ensures that individually tested units work correctly when combined together.",
+    "q_id": "9de9dd23"
   },
   {
     "category": "Manual Testing",
@@ -5572,7 +5794,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "System testing validates the fully integrated system against functional and non-functional requirements."
+    "explanation": "System testing validates the fully integrated system against functional and non-functional requirements.",
+    "q_id": "b0e06082"
   },
   {
     "category": "Manual Testing",
@@ -5597,7 +5820,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "The V-model ensures testing begins early, with test planning parallel to each development phase."
+    "explanation": "The V-model ensures testing begins early, with test planning parallel to each development phase.",
+    "q_id": "fae8ee11"
   },
   {
     "category": "Manual Testing",
@@ -5622,7 +5846,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Risk-based testing ensures the most critical areas are tested first to maximize quality assurance value."
+    "explanation": "Risk-based testing ensures the most critical areas are tested first to maximize quality assurance value.",
+    "q_id": "903d0e6b"
   },
   {
     "category": "Manual Testing",
@@ -5647,7 +5872,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "The test summary report communicates testing outcomes to stakeholders and management."
+    "explanation": "The test summary report communicates testing outcomes to stakeholders and management.",
+    "q_id": "f83dc486"
   },
   {
     "category": "Manual Testing",
@@ -5672,7 +5898,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "The Requirements Traceability Matrix (RTM) ensures no requirement is missed."
+    "explanation": "The Requirements Traceability Matrix (RTM) ensures no requirement is missed.",
+    "q_id": "17fc7dd3"
   },
   {
     "category": "Manual Testing",
@@ -5697,7 +5924,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Alpha testing catches major bugs before the product reaches beta testers or real users."
+    "explanation": "Alpha testing catches major bugs before the product reaches beta testers or real users.",
+    "q_id": "6452e920"
   },
   {
     "category": "Manual Testing",
@@ -5722,7 +5950,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Beta testing provides real-world feedback from actual users before the final product launch."
+    "explanation": "Beta testing provides real-world feedback from actual users before the final product launch.",
+    "q_id": "0ef4d2dc"
   },
   {
     "category": "Manual Testing",
@@ -5747,7 +5976,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Usability testing evaluates user experience, navigation, clarity, and overall satisfaction."
+    "explanation": "Usability testing evaluates user experience, navigation, clarity, and overall satisfaction.",
+    "q_id": "36d5ab2d"
   },
   {
     "category": "Manual Testing",
@@ -5772,7 +6002,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Ad hoc testing relies on the tester's skill and intuition to quickly discover unexpected bugs."
+    "explanation": "Ad hoc testing relies on the tester's skill and intuition to quickly discover unexpected bugs.",
+    "q_id": "6b463af1"
   },
   {
     "category": "Manual Testing",
@@ -5797,7 +6028,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Decision tables ensure all combinations of conditions and actions are tested systematically."
+    "explanation": "Decision tables ensure all combinations of conditions and actions are tested systematically.",
+    "q_id": "0a618803"
   },
   {
     "category": "Manual Testing",
@@ -5822,7 +6054,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "State transition testing is ideal for systems like login flows, order statuses, or ATM operations."
+    "explanation": "State transition testing is ideal for systems like login flows, order statuses, or ATM operations.",
+    "q_id": "f47ec7f4"
   },
   {
     "category": "Manual Testing",
@@ -5847,7 +6080,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Verification answers 'Are we building the product right?' while validation answers 'Are we building the right product?'"
+    "explanation": "Verification answers 'Are we building the product right?' while validation answers 'Are we building the right product?'",
+    "q_id": "6307bbd4"
   },
   {
     "category": "Manual Testing",
@@ -5872,7 +6106,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Mutation testing measures test suite quality \u2014 if tests don't catch mutations, they may be insufficient."
+    "explanation": "Mutation testing measures test suite quality \u2014 if tests don't catch mutations, they may be insufficient.",
+    "q_id": "f4db7365"
   },
   {
     "category": "Manual Testing",
@@ -5897,7 +6132,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Exploratory testing finds unexpected bugs; scripted testing ensures requirement coverage."
+    "explanation": "Exploratory testing finds unexpected bugs; scripted testing ensures requirement coverage.",
+    "q_id": "846fe4da"
   },
   {
     "category": "Manual Testing",
@@ -5922,7 +6158,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Shift-left testing reduces cost by finding and fixing defects when they are cheapest to address."
+    "explanation": "Shift-left testing reduces cost by finding and fixing defects when they are cheapest to address.",
+    "q_id": "f836e17d"
   },
   {
     "category": "Manual Testing",
@@ -5947,7 +6184,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Different browsers render HTML/CSS differently, so cross-browser testing ensures a uniform user experience."
+    "explanation": "Different browsers render HTML/CSS differently, so cross-browser testing ensures a uniform user experience.",
+    "q_id": "e0c20e83"
   },
   {
     "category": "Manual Testing",
@@ -5972,7 +6210,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Accessibility testing covers screen reader compatibility, color contrast, and keyboard navigation."
+    "explanation": "Accessibility testing covers screen reader compatibility, color contrast, and keyboard navigation.",
+    "q_id": "270346cf"
   },
   {
     "category": "Manual Testing",
@@ -5997,7 +6236,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "The test closure report provides a final record and enables knowledge transfer for future projects."
+    "explanation": "The test closure report provides a final record and enables knowledge transfer for future projects.",
+    "q_id": "8a79a4c4"
   },
   {
     "category": "Manual Testing",
@@ -6022,7 +6262,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Load testing ensures SLAs are met; stress testing reveals how the system fails under extreme conditions."
+    "explanation": "Load testing ensures SLAs are met; stress testing reveals how the system fails under extreme conditions.",
+    "q_id": "e8fc34bc"
   },
   {
     "category": "Manual Testing",
@@ -6047,7 +6288,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Flaky tests erode confidence in the test suite and should be investigated for timing or environmental issues."
+    "explanation": "Flaky tests erode confidence in the test suite and should be investigated for timing or environmental issues.",
+    "q_id": "d68d8ed5"
   },
   {
     "category": "Manual Testing",
@@ -6072,7 +6314,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Higher coverage reduces the risk of undiscovered defects but 100% coverage doesn't guarantee bug-free software."
+    "explanation": "Higher coverage reduces the risk of undiscovered defects but 100% coverage doesn't guarantee bug-free software.",
+    "q_id": "5b17f724"
   },
   {
     "category": "Manual Testing",
@@ -6097,7 +6340,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Performance testing ensures the system meets responsiveness and stability requirements under various loads."
+    "explanation": "Performance testing ensures the system meets responsiveness and stability requirements under various loads.",
+    "q_id": "006bdb46"
   },
   {
     "category": "Manual Testing",
@@ -6122,7 +6366,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Security testing ensures the application is protected against malicious attacks and data breaches."
+    "explanation": "Security testing ensures the application is protected against malicious attacks and data breaches.",
+    "q_id": "8242b0d6"
   },
   {
     "category": "Manual Testing",
@@ -6147,7 +6392,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Grey-box testing combines perspectives \u2014 testers have some internal knowledge to design targeted test cases."
+    "explanation": "Grey-box testing combines perspectives \u2014 testers have some internal knowledge to design targeted test cases.",
+    "q_id": "04369e80"
   },
   {
     "category": "Manual Testing",
@@ -6172,7 +6418,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Concurrency testing identifies race conditions, deadlocks, and data integrity issues in multi-user environments."
+    "explanation": "Concurrency testing identifies race conditions, deadlocks, and data integrity issues in multi-user environments.",
+    "q_id": "c76687c1"
   },
   {
     "category": "Manual Testing",
@@ -6197,7 +6444,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Cause-effect graphing is especially useful for systems with many interdependent input conditions."
+    "explanation": "Cause-effect graphing is especially useful for systems with many interdependent input conditions.",
+    "q_id": "f7913c88"
   },
   {
     "category": "Manual Testing",
@@ -6222,7 +6470,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "The test basis is the foundation from which test conditions, test cases, and test scripts are derived."
+    "explanation": "The test basis is the foundation from which test conditions, test cases, and test scripts are derived.",
+    "q_id": "26b5a5df"
   },
   {
     "category": "Automation Testing",
@@ -6247,7 +6496,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Selenium WebDriver provides APIs to interact with browsers like Chrome, Firefox, and Edge."
+    "explanation": "Selenium WebDriver provides APIs to interact with browsers like Chrome, Firefox, and Edge.",
+    "q_id": "ec18567d"
   },
   {
     "category": "Automation Testing",
@@ -6272,7 +6522,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Selenium's multi-language support makes it adoptable by teams with different technology stacks."
+    "explanation": "Selenium's multi-language support makes it adoptable by teams with different technology stacks.",
+    "q_id": "6d75aac5"
   },
   {
     "category": "Automation Testing",
@@ -6297,7 +6548,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Common locators include ID, Name, XPath, CSS Selector, Class Name, and Link Text."
+    "explanation": "Common locators include ID, Name, XPath, CSS Selector, Class Name, and Link Text.",
+    "q_id": "39eb1edd"
   },
   {
     "category": "Automation Testing",
@@ -6322,7 +6574,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "TestNG provides powerful annotations and XML configuration for organizing and executing test suites."
+    "explanation": "TestNG provides powerful annotations and XML configuration for organizing and executing test suites.",
+    "q_id": "debc9004"
   },
   {
     "category": "Automation Testing",
@@ -6347,7 +6600,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "POM improves maintainability: UI changes only require updating the page class, not every test."
+    "explanation": "POM improves maintainability: UI changes only require updating the page class, not every test.",
+    "q_id": "df95edd0"
   },
   {
     "category": "Automation Testing",
@@ -6372,7 +6626,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Cucumber bridges the gap between business stakeholders and technical teams through readable test scenarios."
+    "explanation": "Cucumber bridges the gap between business stakeholders and technical teams through readable test scenarios.",
+    "q_id": "32d6e925"
   },
   {
     "category": "Automation Testing",
@@ -6397,7 +6652,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "BDD encourages collaboration by writing tests as behavior scenarios understandable by all stakeholders."
+    "explanation": "BDD encourages collaboration by writing tests as behavior scenarios understandable by all stakeholders.",
+    "q_id": "e04de9cd"
   },
   {
     "category": "Automation Testing",
@@ -6422,7 +6678,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Maven downloads required libraries (Selenium, TestNG, etc.) and manages the build lifecycle."
+    "explanation": "Maven downloads required libraries (Selenium, TestNG, etc.) and manages the build lifecycle.",
+    "q_id": "28c31852"
   },
   {
     "category": "Automation Testing",
@@ -6447,7 +6704,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Implicit wait is set once and applies globally throughout the WebDriver session."
+    "explanation": "Implicit wait is set once and applies globally throughout the WebDriver session.",
+    "q_id": "25a07ced"
   },
   {
     "category": "Automation Testing",
@@ -6472,7 +6730,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "driver.get('https://example.com') navigates the browser to the given URL and waits for the page to load."
+    "explanation": "driver.get('https://example.com') navigates the browser to the given URL and waits for the page to load.",
+    "q_id": "8df3556a"
   },
   {
     "category": "Automation Testing",
@@ -6497,7 +6756,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Appium uses the WebDriver protocol and supports native, hybrid, and mobile web apps."
+    "explanation": "Appium uses the WebDriver protocol and supports native, hybrid, and mobile web apps.",
+    "q_id": "308b4420"
   },
   {
     "category": "Automation Testing",
@@ -6522,7 +6782,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Gherkin makes test scenarios readable to non-technical stakeholders and bridges communication gaps."
+    "explanation": "Gherkin makes test scenarios readable to non-technical stakeholders and bridges communication gaps.",
+    "q_id": "8a4f8846"
   },
   {
     "category": "Automation Testing",
@@ -6547,7 +6808,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Always use quit() at the end of a test session to properly release WebDriver resources."
+    "explanation": "Always use quit() at the end of a test session to properly release WebDriver resources.",
+    "q_id": "ec40c619"
   },
   {
     "category": "Automation Testing",
@@ -6572,7 +6834,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "CSS selectors are generally faster than XPath and preferred when elements have stable CSS attributes."
+    "explanation": "CSS selectors are generally faster than XPath and preferred when elements have stable CSS attributes.",
+    "q_id": "cf81539a"
   },
   {
     "category": "Automation Testing",
@@ -6597,7 +6860,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "JUnit provides annotations like @Test, @Before, @After to structure and execute tests."
+    "explanation": "JUnit provides annotations like @Test, @Before, @After to structure and execute tests.",
+    "q_id": "fb743b2c"
   },
   {
     "category": "Automation Testing",
@@ -6622,7 +6886,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "PyTest supports fixtures, parameterization, and plugins, making it the most popular Python testing framework."
+    "explanation": "PyTest supports fixtures, parameterization, and plugins, making it the most popular Python testing framework.",
+    "q_id": "e01370e8"
   },
   {
     "category": "Automation Testing",
@@ -6647,7 +6912,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "WebElement provides methods like click(), sendKeys(), getText(), and isDisplayed() to interact with page elements."
+    "explanation": "WebElement provides methods like click(), sendKeys(), getText(), and isDisplayed() to interact with page elements.",
+    "q_id": "111ce5d7"
   },
   {
     "category": "Automation Testing",
@@ -6672,7 +6938,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Playwright supports multiple languages and offers auto-wait, network interception, and more."
+    "explanation": "Playwright supports multiple languages and offers auto-wait, network interception, and more.",
+    "q_id": "7b8003cf"
   },
   {
     "category": "Automation Testing",
@@ -6697,7 +6964,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Explicit wait is more precise and preferred for dynamic elements."
+    "explanation": "Explicit wait is more precise and preferred for dynamic elements.",
+    "q_id": "eaa39c45"
   },
   {
     "category": "Automation Testing",
@@ -6722,7 +6990,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Fluent Wait provides full control over polling frequency and exception handling during element wait."
+    "explanation": "Fluent Wait provides full control over polling frequency and exception handling during element wait.",
+    "q_id": "1f67a26b"
   },
   {
     "category": "Automation Testing",
@@ -6747,7 +7016,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Data-driven testing uses external sources like Excel, CSV, or databases to supply multiple input combinations."
+    "explanation": "Data-driven testing uses external sources like Excel, CSV, or databases to supply multiple input combinations.",
+    "q_id": "53ab24e0"
   },
   {
     "category": "Automation Testing",
@@ -6772,7 +7042,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Relative XPath is preferred because it is shorter and not affected by minor DOM structure changes."
+    "explanation": "Relative XPath is preferred because it is shorter and not affected by minor DOM structure changes.",
+    "q_id": "ce519879"
   },
   {
     "category": "Automation Testing",
@@ -6797,7 +7068,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "@DataProvider returns a 2D Object array, allowing the test to run once per data row."
+    "explanation": "@DataProvider returns a 2D Object array, allowing the test to run once per data row.",
+    "q_id": "e757f092"
   },
   {
     "category": "Automation Testing",
@@ -6822,7 +7094,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "The Select class wraps HTML select elements and provides methods for selecting options."
+    "explanation": "The Select class wraps HTML select elements and provides methods for selecting options.",
+    "q_id": "a744f663"
   },
   {
     "category": "Automation Testing",
@@ -6847,7 +7120,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Selenium's Alert interface allows handling JavaScript alert, confirm, and prompt dialogs."
+    "explanation": "Selenium's Alert interface allows handling JavaScript alert, confirm, and prompt dialogs.",
+    "q_id": "6a6b785b"
   },
   {
     "category": "Automation Testing",
@@ -6872,7 +7146,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Each browser window has a unique handle that can be used to switch the WebDriver context."
+    "explanation": "Each browser window has a unique handle that can be used to switch the WebDriver context.",
+    "q_id": "f0ee1043"
   },
   {
     "category": "Automation Testing",
@@ -6897,7 +7172,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "The Actions class builds a chain of actions using build() and perform() for advanced UI interactions."
+    "explanation": "The Actions class builds a chain of actions using build() and perform() for advanced UI interactions.",
+    "q_id": "33f53047"
   },
   {
     "category": "Automation Testing",
@@ -6922,7 +7198,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "JavaScriptExecutor is used for scrolling, clicking hidden elements, and getting page properties."
+    "explanation": "JavaScriptExecutor is used for scrolling, clicking hidden elements, and getting page properties.",
+    "q_id": "505fbfba"
   },
   {
     "category": "Automation Testing",
@@ -6947,7 +7224,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Screenshots captured during test failures help diagnose what went wrong at the time of failure."
+    "explanation": "Screenshots captured during test failures help diagnose what went wrong at the time of failure.",
+    "q_id": "42d54da6"
   },
   {
     "category": "Automation Testing",
@@ -6972,7 +7250,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Selenium Grid uses a Hub-Node architecture to distribute tests across multiple environments in parallel."
+    "explanation": "Selenium Grid uses a Hub-Node architecture to distribute tests across multiple environments in parallel.",
+    "q_id": "5a348168"
   },
   {
     "category": "Automation Testing",
@@ -6997,7 +7276,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Headless browsers like Chrome in headless mode run faster and are ideal for automated CI/CD environments."
+    "explanation": "Headless browsers like Chrome in headless mode run faster and are ideal for automated CI/CD environments.",
+    "q_id": "d16d2656"
   },
   {
     "category": "Automation Testing",
@@ -7022,7 +7302,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "TestNG's parallel attribute in testng.xml enables concurrent execution to reduce total test execution time."
+    "explanation": "TestNG's parallel attribute in testng.xml enables concurrent execution to reduce total test execution time.",
+    "q_id": "061b378f"
   },
   {
     "category": "Automation Testing",
@@ -7047,7 +7328,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "StaleElementReferenceException is common after page reloads or DOM updates; retry logic or re-finding elements resolves it."
+    "explanation": "StaleElementReferenceException is common after page reloads or DOM updates; retry logic or re-finding elements resolves it.",
+    "q_id": "d77386b6"
   },
   {
     "category": "Automation Testing",
@@ -7072,7 +7354,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "ThreadLocal<WebDriver> ensures each parallel thread has its own WebDriver instance, preventing conflicts."
+    "explanation": "ThreadLocal<WebDriver> ensures each parallel thread has its own WebDriver instance, preventing conflicts.",
+    "q_id": "da423d7d"
   },
   {
     "category": "Automation Testing",
@@ -7097,7 +7380,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "CI tools like Jenkins, GitHub Actions trigger automation test suites on each code push."
+    "explanation": "CI tools like Jenkins, GitHub Actions trigger automation test suites on each code push.",
+    "q_id": "4052264b"
   },
   {
     "category": "Automation Testing",
@@ -7122,7 +7406,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Selenium 4's W3C compliance removes JSON Wire Protocol dependency and adds Chrome DevTools Protocol support."
+    "explanation": "Selenium 4's W3C compliance removes JSON Wire Protocol dependency and adds Chrome DevTools Protocol support.",
+    "q_id": "0cb4a56d"
   },
   {
     "category": "Automation Testing",
@@ -7147,7 +7432,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Relative locators enable natural, readable element targeting based on spatial relationships on the page."
+    "explanation": "Relative locators enable natural, readable element targeting based on spatial relationships on the page.",
+    "q_id": "34529cd3"
   },
   {
     "category": "Automation Testing",
@@ -7172,7 +7458,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "BDD involves all stakeholders in defining behavior scenarios; TDD is a developer practice for code correctness."
+    "explanation": "BDD involves all stakeholders in defining behavior scenarios; TDD is a developer practice for code correctness.",
+    "q_id": "0d4bd24c"
   },
   {
     "category": "Automation Testing",
@@ -7197,7 +7484,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "After working inside an iframe, use driver.switchTo().defaultContent() to return to the main page."
+    "explanation": "After working inside an iframe, use driver.switchTo().defaultContent() to return to the main page.",
+    "q_id": "2b1effe8"
   },
   {
     "category": "Automation Testing",
@@ -7222,7 +7510,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Cypress provides automatic waiting, time-travel debugging, and direct DOM access for fast reliable testing."
+    "explanation": "Cypress provides automatic waiting, time-travel debugging, and direct DOM access for fast reliable testing.",
+    "q_id": "bb651cba"
   },
   {
     "category": "Automation Testing",
@@ -7247,7 +7536,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Cypress runs in the same JS event loop as the app, making it faster and more reliable for web testing."
+    "explanation": "Cypress runs in the same JS event loop as the app, making it faster and more reliable for web testing.",
+    "q_id": "2e8a30f3"
   },
   {
     "category": "Automation Testing",
@@ -7272,7 +7562,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Tools like Percy, Applitools, and BackstopJS automate visual regression checks across builds."
+    "explanation": "Tools like Percy, Applitools, and BackstopJS automate visual regression checks across builds.",
+    "q_id": "9f845838"
   },
   {
     "category": "Automation Testing",
@@ -7297,7 +7588,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Robot Framework's readable keyword syntax makes it accessible to both technical and non-technical users."
+    "explanation": "Robot Framework's readable keyword syntax makes it accessible to both technical and non-technical users.",
+    "q_id": "0b4b03ab"
   },
   {
     "category": "Automation Testing",
@@ -7322,7 +7614,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "API mocking enables faster, isolated UI testing and tests scenarios hard to reproduce with real APIs."
+    "explanation": "API mocking enables faster, isolated UI testing and tests scenarios hard to reproduce with real APIs.",
+    "q_id": "6b2b7355"
   },
   {
     "category": "Automation Testing",
@@ -7347,1182 +7640,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Singleton WebDriver prevents resource leaks and ensures a single browser instance is reused."
-  },
-  {
-    "category": "API Testing",
-    "difficulty": "Beginner",
-    "marks": 1,
-    "text": "What is an API?",
-    "options": [
-      {
-        "text": "A set of rules that allows applications to communicate and share data with each other.",
-        "is_correct": true
-      },
-      {
-        "text": "A programming language.",
-        "is_correct": false
-      },
-      {
-        "text": "A type of database.",
-        "is_correct": false
-      },
-      {
-        "text": "A testing framework.",
-        "is_correct": false
-      }
-    ],
-    "explanation": "API (Application Programming Interface) defines how software components interact with each other."
-  },
-  {
-    "category": "API Testing",
-    "difficulty": "Beginner",
-    "marks": 1,
-    "text": "What is a REST API?",
-    "options": [
-      {
-        "text": "An architectural style using HTTP methods like GET, POST, PUT, DELETE to operate on resources.",
-        "is_correct": true
-      },
-      {
-        "text": "A database query language.",
-        "is_correct": false
-      },
-      {
-        "text": "A programming framework.",
-        "is_correct": false
-      },
-      {
-        "text": "A type of web browser.",
-        "is_correct": false
-      }
-    ],
-    "explanation": "REST (Representational State Transfer) APIs are stateless, resource-based, and use standard HTTP methods."
-  },
-  {
-    "category": "API Testing",
-    "difficulty": "Beginner",
-    "marks": 1,
-    "text": "What does HTTP GET method do?",
-    "options": [
-      {
-        "text": "Retrieves data from a server without modifying any resources.",
-        "is_correct": true
-      },
-      {
-        "text": "Sends data to create a new resource.",
-        "is_correct": false
-      },
-      {
-        "text": "Updates an existing resource.",
-        "is_correct": false
-      },
-      {
-        "text": "Deletes a resource.",
-        "is_correct": false
-      }
-    ],
-    "explanation": "GET is a safe, idempotent method used to read or retrieve resources from the server."
-  },
-  {
-    "category": "API Testing",
-    "difficulty": "Beginner",
-    "marks": 1,
-    "text": "What does HTTP POST method do?",
-    "options": [
-      {
-        "text": "Sends data to the server to create a new resource.",
-        "is_correct": true
-      },
-      {
-        "text": "Retrieves data from the server.",
-        "is_correct": false
-      },
-      {
-        "text": "Deletes an existing resource.",
-        "is_correct": false
-      },
-      {
-        "text": "Partially updates a resource.",
-        "is_correct": false
-      }
-    ],
-    "explanation": "POST submits data (e.g., form submissions, creating new records) and is not idempotent."
-  },
-  {
-    "category": "API Testing",
-    "difficulty": "Beginner",
-    "marks": 1,
-    "text": "What is Postman?",
-    "options": [
-      {
-        "text": "A popular tool for designing, testing, and documenting APIs by sending HTTP requests and viewing responses.",
-        "is_correct": true
-      },
-      {
-        "text": "A mail delivery service.",
-        "is_correct": false
-      },
-      {
-        "text": "A browser automation tool.",
-        "is_correct": false
-      },
-      {
-        "text": "A load testing framework.",
-        "is_correct": false
-      }
-    ],
-    "explanation": "Postman allows testers to send API requests, inspect responses, write tests, and create collections."
-  },
-  {
-    "category": "API Testing",
-    "difficulty": "Beginner",
-    "marks": 1,
-    "text": "What does HTTP status code 200 mean?",
-    "options": [
-      {
-        "text": "OK \u2014 the request was successful and the response contains the requested data.",
-        "is_correct": true
-      },
-      {
-        "text": "Resource not found.",
-        "is_correct": false
-      },
-      {
-        "text": "Internal server error.",
-        "is_correct": false
-      },
-      {
-        "text": "Unauthorized access.",
-        "is_correct": false
-      }
-    ],
-    "explanation": "HTTP 200 OK is the standard success response for GET, PUT, and PATCH requests."
-  },
-  {
-    "category": "API Testing",
-    "difficulty": "Beginner",
-    "marks": 1,
-    "text": "What does HTTP status code 404 mean?",
-    "options": [
-      {
-        "text": "The requested resource was not found on the server.",
-        "is_correct": true
-      },
-      {
-        "text": "The server encountered an internal error.",
-        "is_correct": false
-      },
-      {
-        "text": "The request was successful.",
-        "is_correct": false
-      },
-      {
-        "text": "The client is unauthorized.",
-        "is_correct": false
-      }
-    ],
-    "explanation": "404 Not Found indicates the server cannot find the requested resource at the given URL."
-  },
-  {
-    "category": "API Testing",
-    "difficulty": "Beginner",
-    "marks": 1,
-    "text": "What does HTTP status code 500 mean?",
-    "options": [
-      {
-        "text": "The server encountered an unexpected condition that prevented it from fulfilling the request.",
-        "is_correct": true
-      },
-      {
-        "text": "The request was successful.",
-        "is_correct": false
-      },
-      {
-        "text": "The resource was not found.",
-        "is_correct": false
-      },
-      {
-        "text": "The client sent an invalid request.",
-        "is_correct": false
-      }
-    ],
-    "explanation": "5xx codes indicate server-side errors, as opposed to 4xx which indicate client-side errors."
-  },
-  {
-    "category": "API Testing",
-    "difficulty": "Beginner",
-    "marks": 1,
-    "text": "What is JSON in API testing?",
-    "options": [
-      {
-        "text": "A lightweight data-interchange format using key-value pairs, commonly used in API responses.",
-        "is_correct": true
-      },
-      {
-        "text": "A programming language.",
-        "is_correct": false
-      },
-      {
-        "text": "A database format.",
-        "is_correct": false
-      },
-      {
-        "text": "A testing framework.",
-        "is_correct": false
-      }
-    ],
-    "explanation": "JSON (JavaScript Object Notation) is human-readable and language-independent, the most common API data format."
-  },
-  {
-    "category": "API Testing",
-    "difficulty": "Beginner",
-    "marks": 1,
-    "text": "What is an API endpoint?",
-    "options": [
-      {
-        "text": "A specific URL where an API can be accessed to perform a certain operation.",
-        "is_correct": true
-      },
-      {
-        "text": "The server that hosts the API.",
-        "is_correct": false
-      },
-      {
-        "text": "The authentication token for an API.",
-        "is_correct": false
-      },
-      {
-        "text": "The API documentation page.",
-        "is_correct": false
-      }
-    ],
-    "explanation": "Each endpoint maps to a specific resource and operation, e.g., GET /users retrieves all users."
-  },
-  {
-    "category": "API Testing",
-    "difficulty": "Beginner",
-    "marks": 1,
-    "text": "What does HTTP status code 201 mean?",
-    "options": [
-      {
-        "text": "Created \u2014 a new resource was successfully created as a result of the request.",
-        "is_correct": true
-      },
-      {
-        "text": "The request was successful with no content.",
-        "is_correct": false
-      },
-      {
-        "text": "Redirected to a new URL.",
-        "is_correct": false
-      },
-      {
-        "text": "Conflict with the current state.",
-        "is_correct": false
-      }
-    ],
-    "explanation": "201 Created is returned after a successful POST request that creates a new resource."
-  },
-  {
-    "category": "API Testing",
-    "difficulty": "Beginner",
-    "marks": 1,
-    "text": "What does HTTP PUT method do?",
-    "options": [
-      {
-        "text": "Updates or replaces an existing resource entirely with the data provided.",
-        "is_correct": true
-      },
-      {
-        "text": "Retrieves data from the server.",
-        "is_correct": false
-      },
-      {
-        "text": "Creates a new resource.",
-        "is_correct": false
-      },
-      {
-        "text": "Partially modifies a resource.",
-        "is_correct": false
-      }
-    ],
-    "explanation": "PUT is idempotent \u2014 calling it multiple times produces the same result."
-  },
-  {
-    "category": "API Testing",
-    "difficulty": "Beginner",
-    "marks": 1,
-    "text": "What does HTTP DELETE method do?",
-    "options": [
-      {
-        "text": "Removes the specified resource from the server.",
-        "is_correct": true
-      },
-      {
-        "text": "Retrieves and removes a resource.",
-        "is_correct": false
-      },
-      {
-        "text": "Creates a copy of a resource.",
-        "is_correct": false
-      },
-      {
-        "text": "Updates a resource.",
-        "is_correct": false
-      }
-    ],
-    "explanation": "DELETE is idempotent \u2014 deleting a resource multiple times returns 200 or 404 after the first deletion."
-  },
-  {
-    "category": "API Testing",
-    "difficulty": "Beginner",
-    "marks": 1,
-    "text": "What is an API request body?",
-    "options": [
-      {
-        "text": "The data payload sent to the server in POST, PUT, or PATCH requests.",
-        "is_correct": true
-      },
-      {
-        "text": "The URL of the API.",
-        "is_correct": false
-      },
-      {
-        "text": "The HTTP method used.",
-        "is_correct": false
-      },
-      {
-        "text": "The server response.",
-        "is_correct": false
-      }
-    ],
-    "explanation": "The request body contains data (usually JSON or XML) that the server needs to process the request."
-  },
-  {
-    "category": "API Testing",
-    "difficulty": "Beginner",
-    "marks": 1,
-    "text": "What is API authentication?",
-    "options": [
-      {
-        "text": "A mechanism to verify the identity of a client before allowing access to protected API resources.",
-        "is_correct": true
-      },
-      {
-        "text": "The process of documenting an API.",
-        "is_correct": false
-      },
-      {
-        "text": "Testing APIs for performance.",
-        "is_correct": false
-      },
-      {
-        "text": "Encrypting API responses.",
-        "is_correct": false
-      }
-    ],
-    "explanation": "Common authentication methods include API keys, OAuth 2.0, JWT tokens, and Basic Auth."
-  },
-  {
-    "category": "API Testing",
-    "difficulty": "Beginner",
-    "marks": 1,
-    "text": "What is SOAP API?",
-    "options": [
-      {
-        "text": "A protocol for exchanging structured information using XML messages over HTTP or SMTP.",
-        "is_correct": true
-      },
-      {
-        "text": "A REST API variant.",
-        "is_correct": false
-      },
-      {
-        "text": "A database access protocol.",
-        "is_correct": false
-      },
-      {
-        "text": "A testing framework for web services.",
-        "is_correct": false
-      }
-    ],
-    "explanation": "SOAP is more rigid and verbose than REST but offers built-in error handling and security standards."
-  },
-  {
-    "category": "API Testing",
-    "difficulty": "Beginner",
-    "marks": 1,
-    "text": "What is the difference between REST and SOAP APIs?",
-    "options": [
-      {
-        "text": "REST is lightweight, uses JSON/XML, and HTTP; SOAP uses only XML and has strict standards.",
-        "is_correct": true
-      },
-      {
-        "text": "SOAP is faster than REST.",
-        "is_correct": false
-      },
-      {
-        "text": "REST uses XML only; SOAP uses JSON.",
-        "is_correct": false
-      },
-      {
-        "text": "They are the same.",
-        "is_correct": false
-      }
-    ],
-    "explanation": "REST is preferred for simplicity and performance; SOAP for enterprise scenarios needing strict contracts."
-  },
-  {
-    "category": "API Testing",
-    "difficulty": "Beginner",
-    "marks": 1,
-    "text": "What is an API key?",
-    "options": [
-      {
-        "text": "A unique identifier used to authenticate a client making API requests.",
-        "is_correct": true
-      },
-      {
-        "text": "The encryption key for API responses.",
-        "is_correct": false
-      },
-      {
-        "text": "The primary key of a database table.",
-        "is_correct": false
-      },
-      {
-        "text": "A URL parameter for filtering data.",
-        "is_correct": false
-      }
-    ],
-    "explanation": "API keys are passed in request headers or query parameters to authorize access to an API."
-  },
-  {
-    "category": "API Testing",
-    "difficulty": "Intermediate",
-    "marks": 2,
-    "text": "What is the difference between PUT and PATCH methods?",
-    "options": [
-      {
-        "text": "PUT replaces the entire resource; PATCH partially updates specific fields.",
-        "is_correct": true
-      },
-      {
-        "text": "PATCH creates a new resource; PUT updates it.",
-        "is_correct": false
-      },
-      {
-        "text": "They are interchangeable.",
-        "is_correct": false
-      },
-      {
-        "text": "PUT is for deleting; PATCH for creating.",
-        "is_correct": false
-      }
-    ],
-    "explanation": "Use PATCH when you only need to update a few fields rather than sending the entire resource payload."
-  },
-  {
-    "category": "API Testing",
-    "difficulty": "Intermediate",
-    "marks": 2,
-    "text": "What is OAuth 2.0?",
-    "options": [
-      {
-        "text": "An authorization framework that allows third-party apps to access user resources without exposing passwords.",
-        "is_correct": true
-      },
-      {
-        "text": "An encryption protocol for APIs.",
-        "is_correct": false
-      },
-      {
-        "text": "A version of the HTTP protocol.",
-        "is_correct": false
-      },
-      {
-        "text": "A type of API key.",
-        "is_correct": false
-      }
-    ],
-    "explanation": "OAuth 2.0 issues access tokens enabling delegated authorization without sharing credentials."
-  },
-  {
-    "category": "API Testing",
-    "difficulty": "Intermediate",
-    "marks": 2,
-    "text": "What is a JWT (JSON Web Token)?",
-    "options": [
-      {
-        "text": "A compact, self-contained token for securely transmitting information between parties as a JSON object.",
-        "is_correct": true
-      },
-      {
-        "text": "A JavaScript testing utility.",
-        "is_correct": false
-      },
-      {
-        "text": "A type of API endpoint.",
-        "is_correct": false
-      },
-      {
-        "text": "A web caching mechanism.",
-        "is_correct": false
-      }
-    ],
-    "explanation": "JWT consists of a header, payload, and signature, commonly used for API authentication and authorization."
-  },
-  {
-    "category": "API Testing",
-    "difficulty": "Intermediate",
-    "marks": 2,
-    "text": "What is API contract testing?",
-    "options": [
-      {
-        "text": "Verifying that an API adheres to its agreed-upon specification between consumer and provider.",
-        "is_correct": true
-      },
-      {
-        "text": "Legal review of API terms.",
-        "is_correct": false
-      },
-      {
-        "text": "Performance testing of APIs.",
-        "is_correct": false
-      },
-      {
-        "text": "Testing API authentication.",
-        "is_correct": false
-      }
-    ],
-    "explanation": "Contract testing prevents integration breaks by ensuring both sides conform to the agreed interface definition."
-  },
-  {
-    "category": "API Testing",
-    "difficulty": "Intermediate",
-    "marks": 2,
-    "text": "What is a query parameter?",
-    "options": [
-      {
-        "text": "A key-value pair appended to the URL after '?' to filter, sort, or customize the API response.",
-        "is_correct": true
-      },
-      {
-        "text": "A parameter inside the request body.",
-        "is_correct": false
-      },
-      {
-        "text": "An HTTP header value.",
-        "is_correct": false
-      },
-      {
-        "text": "The API version number in the URL.",
-        "is_correct": false
-      }
-    ],
-    "explanation": "Example: GET /users?role=admin&page=2 \u2014 query parameters filter the list by role and page."
-  },
-  {
-    "category": "API Testing",
-    "difficulty": "Intermediate",
-    "marks": 2,
-    "text": "What is a path parameter?",
-    "options": [
-      {
-        "text": "A variable embedded in the URL path to identify a specific resource, e.g., /users/{id}.",
-        "is_correct": true
-      },
-      {
-        "text": "A parameter in the request body.",
-        "is_correct": false
-      },
-      {
-        "text": "A query string parameter.",
-        "is_correct": false
-      },
-      {
-        "text": "An HTTP header.",
-        "is_correct": false
-      }
-    ],
-    "explanation": "Path parameters are mandatory and define which specific resource to operate on, e.g., GET /users/123."
-  },
-  {
-    "category": "API Testing",
-    "difficulty": "Intermediate",
-    "marks": 2,
-    "text": "What is API versioning?",
-    "options": [
-      {
-        "text": "Managing changes to an API by providing multiple versions so existing clients are not broken.",
-        "is_correct": true
-      },
-      {
-        "text": "Tracking the number of API calls made.",
-        "is_correct": false
-      },
-      {
-        "text": "Updating the API documentation version.",
-        "is_correct": false
-      },
-      {
-        "text": "Managing API server upgrades.",
-        "is_correct": false
-      }
-    ],
-    "explanation": "Common versioning strategies include URL versioning (/v1/users), header versioning, and query parameter versioning."
-  },
-  {
-    "category": "API Testing",
-    "difficulty": "Intermediate",
-    "marks": 2,
-    "text": "What is Swagger/OpenAPI?",
-    "options": [
-      {
-        "text": "A specification and toolset for describing, documenting, and testing RESTful APIs.",
-        "is_correct": true
-      },
-      {
-        "text": "A programming language for APIs.",
-        "is_correct": false
-      },
-      {
-        "text": "A load testing tool for APIs.",
-        "is_correct": false
-      },
-      {
-        "text": "A security scanning tool.",
-        "is_correct": false
-      }
-    ],
-    "explanation": "OpenAPI Specification defines a standard, language-agnostic interface for REST APIs."
-  },
-  {
-    "category": "API Testing",
-    "difficulty": "Intermediate",
-    "marks": 2,
-    "text": "What are Postman environment variables?",
-    "options": [
-      {
-        "text": "Variables storing values like base URLs and tokens, allowing tests to run in different environments.",
-        "is_correct": true
-      },
-      {
-        "text": "Variables defined in the operating system.",
-        "is_correct": false
-      },
-      {
-        "text": "Configuration files for Postman.",
-        "is_correct": false
-      },
-      {
-        "text": "Pre-defined headers in Postman.",
-        "is_correct": false
-      }
-    ],
-    "explanation": "Switching between dev, staging, and production environments is easy by switching Postman environments."
-  },
-  {
-    "category": "API Testing",
-    "difficulty": "Intermediate",
-    "marks": 2,
-    "text": "What is status code 401 vs 403?",
-    "options": [
-      {
-        "text": "401 means unauthenticated (no credentials); 403 means authenticated but not authorized.",
-        "is_correct": true
-      },
-      {
-        "text": "Both mean the same thing.",
-        "is_correct": false
-      },
-      {
-        "text": "401 is a server error; 403 is a client error.",
-        "is_correct": false
-      },
-      {
-        "text": "403 means not found; 401 means forbidden.",
-        "is_correct": false
-      }
-    ],
-    "explanation": "401 prompts the client to provide credentials; 403 denies access even with valid credentials."
-  },
-  {
-    "category": "API Testing",
-    "difficulty": "Intermediate",
-    "marks": 2,
-    "text": "What is API rate limiting?",
-    "options": [
-      {
-        "text": "Controlling the number of API requests a client can make within a specified time window.",
-        "is_correct": true
-      },
-      {
-        "text": "Limiting the size of the API response.",
-        "is_correct": false
-      },
-      {
-        "text": "Restricting the number of API endpoints.",
-        "is_correct": false
-      },
-      {
-        "text": "Limiting API usage to certain IP addresses.",
-        "is_correct": false
-      }
-    ],
-    "explanation": "Rate limiting protects APIs from abuse and ensures fair usage among clients."
-  },
-  {
-    "category": "API Testing",
-    "difficulty": "Intermediate",
-    "marks": 2,
-    "text": "What is idempotency in REST APIs?",
-    "options": [
-      {
-        "text": "The property where making the same request multiple times produces the same result as making it once.",
-        "is_correct": true
-      },
-      {
-        "text": "The ability of an API to handle concurrent requests.",
-        "is_correct": false
-      },
-      {
-        "text": "The consistency of API response times.",
-        "is_correct": false
-      },
-      {
-        "text": "The ability to version an API.",
-        "is_correct": false
-      }
-    ],
-    "explanation": "GET, PUT, and DELETE are idempotent; POST is not because it creates new resources on each call."
-  },
-  {
-    "category": "API Testing",
-    "difficulty": "Intermediate",
-    "marks": 2,
-    "text": "What is CORS in API testing?",
-    "options": [
-      {
-        "text": "A browser security mechanism controlling how web pages request resources from a different domain.",
-        "is_correct": true
-      },
-      {
-        "text": "A caching mechanism for APIs.",
-        "is_correct": false
-      },
-      {
-        "text": "A compression format for API responses.",
-        "is_correct": false
-      },
-      {
-        "text": "A type of API authentication.",
-        "is_correct": false
-      }
-    ],
-    "explanation": "CORS headers allow or restrict cross-domain API requests from browsers."
-  },
-  {
-    "category": "API Testing",
-    "difficulty": "Intermediate",
-    "marks": 2,
-    "text": "What is a mock server in API testing?",
-    "options": [
-      {
-        "text": "A simulated server that returns predefined responses to API requests without the real backend.",
-        "is_correct": true
-      },
-      {
-        "text": "A server used in production for testing.",
-        "is_correct": false
-      },
-      {
-        "text": "A fake database server.",
-        "is_correct": false
-      },
-      {
-        "text": "A server that monitors API traffic.",
-        "is_correct": false
-      }
-    ],
-    "explanation": "Mock servers enable frontend and test development to proceed independently of backend availability."
-  },
-  {
-    "category": "API Testing",
-    "difficulty": "Intermediate",
-    "marks": 2,
-    "text": "What is a Postman Collection?",
-    "options": [
-      {
-        "text": "A group of saved API requests organized together for testing, documentation, and sharing.",
-        "is_correct": true
-      },
-      {
-        "text": "A list of environment variables.",
-        "is_correct": false
-      },
-      {
-        "text": "A folder of test results.",
-        "is_correct": false
-      },
-      {
-        "text": "A Postman plugin.",
-        "is_correct": false
-      }
-    ],
-    "explanation": "Collections enable organizing, running, and sharing a suite of related API requests in Postman."
-  },
-  {
-    "category": "API Testing",
-    "difficulty": "Intermediate",
-    "marks": 2,
-    "text": "What is API response time and why does it matter?",
-    "options": [
-      {
-        "text": "The time taken for the server to respond; it matters for performance and user experience.",
-        "is_correct": true
-      },
-      {
-        "text": "The time to write an API test.",
-        "is_correct": false
-      },
-      {
-        "text": "The time to authenticate an API key.",
-        "is_correct": false
-      },
-      {
-        "text": "The time for the request to leave the client.",
-        "is_correct": false
-      }
-    ],
-    "explanation": "High response times indicate performance issues; APIs should respond within acceptable SLA thresholds."
-  },
-  {
-    "category": "API Testing",
-    "difficulty": "Advanced",
-    "marks": 3,
-    "text": "What is GraphQL and how does it differ from REST?",
-    "options": [
-      {
-        "text": "GraphQL allows clients to request exactly the data they need in a single query; REST has fixed endpoints.",
-        "is_correct": true
-      },
-      {
-        "text": "GraphQL is slower than REST.",
-        "is_correct": false
-      },
-      {
-        "text": "REST allows flexible queries; GraphQL uses fixed endpoints.",
-        "is_correct": false
-      },
-      {
-        "text": "They are the same technology.",
-        "is_correct": false
-      }
-    ],
-    "explanation": "GraphQL eliminates over-fetching and under-fetching by letting clients specify the exact data structure."
-  },
-  {
-    "category": "API Testing",
-    "difficulty": "Advanced",
-    "marks": 3,
-    "text": "What is API security testing?",
-    "options": [
-      {
-        "text": "Testing APIs for vulnerabilities like SQL injection, broken authentication, and excessive data exposure.",
-        "is_correct": true
-      },
-      {
-        "text": "Testing API response times only.",
-        "is_correct": false
-      },
-      {
-        "text": "Checking API documentation completeness.",
-        "is_correct": false
-      },
-      {
-        "text": "Validating API versioning.",
-        "is_correct": false
-      }
-    ],
-    "explanation": "API security testing follows OWASP API Security Top 10 guidelines to identify and mitigate vulnerabilities."
-  },
-  {
-    "category": "API Testing",
-    "difficulty": "Advanced",
-    "marks": 3,
-    "text": "What is the difference between API testing and UI testing?",
-    "options": [
-      {
-        "text": "API testing validates the business logic layer directly; UI testing validates via the graphical interface.",
-        "is_correct": true
-      },
-      {
-        "text": "API testing is slower than UI testing.",
-        "is_correct": false
-      },
-      {
-        "text": "UI testing is more reliable than API testing.",
-        "is_correct": false
-      },
-      {
-        "text": "API testing requires a browser.",
-        "is_correct": false
-      }
-    ],
-    "explanation": "API tests are faster, more stable, and provide earlier feedback, making them critical in CI/CD."
-  },
-  {
-    "category": "API Testing",
-    "difficulty": "Advanced",
-    "marks": 3,
-    "text": "What is RestAssured?",
-    "options": [
-      {
-        "text": "A Java-based library for testing RESTful APIs with a fluent, BDD-style syntax.",
-        "is_correct": true
-      },
-      {
-        "text": "A tool for testing SOAP services.",
-        "is_correct": false
-      },
-      {
-        "text": "A Postman alternative for mobile testing.",
-        "is_correct": false
-      },
-      {
-        "text": "A performance testing framework.",
-        "is_correct": false
-      }
-    ],
-    "explanation": "RestAssured simplifies API test automation in Java with readable, chainable request/response assertions."
-  },
-  {
-    "category": "API Testing",
-    "difficulty": "Advanced",
-    "marks": 3,
-    "text": "What is negative API testing?",
-    "options": [
-      {
-        "text": "Sending invalid inputs or unauthorized requests to verify the API handles errors correctly.",
-        "is_correct": true
-      },
-      {
-        "text": "Testing the API in a negative test environment.",
-        "is_correct": false
-      },
-      {
-        "text": "Testing when the server is offline.",
-        "is_correct": false
-      },
-      {
-        "text": "Running tests in reverse order.",
-        "is_correct": false
-      }
-    ],
-    "explanation": "Negative API testing verifies appropriate error codes (400, 401, 404, 422) and meaningful error messages."
-  },
-  {
-    "category": "API Testing",
-    "difficulty": "Advanced",
-    "marks": 3,
-    "text": "What is API chaining in test automation?",
-    "options": [
-      {
-        "text": "Using the response data from one API call as the input for the next API call in a sequence.",
-        "is_correct": true
-      },
-      {
-        "text": "Linking multiple API tools together.",
-        "is_correct": false
-      },
-      {
-        "text": "Connecting APIs from different providers.",
-        "is_correct": false
-      },
-      {
-        "text": "Chaining test assertions in a single request.",
-        "is_correct": false
-      }
-    ],
-    "explanation": "API chaining is essential for testing end-to-end workflows like create \u2192 get \u2192 update \u2192 delete."
-  },
-  {
-    "category": "API Testing",
-    "difficulty": "Advanced",
-    "marks": 3,
-    "text": "What is the purpose of pre-request scripts in Postman?",
-    "options": [
-      {
-        "text": "JavaScript code that runs before an API request is sent, used to set dynamic variables, tokens, or headers.",
-        "is_correct": true
-      },
-      {
-        "text": "Scripts that validate API responses.",
-        "is_correct": false
-      },
-      {
-        "text": "Scripts used to load test data.",
-        "is_correct": false
-      },
-      {
-        "text": "Scripts that automate test report generation.",
-        "is_correct": false
-      }
-    ],
-    "explanation": "Pre-request scripts dynamically generate timestamps, auth tokens, and request data."
-  },
-  {
-    "category": "API Testing",
-    "difficulty": "Advanced",
-    "marks": 3,
-    "text": "What is gRPC?",
-    "options": [
-      {
-        "text": "A high-performance RPC framework using Protocol Buffers and HTTP/2 for faster, strongly-typed communication.",
-        "is_correct": true
-      },
-      {
-        "text": "A type of REST API.",
-        "is_correct": false
-      },
-      {
-        "text": "A JSON-based protocol.",
-        "is_correct": false
-      },
-      {
-        "text": "A database query language.",
-        "is_correct": false
-      }
-    ],
-    "explanation": "gRPC is preferred for microservices communication due to its performance, streaming support, and strong typing."
-  },
-  {
-    "category": "API Testing",
-    "difficulty": "Advanced",
-    "marks": 3,
-    "text": "What is API fuzzing?",
-    "options": [
-      {
-        "text": "Sending random, unexpected, or malformed data to API endpoints to discover security vulnerabilities and crashes.",
-        "is_correct": true
-      },
-      {
-        "text": "Testing APIs with blurred or unclear data.",
-        "is_correct": false
-      },
-      {
-        "text": "Generating random test cases.",
-        "is_correct": false
-      },
-      {
-        "text": "Testing API response formatting.",
-        "is_correct": false
-      }
-    ],
-    "explanation": "API fuzzing is a security testing technique that finds edge cases and vulnerabilities from unexpected inputs."
-  },
-  {
-    "category": "API Testing",
-    "difficulty": "Advanced",
-    "marks": 3,
-    "text": "What is the significance of the Content-Type header?",
-    "options": [
-      {
-        "text": "It specifies the media type of the request/response body so the server or client can parse it correctly.",
-        "is_correct": true
-      },
-      {
-        "text": "It defines the authentication method.",
-        "is_correct": false
-      },
-      {
-        "text": "It sets the API version.",
-        "is_correct": false
-      },
-      {
-        "text": "It specifies the character encoding only.",
-        "is_correct": false
-      }
-    ],
-    "explanation": "Common Content-Type values include application/json, application/xml, and multipart/form-data."
-  },
-  {
-    "category": "API Testing",
-    "difficulty": "Advanced",
-    "marks": 3,
-    "text": "What is API throttling?",
-    "options": [
-      {
-        "text": "Deliberately slowing down the rate of API calls to prevent system overload and ensure fair resource allocation.",
-        "is_correct": true
-      },
-      {
-        "text": "Compressing API responses.",
-        "is_correct": false
-      },
-      {
-        "text": "Reducing the number of API endpoints.",
-        "is_correct": false
-      },
-      {
-        "text": "Blocking specific API consumers.",
-        "is_correct": false
-      }
-    ],
-    "explanation": "Throttling slows down requests while rate limiting blocks them after a threshold \u2014 they are different concepts."
-  },
-  {
-    "category": "API Testing",
-    "difficulty": "Advanced",
-    "marks": 3,
-    "text": "What is the difference between synchronous and asynchronous APIs?",
-    "options": [
-      {
-        "text": "Synchronous APIs wait for a response before continuing; asynchronous APIs return immediately and notify when done.",
-        "is_correct": true
-      },
-      {
-        "text": "Asynchronous APIs are always slower.",
-        "is_correct": false
-      },
-      {
-        "text": "Synchronous APIs use webhooks; async use polling.",
-        "is_correct": false
-      },
-      {
-        "text": "They produce different HTTP status codes.",
-        "is_correct": false
-      }
-    ],
-    "explanation": "Async APIs use webhooks, callbacks, or polling to notify clients when long-running operations complete."
-  },
-  {
-    "category": "API Testing",
-    "difficulty": "Advanced",
-    "marks": 3,
-    "text": "What is API load testing?",
-    "options": [
-      {
-        "text": "Testing the API performance and behavior under expected and peak load conditions.",
-        "is_correct": true
-      },
-      {
-        "text": "Testing the API with large request payloads only.",
-        "is_correct": false
-      },
-      {
-        "text": "Testing how many endpoints an API has.",
-        "is_correct": false
-      },
-      {
-        "text": "Testing the API response size.",
-        "is_correct": false
-      }
-    ],
-    "explanation": "Tools like JMeter, Gatling, and k6 are used to simulate thousands of concurrent API users."
+    "explanation": "Singleton WebDriver prevents resource leaks and ensures a single browser instance is reused.",
+    "q_id": "c48818f8"
   },
   {
     "category": "Manual Testing",
@@ -8547,7 +7666,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "A good bug report enables developers to quickly understand, reproduce, and fix the issue."
+    "explanation": "A good bug report enables developers to quickly understand, reproduce, and fix the issue.",
+    "q_id": "4e559e20"
   },
   {
     "category": "Automation Testing",
@@ -8572,7 +7692,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "Extent Reports provides rich, colorful HTML reports with status charts for automation results."
+    "explanation": "Extent Reports provides rich, colorful HTML reports with status charts for automation results.",
+    "q_id": "6d4b8cfb"
   },
   {
     "category": "Automation Testing",
@@ -8597,7 +7718,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "The Factory pattern in POM centralizes page object creation, improving flexibility and scalability."
+    "explanation": "The Factory pattern in POM centralizes page object creation, improving flexibility and scalability.",
+    "q_id": "a90536c6"
   },
   {
     "category": "Automation Testing",
@@ -8622,7 +7744,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "These are used for expensive one-time setup like launching a browser once for all tests in the class."
+    "explanation": "These are used for expensive one-time setup like launching a browser once for all tests in the class.",
+    "q_id": "a77f61e5"
   },
   {
     "category": "Automation Testing",
@@ -8647,7 +7770,8 @@
         "is_correct": false
       }
     ],
-    "explanation": "testng.xml gives testers full control over test suite configuration without changing Java code."
+    "explanation": "testng.xml gives testers full control over test suite configuration without changing Java code.",
+    "q_id": "f55d98bd"
   },
   {
     "category": "Automation Testing",
@@ -8672,81 +7796,33 @@
         "is_correct": false
       }
     ],
-    "explanation": "SoftAssert allows multiple assertions to be verified in a single test without stopping on first failure."
+    "explanation": "SoftAssert allows multiple assertions to be verified in a single test without stopping on first failure.",
+    "q_id": "37991ba7"
   },
   {
-    "category": "API Testing",
-    "difficulty": "Intermediate",
-    "marks": 2,
-    "text": "What is API monitoring?",
-    "options": [
-      {
-        "text": "Continuously checking API availability, performance, and correctness in production environments.",
-        "is_correct": true
-      },
-      {
-        "text": "Documenting all API endpoints.",
-        "is_correct": false
-      },
-      {
-        "text": "Testing APIs before deployment only.",
-        "is_correct": false
-      },
-      {
-        "text": "Reviewing API logs for errors.",
-        "is_correct": false
-      }
-    ],
-    "explanation": "API monitoring tools like Datadog and Postman Monitors detect production API failures in real time."
-  },
-  {
-    "category": "API Testing",
-    "difficulty": "Advanced",
+    "category": "Python",
+    "difficulty": "Beginner",
+    "text": "What is Python",
     "marks": 3,
-    "text": "What is the purpose of API documentation?",
+    "explanation": "",
     "options": [
       {
-        "text": "To describe available endpoints, request/response formats, authentication, and usage examples for API consumers.",
+        "text": "Programming language ",
+        "is_correct": false
+      },
+      {
+        "text": "Coding",
         "is_correct": true
       },
       {
-        "text": "To list all known API bugs.",
+        "text": "maths",
         "is_correct": false
       },
       {
-        "text": "To provide the server configuration.",
-        "is_correct": false
-      },
-      {
-        "text": "To document the API test cases.",
+        "text": "data",
         "is_correct": false
       }
     ],
-    "explanation": "Good API documentation like Swagger UI accelerates integration and reduces support overhead."
-  },
-  {
-    "category": "API Testing",
-    "difficulty": "Intermediate",
-    "marks": 2,
-    "text": "What is status code 204 in API testing?",
-    "options": [
-      {
-        "text": "No Content \u2014 the request was successful but there is no content to return in the response body.",
-        "is_correct": true
-      },
-      {
-        "text": "The resource was not found.",
-        "is_correct": false
-      },
-      {
-        "text": "The request was redirected.",
-        "is_correct": false
-      },
-      {
-        "text": "The server encountered an error.",
-        "is_correct": false
-      }
-    ],
-    "explanation": "204 No Content is commonly returned after successful DELETE or PUT requests with no response body."
+    "q_id": "68cf2301"
   }
 ]
