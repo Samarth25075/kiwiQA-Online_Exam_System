@@ -1021,7 +1021,7 @@ const QuestionBank: React.FC = () => {
                                 <h3 className="modal-title">
                                     <Icons.Bank /> Add New Question
                                 </h3>
-                                <button onClick={() => setIsAdding(false)} style={{ background: 'rgba(0,0,0,0.05)', border: 'none', cursor: 'pointer', weight: 40, height: 40, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <button onClick={() => setIsAdding(false)} style={{ background: 'rgba(0,0,0,0.05)', border: 'none', cursor: 'pointer', width: 40, height: 40, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                     ✕
                                 </button>
                             </div>
