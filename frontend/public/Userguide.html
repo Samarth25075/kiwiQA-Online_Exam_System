@@ -469,6 +469,7 @@
   .badge-red { background: #fee2e2; color: #b91c1c; }
   .badge-blue { background: #dbeafe; color: #1d4ed8; }
   .badge-teal { background: #ccfbf1; color: #0f766e; }
+  .badge-purple { background: #e0e7ff; color: #4f46e5; }
 
   /* ── FLOW DIAGRAM ── */
   .flow-diagram {
@@ -678,9 +679,8 @@
     <h1>Master <em>KiwiQA</em><br>Assessment Hub</h1>
     <p>Everything you need to create, deploy, proctor, and analyze candidate assessments — from setup to detailed reports.</p>
     <div class="hero-meta">
-      <div class="hero-pill">📅 Updated March 23, 2026</div>
+      <div class="hero-pill">📅 Updated March 24, 2026</div>
       <div class="hero-pill">🏷️ Version 1.0.0</div>
-      <div class="hero-pill">🤖 AI-Powered</div>
     </div>
   </div>
 
@@ -693,10 +693,10 @@
         <h2 class="section-title">Platform Overview</h2>
         <span class="section-icon">🏠</span>
       </div>
-      <p class="body-text">KiwiQA is a full-stack, AI-powered online examination platform designed for enterprise-grade assessment management. It enables HR teams, educators, and organizations to create, deploy, proctor, and analyze candidate assessments at scale.</p>
+      <p class="body-text">KiwiQA is a full-stack online examination platform designed for enterprise-grade assessment management. It enables HR teams, educators, and organizations to create, deploy, proctor, and analyze candidate assessments at scale.</p>
 
       <div class="feature-grid">
-        <div class="feature-card"><span class="fc-icon">🤖</span><div class="fc-title">AI Exam Generation</div><div class="fc-desc">Generate high-quality MCQ exams using Google Gemini AI by providing a topic, difficulty, and question count.</div></div>
+        <div class="feature-card"><span class="fc-icon">✨</span><div class="fc-title">Bulk Creation</div><div class="fc-desc">Import high-quality MCQ exams via JSON or CSV upload in seconds.</div></div>
         <div class="feature-card"><span class="fc-icon">📚</span><div class="fc-title">Question Bank</div><div class="fc-desc">Maintain a categorized repository of reusable questions pullable into any new exam.</div></div>
         <div class="feature-card"><span class="fc-icon">🛡️</span><div class="fc-title">Smart Proctoring</div><div class="fc-desc">Real-time webcam monitoring with face detection + tab-switch tracking for maximum integrity.</div></div>
         <div class="feature-card"><span class="fc-icon">📊</span><div class="fc-title">Deep Analytics</div><div class="fc-desc">Per-candidate reports with category-wise performance breakdown, proctoring snapshots, and pass/fail analysis.</div></div>
@@ -714,7 +714,6 @@
               <tr><td>Backend</td><td>Python FastAPI</td></tr>
               <tr><td>Database</td><td>PostgreSQL (SQLAlchemy ORM)</td></tr>
               <tr><td>Caching</td><td>Redis (FastAPICache)</td></tr>
-              <tr><td>AI Engine</td><td>Google Gemini API</td></tr>
               <tr><td>Auth</td><td>JWT + Google OAuth 2.0</td></tr>
               <tr><td>Hosting</td><td>Render.com</td></tr>
             </tbody>
@@ -756,7 +755,7 @@
             <thead><tr><th>Module</th><th>Description</th><th>Permission</th></tr></thead>
             <tbody>
               <tr><td>Dashboard</td><td>Real-time exam stats, OTP display, exam activation</td><td><span class="badge badge-green">All</span></td></tr>
-              <tr><td>Create Exam</td><td>Generate new exams (AI, Question Bank, Manual, Upload)</td><td><span class="badge badge-teal">generate exam</span></td></tr>
+              <tr><td>Create Exam</td><td>Generate new exams (Question Bank, Manual, Upload)</td><td><span class="badge badge-teal">generate exam</span></td></tr>
               <tr><td>Manage Exams</td><td>Edit, merge, duplicate, or delete existing exams</td><td><span class="badge badge-teal">manage exam</span></td></tr>
               <tr><td>Question Bank</td><td>Organize and curate reusable questions</td><td><span class="badge badge-teal">manage exam</span></td></tr>
               <tr><td>Candidates</td><td>View, edit, and manage enrolled candidates</td><td><span class="badge badge-blue">manage candidates</span></td></tr>
@@ -832,7 +831,7 @@
           <div class="step-num">2</div>
           <div class="step-body">
             <div class="step-title">Difficulty Selection</div>
-            <div class="step-desc"><span class="badge badge-green">Beginner</span> · <span class="badge badge-yellow">Intermediate</span> · <span class="badge badge-red">Advanced</span> — choose the target difficulty level for the assessment.</div>
+            <div class="step-desc"><span class="badge badge-green">Beginner</span> · <span class="badge badge-yellow">Intermediate</span> · <span class="badge badge-red">Advanced</span> · <span class="badge badge-purple">Mixed</span> — choose the target difficulty level for the assessment. (Selecting <em>Question Bank</em> defaults this to <strong>Mixed</strong>).</div>
           </div>
         </li>
         <li class="step-item">
@@ -846,21 +845,21 @@
           <div class="step-num">4</div>
           <div class="step-body">
             <div class="step-title">Question Source</div>
-            <div class="step-desc">Choose from: 🤖 <strong>AI Path</strong> (Google Gemini), 📚 <strong>Question Bank</strong>, ✏️ <strong>Manual entry</strong>, or 📤 <strong>Upload</strong> (JSON / CSV).</div>
+            <div class="step-desc">Choose from: 📚 <strong>Question Bank</strong>, ✏️ <strong>Manual entry</strong>, or 📤 <strong>Upload</strong> (JSON / CSV).</div>
           </div>
         </li>
         <li class="step-item">
           <div class="step-num">5</div>
           <div class="step-body">
             <div class="step-title">Review & Publish</div>
-            <div class="step-desc">Preview all questions, edit options, regenerate specific questions, then click <strong>"Publish Exam"</strong> to deploy.</div>
+            <div class="step-desc">Preview all questions, edit options, or remove questions, then click <strong>"Publish Exam"</strong> to deploy.</div>
           </div>
         </li>
       </ul>
 
       <div class="callout callout-tip">
         <span class="callout-icon">💡</span>
-        <div>AI generation typically takes <strong>10–30 seconds</strong> depending on question count. Animated tips display during generation (e.g., "Analysing subject matter depth…").</div>
+        <div>Upload large question sets in bulk using the <strong>JSON/CSV</strong> path to save time during exam creation.</div>
       </div>
 
       <div class="subsection" style="margin-top:20px">
@@ -869,8 +868,7 @@
           <table>
             <thead><tr><th>Source</th><th>How It Works</th></tr></thead>
             <tbody>
-              <tr><td>🤖 AI Path</td><td>Powered by Google Gemini. Provide topic + difficulty — AI generates questions with answers and explanations automatically.</td></tr>
-              <tr><td>📚 Question Bank</td><td>Select from your curated question bank. Filter by category, difficulty, and marks.</td></tr>
+              <tr><td>📚 Question Bank</td><td>Select from your curated question bank. Filter by category and marks (defaults to <strong>Mixed</strong> difficulty for balanced selection).</td></tr>
               <tr><td>✏️ Manual</td><td>Write each question, 4 options, mark the correct answer, and add an optional explanation.</td></tr>
               <tr><td>📤 Upload</td><td>Import from a <strong>JSON</strong> or <strong>CSV</strong> file for bulk creation.</td></tr>
             </tbody>
@@ -1094,7 +1092,7 @@
             <thead><tr><th>Permission</th><th>Grants Access To</th></tr></thead>
             <tbody>
               <tr><td><code>manage exam</code></td><td>Create, edit, delete, and activate exams</td></tr>
-              <tr><td><code>generate exam</code></td><td>Use AI to generate exam questions</td></tr>
+              <tr><td><code>generate exam</code></td><td>Create and publish assessment exams</td></tr>
               <tr><td><code>manage candidates</code></td><td>View, edit, manage candidates and results</td></tr>
               <tr><td><code>manage users</code></td><td>Add, edit, remove team members</td></tr>
             </tbody>
@@ -1196,8 +1194,8 @@
       </div>
 
       <div class="faq-item">
-        <div class="faq-q" onclick="toggleFaq(this)">Can I combine AI and Question Bank questions? <span class="faq-caret">▼</span></div>
-        <div class="faq-a">Each exam uses one source at creation time, but you can merge multiple exams (one AI-generated, one from Question Bank) using the <strong>Merge</strong> feature in Manage Exams.</div>
+        <div class="faq-q" onclick="toggleFaq(this)">Can I combine questions from different sources? <span class="faq-caret">▼</span></div>
+        <div class="faq-a">Yes. Each exam uses one source at creation time (Manual, Bank, or Upload), but you can merge multiple exams using the <strong>Merge</strong> feature in Manage Exams.</div>
       </div>
 
       <div class="faq-item">

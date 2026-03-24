@@ -93,7 +93,7 @@ def get_bank_questions(categories: List[str], difficulty: str, count: int, confi
             filtered = [q for q in bank if q.get("category") in categories]
         
         # Optional difficulty filter
-        if difficulty:
+        if difficulty and difficulty.lower() != "mixed":
             diff_filtered = [q for q in filtered if q.get("difficulty", "").lower() == difficulty.lower()]
             # If we have enough with specific difficulty, use them. Otherwise fallback to categories-only.
             if len(diff_filtered) >= count:
@@ -118,8 +118,12 @@ def get_bank_questions(categories: List[str], difficulty: str, count: int, confi
             cat_qs = [q for q in bank if q.get("category", "General").lower() == cat.lower()]
             
             # Prefer matching difficulty but fall back to any in category to satisfy count
-            pref_qs = [q for q in cat_qs if q.get("difficulty", "").lower() == difficulty.lower()]
-            other_qs = [q for q in cat_qs if q.get("difficulty", "").lower() != difficulty.lower()]
+            if difficulty and difficulty.lower() != "mixed":
+                pref_qs = [q for q in cat_qs if q.get("difficulty", "").lower() == difficulty.lower()]
+                other_qs = [q for q in cat_qs if q.get("difficulty", "").lower() != difficulty.lower()]
+            else:
+                pref_qs = []
+                other_qs = cat_qs
             
             combined_qs = pref_qs + other_qs
             random.shuffle(combined_qs)
