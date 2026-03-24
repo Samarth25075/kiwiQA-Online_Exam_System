@@ -397,27 +397,8 @@ export default function ManageCandidates() {
                                 <label className="mc-label">Email Address</label>
                                 <input className="mc-input" type="email" placeholder="john@example.com" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} required />
                             </div>
-                            <div className="mc-field">
-                                <label className="mc-label">Phone Number</label>
-                                <input className="mc-input" placeholder="+91 00000 00000" value={formData.phone_number} onChange={e => setFormData({ ...formData, phone_number: e.target.value })} />
-                            </div>
-                            <div className="mc-field">
-                                <label className="mc-label">Date of Birth</label>
-                                <input className="mc-input" type="date" value={formData.dob} onChange={e => setFormData({ ...formData, dob: e.target.value })} />
-                            </div>
-                            <div className="mc-field">
-                                <label className="mc-label">Gender</label>
-                                <select className="mc-input" value={formData.gender} onChange={e => setFormData({ ...formData, gender: e.target.value })}>
-                                    <option value="">Select</option>
-                                    <option value="Male">Male</option>
-                                    <option value="Female">Female</option>
-                                    <option value="Other">Other</option>
-                                </select>
-                            </div>
-                            <div className="mc-field">
-                                <label className="mc-label">Address</label>
-                                <input className="mc-input" placeholder="City, Country" value={formData.address} onChange={e => setFormData({ ...formData, address: e.target.value })} />
-                            </div>
+                            {/* Phone number hidden from UI per request */}
+                            {/* Personal information fields hidden from UI per request */}
                             <div className="mc-field" style={{ gridColumn: 'span 2' }}>
                                 <label className="mc-label">Upload CV / Resume</label>
                                 <input className="mc-input" type="file" accept=".pdf,.doc,.docx" style={{ padding: '7px 10px' }} onChange={e => setCvFile(e.target.files?.[0] || null)} />
@@ -443,7 +424,6 @@ export default function ManageCandidates() {
                             <thead>
                                 <tr>
                                     <th>Candidate</th>
-                                    <th>Profile Details</th>
                                     <th>Contact & CV</th>
                                     <th>Assigned Exams</th>
                                     <th>Status</th>
@@ -469,24 +449,9 @@ export default function ManageCandidates() {
                                                 </div>
                                             </div>
                                         </td>
-                                        <td>
-                                            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                                                <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text)' }}>
-                                                    <span style={{ color: 'var(--text-muted)', fontSize: 9, textTransform: 'uppercase', marginRight: 4 }}>Gender:</span>
-                                                    {group.gender || '—'}
-                                                </div>
-                                                <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text)' }}>
-                                                    <span style={{ color: 'var(--text-muted)', fontSize: 9, textTransform: 'uppercase', marginRight: 4 }}>DOB:</span>
-                                                    {group.dob || '—'}
-                                                </div>
-                                                <div style={{ fontSize: 10, color: 'var(--text-muted)', maxWidth: 150, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={group.address}>
-                                                    📍 {group.address || 'No address'}
-                                                </div>
-                                            </div>
-                                        </td>
+                                        {/* Profile Details column hidden per request */}
                                         <td>
                                             <div className="mc-name">{group.email}</div>
-                                            <div className="mc-sub">{group.phone_number || 'No phone'}</div>
                                             {group.cv_url && (
                                                 <a href={group.cv_url} target="_blank" rel="noreferrer" className="mc-resume-link" style={{ marginTop: '4px' }}>
                                                     <Icons.FileText /> CV
