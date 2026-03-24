@@ -25,85 +25,94 @@ interface ReportData {
 }
 
 const STYLES = `
-.report-container { max-width: 1000px; margin: 0 auto; padding: 40px 24px; animation: reportFade 0.7s cubic-bezier(0.16, 1, 0.3, 1); }
-@keyframes reportFade { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.report-container { 
+    max-width: 1000px; 
+    margin: 0 auto; 
+    padding: 40px 24px; 
+    color: #333;
+    background: #fff;
+}
 
-.report-top-branding { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; padding-bottom: 24px; border-bottom: 2px solid var(--border); }
-.company-logo { height: 48px; object-fit: contain; filter: brightness(1.1); }
-.report-id { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); font-weight: 700; opacity: 0.6; letter-spacing: 0.05em; }
+.report-top-branding { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    margin-bottom: 40px; 
+    padding-bottom: 24px; 
+    border-bottom: 1px solid #ddd; 
+}
+.company-logo { height: 48px; object-fit: contain; }
+.report-id { font-family: 'monospace'; font-size: 11px; color: #666; font-weight: 700; letter-spacing: 0.05em; }
 
 .report-header { 
-    background: var(--bg); 
-    border: 1px solid var(--border); 
-    border-radius: 24px; 
-    padding: 40px; 
+    background: #f9f9f9; 
+    border: 1px solid #eee; 
+    padding: 30px; 
     margin-bottom: 32px; 
-    box-shadow: 0 12px 40px rgba(0,0,0,0.06); 
     display: flex; 
     gap: 40px; 
     align-items: center; 
-    position: relative; 
-    overflow: hidden; 
 }
-.header-glass { position: absolute; top: -100px; right: -100px; width: 400px; height: 400px; background: radial-gradient(circle, color-mix(in srgb, var(--primary) 12%, transparent) 0%, transparent 70%); pointer-events: none; }
 
-.header-info { flex: 1; z-index: 2; }
-.report-title { font-family: 'Outfit', sans-serif; font-size: 34px; font-weight: 900; color: var(--text); margin: 6px 0 10px; letter-spacing: -0.02em; line-height: 1.1; }
-.report-badge { padding: 5px 14px; border-radius: 100px; font-size: 10px; font-weight: 800; text-transform: uppercase; background: var(--bg-neutral); color: var(--primary); border: 1px solid color-mix(in srgb, var(--primary) 20%, transparent); display: inline-block; letter-spacing: 0.08em; }
+.header-info { flex: 1; }
+.report-title { font-size: 30px; font-weight: 700; color: #000; margin: 6px 0 10px; }
+.report-badge { 
+    padding: 4px 10px; 
+    font-size: 10px; 
+    font-weight: 700; 
+    text-transform: uppercase; 
+    background: #eee; 
+    color: #333; 
+    border: 1px solid #ccc; 
+    display: inline-block; 
+}
 
-.status-box { text-align: right; min-width: 160px; z-index: 2; }
-.status-val { font-family: 'Outfit', sans-serif; font-size: 30px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.02em; }
-.status-val.pass { color: #059669; }
-.status-val.fail { color: #dc2626; }
-.status-val.eliminated { color: #d97706; }
+.status-box { text-align: right; min-width: 160px; }
+.status-val { font-size: 28px; font-weight: 700; text-transform: uppercase; }
+.status-val.pass { color: #000; }
+.status-val.fail { color: #000; }
+.status-val.eliminated { color: #000; }
 
-.section-card { background: var(--bg); border: 1px solid var(--border); border-radius: 24px; padding: 40px; margin-bottom: 32px; box-shadow: var(--shadow-sm); }
-.section-title { font-family: 'Outfit', sans-serif; font-size: 22px; font-weight: 800; color: var(--text); margin-bottom: 32px; display: flex; align-items: center; gap: 12px; letter-spacing: -0.01em; }
-.section-title::before { content: ''; width: 4px; height: 24px; background: var(--primary); border-radius: 4px; }
+.section-card { background: #fff; border: 1px solid #eee; padding: 30px; margin-bottom: 32px; }
+.section-title { font-size: 20px; font-weight: 700; color: #000; margin-bottom: 24px; border-bottom: 2px solid #333; padding-bottom: 8px; }
 
 .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 32px; }
-.stat-pill { background: var(--bg-neutral); border: 1px solid var(--border); border-radius: 20px; padding: 24px; text-align: center; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
-.stat-pill:hover { transform: translateY(-3px); border-color: var(--primary); box-shadow: var(--shadow-md); background: var(--bg); }
-.stat-val { font-family: 'Outfit', sans-serif; font-size: 28px; font-weight: 900; color: var(--text); line-height: 1; }
-.stat-label { font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 10px; opacity: 0.8; }
+.stat-pill { background: #fdfdfd; border: 1px solid #eee; padding: 20px; text-align: center; }
+.stat-val { font-size: 24px; font-weight: 700; color: #000; }
+.stat-label { font-size: 10px; font-weight: 700; color: #666; text-transform: uppercase; margin-top: 8px; }
 
-.cat-table { width: 100%; border-collapse: separate; border-spacing: 0; }
-.cat-table th { text-align: left; padding: 16px; font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--text-muted); border-bottom: 2px solid var(--border); letter-spacing: 0.05em; }
-.cat-table td { padding: 16px; border-bottom: 1px solid var(--border); font-size: 14px; font-weight: 500; }
-.cat-table tr:last-child td { border-bottom: none; }
-.cat-table .cat-name { font-weight: 700; color: var(--text); font-size: 15px; }
+.cat-table { width: 100%; border-collapse: collapse; }
+.cat-table th { text-align: left; padding: 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #333; border-bottom: 2px solid #ddd; }
+.cat-table td { padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; }
+.cat-table .cat-name { font-weight: 700; color: #000; }
 
-.score-cell { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--primary); }
+.score-cell { font-weight: 700; color: #000; }
 
-.proctor-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
-.proctor-frame { background: var(--bg-neutral); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; position: relative; aspect-ratio: 4/3; box-shadow: var(--shadow-sm); }
-.proctor-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
-.proctor-frame:hover .proctor-img { transform: scale(1.05); }
-.proctor-label { position: absolute; bottom: 12px; left: 12px; right: 12px; background: rgba(0,0,0,0.7); color: white; padding: 6px 10px; border-radius: 8px; font-size: 10px; font-weight: 800; text-align: center; backdrop-filter: blur(8px); }
+.proctor-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.proctor-frame { background: #eee; border: 1px solid #ddd; overflow: hidden; position: relative; aspect-ratio: 4/3; }
+.proctor-img { width: 100%; height: 100%; object-fit: cover; }
+.proctor-label { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.9); color: #000; padding: 4px; font-size: 9px; font-weight: 700; text-align: center; border-top: 1px solid #ddd; }
 
-.q-item { border-left: 4px solid var(--border); padding: 0 0 8px 24px; margin-bottom: 40px; position: relative; }
-.q-item::before { content: ''; position: absolute; left: -8px; top: 0; width: 12px; height: 12px; border-radius: 50%; background: var(--border); }
-.q-item.correct { border-left-color: #10b981; }
-.q-item.correct::before { background: #10b981; }
-.q-item.incorrect { border-left-color: #ef4444; }
-.q-item.incorrect::before { background: #ef4444; }
+.q-item { border-left: 3px solid #eee; padding: 0 0 10px 20px; margin-bottom: 30px; }
+.q-item.correct { border-left-color: #ddd; }
+.q-item.incorrect { border-left-color: #ddd; }
 
-.q-text { font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 700; margin-bottom: 16px; color: var(--text); line-height: 1.5; }
-.opt-list { display: grid; gap: 10px; }
-.opt-item { padding: 12px 16px; border: 1px solid var(--border); border-radius: 12px; font-size: 14px; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s; }
-.opt-item.selected { background: #fef2f2; border-color: #fecaca; }
-.opt-item.correct { background: #f0fdf4; border-color: #bbf7d0; color: #065f46; font-weight: 600; }
-.opt-item.both { background: #ecfdf5; border-color: #10b981; color: #065f46; font-weight: 700; box-shadow: 0 0 0 1px #10b981; }
+.q-text { font-size: 15px; font-weight: 700; margin-bottom: 12px; color: #000; }
+.opt-list { display: grid; gap: 8px; }
+.opt-item { padding: 10px 14px; border: 1px solid #eee; font-size: 13px; display: flex; justify-content: space-between; align-items: center; }
+.opt-item.selected { background: #f9f9f9; border-color: #ddd; }
+.opt-item.correct { border-color: #000; font-weight: 700; }
+.opt-item.both { border-color: #000; background: #f0f0f0; font-weight: 700; }
 
 .no-print-controls { text-align: center; padding: 40px 0 80px; display: flex; justify-content: center; gap: 16px; }
+.basic-btn { padding: 12px 24px; border: 1px solid #333; background: #fff; color: #333; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+.basic-btn:hover { background: #333; color: #fff; }
 
 @media print {
-    body { background: white !important; -webkit-print-color-adjust: exact; }
-    .report-container { padding: 0; margin: 0; max-width: 100%; box-shadow: none; }
-    .no-print, .admin-sidebar, .admin-header, .no-print-controls { display: none !important; }
-    .section-card, .report-header { box-shadow: none; border: 1px solid #eee; break-inside: avoid; }
-    .report-header { background: #fafafa !important; }
-    .q-item { break-inside: avoid; }
+    body { background: white !important; }
+    .report-container { padding: 0; margin: 0; max-width: 100%; }
+    .no-print, .no-print-controls { display: none !important; }
+    .section-card, .report-header { border: 1px solid #eee; break-inside: avoid; }
 }
 `;
 
@@ -172,7 +181,7 @@ export default function CandidateReport() {
     const status = getStatus(scorePct, candidate.violations || 0, passing_score || 50);
 
     return (
-        <AdminLayout>
+        <AdminLayout plain={true}>
             <style>{STYLES}</style>
             <div className="report-container">
                 <div className="report-top-branding">
@@ -181,7 +190,6 @@ export default function CandidateReport() {
                 </div>
 
                 <header className="report-header">
-                    <div className="header-glass" />
                     
                     <div className="header-info">
                         <div className="report-badge">Confidential Candidate Evaluation</div>
@@ -245,8 +253,8 @@ export default function CandidateReport() {
                                         <td style={{ textAlign: 'center' }} className="score-cell">{data.correct.toFixed(1)}</td>
                                         <td>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                                <div style={{ flex: 1, height: 6, background: 'var(--bg-neutral)', borderRadius: 10, overflow: 'hidden' }}>
-                                                    <div style={{ height: '100%', width: `${pct}%`, background: pct < 40 ? '#ef4444' : pct < 70 ? '#f59e0b' : '#10b981', borderRadius: 10 }} />
+                                                <div style={{ flex: 1, height: 6, background: '#eee', borderRadius: 10, overflow: 'hidden' }}>
+                                                    <div style={{ height: '100%', width: `${pct}%`, background: '#333', borderRadius: 10 }} />
                                                 </div>
                                                 <span style={{ fontSize: 11, fontWeight: 800 }}>{pct}%</span>
                                             </div>
@@ -340,14 +348,13 @@ export default function CandidateReport() {
 
                 <div className="no-print-controls">
                     <button 
-                        className="test-btn" 
+                        className="basic-btn" 
                         onClick={() => window.print()} 
-                        style={{ padding: '14px 40px', background: 'var(--primary)', color: 'white' }}
                     >
                          Print Official Report
                     </button>
                     <button 
-                        className="test-btn" 
+                        className="basic-btn" 
                         onClick={async () => {
                             if (window.confirm("This will permanently delete all snapshots for this candidate. Verify you have saved or printed the report first. Proceed?")) {
                                 const token = localStorage.getItem("access_token");
@@ -362,14 +369,13 @@ export default function CandidateReport() {
                                 } catch (err) { console.error(err); }
                             }
                         }} 
-                        style={{ padding: '14px 32px', background: '#fee2e2', color: '#991b1b', border: '1px solid #fecaca' }}
+                        style={{ border: '1px solid #ef4444', color: '#ef4444' }}
                     >
                          Purge Proctoring Media
                     </button>
                     <button 
-                        className="test-btn secondary" 
+                        className="basic-btn" 
                         onClick={() => navigate("/manage-candidates")} 
-                        style={{ padding: '14px 40px' }}
                     >
                          Return
                     </button>

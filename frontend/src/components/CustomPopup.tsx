@@ -68,7 +68,7 @@ export default function CustomPopup({
                     animation: overlayIn 0.2s ease-out;
                 }
                 .custom-popup-box {
-                    background: #ffffff;
+                    background: var(--bg, #ffffff);
                     width: 90%;
                     max-width: 420px;
                     border-radius: 16px;
@@ -82,7 +82,7 @@ export default function CustomPopup({
                     width: 64px;
                     height: 64px;
                     border-radius: 50%;
-                    background: linear-gradient(135deg, color-mix(in srgb, var(--primary, #1c848f) 10%, #fff), color-mix(in srgb, var(--primary, #1c848f) 20%, #fff));
+                    background: var(--bg-neutral, #f8fafc);
                     display: flex;
                     align-items: center;
                     justify-content: center;
@@ -127,6 +127,7 @@ export default function CustomPopup({
                 }
                 .confirm-btn:hover {
                     background: var(--primary-hover, #156d77);
+                    color: white;
                     transform: translateY(-2px);
                     box-shadow: 0 6px 16px rgba(28, 132, 143, 0.35);
                 }
@@ -139,7 +140,8 @@ export default function CustomPopup({
                     border: 1px solid var(--border, #e2e8f0);
                 }
                 .cancel-btn:hover {
-                    background: #e2e8f0;
+                    background: var(--border, #e2e8f0);
+                    color: var(--text);
                 }
                 @keyframes overlayIn {
                     from { opacity: 0; }

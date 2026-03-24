@@ -40,9 +40,10 @@ const Icons = {
 
 interface AdminLayoutProps {
     children: React.ReactNode;
+    plain?: boolean;
 }
 
-const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
+const AdminLayout: React.FC<AdminLayoutProps> = ({ children, plain = false }) => {
     const navigate = useNavigate();
     const location = useLocation();
     const [profile, setProfile] = React.useState<{ email: string; role: string; permissions: string[] } | null>(null);
@@ -220,7 +221,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     }, [location.pathname]);
 
     return (
-        <div className="al-layout-wrap">
+        <div className={`al-layout-wrap ${plain ? 'plain' : ''}`}>
             <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&family=Inter:wght@400;500;600;700;800&display=swap');
 
@@ -454,126 +455,139 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                     margin: 0 auto;
                     width: 100%;
                 }
+
+                .al-layout-wrap.plain .al-main-content {
+                    width: 100%;
+                }
+                .al-layout-wrap.plain .al-content-inner {
+                    padding: 0;
+                    margin: 0;
+                    max-width: none;
+                }
             `}</style>
 
             {/* ── Skip to content (keyboard accessibility) ── */}
-            <a href="#main-content" className="skip-to-content">Skip to main content</a>
+            {!plain && <a href="#main-content" className="skip-to-content">Skip to main content</a>}
 
             <div className={`al-sidebar-overlay ${sidebarOpen ? 'open' : ''}`} onClick={() => setSidebarOpen(false)} />
 
-            <aside className={`al-sidebar ${sidebarOpen ? 'open' : ''}`} aria-label="Main navigation">
-                <div
-                    className="al-logo-area"
-                    onClick={() => { navigate("/dashboard"); setSidebarOpen(false); }}
-                    onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { navigate("/dashboard"); setSidebarOpen(false); } }}
-                    tabIndex={0}
-                    role="button"
-                    aria-label="Go to Dashboard"
-                >
-                    <img src={logo} alt="KiwiQA Logo" />
-                </div>
+            {!plain && (
+              <aside className={`al-sidebar ${sidebarOpen ? 'open' : ''}`} aria-label="Main navigation">
+                  <div
+                      className="al-logo-area"
+                      onClick={() => { navigate("/dashboard"); setSidebarOpen(false); }}
+                      onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { navigate("/dashboard"); setSidebarOpen(false); } }}
+                      tabIndex={0}
+                      role="button"
+                      aria-label="Go to Dashboard"
+                  >
+                      <img src={logo} alt="KiwiQA Logo" />
+                  </div>
 
-                <nav className="al-nav">
-                    <span className="al-nav-label">Main</span>
-                    {navItems.slice(0, 1).map(item => (
-                        <div
-                            key={item.path}
-                            role="button"
-                            tabIndex={0}
-                            className={`al-nav-item ${isActive(item.path) ? "active" : ""}`}
-                            onClick={() => { navigate(item.path); setSidebarOpen(false); }}
-                            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate(item.path); setSidebarOpen(false); focusMain(); } }}
-                            aria-current={isActive(item.path) ? 'page' : undefined}
-                        >
-                            <span className="al-nav-icon"><item.icon /></span>
-                            {item.label}
-                        </div>
-                    ))}
+                  <nav className="al-nav">
+                      <span className="al-nav-label">Main</span>
+                      {navItems.slice(0, 1).map(item => (
+                          <div
+                              key={item.path}
+                              role="button"
+                              tabIndex={0}
+                              className={`al-nav-item ${isActive(item.path) ? "active" : ""}`}
+                              onClick={() => { navigate(item.path); setSidebarOpen(false); }}
+                              onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate(item.path); setSidebarOpen(false); focusMain(); } }}
+                              aria-current={isActive(item.path) ? 'page' : undefined}
+                          >
+                              <span className="al-nav-icon"><item.icon /></span>
+                              {item.label}
+                          </div>
+                      ))}
 
-                    <span className="al-nav-label">Assessments</span>
-                    {navItems.slice(1, 4).map(item => (
-                        <div
-                            key={item.path}
-                            role="button"
-                            tabIndex={0}
-                            className={`al-nav-item ${isActive(item.path) ? "active" : ""} ${item.perm && !hasPermission(item.perm) ? "locked" : ""}`}
-                            onClick={() => item.perm ? navTo(item.path, item.perm, item.task!) : (navigate(item.path), setSidebarOpen(false))}
-                            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); item.perm ? navTo(item.path, item.perm, item.task!) : (navigate(item.path), setSidebarOpen(false)); } }}
-                            aria-current={isActive(item.path) ? 'page' : undefined}
-                            aria-disabled={item.perm && !hasPermission(item.perm) ? true : undefined}
-                        >
-                            <span className="al-nav-icon"><item.icon /></span>
-                            {item.label}
-                            {item.perm && !hasPermission(item.perm) && <span className="al-lock-badge"><Icons.Lock /></span>}
-                        </div>
-                    ))}
+                      <span className="al-nav-label">Assessments</span>
+                      {navItems.slice(1, 4).map(item => (
+                          <div
+                              key={item.path}
+                              role="button"
+                              tabIndex={0}
+                              className={`al-nav-item ${isActive(item.path) ? "active" : ""} ${item.perm && !hasPermission(item.perm) ? "locked" : ""}`}
+                              onClick={() => item.perm ? navTo(item.path, item.perm, item.task!) : (navigate(item.path), setSidebarOpen(false))}
+                              onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); item.perm ? navTo(item.path, item.perm, item.task!) : (navigate(item.path), setSidebarOpen(false)); } }}
+                              aria-current={isActive(item.path) ? 'page' : undefined}
+                              aria-disabled={item.perm && !hasPermission(item.perm) ? true : undefined}
+                          >
+                              <span className="al-nav-icon"><item.icon /></span>
+                              {item.label}
+                              {item.perm && !hasPermission(item.perm) && <span className="al-lock-badge"><Icons.Lock /></span>}
+                          </div>
+                      ))}
 
-                    <span className="al-nav-label">People</span>
-                    {navItems.slice(4, 7).map(item => (
-                        <div
-                            key={item.path}
-                            role="button"
-                            tabIndex={0}
-                            className={`al-nav-item ${isActive(item.path) ? "active" : ""} ${item.perm && !hasPermission(item.perm) ? "locked" : ""}`}
-                            onClick={() => item.perm ? navTo(item.path, item.perm, item.task!) : (navigate(item.path), setSidebarOpen(false))}
-                            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); item.perm ? navTo(item.path, item.perm, item.task!) : (navigate(item.path), setSidebarOpen(false)); } }}
-                            aria-current={isActive(item.path) ? 'page' : undefined}
-                            aria-disabled={item.perm && !hasPermission(item.perm) ? true : undefined}
-                        >
-                            <span className="al-nav-icon"><item.icon /></span>
-                            {item.label}
-                            {item.perm && !hasPermission(item.perm) && <span className="al-lock-badge"><Icons.Lock /></span>}
-                        </div>
-                    ))}
+                      <span className="al-nav-label">People</span>
+                      {navItems.slice(4, 7).map(item => (
+                          <div
+                              key={item.path}
+                              role="button"
+                              tabIndex={0}
+                              className={`al-nav-item ${isActive(item.path) ? "active" : ""} ${item.perm && !hasPermission(item.perm) ? "locked" : ""}`}
+                              onClick={() => item.perm ? navTo(item.path, item.perm, item.task!) : (navigate(item.path), setSidebarOpen(false))}
+                              onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); item.perm ? navTo(item.path, item.perm, item.task!) : (navigate(item.path), setSidebarOpen(false)); } }}
+                              aria-current={isActive(item.path) ? 'page' : undefined}
+                              aria-disabled={item.perm && !hasPermission(item.perm) ? true : undefined}
+                          >
+                              <span className="al-nav-icon"><item.icon /></span>
+                              {item.label}
+                              {item.perm && !hasPermission(item.perm) && <span className="al-lock-badge"><Icons.Lock /></span>}
+                          </div>
+                      ))}
 
-                    <span className="al-nav-label">System</span>
-                    {navItems.slice(7).map(item => (
-                        <div
-                            key={item.path}
-                            role="button"
-                            tabIndex={0}
-                            className={`al-nav-item ${isActive(item.path) ? "active" : ""}`}
-                            onClick={() => {
-                                if (item.isExternal) {
-                                    window.open(item.externalPath, "_blank");
-                                } else {
-                                    navigate(item.path);
-                                }
-                                setSidebarOpen(false);
-                            }}
-                            onKeyDown={e => {
-                                if (e.key === 'Enter' || e.key === ' ') {
-                                    e.preventDefault();
-                                    if (item.isExternal) {
-                                        window.open(item.externalPath, "_blank");
-                                    } else {
-                                        navigate(item.path);
-                                    }
-                                    setSidebarOpen(false);
-                                }
-                            }}
-                            aria-current={isActive(item.path) ? 'page' : undefined}
-                        >
-                            <span className="al-nav-icon"><item.icon /></span>
-                            {item.label}
-                        </div>
-                    ))}
-                </nav>
+                      <span className="al-nav-label">System</span>
+                      {navItems.slice(7).map(item => (
+                          <div
+                              key={item.path}
+                              role="button"
+                              tabIndex={0}
+                              className={`al-nav-item ${isActive(item.path) ? "active" : ""}`}
+                              onClick={() => {
+                                  if (item.isExternal) {
+                                      window.open(item.externalPath, "_blank");
+                                  } else {
+                                      navigate(item.path);
+                                  }
+                                  setSidebarOpen(false);
+                              }}
+                              onKeyDown={e => {
+                                  if (e.key === 'Enter' || e.key === ' ') {
+                                      e.preventDefault();
+                                      if (item.isExternal) {
+                                          window.open(item.externalPath, "_blank");
+                                      } else {
+                                          navigate(item.path);
+                                      }
+                                      setSidebarOpen(false);
+                                  }
+                              }}
+                              aria-current={isActive(item.path) ? 'page' : undefined}
+                          >
+                              <span className="al-nav-icon"><item.icon /></span>
+                              {item.label}
+                          </div>
+                      ))}
+                  </nav>
 
-                <div className="al-logout-area">
-                    <button className="al-logout-btn" onClick={handleLogout}>
-                        <Icons.Logout /> Logout
-                    </button>
-                </div>
-            </aside>
+                  <div className="al-logout-area">
+                      <button className="al-logout-btn" onClick={handleLogout}>
+                          <Icons.Logout /> Logout
+                      </button>
+                  </div>
+              </aside>
+            )}
 
             <main className="al-main-content">
-                <header className="al-mobile-header">
-                    <img src={logo} alt="Logo" style={{ height: 40 }} />
-                    <button className="al-menu-toggle" onClick={() => setSidebarOpen(true)}>
-                        <Icons.Menu />
-                    </button>
-                </header>
+                {!plain && (
+                  <header className="al-mobile-header">
+                      <img src={logo} alt="Logo" style={{ height: 40 }} />
+                      <button className="al-menu-toggle" onClick={() => setSidebarOpen(true)}>
+                          <Icons.Menu />
+                      </button>
+                  </header>
+                )}
 
                 <div className="al-content-inner" id="main-content" tabIndex={-1}>
                     {children}

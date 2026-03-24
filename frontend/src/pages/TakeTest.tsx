@@ -315,6 +315,7 @@ const STYLES = `
 
 .test-btn:hover {
   background: var(--primary-hover);
+  color: white;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(28, 132, 143, 0.2);
 }
@@ -344,6 +345,7 @@ const STYLES = `
 
 .test-btn.finish:hover {
   background: var(--secondary-hover);
+  color: white;
   box-shadow: 0 4px 12px rgba(147, 199, 61, 0.2);
 }
 
