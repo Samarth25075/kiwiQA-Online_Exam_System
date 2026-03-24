@@ -190,7 +190,7 @@ export default function CandidateReport() {
                 </div>
 
                 <header className="report-header">
-                    
+
                     <div className="header-info">
                         <div className="report-badge">Confidential Candidate Evaluation</div>
                         <h1 className="report-title">{candidate.name}</h1>
@@ -323,21 +323,11 @@ export default function CandidateReport() {
                         </div>
                     ) : (
                         <>
-                            <div className="proctor-grid" style={{ gridTemplateColumns: proctoring.end ? 'repeat(3, 1fr)' : 'repeat(2, 1fr)' }}>
+                            <div className="proctor-grid" style={{ gridTemplateColumns: 'repeat(1, 1fr)', maxWidth: '400px', margin: '0 auto' }}>
                                 <div className="proctor-frame">
                                     {proctoring.start ? <img src={proctoring.start} className="proctor-img" alt="Start" /> : <div style={{ display: 'grid', placeItems: 'center', height: '100%', color: 'var(--text-muted)' }}>No Record</div>}
                                     <div className="proctor-label">INITIAL PHASE · Q1 Snapshot</div>
                                 </div>
-                                <div className="proctor-frame">
-                                    {proctoring.mid ? <img src={proctoring.mid} className="proctor-img" alt="Mid" /> : <div style={{ display: 'grid', placeItems: 'center', height: '100%', color: 'var(--text-muted)' }}>No Record</div>}
-                                    <div className="proctor-label">PROGRESSION PHASE · Q{Math.floor(questions.length / 2) + 2} Snapshot</div>
-                                </div>
-                                {proctoring.end && (
-                                    <div className="proctor-frame">
-                                        <img src={proctoring.end} className="proctor-img" alt="End" />
-                                        <div className="proctor-label">FINAL PHASE · Submission Snapshot</div>
-                                    </div>
-                                )}
                             </div>
                             <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 16, fontStyle: 'italic', fontWeight: 500 }}>
                                 * Automated snapshots captured using AI-driven proctoring technology to maintain assessment integrity.
@@ -347,14 +337,14 @@ export default function CandidateReport() {
                 </div>
 
                 <div className="no-print-controls">
-                    <button 
-                        className="basic-btn" 
-                        onClick={() => window.print()} 
+                    <button
+                        className="basic-btn"
+                        onClick={() => window.print()}
                     >
-                         Print Official Report
+                        Print Official Report
                     </button>
-                    <button 
-                        className="basic-btn" 
+                    <button
+                        className="basic-btn"
                         onClick={async () => {
                             if (window.confirm("This will permanently delete all snapshots for this candidate. Verify you have saved or printed the report first. Proceed?")) {
                                 const token = localStorage.getItem("access_token");
@@ -368,16 +358,16 @@ export default function CandidateReport() {
                                     }
                                 } catch (err) { console.error(err); }
                             }
-                        }} 
+                        }}
                         style={{ border: '1px solid #ef4444', color: '#ef4444' }}
                     >
-                         Purge Proctoring Media
+                        Purge Proctoring Media
                     </button>
-                    <button 
-                        className="basic-btn" 
-                        onClick={() => navigate("/manage-candidates")} 
+                    <button
+                        className="basic-btn"
+                        onClick={() => navigate("/manage-candidates")}
                     >
-                         Return
+                        Return
                     </button>
                 </div>
             </div>
