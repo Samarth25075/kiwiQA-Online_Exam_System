@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import API_BASE_URL from "../config";
 import logo from "../assets/logo.png";
 
@@ -107,9 +107,11 @@ const Icons = {
 export default function EnrollCandidate() {
     const { examId } = useParams();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const preFilledEmail = searchParams.get("email");
 
     const [name, setName] = useState("");
-    const [email, setEmail] = useState("");
+    const [email, setEmail] = useState(preFilledEmail || "");
     const [phone, setPhone] = useState("");
     const [agreedToConsent, setAgreedToConsent] = useState(false);
     const [otp, setOtp] = useState("");
@@ -578,7 +580,9 @@ export default function EnrollCandidate() {
                                         placeholder="jane@example.com"
                                         value={email}
                                         required
-                                        onChange={e => setEmail(e.target.value)}
+                                        readOnly={!!preFilledEmail}
+                                        onChange={e => !preFilledEmail && setEmail(e.target.value)}
+                                        style={preFilledEmail ? { background: 'var(--slate-50)', cursor: 'not-allowed', color: 'var(--ink-3)' } : {}}
                                     />
                                 </div>
                             </div>

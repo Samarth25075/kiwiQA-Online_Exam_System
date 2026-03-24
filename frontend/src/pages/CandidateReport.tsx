@@ -47,22 +47,6 @@ const STYLES = `
 }
 .header-glass { position: absolute; top: -100px; right: -100px; width: 400px; height: 400px; background: radial-gradient(circle, color-mix(in srgb, var(--primary) 12%, transparent) 0%, transparent 70%); pointer-events: none; }
 
-.candidate-photo-frame { 
-    width: 130px; 
-    height: 130px; 
-    border-radius: 20px; 
-    border: 5px solid var(--bg-neutral); 
-    box-shadow: var(--shadow-sm); 
-    overflow: hidden; 
-    flex-shrink: 0; 
-    background: var(--bg-neutral); 
-    display: grid; 
-    place-items: center; 
-    z-index: 2;
-}
-.candidate-photo { width: 100%; height: 100%; object-fit: cover; }
-.candidate-initial { font-family: 'Outfit', sans-serif; font-size: 56px; font-weight: 900; color: color-mix(in srgb, var(--primary) 20%, var(--text-muted)); }
-
 .header-info { flex: 1; z-index: 2; }
 .report-title { font-family: 'Outfit', sans-serif; font-size: 34px; font-weight: 900; color: var(--text); margin: 6px 0 10px; letter-spacing: -0.02em; line-height: 1.1; }
 .report-badge { padding: 5px 14px; border-radius: 100px; font-size: 10px; font-weight: 800; text-transform: uppercase; background: var(--bg-neutral); color: var(--primary); border: 1px solid color-mix(in srgb, var(--primary) 20%, transparent); display: inline-block; letter-spacing: 0.08em; }
@@ -198,15 +182,6 @@ export default function CandidateReport() {
 
                 <header className="report-header">
                     <div className="header-glass" />
-                    <div className="candidate-photo-frame">
-                        {candidate.profile_photo ? (
-                            <img src={candidate.profile_photo} alt={candidate.name} className="candidate-photo" />
-                        ) : proctoring.start ? (
-                            <img src={proctoring.start} alt={candidate.name} className="candidate-photo" />
-                        ) : (
-                            <div className="candidate-initial">{candidate.name.charAt(0)}</div>
-                        )}
-                    </div>
                     
                     <div className="header-info">
                         <div className="report-badge">Confidential Candidate Evaluation</div>
@@ -340,15 +315,21 @@ export default function CandidateReport() {
                         </div>
                     ) : (
                         <>
-                            <div className="proctor-grid">
+                            <div className="proctor-grid" style={{ gridTemplateColumns: proctoring.end ? 'repeat(3, 1fr)' : 'repeat(2, 1fr)' }}>
                                 <div className="proctor-frame">
                                     {proctoring.start ? <img src={proctoring.start} className="proctor-img" alt="Start" /> : <div style={{ display: 'grid', placeItems: 'center', height: '100%', color: 'var(--text-muted)' }}>No Record</div>}
-                                    <div className="proctor-label">START PHASE · {new Date(candidate.joined_date).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</div>
+                                    <div className="proctor-label">INITIAL PHASE · Q1 Snapshot</div>
                                 </div>
                                 <div className="proctor-frame">
                                     {proctoring.mid ? <img src={proctoring.mid} className="proctor-img" alt="Mid" /> : <div style={{ display: 'grid', placeItems: 'center', height: '100%', color: 'var(--text-muted)' }}>No Record</div>}
-                                    <div className="proctor-label">PROGRESSION PHASE · {new Date(new Date(candidate.joined_date).getTime() + (report.stats[Object.keys(report.stats)[0]]?.total ? 1800000 : 0)).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</div>
+                                    <div className="proctor-label">PROGRESSION PHASE · Q{Math.floor(questions.length / 2) + 2} Snapshot</div>
                                 </div>
+                                {proctoring.end && (
+                                    <div className="proctor-frame">
+                                        <img src={proctoring.end} className="proctor-img" alt="End" />
+                                        <div className="proctor-label">FINAL PHASE · Submission Snapshot</div>
+                                    </div>
+                                )}
                             </div>
                             <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 16, fontStyle: 'italic', fontWeight: 500 }}>
                                 * Automated snapshots captured using AI-driven proctoring technology to maintain assessment integrity.

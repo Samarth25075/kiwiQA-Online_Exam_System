@@ -1393,6 +1393,33 @@ export default function TakeTest() {
         fetch(`${API_BASE_URL}/candidates/test/${token}/status?status=Live`, { method: 'POST' }).catch(() => { });
     };
 
+    // ─── Question Navigation Based Snapshots ──────────────────────────────
+    useEffect(() => {
+        if (!started || finished || !needsVideo || shuffledQuestions.length === 0) return;
+
+        // 1. Take START snapshot at Question 1
+        if (currentIdx === 0 && !snapshotStartRef.current) {
+            const shot = takeSnapshot();
+            if (shot) {
+                snapshotStartRef.current = shot;
+                console.log("Captured Start Snapshot at Q1");
+            }
+        }
+
+        // 2. Take MID snapshot at (Total/2) + 2
+        // Question (N/2)+2 corresponds to currentIdx = floor(N/2) + 1
+        const targetMidIdx = Math.floor(shuffledQuestions.length / 2) + 1;
+        
+        if (currentIdx === targetMidIdx && !midCapturedRef.current) {
+            const shot = takeSnapshot();
+            if (shot) {
+                snapshotMidRef.current = shot;
+                midCapturedRef.current = true;
+                console.log("Captured Mid Snapshot at Q", targetMidIdx + 1);
+            }
+        }
+    }, [currentIdx, started, finished, needsVideo, shuffledQuestions.length]);
+
     useEffect(() => {
         if (!started || timeLeft === null || finished) return;
 
@@ -1405,14 +1432,7 @@ export default function TakeTest() {
             setTimeLeft(prev => {
                 const next = (prev !== null && prev > 0) ? prev - 1 : 0;
                 
-                // Take MID snapshot (around 50% time left)
-                if (testData?.exam.duration && next <= Math.floor((testData.exam.duration * 60) / 2) && !midCapturedRef.current) {
-                    const shot = takeSnapshot();
-                    if (shot) {
-                        snapshotMidRef.current = shot;
-                        midCapturedRef.current = true;
-                    }
-                }
+                // (Old timer-based mid-snapshot logic removed)
                 
                 return next;
             });

@@ -207,8 +207,15 @@ async def send_exam_link_custom(
     for email in payload.emails:
         safe_email = email.strip()
         if safe_email:
+            # Personalize the link in the message for auto-fill
+            personalized_content = content
+            if payload.link:
+                delimiter = "&" if "?" in payload.link else "?"
+                personalized_link = f"{payload.link}{delimiter}email={safe_email}"
+                personalized_content = content.replace(payload.link, personalized_link)
+
             # Send email
-            background_tasks.add_task(send_email, safe_email, subject, content)
+            background_tasks.add_task(send_email, safe_email, subject, personalized_content)
             
             # Save invitation to DB
             new_invite = ExamInvitation(
