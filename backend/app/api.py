@@ -17,6 +17,17 @@ from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 from fastapi_cache.decorator import cache
 import redis.asyncio as redis
+import logging
+
+# Filter out /health endpoint from Uvicorn access logs to prevent spam
+class EndpointFilter(logging.Filter):
+    def filter(self, record: logging.LogRecord) -> bool:
+        # uvicorn.access passes args like (client_addr, method, path, http_version, status_code)
+        if record.args and isinstance(record.args, tuple) and len(record.args) >= 3:
+            return record.args[2] != '/health'
+        return True
+
+logging.getLogger("uvicorn.access").addFilter(EndpointFilter())
 
 from .auth.router import router as auth_router
 from .candidates.admin_router import router as candidates_admin_router
