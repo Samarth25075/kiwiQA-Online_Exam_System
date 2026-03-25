@@ -223,9 +223,10 @@ async def startup_event():
 
     # 4. Demo Keep-Alive for Render Free Tier
     async def keep_alive_loop():
-        url = os.getenv("RENDER_EXTERNAL_URL", "")
+        # Use BACKEND_URL if set, else RENDER_EXTERNAL_URL
+        url = os.getenv("BACKEND_URL") or os.getenv("RENDER_EXTERNAL_URL") or ""
         if not url:
-            print("INFO: RENDER_EXTERNAL_URL not set. Keep-alive disabled.")
+            print("INFO: Keep-alive ping disabled (URL not found).")
             return
 
         import urllib.request
