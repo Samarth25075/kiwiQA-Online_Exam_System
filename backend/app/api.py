@@ -132,6 +132,15 @@ async def startup_event():
                         print(f"INFO: Adding column {col_name} to exams...")
                         conn.execute(text(f"ALTER TABLE exams ADD COLUMN {col_name} {col_type}"))
                         conn.commit()
+                        
+                # ── Exam Invitations Table ─────
+                if 'exam_invitations' in inspector.get_table_names():
+                    existing_cols = [c['name'] for c in inspector.get_columns('exam_invitations')]
+                    if "admin_name" not in existing_cols:
+                        print(f"INFO: Adding column admin_name to exam_invitations...")
+                        conn.execute(text("ALTER TABLE exam_invitations ADD COLUMN admin_name TEXT"))
+                        conn.commit()
+
             print("INFO: Auto-migration checks complete.")
 
             with engine.connect() as conn:
