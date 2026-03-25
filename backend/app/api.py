@@ -210,6 +210,38 @@ async def startup_event():
             await asyncio.sleep(30)
     asyncio.create_task(cleanup_loop())
 
+    # 4. Demo Keep-Alive for Render Free Tier
+    async def keep_alive_loop():
+        url = os.getenv("RENDER_EXTERNAL_URL", "")
+        if not url:
+            print("INFO: RENDER_EXTERNAL_URL not set. Keep-alive disabled.")
+            return
+
+        import urllib.request
+        def ping(target_url: str):
+            try:
+                req = urllib.request.Request(target_url, headers={'User-Agent': 'KeepAliveAgent'})
+                with urllib.request.urlopen(req, timeout=10) as response:
+                    if response.status == 200:
+                        print(f"INFO: Keep-alive ping successful to {target_url}")
+            except Exception as e:
+                print(f"WARNING: Keep-alive ping failed: {e}")
+
+        ping_url = f"{url}/health" if not url.endswith("/") else f"{url}health"
+        
+        # Initial delay to let startup finish
+        await asyncio.sleep(60)
+        while True:
+            # Run blocking request in a separate thread to not block event loop
+            try:
+                await asyncio.to_thread(ping, ping_url)
+            except Exception:
+                pass
+            # Sleep for 14 minutes (840 seconds) to prevent 15-minute idle timeout
+            await asyncio.sleep(840)
+            
+    asyncio.create_task(keep_alive_loop())
+
 # ── Health check ──────────────────────────────
 @app.get("/health", tags=["system"])
 async def health_check():
