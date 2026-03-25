@@ -825,6 +825,7 @@ def get_invitation_tracking(db: Session):
 
         sat_count = 0
         not_sat_count = 0
+        sent_by_counts = {}
         
         for email_lower, inv in unique_invites.items():
             if email_lower in enrolled_status_map:
@@ -837,10 +838,15 @@ def get_invitation_tracking(db: Session):
                 not_sat_count += 1
                 detail_status = "Not Sat"
                 
+            admin_nm = getattr(inv, "admin_name", None)
+            display_admin = admin_nm if admin_nm else "Admin"
+            sent_by_counts[display_admin] = sent_by_counts.get(display_admin, 0) + 1
+                
             invitation_details.append({
                 "email": inv.email,
                 "sent_at": inv.sent_at,
-                "status": detail_status
+                "status": detail_status,
+                "admin_name": admin_nm
             })
             
         result.append({
@@ -849,6 +855,7 @@ def get_invitation_tracking(db: Session):
             "total_invited": len(unique_invites),
             "sat_count": sat_count,
             "not_sat_count": not_sat_count,
+            "sent_by_counts": sent_by_counts,
             "details": invitation_details
         })
     return result

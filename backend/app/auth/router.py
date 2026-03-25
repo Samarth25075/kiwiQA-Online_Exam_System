@@ -21,7 +21,7 @@ from app.auth.schemas import Token, TokenPayload, AdminUser, Member, MemberCreat
 from app.auth.service import (
     authenticate, get_user, add_user, change_password, 
     get_all_users, delete_user, hash_password, 
-    update_user_session, verify_session
+    update_user_session, verify_session, update_user_profile
 )
 from app.core.config import ACCESS_TOKEN_EXPIRE_MINUTES, GOOGLE_CLIENT_ID, AUTHORIZED_GOOGLE_EMAIL
 from app.core.security import create_access_token, decode_access_token
@@ -119,6 +119,23 @@ def check_permission(required_permission: str):
 async def me(current_admin: Annotated[AdminUser, Depends(get_current_admin)]):
     """Return the currently authenticated admin's profile."""
     return current_admin
+
+
+class UpdateProfileRequest(BaseModel):
+    full_name: str
+    username: str
+
+@router.put("/me")
+async def update_me(
+    body: UpdateProfileRequest,
+    current_admin: Annotated[AdminUser, Depends(get_current_admin)],
+    db: Session = Depends(get_db)
+):
+    """Update the currently authenticated admin's profile."""
+    success = update_user_profile(db, current_admin.email, body.full_name, body.username)
+    if not success:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Failed to update profile")
+    return {"message": "Profile updated successfully", "full_name": body.full_name, "username": body.username}
 
 
 # ── POST /change-password ─────────────────────

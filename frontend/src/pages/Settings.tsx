@@ -96,6 +96,12 @@ export default function Settings() {
     const [profile, setProfile] = useState<AdminProfile | null>(null);
     const [loading, setLoading] = useState(true);
 
+    // Profile Editing
+    const [isEditingProfile, setIsEditingProfile] = useState(false);
+    const [profileForm, setProfileForm] = useState({ full_name: "", username: "" });
+    const [profileLoading, setProfileLoading] = useState(false);
+    const [profileMsg, setProfileMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
     // Theme
     const [activeTheme, setActiveTheme] = useState<string>(() =>
         localStorage.getItem("kiwi-theme") || "default"
@@ -154,6 +160,43 @@ export default function Settings() {
             console.error("Failed to fetch members", err);
         } finally {
             setMembersLoading(false);
+        }
+    };
+
+    // ── Update Profile ─────────────────────────────────────────────────────
+    const handleEditProfileClick = () => {
+        setProfileMsg(null);
+        setProfileForm({
+            full_name: profile?.full_name || "",
+            username: profile?.username || ""
+        });
+        setIsEditingProfile(true);
+    };
+
+    const handleProfileSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setProfileMsg(null);
+        const token = localStorage.getItem("access_token");
+        setProfileLoading(true);
+        try {
+            const res = await fetch(`${API_BASE_URL}/me`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                body: JSON.stringify(profileForm),
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setProfile(prev => prev ? { ...prev, full_name: data.full_name, username: data.username } : null);
+                setProfileMsg({ type: "success", text: "Profile updated successfully." });
+                setIsEditingProfile(false);
+            } else {
+                const data = await res.json();
+                setProfileMsg({ type: "error", text: data.detail || "Failed to update profile." });
+            }
+        } catch {
+            setProfileMsg({ type: "error", text: "Network error. Please try again." });
+        } finally {
+            setProfileLoading(false);
         }
     };
 
@@ -699,32 +742,73 @@ export default function Settings() {
 
                 {/* ── Admin Profile ── */}
                 <div className="st-card" style={{ alignSelf: 'start' }}>
-                    <div className="st-card-header">
-                        <div className="st-card-title"><Icons.User /> Admin Profile</div>
-                        <div className="st-card-sub">Your account information</div>
+                    <div className="st-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div>
+                            <div className="st-card-title"><Icons.User /> Admin Profile</div>
+                            <div className="st-card-sub">Your account information</div>
+                        </div>
+                        {!isEditingProfile && (
+                            <button className="st-add-btn" onClick={handleEditProfileClick} style={{ padding: '6px 12px' }}>
+                                Edit Profile
+                            </button>
+                        )}
                     </div>
                     <div className="st-card-body">
-                        <div className="st-profile-grid">
-                            <div className="st-field">
-                                <div className="st-field-label">Full Name</div>
-                                <div className="st-field-value"><Icons.User /> {profile.full_name}</div>
-                            </div>
-                            <div className="st-field">
-                                <div className="st-field-label">Email Address</div>
-                                <div className="st-field-value"><Icons.Mail /> {profile.email}</div>
-                            </div>
-                            <div className="st-field">
-                                <div className="st-field-label">Role</div>
-                                <div className="st-field-value">
-                                    <Icons.Shield />
-                                    <span className="st-role-badge">{profile.role}</span>
+                        {profileMsg && !isEditingProfile && (
+                            <div className={`st-msg ${profileMsg.type}`} style={{ marginBottom: 16 }}>{profileMsg.text}</div>
+                        )}
+                        
+                        {isEditingProfile ? (
+                            <form className="st-pw-grid" onSubmit={handleProfileSubmit}>
+                                <div className="st-pw-field">
+                                    <label className="st-pw-label" htmlFor="st-full-name">Full Name</label>
+                                    <input id="st-full-name" className="st-pw-input" type="text" value={profileForm.full_name} onChange={e => setProfileForm(p => ({ ...p, full_name: e.target.value }))} required />
+                                </div>
+                                <div className="st-pw-field">
+                                    <label className="st-pw-label" htmlFor="st-username">Username</label>
+                                    <input id="st-username" className="st-pw-input" type="text" value={profileForm.username} onChange={e => setProfileForm(p => ({ ...p, username: e.target.value }))} />
+                                </div>
+                                <div className="st-field">
+                                    <div className="st-field-label">Email Address (Read-only)</div>
+                                    <div className="st-field-value" style={{ opacity: 0.7 }}><Icons.Mail /> {profile.email}</div>
+                                </div>
+                                
+                                {profileMsg && (
+                                    <div className={`st-msg ${profileMsg.type}`}>{profileMsg.text}</div>
+                                )}
+                                
+                                <div style={{ display: 'flex', gap: 12, marginTop: 12 }}>
+                                    <button type="submit" className="st-pw-btn" disabled={profileLoading}>
+                                        {profileLoading ? <div className="st-spinner" /> : <Icons.Check />} Save Changes
+                                    </button>
+                                    <button type="button" className="st-perm-tag" onClick={() => setIsEditingProfile(false)} disabled={profileLoading}>
+                                        Cancel
+                                    </button>
+                                </div>
+                            </form>
+                        ) : (
+                            <div className="st-profile-grid">
+                                <div className="st-field">
+                                    <div className="st-field-label">Full Name</div>
+                                    <div className="st-field-value"><Icons.User /> {profile.full_name}</div>
+                                </div>
+                                <div className="st-field">
+                                    <div className="st-field-label">Email Address</div>
+                                    <div className="st-field-value"><Icons.Mail /> {profile.email}</div>
+                                </div>
+                                <div className="st-field">
+                                    <div className="st-field-label">Role</div>
+                                    <div className="st-field-value">
+                                        <Icons.Shield />
+                                        <span className="st-role-badge">{profile.role}</span>
+                                    </div>
+                                </div>
+                                <div className="st-field">
+                                    <div className="st-field-label">Username</div>
+                                    <div className="st-field-value"><Icons.User /> {profile.username || "—"}</div>
                                 </div>
                             </div>
-                            <div className="st-field">
-                                <div className="st-field-label">Username</div>
-                                <div className="st-field-value"><Icons.User /> {profile.username || "—"}</div>
-                            </div>
-                        </div>
+                        )}
                     </div>
                 </div>
 

@@ -60,6 +60,15 @@ def update_user_session(db: Session, email: str, session_id: str):
         user.session_id = session_id
         db.commit()
 
+def update_user_profile(db: Session, email: str, full_name: str, username: str) -> bool:
+    user = db.query(User).filter(User.email == email).first()
+    if user:
+        user.full_name = full_name
+        user.username = username
+        db.commit()
+        return True
+    return False
+
 def verify_session(db: Session, email: str, session_id: str):
     user = db.query(User).filter(User.email == email).first()
     return user.session_id == session_id if user else False

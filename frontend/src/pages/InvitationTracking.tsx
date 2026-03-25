@@ -21,6 +21,7 @@ interface TrackingDetail {
     email: string;
     sent_at: string;
     status: string;
+    admin_name?: string;
 }
 
 interface ExamTracking {
@@ -29,6 +30,7 @@ interface ExamTracking {
     total_invited: number;
     sat_count: number;
     not_sat_count: number;
+    sent_by_counts?: Record<string, number>;
     details: TrackingDetail[];
 }
 
@@ -242,6 +244,7 @@ const InvitationTracking: React.FC = () => {
                                         <h4>{exam.exam_title}</h4>
                                         <span style={{ fontSize: '11px', color: 'var(--slate-400)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                                             {exam.exam_id.split('-')[0]} • {exam.total_invited} Recipients
+                                            {exam.sent_by_counts && Object.keys(exam.sent_by_counts).length > 0 && ` (Sent by: ${Object.entries(exam.sent_by_counts).map(([admin, count]) => `${admin}: ${count}`).join(', ')})`}
                                         </span>
                                     </div>
                                     <div className="tracking-stats">
@@ -264,6 +267,7 @@ const InvitationTracking: React.FC = () => {
                                                     <tr>
                                                         <th>Email Address</th>
                                                         <th>Invited Date</th>
+                                                        <th>Sent By</th>
                                                         <th>Status</th>
                                                     </tr>
                                                 </thead>
@@ -272,6 +276,7 @@ const InvitationTracking: React.FC = () => {
                                                         <tr key={idx}>
                                                             <td style={{ fontWeight: 600, color: 'var(--slate-700)' }}>{detail.email}</td>
                                                             <td>{new Date(detail.sent_at).toLocaleDateString()} at {new Date(detail.sent_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
+                                                            <td style={{ color: 'var(--slate-600)' }}>{detail.admin_name || 'Admin'}</td>
                                                             <td>
                                                                 <span className={`status-badge ${detail.status.startsWith('Sat') ? 'sat' : 'not-sat'}`}>
                                                                     {detail.status}

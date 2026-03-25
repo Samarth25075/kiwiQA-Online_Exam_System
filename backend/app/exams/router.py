@@ -204,15 +204,18 @@ async def send_exam_link_custom(
             # Send email
             background_tasks.add_task(send_email, safe_email, subject, personalized_content)
             
+            admin_display = current_admin.username if current_admin.username else (current_admin.full_name or current_admin.email)
             if existing:
                 # Update existing invitation
                 existing.sent_at = datetime.now().isoformat()
+                existing.admin_name = admin_display
             else:
                 # Save new invitation to DB
                 new_invite = ExamInvitation(
                     exam_id=exam_id,
                     email=safe_email,
-                    sent_at=datetime.now().isoformat()
+                    sent_at=datetime.now().isoformat(),
+                    admin_name=admin_display
                 )
                 db.add(new_invite)
             

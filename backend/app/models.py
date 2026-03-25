@@ -80,6 +80,7 @@ class ExamInvitation(Base):
     exam_id = Column(String, ForeignKey("exams.id", ondelete="CASCADE"), index=True)
     email = Column(String, index=True)
     sent_at = Column(String)
+    admin_name = Column(String, nullable=True)
 
     __table_args__ = (
         UniqueConstraint('exam_id', 'email', name='_exam_email_uc'),
