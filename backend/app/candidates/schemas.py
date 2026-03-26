@@ -35,6 +35,8 @@ class Candidate(CandidateBase):
     candidate_id: str
     status: str
     joined_date: str
+    completed_at: Optional[str] = None
+    admin_name: Optional[str] = None
     token: str
     assigned_exam_id: Optional[str] = None
     score: Optional[float] = None

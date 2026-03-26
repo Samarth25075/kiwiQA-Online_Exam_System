@@ -64,7 +64,7 @@ def update_user_profile(db: Session, email: str, full_name: str, username: str) 
     user = db.query(User).filter(User.email == email).first()
     if user:
         user.full_name = full_name
-        user.username = username
+        user.username = username.strip() if username.strip() else None
         db.commit()
         return True
     return False

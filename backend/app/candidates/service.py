@@ -32,7 +32,8 @@ def _to_summary_dict(c: Candidate) -> Dict:
         "phone_number": c.phone_number or "",
         "status": c.status or "",
         "joined_date": c.joined_date or "",
-        "completed_at": c.completed_at or "", # Added completed_at
+        "completed_at": c.completed_at or "",
+        "admin_name": c.admin_name or "",
         "token": c.token or "",
         "assigned_exam_id": c.assigned_exam_id or "",
         "exam_title": c.exam.title if c.exam else "No Exam Assigned",
@@ -92,7 +93,7 @@ def get_all_candidates(db: Session, **kwargs) -> List[Dict]:
     set_cached_data("all_candidates_list_summary", res, expire=300)
     return res
 
-def create_candidate(db: Session, name: str, email: str, country_code: str = "", phone_number: str = "", dob: str = "", gender: str = "", address: str = "", profile_photo: str = "", cv_url: str = "", device_id: str = "") -> Dict:
+def create_candidate(db: Session, name: str, email: str, country_code: str = "", phone_number: str = "", dob: str = "", gender: str = "", address: str = "", profile_photo: str = "", cv_url: str = "", device_id: str = "", admin_name: str = "") -> Dict:
     from app.core.redis import redis_client
     current_year = datetime.now().year
     
@@ -114,6 +115,7 @@ def create_candidate(db: Session, name: str, email: str, country_code: str = "",
         cv_url=cv_url,
         status="Not Started",
         joined_date=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        admin_name=admin_name,
         token=str(uuid.uuid4()),
         assigned_exam_id=None,
         score=None,

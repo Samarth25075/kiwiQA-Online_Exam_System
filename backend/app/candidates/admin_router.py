@@ -58,7 +58,8 @@ async def admin_create_candidate(
         dob=candidate_in.dob or "",
         gender=candidate_in.gender or "",
         address=candidate_in.address or "",
-        profile_photo=candidate_in.profile_photo or ""
+        profile_photo=candidate_in.profile_photo or "",
+        admin_name=current_admin.full_name
     )
     return _format_candidate(new_cand)
 

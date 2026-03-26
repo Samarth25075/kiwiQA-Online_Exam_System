@@ -92,6 +92,7 @@ async def get_current_admin(token: Annotated[str, Depends(oauth2_scheme)], db: S
         )
     return AdminUser(
         email=user["email"],
+        username=user["username"],
         role=user["role"],
         full_name=user["full_name"],
         permissions=user.get("permissions", [])
@@ -275,6 +276,7 @@ async def get_members(current_admin: Annotated[AdminUser, Depends(get_current_ad
     return [
         Member(
             email=u["email"],
+            username=u.get("username"),
             full_name=u["full_name"],
             role=u["role"],
             permissions=u.get("permissions", [])

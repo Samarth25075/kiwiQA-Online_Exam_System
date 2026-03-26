@@ -113,6 +113,7 @@ async def startup_event():
                     ("answers", "JSONB" if "postgresql" in DATABASE_URL else "JSON"),
                     ("country_code", "TEXT"),
                     ("completed_at", "TEXT"),
+                    ("admin_name", "TEXT"),
                     ("screenshot_start", "TEXT"), ("screenshot_mid", "TEXT"), ("screenshot_end", "TEXT"),
                     ("total_marks", "FLOAT DEFAULT 0")
                 ]
