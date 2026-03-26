@@ -1652,7 +1652,13 @@ export default function TakeTest() {
                             <button
                                 onClick={handleTabClose}
                                 className="test-btn"
-                                style={{ background: 'var(--text)', padding: '12px 32px' }}
+                                disabled={closeCountdown !== null && closeCountdown > 0}
+                                style={{ 
+                                    background: 'var(--text)', 
+                                    padding: '12px 32px',
+                                    opacity: (closeCountdown !== null && closeCountdown > 0) ? 0.5 : 1,
+                                    cursor: (closeCountdown !== null && closeCountdown > 0) ? 'not-allowed' : 'pointer'
+                                }}
                             >
                                 Close Assessment Now
                             </button>

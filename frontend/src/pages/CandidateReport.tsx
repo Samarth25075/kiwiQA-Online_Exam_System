@@ -179,6 +179,39 @@ export default function CandidateReport() {
     const { candidate, stats, questions, proctoring, exam_title, passing_score } = report;
     const scorePct = Math.round((candidate.score / (candidate.total_marks || candidate.total_questions || 1)) * 100);
     const status = getStatus(scorePct, candidate.violations || 0, passing_score || 50);
+    
+    // Time calculations
+    const formatDateTime = (dateStr: string) => {
+        if (!dateStr) return "N/A";
+        try {
+            const date = new Date(dateStr);
+            if (isNaN(date.getTime())) return dateStr; // Return as is if not a valid date string
+            return date.toLocaleString('en-GB', { 
+                day: '2-digit', month: 'short', year: 'numeric',
+                hour: '2-digit', minute: '2-digit'
+            });
+        } catch(e) { return dateStr; }
+    };
+
+    const calculateDuration = () => {
+        if (!candidate.joined_date || !candidate.completed_at) return null;
+        try {
+            const start = new Date(candidate.joined_date).getTime();
+            const end = new Date(candidate.completed_at).getTime();
+            if (isNaN(start) || isNaN(end)) return null;
+            
+            const diffMs = end - start;
+            if (diffMs < 0) return null;
+            
+            const totalSeconds = Math.floor(diffMs / 1000);
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            
+            return `${minutes}m ${seconds}s`;
+        } catch(e) { return null; }
+    };
+
+    const duration = calculateDuration();
 
     return (
         <AdminLayout plain={true}>
@@ -194,14 +227,27 @@ export default function CandidateReport() {
                     <div className="header-info">
                         <div className="report-badge">Confidential Candidate Evaluation</div>
                         <h1 className="report-title">{candidate.name}</h1>
-                        <div style={{ display: 'flex', gap: 16, alignItems: 'center', color: 'var(--text-muted)', fontSize: 13, fontWeight: 600 }}>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'center', color: 'var(--text-muted)', fontSize: 13, fontWeight: 600 }}>
                             <span>{exam_title}</span>
-                            <span>â€¢</span>
+                            <span>•</span>
                             <span>ID: {candidate.candidate_id || `CAND-${candidate.id}`}</span>
                             <span>•</span>
                             <span>{candidate.country_code} {candidate.phone_number}</span>
-                            <span>•</span>
-                            <span>{new Date(candidate.joined_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                        </div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'center', color: 'var(--text-muted)', fontSize: 12, fontWeight: 500, marginTop: 8 }}>
+                            <span>Started: {formatDateTime(candidate.joined_date)}</span>
+                            {candidate.completed_at && (
+                                <>
+                                    <span>•</span>
+                                    <span>Finished: {formatDateTime(candidate.completed_at)}</span>
+                                </>
+                            )}
+                            {duration && (
+                                <>
+                                    <span>•</span>
+                                    <span style={{ color: 'var(--primary)', fontWeight: 700 }}>Duration: {duration}</span>
+                                </>
+                            )}
                         </div>
                     </div>
 

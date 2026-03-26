@@ -50,6 +50,7 @@ class Candidate(Base):
     cv_url = Column(Text)
     status = Column(String)
     joined_date = Column(String)
+    completed_at = Column(String, nullable=True)
     token = Column(String, unique=True)
     
     # Foreign Key integrity

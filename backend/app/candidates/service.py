@@ -32,6 +32,7 @@ def _to_summary_dict(c: Candidate) -> Dict:
         "phone_number": c.phone_number or "",
         "status": c.status or "",
         "joined_date": c.joined_date or "",
+        "completed_at": c.completed_at or "", # Added completed_at
         "token": c.token or "",
         "assigned_exam_id": c.assigned_exam_id or "",
         "exam_title": c.exam.title if c.exam else "No Exam Assigned",
@@ -112,7 +113,7 @@ def create_candidate(db: Session, name: str, email: str, country_code: str = "",
         profile_photo=profile_photo,
         cv_url=cv_url,
         status="Not Started",
-        joined_date=datetime.now().strftime("%Y-%m-%d"),
+        joined_date=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         token=str(uuid.uuid4()),
         assigned_exam_id=None,
         score=None,
@@ -227,6 +228,7 @@ def update_candidate_result(db: Session, token: str, score: float, total: int, t
         c.total_marks = total_marks
         c.violations = violations
         c.status = "Completed"
+        c.completed_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         if answers is not None:
             c.answers = answers
         if screenshots:

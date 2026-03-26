@@ -112,6 +112,7 @@ async def startup_event():
                 new_cols = [
                     ("answers", "JSONB" if "postgresql" in DATABASE_URL else "JSON"),
                     ("country_code", "TEXT"),
+                    ("completed_at", "TEXT"),
                     ("screenshot_start", "TEXT"), ("screenshot_mid", "TEXT"), ("screenshot_end", "TEXT"),
                     ("total_marks", "FLOAT DEFAULT 0")
                 ]

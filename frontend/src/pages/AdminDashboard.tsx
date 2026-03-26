@@ -1456,7 +1456,7 @@ export default function AdminDashboard() {
                 <div className="db-banner">
                     <div>
                         <h3 className="db-banner-greeting">
-                            {getGreeting()}, {profile.full_name.split(" ")[0]}.
+                            {getGreeting()}, {profile.full_name.split(" ")[0]}!
                         </h3>
                         <p className="db-banner-subtitle">
                             You have <strong>{stats.live} active</strong> candidate{stats.live !== 1 ? "s" : ""} across{" "}
@@ -1529,7 +1529,7 @@ export default function AdminDashboard() {
                             </div>
                             <div className="stat-label">HR / Master OTP</div>
                             <div className="stat-value" style={{ fontVariantNumeric: "tabular-nums", letterSpacing: "0.12em" }}>
-                                {adminOtp ?? "â€”â€”â€”â€”â€”â€”"}
+                                {adminOtp ?? "------"}
                             </div>
                             <div className="stat-hint">
                                 <Icons.Clock size={12} />
@@ -1609,7 +1609,7 @@ export default function AdminDashboard() {
                                                             <div style={{ fontWeight: 800, color: 'var(--slate-900)', fontSize: '15px', letterSpacing: '-0.01em' }}>{exam.title}</div>
                                                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                                                                 <span className="exam-id-chip" style={{ fontSize: '9px', padding: '1px 5px' }}>{exam.id.slice(0, 8)}</span>
-                                                                <span style={{ fontSize: '11px', color: 'var(--slate-500)', fontWeight: 600 }}>â€¢</span>
+                                                                <span style={{ fontSize: '11px', color: 'var(--slate-500)', fontWeight: 600 }}>•</span>
                                                                 <span style={{ fontSize: '11px', color: 'var(--slate-500)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{exam.difficulty}</span>
                                                             </div>
                                                         </div>
