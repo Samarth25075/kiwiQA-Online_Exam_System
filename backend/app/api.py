@@ -111,6 +111,7 @@ async def startup_event():
                 existing_cols = [c['name'] for c in inspector.get_columns('candidates')]
                 new_cols = [
                     ("answers", "JSONB" if "postgresql" in DATABASE_URL else "JSON"),
+                    ("country_code", "TEXT"),
                     ("screenshot_start", "TEXT"), ("screenshot_mid", "TEXT"), ("screenshot_end", "TEXT"),
                     ("total_marks", "FLOAT DEFAULT 0")
                 ]
