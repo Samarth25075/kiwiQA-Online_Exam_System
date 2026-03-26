@@ -50,3 +50,10 @@ class Member(BaseModel):
     full_name: str
     role: str
     permissions: list[str]
+
+class MemberUpdate(BaseModel):
+    """Schema for updating an existing member."""
+    full_name: str | None = None
+    username: str | None = None
+    role: str | None = None
+    permissions: list[str] | None = None

@@ -1,9 +1,9 @@
-import { useState, useEffect, useMemo } from "react";
+﻿import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import AdminLayout from "../components/AdminLayout";
 import API_BASE_URL from "../config";
 
-// ─── Types ─────────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 interface Candidate {
   id: number;
   candidate_id?: string;
@@ -24,7 +24,13 @@ interface Exam {
   passing_score: number;
 }
 
-// ─── Helpers ───────────────────────────────────────────────────────────────────
+interface AdminProfile {
+    email: string;
+    role: string;
+    permissions: string[];
+}
+
+// â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function calcScore(c: Candidate) {
   const score = parseInt(c.score ?? "0", 10);
   const total = parseInt(c.total_questions ?? "1", 10) || 1;
@@ -40,7 +46,7 @@ function formatDate(dateStr: string): string {
     } catch { return dateStr; }
 }
 
-// ─── Icons ─────────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Icons â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const Icons = {
   Search: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>,
   Filter: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>,
@@ -49,11 +55,12 @@ const Icons = {
   ArrowRight: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>,
 };
 
-// ─── Main Component ────────────────────────────────────────────────────────────
+// â”€â”€â”€ Main Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export default function CandidateResults() {
   const navigate = useNavigate();
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [exams, setExams] = useState<Record<string, Exam>>({});
+  const [profile, setProfile] = useState<AdminProfile | null>(null);
   const [loading, setLoading] = useState(true);
   
   // States for filter
@@ -62,20 +69,23 @@ export default function CandidateResults() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const token = localStorage.getItem("access_token");
+      const token = sessionStorage.getItem("access_token");
       if (!token) { navigate("/"); return; }
       const headers = { Authorization: `Bearer ${token}` };
       try {
-        const [cRes, eRes] = await Promise.all([
+        const [cRes, eRes, pRes] = await Promise.all([
           fetch(`${API_BASE_URL}/candidates`, { headers }),
           fetch(`${API_BASE_URL}/exams`, { headers }),
+          fetch(`${API_BASE_URL}/me`, { headers }),
         ]);
 
-        if (cRes.status === 401 || eRes.status === 401) { navigate("/"); return; }
+        if (cRes.status === 401 || eRes.status === 401 || pRes.status === 401) { navigate("/"); return; }
 
-        if (cRes.ok && eRes.ok) {
+        if (cRes.ok && eRes.ok && pRes.ok) {
           const cData = await cRes.json();
           const eData = await eRes.json();
+          const pData = await pRes.json();
+          setProfile(pData);
           if (Array.isArray(cData)) {
             setCandidates(cData.filter((c: any) => c.status === "Completed" || c.score || parseInt(c.violations || "0") >= 3));
           }
@@ -533,22 +543,24 @@ export default function CandidateResults() {
             <h1>Assessment Intelligence</h1>
             <p>Comprehensive performance monitoring and candidate analytics.</p>
           </div>
-          <button 
-            className="cr-tab active cr-export-btn" 
-            onClick={exportToCSV}
-            style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: 8, 
-                height: 40, 
-                border: '1.5px solid var(--border)', 
-                background: 'var(--bg)',
-                cursor: 'pointer',
-                transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
-            }}
-          >
-            <Icons.Download /> Export Data
-          </button>
+          {profile?.permissions?.includes("download report") && (
+            <button 
+              className="cr-tab active cr-export-btn" 
+              onClick={exportToCSV}
+              style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: 8, 
+                  height: 40, 
+                  border: '1.5px solid var(--border)', 
+                  background: 'var(--bg)',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
+              }}
+            >
+              <Icons.Download /> Export Data
+            </button>
+          )}
         </header>
 
         <section className="cr-stats">
@@ -614,7 +626,7 @@ export default function CandidateResults() {
                 <tr>
                   <td colSpan={7}>
                     <div className="cr-empty">
-                      <div className="cr-empty-icon">📊</div>
+                      <div className="cr-empty-icon">{"\u{1F4CA}"}</div>
                       <h3>No results found</h3>
                       <p>Try adjusting your filters or search query.</p>
                     </div>
@@ -632,7 +644,13 @@ export default function CandidateResults() {
                   else status = "Failed";
 
                   return (
-                    <tr key={c.id} onClick={() => navigate(`/report/${c.id}`)}>
+                    <tr key={c.id} onClick={() => {
+                      if (profile?.role === 'admin' || profile?.permissions?.includes("view results")) {
+                        navigate(`/report/${c.id}`);
+                      } else {
+                        alert("Access Denied: You do not have authority to view detailed reports.");
+                      }
+                    }}>
                       <td>
                         <div className="cand-cell">
                           <div className="cand-avatar">

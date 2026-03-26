@@ -17,11 +17,11 @@ from pydantic import BaseModel
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 
-from app.auth.schemas import Token, TokenPayload, AdminUser, Member, MemberCreate
+from app.auth.schemas import Token, TokenPayload, AdminUser, Member, MemberCreate, MemberUpdate
 from app.auth.service import (
     authenticate, get_user, add_user, change_password, 
     get_all_users, delete_user, hash_password, 
-    update_user_session, verify_session, update_user_profile
+    update_user_session, verify_session, update_user_profile, update_member
 )
 from app.core.config import ACCESS_TOKEN_EXPIRE_MINUTES, GOOGLE_CLIENT_ID, AUTHORIZED_GOOGLE_EMAIL
 from app.core.security import create_access_token, decode_access_token
@@ -100,16 +100,35 @@ async def get_current_admin(token: Annotated[str, Depends(oauth2_scheme)], db: S
 
 def check_permission(required_permission: str):
     async def permission_dependency(current_admin: Annotated[AdminUser, Depends(get_current_admin)]):
+        # 1. Root admin has all permissions
         if current_admin.role == "admin":
             return current_admin
-        # Allow 'member' role to have 'manage exam' and 'generate exam' by default
-        if current_admin.role == "member" and required_permission in ["manage exam", "generate exam"]:
-            return current_admin
+        
+        # 2. Check if the specific permission exists in the user's permissions list
         if required_permission in current_admin.permissions:
             return current_admin
+            
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail=f"Missing required permission: {required_permission}"
+            detail=f"Access denied. You do not have the '{required_permission}' authority."
+        )
+    return permission_dependency
+
+
+def check_permission_any(required_permissions: List[str]):
+    async def permission_dependency(current_admin: Annotated[AdminUser, Depends(get_current_admin)]):
+        # 1. Root admin has all permissions
+        if current_admin.role == "admin":
+            return current_admin
+        
+        # 2. Check if any of the permissions exist in the user's permissions list
+        for perm in required_permissions:
+            if perm in current_admin.permissions:
+                return current_admin
+            
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Access denied. You need one of these authorities: {', '.join(required_permissions)}."
         )
     return permission_dependency
 
@@ -274,7 +293,10 @@ async def create_member(
         raise HTTPException(status_code=403, detail="Only admins can manage members")
     
     if get_user(db, body.email):
-        raise HTTPException(status_code=400, detail="User already exists")
+        raise HTTPException(status_code=400, detail="User with this email already exists")
+    
+    if get_user(db, body.username):
+        raise HTTPException(status_code=400, detail="User with this username already exists")
     
     new_user = {
         "email": body.email,
@@ -312,3 +334,20 @@ async def remove_member(
         raise HTTPException(status_code=404, detail="User not found")
     
     return {"message": "Member removed successfully"}
+
+@router.put("/members/{email}")
+async def update_member_route(
+    email: str,
+    body: MemberUpdate,
+    current_admin: Annotated[AdminUser, Depends(get_current_admin)],
+    db: Session = Depends(get_db)
+):
+    """Update a member's info, role or permissions (Admin only)."""
+    if current_admin.role != "admin":
+        raise HTTPException(status_code=403, detail="Only admins can manage members")
+    
+    success = update_member(db, email, body.dict(exclude_unset=True))
+    if not success:
+        raise HTTPException(status_code=404, detail="Member not found")
+    
+    return {"message": "Member updated successfully"}

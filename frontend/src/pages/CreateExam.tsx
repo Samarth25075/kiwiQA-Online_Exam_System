@@ -1,10 +1,10 @@
-import { useState, useEffect, useRef } from "react";
+﻿import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import AdminLayout from "../components/AdminLayout";
 import CustomPopup, { PopupType } from "../components/CustomPopup";
 import API_BASE_URL from "../config";
 
-// ─── Types ─────────────────────────────────────────────────────────────────────
+// ─── Types ───────────────────────────────────────────────────────────────────
 interface Option {
   text: string;
   is_correct: boolean;
@@ -32,7 +32,7 @@ interface DifficultyConfig {
   border: string;
 }
 
-// ─── Constants ─────────────────────────────────────────────────────────────────
+// ─── Constants ───────────────────────────────────────────────────────────────
 const DIFFICULTY_MAP: Record<DifficultyLevel, DifficultyConfig> = {
   Beginner: {
     label: "Beginner",
@@ -63,17 +63,17 @@ const PROCTORING_OPTIONS: { value: ProctoringType; label: string; icon: string; 
 ];
 
 const AI_TIPS = [
-  "Analysing subject matter depth…",
-  "Calibrating difficulty parameters…",
-  "Generating diverse question types…",
-  "Ensuring topic coverage breadth…",
-  "Validating answer accuracy…",
-  "Creating meaningful distractors…",
-  "Polishing explanations…",
-  "Finalising exam blueprint…",
+  "🔍 Analysing subject matter depth…",
+  "⚙️ Calibrating difficulty parameters…",
+  "🧠 Generating diverse question types…",
+  "📚 Ensuring topic coverage breadth…",
+  "✅ Validating answer accuracy…",
+  "🎯 Creating meaningful distractors…",
+  "✨ Polishing explanations…",
+  "📋 Finalising exam blueprint…",
 ];
 
-// ─── Icons ─────────────────────────────────────────────────────────────────────
+// ─── Icons ───────────────────────────────────────────────────────────────────
 const Icons = {
   Brain: ({ size = 20 }) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
@@ -124,7 +124,7 @@ const Icons = {
   ),
   Upload: ({ size = 24 }) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v4" />
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
       <polyline points="17 8 12 3 7 8" />
       <line x1="12" y1="3" x2="12" y2="15" />
     </svg>
@@ -156,7 +156,7 @@ const Icons = {
   ),
 };
 
-// ─── Step indicator ────────────────────────────────────────────────────────────
+// ─── Step indicator ───────────────────────────────────────────────────────────
 type StepId = "configure" | "generating" | "review";
 
 function StepBar({ active }: { active: StepId }) {
@@ -169,7 +169,10 @@ function StepBar({ active }: { active: StepId }) {
     <div className="step-bar">
       {steps.map((s, i) => (
         <>
-          <div key={s.id} className={`step ${active === s.id ? "step--active" : active === "review" && s.id !== "review" ? "step--done" : ""}`}>
+          <div
+            key={s.id}
+            className={`step ${active === s.id ? "step--active" : active === "review" && s.id !== "review" ? "step--done" : ""}`}
+          >
             <div className="step-num">
               {active === "review" && s.id !== "review" ? <Icons.Check /> : s.n}
             </div>
@@ -182,7 +185,7 @@ function StepBar({ active }: { active: StepId }) {
   );
 }
 
-// ─── Section Card ──────────────────────────────────────────────────────────────
+// ─── Section Card ─────────────────────────────────────────────────────────────
 function SectionCard({ title, desc, children }: { title: string; desc?: string; children: React.ReactNode }) {
   return (
     <div className="section-card">
@@ -195,7 +198,7 @@ function SectionCard({ title, desc, children }: { title: string; desc?: string; 
   );
 }
 
-// ─── Main Component ────────────────────────────────────────────────────────────
+// ─── Main Component ───────────────────────────────────────────────────────────
 export default function CreateExam() {
   const navigate = useNavigate();
   const [title, setTitle] = useState("");
@@ -212,7 +215,7 @@ export default function CreateExam() {
   const [questions, setQuestions] = useState<Question[] | null>(null);
   const [editingIdx, setEditingIdx] = useState<number | null>(null);
   const [aiTipIndex, setAiTipIndex] = useState(0);
-  const [categories, setCategories] = useState<{ id: number, name: string }[]>([]);
+  const [categories, setCategories] = useState<{ id: number; name: string }[]>([]);
   const [showNewCategoryInput, setShowNewCategoryInput] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [bankCategories, setBankCategories] = useState<string[]>([]);
@@ -221,8 +224,17 @@ export default function CreateExam() {
   const [showBankAdd, setShowBankAdd] = useState(false);
   const [newBankCatName, setNewBankCatName] = useState("");
   const [showAllBankCats, setShowAllBankCats] = useState(false);
-  const [bankStats, setBankStats] = useState<Record<string, { count: number, total_marks: number }>>({});
-  const [catConfigs, setCatConfigs] = useState<Record<string, { count: number, marks: number, showBreakdown?: boolean, breakdown?: Record<number, number> }>>({});
+  const [bankStats, setBankStats] = useState<Record<string, { count: number; total_marks: number }>>({});
+  const [catConfigs, setCatConfigs] = useState<Record<string, { count: number; marks: number; showBreakdown?: boolean; breakdown?: Record<number, number> }>>({});
+  const [popup, setPopup] = useState<{
+    isOpen: boolean;
+    type: PopupType;
+    title?: string;
+    message: string;
+    onConfirm: () => void;
+    onCancel?: () => void;
+  } | null>(null);
+
   const bankSectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -235,22 +247,20 @@ export default function CreateExam() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const getToken = () => sessionStorage.getItem("access_token");
+  const authHeaders = () => ({ "Content-Type": "application/json", Authorization: `Bearer ${getToken()}` });
+
   const fetchBankStats = () => {
     fetch(`${API_BASE_URL}/exams/bank/stats`, { headers: authHeaders() })
       .then(r => r.json())
       .then(data => {
-        // The API returns an array: [{category, count, total_marks}, ...]
-        // We need it as a map for quick lookups
         const statsArray = Array.isArray(data) ? data : [];
         const statsMap = statsArray.reduce((acc: any, s: any) => {
           acc[s.category] = { count: s.count, total_marks: s.total_marks };
           return acc;
         }, {});
-
         setBankStats(statsMap);
 
-        // SYNC: We want to show ALL categories in the bank section, 
-        // even if they have 0 questions (so they appear after creation)
         fetch(`${API_BASE_URL}/categories`, { headers: authHeaders() })
           .then(r => {
             if (r.status === 401) return [];
@@ -259,11 +269,8 @@ export default function CreateExam() {
           .then(allCats => {
             if (!Array.isArray(allCats)) allCats = [];
             setCategories(allCats);
-
             const allNames = allCats.map((c: any) => c.name);
             const statsNames = statsArray.map((s: any) => s.category);
-
-            // Unique names from both sources
             const combined = Array.from(new Set([...allNames, ...statsNames])).filter(Boolean);
             setBankCategories(combined);
           });
@@ -279,28 +286,31 @@ export default function CreateExam() {
           type: "alert",
           title: "Session Expired",
           message: "Your session has expired. Please log in again.",
-          onConfirm: () => navigate("/login")
+          onConfirm: () => navigate("/login"),
         });
       }
     };
-    window.addEventListener('api-unauthorized', handleUnauthorized);
+    window.addEventListener("api-unauthorized", handleUnauthorized);
 
     fetch(`${API_BASE_URL}/categories`, { headers: authHeaders() })
       .then(r => {
-        if (r.status === 401) { window.dispatchEvent(new CustomEvent('api-unauthorized', { detail: { status: 401 } })); return []; }
+        if (r.status === 401) {
+          window.dispatchEvent(new CustomEvent("api-unauthorized", { detail: { status: 401 } }));
+          return [];
+        }
         return r.json();
       })
       .then(data => setCategories(data))
       .catch(console.error);
-    fetchBankStats();
 
-    return () => window.removeEventListener('api-unauthorized', handleUnauthorized);
+    fetchBankStats();
+    return () => window.removeEventListener("api-unauthorized", handleUnauthorized);
   }, []);
 
   const handleImageUpload = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onload = (e) => resolve(e.target?.result as string);
+      reader.onload = e => resolve(e.target?.result as string);
       reader.onerror = reject;
       reader.readAsDataURL(file);
     });
@@ -311,28 +321,27 @@ export default function CreateExam() {
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = (evt) => {
+    reader.onload = evt => {
       try {
         const text = evt.target?.result as string;
         let parsedQuestions: Question[] = [];
 
-        if (file.name.endsWith('.json')) {
+        if (file.name.endsWith(".json")) {
           const data = JSON.parse(text);
           parsedQuestions = Array.isArray(data) ? data : data.questions || [];
 
-          // SYNC: Find new categories in the uploaded file and PERSIST them
           const fileCats = Array.from(new Set(parsedQuestions.map(q => q.category).filter(Boolean)));
           const existingNames = categories.map(c => c.name.toLowerCase());
           fileCats.forEach(cat => {
             if (cat && !existingNames.includes(cat.toLowerCase())) {
               fetch(`${API_BASE_URL}/categories`, {
-                method: 'POST',
-                headers: { ...authHeaders(), 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: cat })
+                method: "POST",
+                headers: { ...authHeaders(), "Content-Type": "application/json" },
+                body: JSON.stringify({ name: cat }),
               })
                 .then(r => r.json())
                 .then(savedCat => {
-                  setCategories((prev: any[]) => {
+                  setCategories(prev => {
                     const alreadyHave = prev.some(c => c.name === savedCat.name);
                     return alreadyHave ? prev : [...prev, savedCat];
                   });
@@ -340,21 +349,17 @@ export default function CreateExam() {
                 .catch(console.error);
             }
           });
-        }
-        else {
-          const lines = text.split('\n').filter(l => l.trim().length > 0);
+        } else {
+          const lines = text.split("\n").filter(l => l.trim().length > 0);
           for (let i = 1; i < lines.length; i++) {
-            const row = lines[i].split(',').map(cell => cell.trim().replace(/^"|"$/g, ''));
+            const row = lines[i].split(",").map(cell => cell.trim().replace(/^"|"$/g, ""));
             if (!row[0] || !row[1]) continue;
-            let options = [];
-            options.push({ text: row[1], is_correct: row[5]?.toUpperCase() === 'A' });
-            options.push({ text: row[2], is_correct: row[5]?.toUpperCase() === 'B' });
-            if (row[3]) options.push({ text: row[3], is_correct: row[5]?.toUpperCase() === 'C' });
-            if (row[4]) options.push({ text: row[4], is_correct: row[5]?.toUpperCase() === 'D' });
-            parsedQuestions.push({
-              text: row[0],
-              options
-            });
+            const options = [];
+            options.push({ text: row[1], is_correct: row[5]?.toUpperCase() === "A" });
+            options.push({ text: row[2], is_correct: row[5]?.toUpperCase() === "B" });
+            if (row[3]) options.push({ text: row[3], is_correct: row[5]?.toUpperCase() === "C" });
+            if (row[4]) options.push({ text: row[4], is_correct: row[5]?.toUpperCase() === "D" });
+            parsedQuestions.push({ text: row[0], options });
           }
         }
 
@@ -363,17 +368,19 @@ export default function CreateExam() {
         } else {
           throw new Error("No questions found");
         }
-      } catch (err) {
-        setPopup({ isOpen: true, type: "alert", title: "Error", message: "Failed to parse file. Ensure it is a valid format.", onConfirm: () => setPopup(null) });
+      } catch {
+        setPopup({
+          isOpen: true,
+          type: "alert",
+          title: "Error",
+          message: "Failed to parse file. Ensure it is a valid format.",
+          onConfirm: () => setPopup(null),
+        });
       }
     };
     reader.readAsText(file);
-    e.target.value = '';
+    e.target.value = "";
   };
-  const [popup, setPopup] = useState<{
-    isOpen: boolean; type: PopupType; title?: string;
-    message: string; onConfirm: () => void; onCancel?: () => void;
-  } | null>(null);
 
   useEffect(() => {
     if (!loading) return;
@@ -381,18 +388,18 @@ export default function CreateExam() {
     return () => clearInterval(id);
   }, [loading]);
 
-  const getToken = () => localStorage.getItem("access_token");
-  const authHeaders = () => ({ "Content-Type": "application/json", Authorization: `Bearer ${getToken()}` });
-
   const buildPayload = () => ({
-    title, topic: subject, difficulty, duration,
+    title,
+    topic: subject,
+    difficulty,
+    duration,
     num_questions: numQuestions,
     proctoring_enabled: proctoringEnabled,
     proctoring_type: proctoringType,
     passing_score: passingScore,
     source: creationMode === "bank" ? "Bank" : "AI",
     bank_categories: selectedBankCats,
-    category_configs: catConfigs
+    category_configs: catConfigs,
   });
 
   const handleGenerate = async (e?: React.FormEvent) => {
@@ -406,14 +413,14 @@ export default function CreateExam() {
           { text: "Option A", is_correct: true },
           { text: "Option B", is_correct: false },
         ],
-        image_required: false
+        image_required: false,
       }]);
       setEditingIdx(0);
       return;
     }
 
     if (creationMode === "file") {
-      document.getElementById('exam-upload-input')?.click();
+      document.getElementById("exam-upload-input")?.click();
       return;
     }
 
@@ -429,9 +436,11 @@ export default function CreateExam() {
       setQuestions(await res.json());
     } catch {
       setPopup({
-        isOpen: true, type: "alert", title: "Generation Failed",
+        isOpen: true,
+        type: "alert",
+        title: "Generation Failed",
         message: "Failed to generate exam questions. Please try again.",
-        onConfirm: () => setPopup(null)
+        onConfirm: () => setPopup(null),
       });
     } finally {
       setLoading(false);
@@ -449,19 +458,22 @@ export default function CreateExam() {
       });
       if (!res.ok) throw new Error();
       setPopup({
-        isOpen: true, type: "alert", title: "Published",
+        isOpen: true,
+        type: "alert",
+        title: "Published",
         message: "Exam has been saved and is ready to deploy.",
         onConfirm: () => {
-          // Notify other tabs/dashboard
           new BroadcastChannel("exam_portal_updates").postMessage("refresh_dashboard");
           navigate("/manage-exams");
-        }
+        },
       });
     } catch {
       setPopup({
-        isOpen: true, type: "alert", title: "Save Failed",
+        isOpen: true,
+        type: "alert",
+        title: "Save Failed",
         message: "Failed to save the exam. Please try again.",
-        onConfirm: () => setPopup(null)
+        onConfirm: () => setPopup(null),
       });
     } finally {
       setSaving(false);
@@ -501,16 +513,15 @@ export default function CreateExam() {
           --radius:     10px;
           --radius-sm:  6px;
           --radius-lg:  14px;
-          --shadow-sm:  var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.05));
-          --shadow-md:  var(--shadow, 0 4px 16px rgba(0,0,0,0.1));
+          --shadow-sm:  0 2px 8px rgba(0,0,0,0.05);
+          --shadow-md:  0 4px 16px rgba(0,0,0,0.1);
           --transition: 0.2s cubic-bezier(0.4,0,0.2,1);
         }
-        
-        .req-star { color: #ef4444; margin-left: 2px; font-weight: 700; }
 
+        .req-star { color: #ef4444; margin-left: 2px; font-weight: 700; }
         *, *::before, *::after { box-sizing: border-box; }
 
-        /* ── Shell ───────────────────────────────────────────────────── */
+        /* ── Shell ─────────────────────────────────────────────────────────── */
         .ce-page {
           min-height: 100vh;
           background: var(--bg);
@@ -532,7 +543,7 @@ export default function CreateExam() {
           to   { opacity: 1; transform: translateY(0); }
         }
 
-        /* ── Top Bar ─────────────────────────────────────────────────── */
+        /* ── Top Bar ─────────────────────────────────────────────────────────*/
         .ce-topbar {
           display: flex;
           align-items: center;
@@ -576,7 +587,7 @@ export default function CreateExam() {
           margin: 2px 0 0;
         }
 
-        /* ── Step Bar ────────────────────────────────────────────────── */
+        /* ── Step Bar ────────────────────────────────────────────────────────*/
         .step-bar {
           display: flex;
           align-items: center;
@@ -603,12 +614,8 @@ export default function CreateExam() {
           transition: background var(--transition), color var(--transition);
         }
 
-        .step--active {
-          background: var(--teal-light);
-          color: var(--teal);
-        }
-
-        .step--done { color: var(--success); }
+        .step--active { background: var(--teal-light); color: var(--teal); }
+        .step--done   { color: var(--success); }
 
         .step-num {
           width: 22px;
@@ -643,7 +650,7 @@ export default function CreateExam() {
           max-width: 40px;
         }
 
-        /* ── Section Card ────────────────────────────────────────────── */
+        /* ── Section Card ────────────────────────────────────────────────────*/
         .section-card {
           background: var(--white);
           border: 1px solid var(--line);
@@ -657,6 +664,26 @@ export default function CreateExam() {
           padding: 24px 24px 0;
         }
 
+        .section-card-title {
+          font-family: var(--font-serif);
+          font-size: 17px;
+          color: var(--ink);
+          margin: 0 0 4px;
+          letter-spacing: -0.01em;
+        }
+
+        .section-card-desc {
+          font-size: 13px;
+          color: var(--ink-3);
+          margin: 0;
+          line-height: 1.5;
+        }
+
+        .section-card-body {
+          padding: 20px 24px 24px;
+        }
+
+        /* ── Bank Category Chips ─────────────────────────────────────────────*/
         .bank-cat-chip {
           display: flex;
           align-items: center;
@@ -689,9 +716,7 @@ export default function CreateExam() {
           color: var(--ink);
         }
 
-        .bank-cat-chip.active .cat-name {
-          color: var(--teal);
-        }
+        .bank-cat-chip.active .cat-name { color: var(--teal); }
 
         .cat-delete-btn {
           width: 20px;
@@ -711,29 +736,8 @@ export default function CreateExam() {
           color: var(--danger);
           transform: rotate(90deg);
         }
-          padding: 20px 24px 0;
-        }
 
-        .section-card-title {
-          font-family: var(--font-serif);
-          font-size: 17px;
-          color: var(--ink);
-          margin: 0 0 4px;
-          letter-spacing: -0.01em;
-        }
-
-        .section-card-desc {
-          font-size: 13px;
-          color: var(--ink-3);
-          margin: 0 0 0;
-          line-height: 1.5;
-        }
-
-        .section-card-body {
-          padding: 20px 24px 24px;
-        }
-
-        /* ── Form Fields ─────────────────────────────────────────────── */
+        /* ── Form Fields ─────────────────────────────────────────────────────*/
         .form-grid {
           display: grid;
           grid-template-columns: 1fr 1fr;
@@ -778,7 +782,7 @@ export default function CreateExam() {
           box-shadow: 0 0 0 3px rgba(15,113,115,0.1);
         }
 
-        /* ── Difficulty Cards ────────────────────────────────────────── */
+        /* ── Difficulty Cards ────────────────────────────────────────────────*/
         .diff-grid {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -807,92 +811,10 @@ export default function CreateExam() {
           box-shadow: 0 0 0 3px rgba(15,113,115,0.08);
         }
 
-        .diff-card-name {
-          font-size: 14px;
-          font-weight: 700;
-          margin-bottom: 4px;
-        }
+        .diff-card-name { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+        .diff-card-desc { font-size: 12.5px; color: var(--ink-3); line-height: 1.4; }
 
-        .diff-card-desc {
-          font-size: 12.5px;
-          color: var(--ink-3);
-          line-height: 1.4;
-        }
-
-        /* ── Proctoring Toggle ───────────────────────────────────────── */
-        .proctor-toggle-row {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 14px 16px;
-          background: var(--bg);
-          border: 1px solid var(--line);
-          border-radius: var(--radius);
-          margin-bottom: 16px;
-        }
-
-        .proctor-toggle-label { font-size: 14px; font-weight: 600; color: var(--ink); }
-        .proctor-toggle-sub   { font-size: 12px; color: var(--ink-3); margin-top: 2px; }
-
-        .toggle-switch { position: relative; display: inline-block; width: 40px; height: 22px; flex-shrink: 0; }
-        .toggle-switch input { opacity: 0; width: 0; height: 0; }
-        .toggle-track {
-          position: absolute; cursor: pointer; inset: 0;
-          background: var(--line); border-radius: 22px;
-          transition: background var(--transition);
-        }
-        .toggle-thumb {
-          position: absolute; content: "";
-          height: 16px; width: 16px;
-          left: 3px; bottom: 3px;
-          background: white; border-radius: 50%;
-          transition: transform var(--transition);
-          pointer-events: none;
-        }
-        .toggle-switch input:checked ~ .toggle-track { background: var(--teal); }
-        .toggle-switch input:checked ~ .toggle-thumb { transform: translateX(18px); }
-
-        .proctor-options {
-          display: grid;
-          grid-template-columns: 1fr 1fr 1fr;
-          gap: 10px;
-        }
-
-        @media (max-width: 600px) { .proctor-options { grid-template-columns: 1fr; } }
-
-        .proctor-card {
-          padding: 14px;
-          border: 1.5px solid var(--line);
-          border-radius: var(--radius);
-          cursor: pointer;
-          text-align: center;
-          transition: all var(--transition);
-          background: var(--white);
-        }
-
-        .proctor-card:hover { border-color: var(--teal-mid); background: var(--teal-light); }
-        .proctor-card--active { border-color: var(--teal) !important; background: var(--teal-light) !important; }
-
-        .proctor-card-icon  { font-size: 20px; margin-bottom: 6px; }
-        .proctor-card-label { font-size: 13px; font-weight: 700; color: var(--ink); }
-        .proctor-card-desc  { font-size: 11.5px; color: var(--ink-3); margin-top: 2px; }
-
-        /* ── Action Buttons ──────────────────────────────────────────── */
-        .btn {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          gap: 7px;
-          font-family: var(--font-sans);
-          font-weight: 600;
-          border-radius: var(--radius-sm);
-          cursor: pointer;
-          transition: all var(--transition);
-          outline: none;
-          border: 1px solid transparent;
-          white-space: nowrap;
-        }
-
+        /* ── File Upload ─────────────────────────────────────────────────────*/
         .file-upload-box {
           border: 2px dashed var(--line);
           border-radius: var(--radius-lg);
@@ -958,6 +880,89 @@ export default function CreateExam() {
           background: color-mix(in srgb, var(--teal) 10%, transparent);
           padding: 4px 12px;
           border-radius: 100px;
+        }
+
+        /* ── Proctoring ──────────────────────────────────────────────────────*/
+        .proctor-toggle-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 14px 16px;
+          background: var(--bg);
+          border: 1px solid var(--line);
+          border-radius: var(--radius);
+          margin-bottom: 16px;
+        }
+
+        .proctor-toggle-label { font-size: 14px; font-weight: 600; color: var(--ink); }
+        .proctor-toggle-sub   { font-size: 12px; color: var(--ink-3); margin-top: 2px; }
+
+        .toggle-switch { position: relative; display: inline-block; width: 40px; height: 22px; flex-shrink: 0; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+
+        .toggle-track {
+          position: absolute;
+          cursor: pointer;
+          inset: 0;
+          background: var(--line);
+          border-radius: 22px;
+          transition: background var(--transition);
+        }
+
+        .toggle-thumb {
+          position: absolute;
+          height: 16px;
+          width: 16px;
+          left: 3px;
+          bottom: 3px;
+          background: white;
+          border-radius: 50%;
+          transition: transform var(--transition);
+          pointer-events: none;
+        }
+
+        .toggle-switch input:checked ~ .toggle-track { background: var(--teal); }
+        .toggle-switch input:checked ~ .toggle-thumb { transform: translateX(18px); }
+
+        .proctor-options {
+          display: grid;
+          grid-template-columns: 1fr 1fr 1fr;
+          gap: 10px;
+        }
+
+        @media (max-width: 600px) { .proctor-options { grid-template-columns: 1fr; } }
+
+        .proctor-card {
+          padding: 14px;
+          border: 1.5px solid var(--line);
+          border-radius: var(--radius);
+          cursor: pointer;
+          text-align: center;
+          transition: all var(--transition);
+          background: var(--white);
+        }
+
+        .proctor-card:hover     { border-color: var(--teal-mid); background: var(--teal-light); }
+        .proctor-card--active   { border-color: var(--teal) !important; background: var(--teal-light) !important; }
+
+        .proctor-card-icon  { font-size: 20px; margin-bottom: 6px; }
+        .proctor-card-label { font-size: 13px; font-weight: 700; color: var(--ink); }
+        .proctor-card-desc  { font-size: 11.5px; color: var(--ink-3); margin-top: 2px; }
+
+        /* ── Buttons ─────────────────────────────────────────────────────────*/
+        .btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 7px;
+          font-family: var(--font-sans);
+          font-weight: 600;
+          border-radius: var(--radius-sm);
+          cursor: pointer;
+          transition: all var(--transition);
+          outline: none;
+          border: 1px solid transparent;
+          white-space: nowrap;
         }
 
         .btn-generate {
@@ -1026,7 +1031,11 @@ export default function CreateExam() {
           margin-bottom: 20px;
         }
 
-        .btn-back:hover { border-color: var(--teal); color: var(--teal); background: var(--teal-light); }
+        .btn-back:hover {
+          border-color: var(--teal);
+          color: var(--teal);
+          background: var(--teal-light);
+        }
 
         .btn-row {
           display: flex;
@@ -1034,7 +1043,7 @@ export default function CreateExam() {
           margin-top: 8px;
         }
 
-        /* ── Loading State ───────────────────────────────────────────── */
+        /* ── Loading ─────────────────────────────────────────────────────────*/
         .ce-loading {
           text-align: center;
           padding: 80px 24px;
@@ -1072,7 +1081,7 @@ export default function CreateExam() {
           transition: opacity 0.4s;
         }
 
-        /* ── Summary Bar ─────────────────────────────────────────────── */
+        /* ── Summary Bar ─────────────────────────────────────────────────────*/
         .summary-bar {
           display: flex;
           gap: 0;
@@ -1110,7 +1119,7 @@ export default function CreateExam() {
           text-overflow: ellipsis;
         }
 
-        /* ── Review Header ───────────────────────────────────────────── */
+        /* ── Review Header ───────────────────────────────────────────────────*/
         .review-header {
           background: var(--white);
           border: 1px solid var(--line);
@@ -1145,7 +1154,7 @@ export default function CreateExam() {
 
         .review-actions { display: flex; gap: 10px; }
 
-        /* ── Question Card ───────────────────────────────────────────── */
+        /* ── Question Card ───────────────────────────────────────────────────*/
         .q-card {
           background: var(--white);
           border: 1px solid var(--line);
@@ -1261,16 +1270,13 @@ export default function CreateExam() {
           line-height: 1.6;
         }
 
-        .q-explanation strong {
-          color: var(--teal);
-          font-weight: 700;
-        }
+        .q-explanation strong { color: var(--teal); font-weight: 700; }
       `}</style>
 
       <div className="ce-page">
         <div className="ce-container">
 
-          {/* Top Bar */}
+          {/* ── Top Bar ─────────────────────────────────────────────────────── */}
           <div className="ce-topbar">
             <div className="ce-brand">
               <div className="ce-brand-icon"><Icons.Brain /></div>
@@ -1284,34 +1290,51 @@ export default function CreateExam() {
             </button>
           </div>
 
-          {/* Step Bar */}
+          {/* ── Step Bar ────────────────────────────────────────────────────── */}
           <StepBar active={activeStep} />
 
-          {/* ── Step 1: Configure ─────────────────────────────────────── */}
+          {/* ── Step 1: Configure ───────────────────────────────────────────── */}
           {activeStep === "configure" && (
             <form onSubmit={handleGenerate}>
-              <SectionCard
-                title="Creation Method"
-                desc="Choose how you want to build this assessment."
-              >
-                <div className="diff-grid" style={{ marginBottom: creationMode === 'file' ? 0 : 20 }}>
-                  <div className={`diff-card ${creationMode === 'manual' ? "diff-card--active" : ""}`} onClick={() => setCreationMode('manual')}>
-                    <div className="diff-card-name" style={{ color: 'var(--ink)' }}>✋ Manual Entry</div>
+
+              {/* Creation Method */}
+              <SectionCard title="Creation Method" desc="Choose how you want to build this assessment.">
+                <div className="diff-grid" style={{ marginBottom: creationMode === "file" ? 0 : 20 }}>
+                  <div
+                    className={`diff-card ${creationMode === "manual" ? "diff-card--active" : ""}`}
+                    onClick={() => setCreationMode("manual")}
+                  >
+                    <div className="diff-card-name" style={{ color: "var(--ink)" }}>✋ Manual Entry</div>
                     <div className="diff-card-desc">Start from scratch and build your questions completely by hand.</div>
                   </div>
-                  <div className={`diff-card ${creationMode === 'bank' ? "diff-card--active" : ""}`} onClick={() => { setCreationMode('bank'); setDifficulty('Mixed'); }}>
-                    <div className="diff-card-name" style={{ color: 'var(--teal)' }}>📚 Inbuilt Question Bank</div>
+                  <div
+                    className={`diff-card ${creationMode === "bank" ? "diff-card--active" : ""}`}
+                    onClick={() => { setCreationMode("bank"); setDifficulty("Mixed"); }}
+                  >
+                    <div className="diff-card-name" style={{ color: "var(--teal)" }}>📖 Inbuilt Question Bank</div>
                     <div className="diff-card-desc">Automatically generate questions using our predefined question bank.</div>
                   </div>
-                  <div className={`diff-card ${creationMode === 'file' ? "diff-card--active" : ""}`} onClick={() => setCreationMode('file')}>
-                    <div className="diff-card-name" style={{ color: 'var(--ink)' }}>📁 Upload File</div>
+                  <div
+                    className={`diff-card ${creationMode === "file" ? "diff-card--active" : ""}`}
+                    onClick={() => setCreationMode("file")}
+                  >
+                    <div className="diff-card-name" style={{ color: "var(--ink)" }}>📂 Upload File</div>
                     <div className="diff-card-desc">Import existing questions from a CSV, Excel, or JSON document.</div>
                   </div>
                 </div>
 
-                {creationMode === 'file' && (
-                  <div className="file-upload-box" onClick={() => document.getElementById('exam-upload-input')?.click()}>
-                    <input type="file" id="exam-upload-input" style={{ display: 'none' }} accept=".csv,.xlsx,.json" onChange={handleFileUpload} />
+                {creationMode === "file" && (
+                  <div
+                    className="file-upload-box"
+                    onClick={() => document.getElementById("exam-upload-input")?.click()}
+                  >
+                    <input
+                      type="file"
+                      id="exam-upload-input"
+                      style={{ display: "none" }}
+                      accept=".csv,.xlsx,.json"
+                      onChange={handleFileUpload}
+                    />
                     <div className="file-upload-icon-container">
                       <Icons.Upload />
                     </div>
@@ -1322,52 +1345,64 @@ export default function CreateExam() {
                 )}
               </SectionCard>
 
-              <SectionCard
-                title="Exam Details"
-                desc="Define the title, subject topic, and session parameters."
-              >
+              {/* Exam Details */}
+              <SectionCard title="Exam Details" desc="Define the title, subject topic, and session parameters.">
                 <div className="form-grid">
                   <div className="form-field">
                     <label className="form-label">Exam Title <span className="req-star">*</span></label>
-                    <input className="form-input" value={title} onChange={e => setTitle(e.target.value)}
-                      placeholder="e.g. Advanced Python Patterns" required />
+                    <input
+                      className="form-input"
+                      value={title}
+                      onChange={e => setTitle(e.target.value)}
+                      placeholder="e.g. Advanced Python Patterns"
+                      required
+                    />
                   </div>
                   <div className="form-field">
                     <label className="form-label">Subject Topic <span className="req-star">*</span></label>
-                    <input className="form-input" value={subject} onChange={e => setSubject(e.target.value)}
-                      placeholder="e.g. React Hooks & Performance" required />
+                    <input
+                      className="form-input"
+                      value={subject}
+                      onChange={e => setSubject(e.target.value)}
+                      placeholder="e.g. React Hooks & Performance"
+                      required
+                    />
                   </div>
                 </div>
+
                 <div className="form-grid" style={{ marginBottom: 0 }}>
                   <div className="form-field">
                     <label className="form-label">Duration (minutes) <span className="req-star">*</span></label>
-                    <input className="form-input" type="text" value={duration}
+                    <input
+                      className="form-input"
+                      type="text"
+                      value={duration}
                       onChange={e => {
                         const val = e.target.value.replace(/\D/g, "");
                         setDuration(val ? Number(val) : 0);
-                      }} required />
+                      }}
+                      required
+                    />
                   </div>
-                  {creationMode === 'bank' && (
+
+                  {creationMode === "bank" && (
                     <>
-                      <div className="form-field" style={{ gridColumn: 'span 2' }}>
-                        <div className="form-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div className="form-field" style={{ gridColumn: "span 2" }}>
+                        <div className="form-label" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                           <span>Select Bank Categories (Select Multiple)</span>
                         </div>
+
                         {bankCategories.length === 0 && !showBankAdd && (
-                          <div style={{ width: '100%', padding: '24px', textAlign: 'center', background: 'var(--bg)', borderRadius: 12, border: '1px dashed var(--line)' }}>
-                            <p style={{ color: 'var(--ink-3)', fontSize: '13px', marginBottom: 12 }}>No categories found in the bank.</p>
-                            <button
-                              type="button"
-                              className="btn btn-secondary"
-                              onClick={() => setShowBankAdd(true)}
-                            >
+                          <div style={{ width: "100%", padding: "24px", textAlign: "center", background: "var(--bg)", borderRadius: 12, border: "1px dashed var(--line)" }}>
+                            <p style={{ color: "var(--ink-3)", fontSize: "13px", marginBottom: 12 }}>No categories found in the bank.</p>
+                            <button type="button" className="btn btn-secondary" onClick={() => setShowBankAdd(true)}>
                               <Icons.Plus /> Add First Category
                             </button>
                           </div>
                         )}
 
                         {showBankAdd && (
-                          <div style={{ width: '100%', padding: '16px', background: 'var(--teal-light)', borderRadius: 12, border: '1px solid var(--teal)', display: 'flex', gap: 8, alignItems: 'center' }}>
+                          <div style={{ width: "100%", padding: "16px", background: "var(--teal-light)", borderRadius: 12, border: "1px solid var(--teal)", display: "flex", gap: 8, alignItems: "center" }}>
                             <input
                               autoFocus
                               className="form-input"
@@ -1379,17 +1414,16 @@ export default function CreateExam() {
                             <button
                               type="button"
                               className="btn btn-publish"
-                              style={{ height: 36, padding: '0 12px' }}
+                              style={{ height: 36, padding: "0 12px" }}
                               onClick={async () => {
                                 if (!newBankCatName.trim()) { setShowBankAdd(false); return; }
                                 try {
-                                  // Add to DB
                                   const res = await fetch(`${API_BASE_URL}/categories`, {
-                                    method: 'POST', headers: authHeaders(), body: JSON.stringify({ name: newBankCatName })
+                                    method: "POST",
+                                    headers: authHeaders(),
+                                    body: JSON.stringify({ name: newBankCatName }),
                                   });
                                   if (res.ok) {
-                                    // It will be picked up by fetchBankStats because we SYNC them
-                                    // But let's proactively add it to local state too
                                     setBankCategories(prev => [...prev, newBankCatName]);
                                     setNewBankCatName("");
                                     setShowBankAdd(false);
@@ -1403,7 +1437,7 @@ export default function CreateExam() {
                             <button
                               type="button"
                               className="btn btn-secondary"
-                              style={{ height: 36, padding: '0 12px' }}
+                              style={{ height: 36, padding: "0 12px" }}
                               onClick={() => setShowBankAdd(false)}
                             >
                               <Icons.X />
@@ -1411,7 +1445,7 @@ export default function CreateExam() {
                           </div>
                         )}
 
-                        <div ref={bankSectionRef} style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '4px', position: 'relative' }}>
+                        <div ref={bankSectionRef} style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "4px", position: "relative" }}>
                           {(showAllBankCats ? bankCategories : bankCategories.slice(0, 4)).map(cat => {
                             const isSelected = selectedBankCats.includes(cat);
                             const statsForCat = bankStats[cat] || { count: 0, total_marks: 0 };
@@ -1420,9 +1454,9 @@ export default function CreateExam() {
                                 key={cat}
                                 className={`bank-cat-chip ${isSelected ? "active" : ""} ${editingCat === cat ? "editing" : ""}`}
                                 style={{
-                                  height: editingCat === cat ? 'auto' : '62px',
-                                  alignItems: editingCat === cat ? 'flex-start' : 'center',
-                                  padding: editingCat === cat ? '12px' : '10px 14px'
+                                  height: editingCat === cat ? "auto" : "62px",
+                                  alignItems: editingCat === cat ? "flex-start" : "center",
+                                  padding: editingCat === cat ? "12px" : "10px 14px",
                                 }}
                                 onClick={() => {
                                   if (!isSelected) {
@@ -1432,41 +1466,40 @@ export default function CreateExam() {
                                       setCatConfigs(prev => ({ ...prev, [cat]: { count: 5, marks: 5 } }));
                                     }
                                   } else {
-                                    // If we click the card while it's selected, just make sure it's expanded
                                     setEditingCat(cat);
                                   }
                                 }}
                               >
-                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 6, flex: 1, width: '100%' }}>
-                                  <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
+                                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 6, flex: 1, width: "100%" }}>
+                                  <div style={{ display: "flex", justifyContent: "space-between", width: "100%", alignItems: "center" }}>
                                     <span className="cat-name">{cat}</span>
                                     {!isSelected && (
                                       <span
                                         className="cat-delete-btn"
-                                        onClick={(e) => {
+                                        onClick={e => {
                                           e.stopPropagation();
                                           if (window.confirm(`Delete category "${cat}" and all its questions from the bank?`)) {
-                                            fetch(`${API_BASE_URL}/exams/bank/categories/${encodeURIComponent(cat)}`, { method: 'DELETE', headers: authHeaders() })
+                                            fetch(`${API_BASE_URL}/exams/bank/categories/${encodeURIComponent(cat)}`, { method: "DELETE", headers: authHeaders() })
                                               .then(() => {
                                                 setBankCategories(prev => prev.filter(c => c !== cat));
                                                 setSelectedBankCats(prev => prev.filter(c => c !== cat));
                                                 setCategories(prev => prev.filter(c => c.name !== cat));
-                                                fetch(`${API_BASE_URL}/categories/${encodeURIComponent(cat)}`, { method: 'DELETE', headers: authHeaders() })
+                                                fetch(`${API_BASE_URL}/categories/${encodeURIComponent(cat)}`, { method: "DELETE", headers: authHeaders() })
                                                   .then(() => fetchBankStats());
                                               })
                                               .catch(console.error);
                                           }
                                         }}
                                       >
-                                        <span style={{ fontSize: '14px', fontWeight: 'bold' }}>×</span>
+                                        <span style={{ fontSize: "14px", fontWeight: "bold" }}>×</span>
                                       </span>
                                     )}
                                     {isSelected && (
-                                      <div style={{ display: 'flex', gap: 4 }}>
+                                      <div style={{ display: "flex", gap: 4 }}>
                                         <button
                                           type="button"
-                                          onClick={(e) => { e.stopPropagation(); setSelectedBankCats(prev => prev.filter(c => c !== cat)); }}
-                                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--teal)', display: 'flex' }}
+                                          onClick={e => { e.stopPropagation(); setSelectedBankCats(prev => prev.filter(c => c !== cat)); }}
+                                          style={{ background: "none", border: "none", cursor: "pointer", color: "var(--teal)", display: "flex" }}
                                         >
                                           <Icons.X size={14} />
                                         </button>
@@ -1475,37 +1508,37 @@ export default function CreateExam() {
                                   </div>
 
                                   {editingCat !== cat ? (
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                                    <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
                                       {isSelected ? (
-                                        <div style={{ display: 'flex', gap: 6, fontSize: '11px', color: 'var(--teal)', fontWeight: 700 }}>
+                                        <div style={{ display: "flex", gap: 6, fontSize: "11px", color: "var(--teal)", fontWeight: 700 }}>
                                           <span>{catConfigs[cat]?.count || 0} Qs</span>
                                           <span>•</span>
                                           <span>{catConfigs[cat]?.marks || 0} Marks</span>
                                         </div>
                                       ) : (
-                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, fontSize: '10px', opacity: 0.7, fontWeight: 500 }}>
-                                          <span style={{ background: 'var(--bg-neutral)', padding: '2px 6px', borderRadius: '4px' }}>Bank: {statsForCat.count} Qs</span>
-                                          <span style={{ background: 'var(--bg-neutral)', padding: '2px 6px', borderRadius: '4px' }}>{statsForCat.total_marks} Marks</span>
+                                        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, fontSize: "10px", opacity: 0.7, fontWeight: 500 }}>
+                                          <span style={{ background: "var(--bg-neutral)", padding: "2px 6px", borderRadius: "4px" }}>Bank: {statsForCat.count} Qs</span>
+                                          <span style={{ background: "var(--bg-neutral)", padding: "2px 6px", borderRadius: "4px" }}>{statsForCat.total_marks} Marks</span>
                                         </div>
                                       )}
                                     </div>
                                   ) : (
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: '100%', marginTop: 4 }}>
-                                      <div style={{ display: 'flex', gap: 6, fontSize: '10px', fontWeight: 700, color: 'var(--teal)' }}>
+                                    <div style={{ display: "flex", flexDirection: "column", gap: 8, width: "100%", marginTop: 4 }}>
+                                      <div style={{ display: "flex", gap: 6, fontSize: "10px", fontWeight: 700, color: "var(--teal)" }}>
                                         <span>CHOSEN: {catConfigs[cat]?.count || 0} Qs</span>
                                         <span>•</span>
                                         <span>{catConfigs[cat]?.marks || 0} Marks</span>
                                       </div>
-                                      <div style={{ display: 'flex', gap: 8, width: '100%' }}>
+                                      <div style={{ display: "flex", gap: 8, width: "100%" }}>
                                         <div style={{ flex: 1 }}>
-                                          <label style={{ fontSize: '9px', textTransform: 'uppercase', fontWeight: 800, color: 'var(--teal)', display: 'block', marginBottom: 2 }}>Questions</label>
-                                          <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+                                          <label style={{ fontSize: "9px", textTransform: "uppercase", fontWeight: 800, color: "var(--teal)", display: "block", marginBottom: 2 }}>Questions</label>
+                                          <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
                                             <input
                                               type="number"
                                               autoFocus
                                               onClick={e => e.stopPropagation()}
                                               className="form-input"
-                                              style={{ height: 28, fontSize: '12px', padding: '0 8px', borderColor: 'var(--teal)', background: 'white', flex: 1 }}
+                                              style={{ height: 28, fontSize: "12px", padding: "0 8px", borderColor: "var(--teal)", background: "white", flex: 1 }}
                                               value={catConfigs[cat]?.count || ""}
                                               onChange={e => {
                                                 const valStr = e.target.value;
@@ -1514,7 +1547,6 @@ export default function CreateExam() {
                                                 const safeVal = Math.min(val, max);
                                                 setCatConfigs(prev => {
                                                   const current = prev[cat] || { count: 0, marks: 0 };
-                                                  // Auto-predict marks if it's 1:1 or first time
                                                   const newMarks = (current.marks === current.count || current.marks === 0) ? safeVal : current.marks;
                                                   return { ...prev, [cat]: { ...current, count: safeVal, marks: newMarks } };
                                                 });
@@ -1522,25 +1554,25 @@ export default function CreateExam() {
                                             />
                                             <button
                                               type="button"
-                                              onClick={(e) => {
+                                              onClick={e => {
                                                 e.stopPropagation();
                                                 const max = bankStats[cat]?.count || 0;
                                                 setCatConfigs(prev => ({ ...prev, [cat]: { ...(prev[cat] || { marks: max }), count: max } }));
                                               }}
-                                              style={{ padding: '4px 8px', fontSize: '9px', fontWeight: 800, background: 'var(--teal-light)', color: 'var(--teal-dark)', border: '1px solid var(--teal)', borderRadius: '4px', cursor: 'pointer' }}
+                                              style={{ padding: "4px 8px", fontSize: "9px", fontWeight: 800, background: "var(--teal-light)", color: "var(--teal-dark)", border: "1px solid var(--teal)", borderRadius: "4px", cursor: "pointer" }}
                                             >
                                               MAX
                                             </button>
                                           </div>
-                                          <span style={{ fontSize: '9px', opacity: 0.6 }}>Available: {bankStats[cat]?.count || 0}</span>
+                                          <span style={{ fontSize: "9px", opacity: 0.6 }}>Available: {bankStats[cat]?.count || 0}</span>
                                         </div>
                                         <div style={{ flex: 1 }}>
-                                          <label style={{ fontSize: '9px', textTransform: 'uppercase', fontWeight: 800, color: 'var(--teal)', display: 'block', marginBottom: 2 }}>Total Marks</label>
+                                          <label style={{ fontSize: "9px", textTransform: "uppercase", fontWeight: 800, color: "var(--teal)", display: "block", marginBottom: 2 }}>Total Marks</label>
                                           <input
                                             type="number"
                                             onClick={e => e.stopPropagation()}
                                             className="form-input"
-                                            style={{ height: 28, fontSize: '12px', padding: '0 8px', borderColor: 'var(--teal)', background: 'white' }}
+                                            style={{ height: 28, fontSize: "12px", padding: "0 8px", borderColor: "var(--teal)", background: "white" }}
                                             value={catConfigs[cat]?.marks ?? ""}
                                             onChange={e => {
                                               const valStr = e.target.value;
@@ -1552,31 +1584,31 @@ export default function CreateExam() {
                                       </div>
 
                                       {/* Detailed Breakdown Toggle */}
-                                      <div style={{ marginTop: 8, borderTop: '1px dashed var(--line)', paddingTop: 8 }}>
+                                      <div style={{ marginTop: 8, borderTop: "1px dashed var(--line)", paddingTop: 8 }}>
                                         <button
                                           type="button"
-                                          onClick={(e) => {
+                                          onClick={e => {
                                             e.stopPropagation();
                                             const current = catConfigs[cat] || { count: 1, marks: 1 };
                                             setCatConfigs(prev => ({
                                               ...prev,
-                                              [cat]: { ...current, showBreakdown: !current.showBreakdown }
+                                              [cat]: { ...current, showBreakdown: !current.showBreakdown },
                                             }));
                                           }}
-                                          style={{ background: 'none', border: 'none', padding: 0, color: 'var(--teal)', fontSize: '10px', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
+                                          style={{ background: "none", border: "none", padding: 0, color: "var(--teal)", fontSize: "10px", fontWeight: 800, cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}
                                         >
-                                          {catConfigs[cat]?.showBreakdown ? '← Simple Mode' : '⚡ Detailed Breakdown (1, 2, 3 pts)'}
+                                          {catConfigs[cat]?.showBreakdown ? "← Simple Mode" : "⚡ Detailed Breakdown (1, 2, 3 pts)"}
                                         </button>
 
                                         {catConfigs[cat]?.showBreakdown && (
-                                          <div style={{ display: 'flex', gap: 6, marginTop: 8, animation: 'ceIn 0.2s ease' }}>
+                                          <div style={{ display: "flex", gap: 6, marginTop: 8, animation: "ceIn 0.2s ease" }}>
                                             {[1, 2, 3].map(m => (
-                                              <div key={m} style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
-                                                <label style={{ fontSize: '8px', textTransform: 'uppercase', fontWeight: 800, color: 'var(--ink-3)', textAlign: 'center' }}>{m} Pt</label>
+                                              <div key={m} style={{ flex: 1, display: "flex", flexDirection: "column", gap: 2 }}>
+                                                <label style={{ fontSize: "8px", textTransform: "uppercase", fontWeight: 800, color: "var(--ink-3)", textAlign: "center" }}>{m} Pt</label>
                                                 <input
                                                   type="number"
                                                   min="0"
-                                                  style={{ height: 24, fontSize: '11px', textAlign: 'center', border: '1px solid var(--line)', borderRadius: '4px', outline: 'none', background: 'var(--bg-neutral)' }}
+                                                  style={{ height: 24, fontSize: "11px", textAlign: "center", border: "1px solid var(--line)", borderRadius: "4px", outline: "none", background: "var(--bg-neutral)" }}
                                                   value={catConfigs[cat]?.breakdown?.[m] || 0}
                                                   onChange={e => {
                                                     const val = Math.max(0, parseInt(e.target.value) || 0);
@@ -1585,20 +1617,12 @@ export default function CreateExam() {
                                                       const otherBreakdownSum = [1, 2, 3]
                                                         .filter(x => x !== m)
                                                         .reduce((sum, x) => sum + (current.breakdown?.[x] || 0), 0);
-
                                                       const maxAllowedForThisLevel = (bankStats[cat]?.count || 0) - otherBreakdownSum;
                                                       const safeVal = Math.min(val, Math.max(0, maxAllowedForThisLevel));
-
                                                       const newBreakdown = { ...(current.breakdown || {}), [m]: safeVal };
-
-                                                      // Auto-calculate totals
                                                       const newCount = Object.values(newBreakdown).reduce((a, b) => a + b, 0);
-                                                      const newMarks = Object.entries(newBreakdown).reduce((sum, [mark, qty]) => sum + (Number(mark) * qty), 0);
-
-                                                      return {
-                                                        ...prev,
-                                                        [cat]: { ...current, breakdown: newBreakdown, count: newCount, marks: newMarks }
-                                                      };
+                                                      const newMarks = Object.entries(newBreakdown).reduce((sum, [mark, qty]) => sum + Number(mark) * qty, 0);
+                                                      return { ...prev, [cat]: { ...current, breakdown: newBreakdown, count: newCount, marks: newMarks } };
                                                     });
                                                   }}
                                                 />
@@ -1611,8 +1635,8 @@ export default function CreateExam() {
                                       <button
                                         type="button"
                                         className="btn btn-secondary"
-                                        style={{ height: 24, fontSize: '10px', marginTop: 8, width: '100%' }}
-                                        onClick={(e) => { e.stopPropagation(); setEditingCat(null); }}
+                                        style={{ height: 24, fontSize: "10px", marginTop: 8, width: "100%" }}
+                                        onClick={e => { e.stopPropagation(); setEditingCat(null); }}
                                       >
                                         Done
                                       </button>
@@ -1622,30 +1646,31 @@ export default function CreateExam() {
                               </div>
                             );
                           })}
+
                           {bankCategories.length > 0 && !showBankAdd && (
-                            <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', padding: '12px 16px', background: 'var(--teal-light)', borderRadius: '12px', border: '1px solid var(--teal)' }}>
-                              <div style={{ display: 'flex', gap: 20 }}>
-                                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                  <span style={{ fontSize: '10px', textTransform: 'uppercase', fontWeight: 800, color: 'var(--teal-dark)', opacity: 0.8 }}>Questions Budget</span>
-                                  <span style={{ fontSize: '18px', fontWeight: 800, color: selectedBankCats.reduce((sum, cat) => sum + (catConfigs[cat]?.count || 0), 0) > numQuestions ? 'var(--red)' : 'var(--teal-dark)' }}>
+                            <div style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "16px", padding: "12px 16px", background: "var(--teal-light)", borderRadius: "12px", border: "1px solid var(--teal)" }}>
+                              <div style={{ display: "flex", gap: 20 }}>
+                                <div style={{ display: "flex", flexDirection: "column" }}>
+                                  <span style={{ fontSize: "10px", textTransform: "uppercase", fontWeight: 800, color: "var(--teal-dark)", opacity: 0.8 }}>Questions Budget</span>
+                                  <span style={{ fontSize: "18px", fontWeight: 800, color: selectedBankCats.reduce((sum, cat) => sum + (catConfigs[cat]?.count || 0), 0) > numQuestions ? "var(--danger)" : "var(--teal-dark)" }}>
                                     {selectedBankCats.reduce((sum, cat) => sum + (catConfigs[cat]?.count || 0), 0)} / {numQuestions}
                                   </span>
                                 </div>
-                                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                  <span style={{ fontSize: '10px', textTransform: 'uppercase', fontWeight: 800, color: 'var(--teal-dark)', opacity: 0.8 }}>Total Exam Marks</span>
-                                  <span style={{ fontSize: '18px', fontWeight: 800, color: 'var(--teal-dark)' }}>
+                                <div style={{ display: "flex", flexDirection: "column" }}>
+                                  <span style={{ fontSize: "10px", textTransform: "uppercase", fontWeight: 800, color: "var(--teal-dark)", opacity: 0.8 }}>Total Exam Marks</span>
+                                  <span style={{ fontSize: "18px", fontWeight: 800, color: "var(--teal-dark)" }}>
                                     {selectedBankCats.reduce((sum, cat) => sum + (catConfigs[cat]?.marks || 0), 0)} pts
                                   </span>
                                 </div>
                               </div>
-                              <div style={{ display: 'flex', gap: 8 }}>
+                              <div style={{ display: "flex", gap: 8 }}>
                                 <button
                                   type="button"
                                   onClick={() => {
                                     const newTotal = selectedBankCats.reduce((sum, cat) => sum + (catConfigs[cat]?.count || 0), 0);
                                     setNumQuestions(newTotal);
                                   }}
-                                  style={{ padding: '4px 10px', fontSize: '10px', fontWeight: 700, borderRadius: '6px', border: '1px solid var(--teal)', background: 'white', color: 'var(--teal)', cursor: 'pointer' }}
+                                  style={{ padding: "4px 10px", fontSize: "10px", fontWeight: 700, borderRadius: "6px", border: "1px solid var(--teal)", background: "white", color: "var(--teal)", cursor: "pointer" }}
                                   title="Set the Global Limit to match your current selection"
                                 >
                                   SYNC LIMIT
@@ -1653,71 +1678,68 @@ export default function CreateExam() {
                                 <button
                                   type="button"
                                   onClick={() => setShowBankAdd(true)}
-                                  style={{
-                                    display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: '12px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', border: 'none', background: 'var(--teal)', color: 'white', transition: 'all 0.2s'
-                                  }}
-                                  onMouseOver={e => e.currentTarget.style.transform = 'translateY(-1px)'}
-                                  onMouseOut={e => e.currentTarget.style.transform = 'none'}
+                                  style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: "12px", fontSize: "12px", fontWeight: 700, cursor: "pointer", border: "none", background: "var(--teal)", color: "white", transition: "all 0.2s" }}
+                                  onMouseOver={e => (e.currentTarget.style.transform = "translateY(-1px)")}
+                                  onMouseOut={e => (e.currentTarget.style.transform = "none")}
                                 >
                                   <Icons.Plus size={16} /> Add Category
                                 </button>
                               </div>
                             </div>
                           )}
+
                           {bankCategories.length > 4 && (
                             <button
                               type="button"
                               onClick={() => setShowAllBankCats(!showAllBankCats)}
-                              style={{
-                                background: 'none',
-                                border: '1px solid var(--line)',
-                                padding: '4px 12px',
-                                borderRadius: '100px',
-                                fontSize: '11px',
-                                fontWeight: 700,
-                                color: 'var(--ink-2)',
-                                cursor: 'pointer'
-                              }}
+                              style={{ background: "none", border: "1px solid var(--line)", padding: "4px 12px", borderRadius: "100px", fontSize: "11px", fontWeight: 700, color: "var(--ink-2)", cursor: "pointer" }}
                             >
                               {showAllBankCats ? "Show Less" : "See All"}
                             </button>
                           )}
                         </div>
                       </div>
-                      {creationMode === 'bank' && (
-                        <div className="form-field">
-                          <label className="form-label">Global Question Limit <span className="req-star">*</span></label>
-                          <p style={{ fontSize: '11px', color: 'var(--ink-3)', marginTop: -8, marginBottom: 8 }}>This will balance your selected category counts.</p>
-                          <input className="form-input" type="text" value={numQuestions}
-                            onChange={e => {
-                              const val = e.target.value.replace(/\D/g, "");
-                              let n = val ? Number(val) : 0;
-                              if (creationMode === 'bank') {
-                                const totalAvailable = selectedBankCats.reduce((sum, c) => sum + (bankStats[c]?.count || 0), 0);
-                                if (n > totalAvailable) n = totalAvailable;
-                              }
-                              setNumQuestions(n);
-                            }} required />
-                        </div>
-                      )}
+
+                      <div className="form-field">
+                        <label className="form-label">Global Question Limit <span className="req-star">*</span></label>
+                        <p style={{ fontSize: "11px", color: "var(--ink-3)", marginTop: -8, marginBottom: 8 }}>This will balance your selected category counts.</p>
+                        <input
+                          className="form-input"
+                          type="text"
+                          value={numQuestions}
+                          onChange={e => {
+                            const val = e.target.value.replace(/\D/g, "");
+                            let n = val ? Number(val) : 0;
+                            const totalAvailable = selectedBankCats.reduce((sum, c) => sum + (bankStats[c]?.count || 0), 0);
+                            if (n > totalAvailable) n = totalAvailable;
+                            setNumQuestions(n);
+                          }}
+                          required
+                        />
+                      </div>
                     </>
                   )}
+
                   <div className="form-field">
                     <label className="form-label">Passing Score (%) <span className="req-star">*</span></label>
-                    <input className="form-input" type="text" value={passingScore}
+                    <input
+                      className="form-input"
+                      type="text"
+                      value={passingScore}
                       onChange={e => {
                         const val = e.target.value.replace(/\D/g, "");
                         const num = val ? Number(val) : 0;
                         setPassingScore(num > 100 ? 100 : num);
-                      }} required placeholder="e.g. 50" />
+                      }}
+                      required
+                      placeholder="e.g. 50"
+                    />
                   </div>
                 </div>
               </SectionCard>
 
-              <SectionCard
-                title="Difficulty Level"
-                desc="Select the cognitive complexity for generated questions."
-              >
+              {/* Difficulty Level */}
+              <SectionCard title="Difficulty Level" desc="Select the cognitive complexity for generated questions.">
                 <div className="diff-grid">
                   {(Object.keys(DIFFICULTY_MAP) as DifficultyLevel[]).map(level => {
                     const cfg = DIFFICULTY_MAP[level];
@@ -1735,18 +1757,19 @@ export default function CreateExam() {
                 </div>
               </SectionCard>
 
-              <SectionCard
-                title="Proctoring"
-                desc="Configure AI monitoring for candidate sessions."
-              >
+              {/* Proctoring */}
+              <SectionCard title="Proctoring" desc="Configure AI monitoring for candidate sessions.">
                 <div className="proctor-toggle-row">
                   <div>
                     <div className="proctor-toggle-label">Enable Proctoring</div>
                     <div className="proctor-toggle-sub">Webcam and browser state monitoring</div>
                   </div>
                   <label className="toggle-switch">
-                    <input type="checkbox" checked={proctoringEnabled}
-                      onChange={e => setProctoringEnabled(e.target.checked)} />
+                    <input
+                      type="checkbox"
+                      checked={proctoringEnabled}
+                      onChange={e => setProctoringEnabled(e.target.checked)}
+                    />
                     <div className="toggle-track" />
                     <div className="toggle-thumb" />
                   </label>
@@ -1770,15 +1793,18 @@ export default function CreateExam() {
               </SectionCard>
 
               <div className="btn-row">
-                <button className="btn btn-generate" type="submit"
-                  disabled={!title.trim() || !subject.trim()}>
-                  {creationMode === 'bank' ? <><Icons.Sparkles /> Generate From Bank</> : creationMode === 'manual' ? <><Icons.Check /> Start Manual Entry</> : <><Icons.Check /> Process Uploaded File</>}
+                <button className="btn btn-generate" type="submit" disabled={!title.trim() || !subject.trim()}>
+                  {creationMode === "bank"
+                    ? <><Icons.Sparkles /> Generate From Bank</>
+                    : creationMode === "manual"
+                      ? <>✅ Start Manual Entry</>
+                      : <>📂 Process Uploaded File</>}
                 </button>
               </div>
             </form>
           )}
 
-          {/* ── Step 2: Generating ────────────────────────────────────── */}
+          {/* ── Step 2: Generating ──────────────────────────────────────────── */}
           {activeStep === "generating" && (
             <div className="ce-loading">
               <div className="ce-spinner" />
@@ -1787,12 +1813,13 @@ export default function CreateExam() {
             </div>
           )}
 
-          {/* ── Step 3: Review ────────────────────────────────────────── */}
+          {/* ── Step 3: Review ──────────────────────────────────────────────── */}
           {activeStep === "review" && questions && (
             <>
               <button className="btn btn-back" onClick={() => setQuestions(null)}>
                 <Icons.ChevronLeft /> Back to Configuration
               </button>
+
               {/* Summary */}
               <div className="summary-bar">
                 {[
@@ -1814,19 +1841,22 @@ export default function CreateExam() {
               <div className="review-header">
                 <h2 className="review-title">
                   <span className="review-title-accent" />
-                  {creationMode === 'manual' ? 'Build Questions' : 'Review Questions'}
+                  {creationMode === "manual" ? "Build Questions" : "Review Questions"}
                 </h2>
                 <div className="review-actions">
-                  {creationMode === 'bank' && (
+                  {creationMode === "bank" && (
                     <button className="btn btn-secondary" onClick={() => handleGenerate()}>
                       <Icons.Refresh /> Regenerate
                     </button>
                   )}
-                  <button className="btn btn-publish" onClick={handleFinalSubmit} disabled={saving || (questions.length === 0)}>
+                  <button
+                    className="btn btn-publish"
+                    onClick={handleFinalSubmit}
+                    disabled={saving || questions.length === 0}
+                  >
                     {saving
                       ? <><div className="ce-spinner" style={{ width: 13, height: 13, margin: 0, borderWidth: 2, opacity: 0.6 }} /> Publishing…</>
-                      : <><Icons.Check /> Publish Exam</>
-                    }
+                      : <><Icons.Check /> Publish Exam</>}
                   </button>
                 </div>
               </div>
@@ -1835,130 +1865,191 @@ export default function CreateExam() {
               {questions.map((q, idx) => (
                 <div className="q-card" key={idx}>
                   {editingIdx === idx ? (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                      <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                        <input className="form-input" style={{ flex: 1, fontWeight: 600, fontSize: 16 }} value={q.text} onChange={e => {
-                          const nq = [...questions]; nq[idx].text = e.target.value; setQuestions(nq);
-                        }} placeholder="Question Text" />
-
-                        <div style={{ display: 'flex', gap: 6 }}>
-                          <input type="file" id={`q-img-${idx}`} style={{ display: 'none' }} accept="image/*" onChange={async (e) => {
-                            const file = e.target.files?.[0];
-                            if (file) {
-                              const base64 = await handleImageUpload(file);
-                              const nq = [...questions]; nq[idx].image = base64; setQuestions(nq);
-                            }
-                          }} />
+                    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                      <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                        <input
+                          className="form-input"
+                          style={{ flex: 1, fontWeight: 600, fontSize: 16 }}
+                          value={q.text}
+                          onChange={e => {
+                            const nq = [...questions]; nq[idx].text = e.target.value; setQuestions(nq);
+                          }}
+                          placeholder="Question Text"
+                        />
+                        <div style={{ display: "flex", gap: 6 }}>
+                          <input type="file" id={`q-img-${idx}`} style={{ display: "none" }} accept="image/*"
+                            onChange={async e => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                const base64 = await handleImageUpload(file);
+                                const nq = [...questions]; nq[idx].image = base64; setQuestions(nq);
+                              }
+                            }}
+                          />
                           <button className="q-delete" type="button" onClick={() => document.getElementById(`q-img-${idx}`)?.click()} title="Upload question image">
                             <Icons.Upload />
                           </button>
-
                         </div>
                       </div>
 
-
-                      <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginTop: 12 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--bg)', padding: '6px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--line)' }}>
-                          <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--ink-2)' }}>Marks:</span>
-                          <input type="number" step="0.5" min="0" className="form-input" style={{ width: 80, height: 32, padding: '0 8px' }} value={q.marks ?? 1} onChange={e => {
-                            let val = parseFloat(e.target.value);
-                            if (isNaN(val)) val = 0;
-                            const nq = [...questions]; nq[idx].marks = val; setQuestions(nq);
-                          }} />
+                      <div style={{ display: "flex", gap: 12, alignItems: "center", marginTop: 12 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8, background: "var(--bg)", padding: "6px 12px", borderRadius: "var(--radius-sm)", border: "1px solid var(--line)" }}>
+                          <span style={{ fontSize: "13px", fontWeight: 600, color: "var(--ink-2)" }}>Marks:</span>
+                          <input
+                            type="number"
+                            step="0.5"
+                            min="0"
+                            className="form-input"
+                            style={{ width: 80, height: 32, padding: "0 8px" }}
+                            value={q.marks ?? 1}
+                            onChange={e => {
+                              let val = parseFloat(e.target.value);
+                              if (isNaN(val)) val = 0;
+                              const nq = [...questions]; nq[idx].marks = val; setQuestions(nq);
+                            }}
+                          />
                         </div>
 
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--bg)', padding: '6px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--line)', flex: 1 }}>
-                          <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--ink-2)' }}>Category:</span>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8, background: "var(--bg)", padding: "6px 12px", borderRadius: "var(--radius-sm)", border: "1px solid var(--line)", flex: 1 }}>
+                          <span style={{ fontSize: "13px", fontWeight: 600, color: "var(--ink-2)" }}>Category:</span>
                           {showNewCategoryInput ? (
-                            <div style={{ display: 'flex', gap: 6, flex: 1 }}>
-                              <input autoFocus className="form-input" style={{ height: 32, flex: 1 }} value={newCategoryName} onChange={e => setNewCategoryName(e.target.value)} placeholder="New Category Name" />
-                              <button className="btn btn-publish" type="button" style={{ height: 32, padding: '0 12px' }} onClick={async () => {
-                                if (!newCategoryName.trim()) { setShowNewCategoryInput(false); return; }
-                                try {
-                                  const res = await fetch(`${API_BASE_URL}/categories`, {
-                                    method: 'POST', headers: authHeaders(), body: JSON.stringify({ name: newCategoryName })
-                                  });
-                                  if (res.ok) {
-                                    const newCat = await res.json();
-                                    setCategories(prev => {
-                                      if (prev.some(c => c.name === newCat.name)) return prev;
-                                      return [...prev, newCat];
+                            <div style={{ display: "flex", gap: 6, flex: 1 }}>
+                              <input
+                                autoFocus
+                                className="form-input"
+                                style={{ height: 32, flex: 1 }}
+                                value={newCategoryName}
+                                onChange={e => setNewCategoryName(e.target.value)}
+                                placeholder="New Category Name"
+                              />
+                              <button
+                                className="btn btn-publish"
+                                type="button"
+                                style={{ height: 32, padding: "0 12px" }}
+                                onClick={async () => {
+                                  if (!newCategoryName.trim()) { setShowNewCategoryInput(false); return; }
+                                  try {
+                                    const res = await fetch(`${API_BASE_URL}/categories`, {
+                                      method: "POST",
+                                      headers: authHeaders(),
+                                      body: JSON.stringify({ name: newCategoryName }),
                                     });
-                                    // SYNC: Also add to bank categories list for selection
-                                    setBankCategories(prev => {
-                                      if (prev.includes(newCat.name)) return prev;
-                                      return [...prev, newCat.name];
-                                    });
-                                    const nq = [...questions]; nq[idx].category = newCat.name; setQuestions(nq);
-                                  }
-                                } catch (e) { console.error(e); }
-                                setShowNewCategoryInput(false);
-                                setNewCategoryName("");
-                              }}><Icons.Check /></button>
-                              <button className="btn btn-secondary" type="button" style={{ height: 32, padding: '0 12px' }} onClick={() => setShowNewCategoryInput(false)}><Icons.X /></button>
+                                    if (res.ok) {
+                                      const newCat = await res.json();
+                                      setCategories(prev => prev.some(c => c.name === newCat.name) ? prev : [...prev, newCat]);
+                                      setBankCategories(prev => prev.includes(newCat.name) ? prev : [...prev, newCat.name]);
+                                      const nq = [...questions]; nq[idx].category = newCat.name; setQuestions(nq);
+                                    }
+                                  } catch (e) { console.error(e); }
+                                  setShowNewCategoryInput(false);
+                                  setNewCategoryName("");
+                                }}
+                              >
+                                <Icons.Check />
+                              </button>
+                              <button
+                                className="btn btn-secondary"
+                                type="button"
+                                style={{ height: 32, padding: "0 12px" }}
+                                onClick={() => setShowNewCategoryInput(false)}
+                              >
+                                <Icons.X />
+                              </button>
                             </div>
                           ) : (
-                            <select className="form-input" style={{ height: 32, flex: 1 }} value={q.category || "General"} onChange={e => {
-                              if (e.target.value === "ADD_NEW") {
-                                setShowNewCategoryInput(true);
-                              } else {
-                                const nq = [...questions]; nq[idx].category = e.target.value; setQuestions(nq);
-                              }
-                            }}>
+                            <select
+                              className="form-input"
+                              style={{ height: 32, flex: 1 }}
+                              value={q.category || "General"}
+                              onChange={e => {
+                                if (e.target.value === "ADD_NEW") {
+                                  setShowNewCategoryInput(true);
+                                } else {
+                                  const nq = [...questions]; nq[idx].category = e.target.value; setQuestions(nq);
+                                }
+                              }}
+                            >
                               <option value="General">General</option>
-                              {categories.filter(c => c.name !== 'General').map(c => (
+                              {categories.filter(c => c.name !== "General").map(c => (
                                 <option key={c.id} value={c.name}>{c.name}</option>
                               ))}
-                              <option value="ADD_NEW" style={{ fontWeight: 'bold', color: 'var(--teal)' }}>+ Add New Category</option>
+                              <option value="ADD_NEW" style={{ fontWeight: "bold", color: "var(--teal)" }}>+ Add New Category</option>
                             </select>
                           )}
                         </div>
                       </div>
 
                       {q.image && (
-                        <div style={{ position: 'relative', width: 'fit-content' }}>
-                          <img src={q.image} alt="Question" style={{ maxWidth: '200px', borderRadius: 8, border: '1px solid var(--line)' }} />
-                          <button className="q-delete" style={{ position: 'absolute', top: -10, right: -10, width: 24, height: 24 }} onClick={() => {
-                            const nq = [...questions]; delete nq[idx].image; setQuestions(nq);
-                          }}><Icons.X /></button>
+                        <div style={{ position: "relative", width: "fit-content" }}>
+                          <img src={q.image} alt="Question" style={{ maxWidth: "200px", borderRadius: 8, border: "1px solid var(--line)" }} />
+                          <button
+                            className="q-delete"
+                            style={{ position: "absolute", top: -10, right: -10, width: 24, height: 24 }}
+                            onClick={() => { const nq = [...questions]; delete nq[idx].image; setQuestions(nq); }}
+                          >
+                            <Icons.X />
+                          </button>
                         </div>
                       )}
 
-                      <div style={{ paddingLeft: 10, marginTop: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      <div style={{ paddingLeft: 10, marginTop: 10, display: "flex", flexDirection: "column", gap: 8 }}>
                         {q.options.map((opt, oIdx) => (
-                          <div key={oIdx} style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                            <input type="radio" checked={opt.is_correct} style={{ width: 16, height: 16, accentColor: 'var(--primary)', cursor: 'pointer' }} onChange={() => {
-                              const nq = [...questions];
-                              nq[idx].options = nq[idx].options.map((o, i) => ({ ...o, is_correct: i === oIdx }));
-                              setQuestions(nq);
-                            }} />
-                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                              <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                                <input className="form-input" style={{ flex: 1 }} value={opt.text} onChange={e => {
-                                  const nq = [...questions]; nq[idx].options[oIdx].text = e.target.value; setQuestions(nq);
-                                }} placeholder={`Option ${String.fromCharCode(65 + oIdx)}`} />
-
-                                <input type="file" id={`o-img-${idx}-${oIdx}`} style={{ display: 'none' }} accept="image/*" onChange={async (e) => {
-                                  const file = e.target.files?.[0];
-                                  if (file) {
-                                    const base64 = await handleImageUpload(file);
-                                    const nq = [...questions]; nq[idx].options[oIdx].image = base64; setQuestions(nq);
-                                  }
-                                }} />
+                          <div key={oIdx} style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                            <input
+                              type="radio"
+                              checked={opt.is_correct}
+                              style={{ width: 16, height: 16, accentColor: "var(--primary)", cursor: "pointer" }}
+                              onChange={() => {
+                                const nq = [...questions];
+                                nq[idx].options = nq[idx].options.map((o, i) => ({ ...o, is_correct: i === oIdx }));
+                                setQuestions(nq);
+                              }}
+                            />
+                            <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 6 }}>
+                              <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                                <input
+                                  className="form-input"
+                                  style={{ flex: 1 }}
+                                  value={opt.text}
+                                  onChange={e => {
+                                    const nq = [...questions]; nq[idx].options[oIdx].text = e.target.value; setQuestions(nq);
+                                  }}
+                                  placeholder={`Option ${String.fromCharCode(65 + oIdx)}`}
+                                />
+                                <input
+                                  type="file"
+                                  id={`o-img-${idx}-${oIdx}`}
+                                  style={{ display: "none" }}
+                                  accept="image/*"
+                                  onChange={async e => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                      const base64 = await handleImageUpload(file);
+                                      const nq = [...questions]; nq[idx].options[oIdx].image = base64; setQuestions(nq);
+                                    }
+                                  }}
+                                />
                                 <button className="q-delete" type="button" onClick={() => document.getElementById(`o-img-${idx}-${oIdx}`)?.click()} title="Upload option image">
                                   <Icons.Upload />
                                 </button>
-
-                                <button className="q-delete" type="button" onClick={() => {
-                                  const nq = [...questions]; nq[idx].options.splice(oIdx, 1); setQuestions(nq);
-                                }}><Icons.Trash /></button>
+                                <button
+                                  className="q-delete"
+                                  type="button"
+                                  onClick={() => { const nq = [...questions]; nq[idx].options.splice(oIdx, 1); setQuestions(nq); }}
+                                >
+                                  <Icons.Trash />
+                                </button>
                               </div>
                               {opt.image && (
-                                <div style={{ position: 'relative', width: 'fit-content' }}>
-                                  <img src={opt.image} alt="Option" style={{ maxWidth: '100px', borderRadius: 4, border: '1px solid var(--line)' }} />
-                                  <button className="q-delete" style={{ position: 'absolute', top: -5, right: -5, width: 20, height: 20 }} onClick={() => {
-                                    const nq = [...questions]; delete nq[idx].options[oIdx].image; setQuestions(nq);
-                                  }}><Icons.X /></button>
+                                <div style={{ position: "relative", width: "fit-content" }}>
+                                  <img src={opt.image} alt="Option" style={{ maxWidth: "100px", borderRadius: 4, border: "1px solid var(--line)" }} />
+                                  <button
+                                    className="q-delete"
+                                    style={{ position: "absolute", top: -5, right: -5, width: 20, height: 20 }}
+                                    onClick={() => { const nq = [...questions]; delete nq[idx].options[oIdx].image; setQuestions(nq); }}
+                                  >
+                                    <Icons.X />
+                                  </button>
                                 </div>
                               )}
                             </div>
@@ -1966,11 +2057,22 @@ export default function CreateExam() {
                         ))}
                       </div>
 
-                      <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
-                        <button className="btn btn-secondary" type="button" onClick={() => {
-                          const nq = [...questions]; nq[idx].options.push({ text: "", is_correct: false }); setQuestions(nq);
-                        }}><Icons.Plus /> Add Option</button>
-                        <button className="btn btn-publish" type="button" style={{ marginLeft: 'auto' }} onClick={() => setEditingIdx(null)}>
+                      <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
+                        <button
+                          className="btn btn-secondary"
+                          type="button"
+                          onClick={() => {
+                            const nq = [...questions]; nq[idx].options.push({ text: "", is_correct: false }); setQuestions(nq);
+                          }}
+                        >
+                          <Icons.Plus /> Add Option
+                        </button>
+                        <button
+                          className="btn btn-publish"
+                          type="button"
+                          style={{ marginLeft: "auto" }}
+                          onClick={() => setEditingIdx(null)}
+                        >
                           <Icons.Save /> Save Question
                         </button>
                       </div>
@@ -1982,25 +2084,29 @@ export default function CreateExam() {
                         <div className="q-text">
                           <div style={{ marginBottom: q.image ? 12 : 6 }}>
                             <span style={{ marginRight: 8 }}>{q.text}</span>
-                            <span style={{ fontSize: '11px', background: 'var(--teal-light)', color: 'var(--teal)', padding: '2px 8px', borderRadius: '100px', fontWeight: 700, whiteSpace: 'nowrap' }}>
+                            <span style={{ fontSize: "11px", background: "var(--teal-light)", color: "var(--teal)", padding: "2px 8px", borderRadius: "100px", fontWeight: 700, whiteSpace: "nowrap" }}>
                               {q.marks ?? 1} Marks
                             </span>
-                            <span style={{ fontSize: '11px', background: 'var(--bg)', color: 'var(--ink-2)', border: '1px solid var(--line)', padding: '2px 8px', borderRadius: '100px', fontWeight: 600, marginLeft: 6, whiteSpace: 'nowrap' }}>
-                              {q.category || 'General'}
+                            <span style={{ fontSize: "11px", background: "var(--bg)", color: "var(--ink-2)", border: "1px solid var(--line)", padding: "2px 8px", borderRadius: "100px", fontWeight: 600, marginLeft: 6, whiteSpace: "nowrap" }}>
+                              {q.category || "General"}
                             </span>
                           </div>
-                          {q.image && <img src={q.image} alt="Question" style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: 8, display: 'block', marginBottom: 12 }} />}
+                          {q.image && (
+                            <img src={q.image} alt="Question" style={{ maxWidth: "100%", maxHeight: "200px", borderRadius: 8, display: "block", marginBottom: 12 }} />
+                          )}
                           {q.image_required && (
-                            <span style={{ fontSize: '11px', background: 'var(--teal-light)', color: 'var(--teal)', padding: '2px 8px', borderRadius: '100px', fontWeight: 700, textTransform: 'uppercase' }}>
+                            <span style={{ fontSize: "11px", background: "var(--teal-light)", color: "var(--teal)", padding: "2px 8px", borderRadius: "100px", fontWeight: 700, textTransform: "uppercase" }}>
                               📷 Image Required
                             </span>
                           )}
                         </div>
-                        <div style={{ display: 'flex', gap: 6 }}>
-                          <button className="q-delete" type="button" onClick={() => {
-                            setEditingIdx(idx);
-                            setShowNewCategoryInput(false);
-                          }} title="Edit question">
+                        <div style={{ display: "flex", gap: 6 }}>
+                          <button
+                            className="q-delete"
+                            type="button"
+                            onClick={() => { setEditingIdx(idx); setShowNewCategoryInput(false); }}
+                            title="Edit question"
+                          >
                             <Icons.Edit />
                           </button>
                           <button className="q-delete" type="button" onClick={() => deleteQuestion(idx)} title="Remove question">
@@ -2011,12 +2117,14 @@ export default function CreateExam() {
 
                       <div className="opt-grid">
                         {q.options.map((opt, oIdx) => (
-                          <div key={oIdx} className={`opt ${opt.is_correct ? "opt--correct" : ""}`} style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 8 }}>
-                            <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                          <div key={oIdx} className={`opt ${opt.is_correct ? "opt--correct" : ""}`} style={{ flexDirection: "column", alignItems: "flex-start", gap: 8 }}>
+                            <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
                               <span className="opt-letter">{String.fromCharCode(65 + oIdx)}.</span>
                               {opt.text}
                             </div>
-                            {opt.image && <img src={opt.image} alt="Option" style={{ maxWidth: '100%', maxHeight: '100px', borderRadius: 4, marginLeft: 22 }} />}
+                            {opt.image && (
+                              <img src={opt.image} alt="Option" style={{ maxWidth: "100%", maxHeight: "100px", borderRadius: 4, marginLeft: 22 }} />
+                            )}
                           </div>
                         ))}
                       </div>
@@ -2031,16 +2139,25 @@ export default function CreateExam() {
                 </div>
               ))}
 
-              {creationMode !== 'bank' && (
-                <button className="btn btn-secondary" type="button" style={{ width: '100%', marginBottom: 20, padding: 16, borderStyle: 'dashed' }} onClick={() => {
-                  setQuestions(prev => [...(prev || []), { text: "New Question", options: [{ text: "Option A", is_correct: true }, { text: "Option B", is_correct: false }], image_required: false }]);
-                  setEditingIdx((questions?.length || 0));
-                }}>
+              {creationMode !== "bank" && (
+                <button
+                  className="btn btn-secondary"
+                  type="button"
+                  style={{ width: "100%", marginBottom: 20, padding: 16, borderStyle: "dashed" }}
+                  onClick={() => {
+                    setQuestions(prev => [
+                      ...(prev || []),
+                      { text: "New Question", options: [{ text: "Option A", is_correct: true }, { text: "Option B", is_correct: false }], image_required: false },
+                    ]);
+                    setEditingIdx(questions?.length || 0);
+                  }}
+                >
                   <Icons.Plus /> Add Another Question
                 </button>
               )}
             </>
           )}
+
         </div>
       </div>
 

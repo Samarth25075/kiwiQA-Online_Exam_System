@@ -4,7 +4,7 @@ import CustomPopup from "./CustomPopup";
 import API_BASE_URL from "../config";
 import logo from "../assets/logo.png";
 
-// ─── Icons ────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Icons â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const Icons = {
     Dashboard: () => (
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
@@ -50,7 +50,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, plain = false }) =>
     const [popup, setPopup] = React.useState<{ isOpen: boolean; title: string; message: string } | null>(null);
     const [sidebarOpen, setSidebarOpen] = React.useState(false);
 
-    // ── Apply saved theme (Global then User-Specific) ──
+    // â”€â”€ Apply saved theme (Global then User-Specific) â”€â”€
     useEffect(() => {
         // First application of global/last-used theme
         const globalSaved = localStorage.getItem("kiwi-theme") || "default";
@@ -80,7 +80,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, plain = false }) =>
     }, [profile]);
 
     const handleLogout = async () => {
-        const token = localStorage.getItem("access_token");
+        const token = sessionStorage.getItem("access_token");
         if (token) {
             try {
                 await fetch(`${API_BASE_URL}/logout`, {
@@ -91,7 +91,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, plain = false }) =>
                 console.error("Logout request failed:", err);
             }
         }
-        localStorage.removeItem("access_token");
+        sessionStorage.removeItem("access_token");
         sessionStorage.removeItem("admin-profile");
         
         // Reset theme to default on logout to prevent theme bleeding between users
@@ -104,7 +104,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, plain = false }) =>
     const isActive = (path: string) => location.pathname === path;
 
     useEffect(() => {
-        const token = localStorage.getItem("access_token");
+        const token = sessionStorage.getItem("access_token");
         if (!token) return;
 
         // Try local cache first for performance
@@ -123,7 +123,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, plain = false }) =>
             .then(res => {
                 if (cancelled) return;
                 if (res.status === 401) {
-                    localStorage.removeItem("access_token");
+                    sessionStorage.removeItem("access_token");
                     sessionStorage.removeItem("admin-profile");
                     navigate("/", { replace: true });
                     throw new Error("Unauthorized");
@@ -146,7 +146,10 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, plain = false }) =>
     const hasPermission = (perm: string) => {
         if (!profile) return true;
         if (profile.role === 'admin') return true;
-        if (profile.role === 'member' && (perm === 'manage exam' || perm === 'generate exam')) return true;
+        
+        // Members always have dashboard, settings, and guide
+        if (perm === null) return true;
+
         return profile.permissions.includes(perm);
     };
 
@@ -171,10 +174,10 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, plain = false }) =>
         { path: "/dashboard", label: "Dashboard", icon: Icons.Dashboard, perm: null },
         { path: "/create-exam", label: "Create Exam", icon: Icons.Generate, perm: "generate exam", task: "Create Exam" },
         { path: "/manage-exams", label: "Manage Exams", icon: Icons.Exams, perm: "manage exam", task: "Manage Exams" },
-        { path: "/question-bank", label: "Question Bank", icon: Icons.Exams, perm: "manage exam", task: "Question Bank" },
+        { path: "/question-bank", label: "Question Bank", icon: Icons.Exams, perm: "manage bank", task: "Question Bank" },
         { path: "/manage-candidates", label: "Candidates", icon: Icons.Users, perm: "manage candidates", task: "Candidates" },
-        { path: "/invitation-tracking", label: "Invites Tracking", icon: Icons.Results, perm: "manage candidates", task: "Invites" },
-        { path: "/candidate-results", label: "Results", icon: Icons.Results, perm: "manage candidates", task: "Results" },
+        { path: "/invitation-tracking", label: "Invites Tracking", icon: Icons.Results, perm: "send invitation", task: "Invites" },
+        { path: "/candidate-results", label: "Results", icon: Icons.Results, perm: "view results", task: "Results" },
         { path: "/settings", label: "Settings", icon: Icons.Settings, perm: null },
         { path: "/user-guide", label: "User Guide", icon: Icons.Help, perm: null, isExternal: true, externalPath: "/Userguide.html" },
     ];
@@ -188,7 +191,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, plain = false }) =>
         }
     }, [location.pathname]);
 
-    // ── Restore accessibility preferences on every page load ───────────────
+    // â”€â”€ Restore accessibility preferences on every page load â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     useEffect(() => {
         // Font size
         const savedFont = localStorage.getItem("kiwi-font-size") || "normal";
@@ -210,7 +213,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, plain = false }) =>
         if (main) main.focus();
     };
 
-    // ── Focus main content after every route change ────────────────────────
+    // â”€â”€ Focus main content after every route change â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const isFirstNav = useRef(true);
     useEffect(() => {
         if (isFirstNav.current) {
@@ -232,7 +235,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, plain = false }) =>
                     font-family: 'Inter', sans-serif;
                 }
 
-                /* ── Sidebar ── */
+                /* â”€â”€ Sidebar â”€â”€ */
                 .al-sidebar {
                     width: 240px;
                     flex-shrink: 0;
@@ -279,7 +282,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, plain = false }) =>
                     .al-main-content { width: 100% !important; }
                 }
 
-                /* ── Logo ── */
+                /* â”€â”€ Logo â”€â”€ */
                 .al-logo-area {
                     padding: var(--space-24) var(--space-16);
                     display: flex;
@@ -296,7 +299,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, plain = false }) =>
                     object-fit: contain;
                 }
 
-                /* ── Nav ── */
+                /* â”€â”€ Nav â”€â”€ */
                 .al-nav { flex: 1; padding: 4px 10px; overflow-y: auto; }
                 .al-nav::-webkit-scrollbar { width: 3px; }
                 .al-nav::-webkit-scrollbar-track { background: transparent; }
@@ -379,7 +382,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, plain = false }) =>
                     opacity: 0.5;
                 }
 
-                /* ── Logout ── */
+                /* â”€â”€ Logout â”€â”€ */
                 .al-logout-area {
                     padding: 12px 10px;
                     border-top: 1px solid rgba(255,255,255,0.06);
@@ -408,7 +411,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, plain = false }) =>
                     color: #fb7185;
                 }
 
-                /* ── Main Content ── */
+                /* â”€â”€ Main Content â”€â”€ */
                 .al-main-content {
                     flex: 1;
                     min-width: 0;
@@ -417,7 +420,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, plain = false }) =>
                     background: var(--bg-neutral);
                 }
 
-                /* ── Mobile Header ── */
+                /* â”€â”€ Mobile Header â”€â”€ */
                 .al-mobile-header {
                     display: none;
                     background: var(--bg);
@@ -466,7 +469,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, plain = false }) =>
                 }
             `}</style>
 
-            {/* ── Skip to content (keyboard accessibility) ── */}
+            {/* â”€â”€ Skip to content (keyboard accessibility) â”€â”€ */}
             {!plain && <a href="#main-content" className="skip-to-content">Skip to main content</a>}
 
             <div className={`al-sidebar-overlay ${sidebarOpen ? 'open' : ''}`} onClick={() => setSidebarOpen(false)} />

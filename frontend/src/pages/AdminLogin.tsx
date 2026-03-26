@@ -4,14 +4,14 @@ import { GoogleLogin } from "@react-oauth/google";
 import API_BASE_URL from "../config";
 import logo from "../assets/logo.png";
 
-// ─── Types ─────────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 interface FormErrors {
   email?: string;
   password?: string;
   auth?: string;
 }
 
-// ─── API ───────────────────────────────────────────────────────────────────────
+// â”€â”€â”€ API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function loginRequest(email: string, password: string) {
   const res = await fetch(`${API_BASE_URL}/login`, {
     method: "POST",
@@ -24,7 +24,7 @@ async function loginRequest(email: string, password: string) {
 }
 
 
-// ─── Icons ─────────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Icons â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const Icons = {
   Mail: () => (
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -71,7 +71,7 @@ const Icons = {
   ),
 };
 
-// ─── Loader Dots ───────────────────────────────────────────────────────────────
+// â”€â”€â”€ Loader Dots â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function LoaderDots({ color = "white" }: { color?: string }) {
   return (
     <span className="login-dots">
@@ -82,7 +82,7 @@ function LoaderDots({ color = "white" }: { color?: string }) {
   );
 }
 
-// ─── Component ─────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export default function AdminLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -95,7 +95,7 @@ export default function AdminLogin() {
 
   useEffect(() => {
     document.title = "Login | KiwiQA";
-    if (localStorage.getItem("access_token")) navigate("/dashboard", { replace: true });
+    if (sessionStorage.getItem("access_token")) navigate("/dashboard", { replace: true });
   }, [navigate]);
 
   const validate = (): FormErrors => {
@@ -124,7 +124,7 @@ export default function AdminLogin() {
     setLoading(true);
     try {
       const data = await loginRequest(email, password);
-      localStorage.setItem("access_token", data.access_token);
+      sessionStorage.setItem("access_token", data.access_token);
       navigate("/dashboard");
     } catch (err) {
       setErrors({ auth: err instanceof Error ? err.message : "Something went wrong" });
@@ -146,7 +146,7 @@ export default function AdminLogin() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || "Google authentication failed");
       
-      localStorage.setItem("access_token", data.access_token);
+      sessionStorage.setItem("access_token", data.access_token);
       navigate("/dashboard");
     } catch (err) {
       setErrors({ auth: err instanceof Error ? err.message : "Google login failed" });
@@ -474,7 +474,7 @@ export default function AdminLogin() {
         </div>
       </aside>
 
-      {/* Right Panel — Form */}
+      {/* Right Panel â€” Form */}
       <main className="login-panel-right">
         <div ref={cardRef} className={`login-form-wrap${shake ? " login-shake" : ""}`}>
 
@@ -525,7 +525,7 @@ export default function AdminLogin() {
                   id="login-password"
                   type={showPass ? "text" : "password"}
                   className={`login-input${errors.password ? " has-error" : ""}`}
-                  placeholder="••••••••••"
+                  placeholder="••••••••"
                   value={password}
                   autoComplete="current-password"
                   onChange={e => { setPassword(e.target.value); clearFieldErr("password"); }}

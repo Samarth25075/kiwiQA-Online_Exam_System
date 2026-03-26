@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import AdminLayout from "../components/AdminLayout";
 import CustomPopup, { PopupType } from "../components/CustomPopup";
@@ -85,7 +85,7 @@ export default function ManageExams() {
     }, []);
 
     const fetchExams = async (bypassCache: boolean = false) => {
-        const token = localStorage.getItem("access_token");
+        const token = sessionStorage.getItem("access_token");
         if (!token) { navigate("/"); return; }
         try {
             const url = new URL(`${API_BASE_URL}/exams/stats`);
@@ -97,7 +97,7 @@ export default function ManageExams() {
             });
 
             if (res.status === 401) {
-                localStorage.removeItem("access_token");
+                sessionStorage.removeItem("access_token");
                 sessionStorage.removeItem("admin-profile");
                 navigate("/");
                 return;
@@ -124,7 +124,7 @@ export default function ManageExams() {
             confirmText: 'Delete',
             onConfirm: async () => {
                 setPopup(null);
-                const token = localStorage.getItem("access_token");
+                const token = sessionStorage.getItem("access_token");
                 try {
                     const res = await fetch(`${API_BASE_URL}/exams/${id}`, {
                         method: "DELETE",
@@ -154,7 +154,7 @@ export default function ManageExams() {
     const handleDuplicate = async (id: string, e: React.MouseEvent) => {
         e.stopPropagation();
         setSaving(true);
-        const token = localStorage.getItem("access_token");
+        const token = sessionStorage.getItem("access_token");
         try {
             const res = await fetch(`${API_BASE_URL}/exams/${id}/duplicate`, {
                 method: "POST",
@@ -194,7 +194,7 @@ export default function ManageExams() {
 
         setSaving(true);
         try {
-            const token = localStorage.getItem("access_token");
+            const token = sessionStorage.getItem("access_token");
             const fullExams = await Promise.all(
                 selected.map(async (e) => {
                     const res = await fetch(`${API_BASE_URL}/exams/${e.id}`, {
@@ -234,7 +234,7 @@ export default function ManageExams() {
         if (!mergedExam || !mergedExam.questions) return;
         setSaving(true);
         try {
-            const token = localStorage.getItem("access_token");
+            const token = sessionStorage.getItem("access_token");
             const res = await fetch(`${API_BASE_URL}/exams`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
@@ -472,7 +472,7 @@ export default function ManageExams() {
                             <div>
                                 <h2 className="me-header-title">Management Dashboard</h2>
                                 <div style={{ fontSize: 10, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: 2 }}>
-                                    {exams.length} Assessments • {selectedExamIds.size} Marked
+                                    {exams.length} Assessments â€¢ {selectedExamIds.size} Marked
                                 </div>
                             </div>
                         </div>
@@ -492,7 +492,7 @@ export default function ManageExams() {
                     <div className="me-content">
                         {exams.length === 0 ? (
                             <div style={{ textAlign: 'center', padding: '100px 40px', background: 'var(--bg)', borderRadius: 24, border: '1px dashed var(--border)' }}>
-                                <div style={{ fontSize: 48, marginBottom: 20 }}>📋</div>
+                                <div style={{ fontSize: 48, marginBottom: 20 }}>{"\u{1F4CB}"}</div>
                                 <h3 style={{ fontSize: 24, fontWeight: 800, color: 'var(--text)', marginBottom: 12 }}>Empty Exam Repository</h3>
                                 <p style={{ color: 'var(--text-muted)', fontSize: 16, maxWidth: 400, margin: '0 auto 32px' }}>
                                     You haven't generated any assessments yet. Boost your testing process by creating a new one.

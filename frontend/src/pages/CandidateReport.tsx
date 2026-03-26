@@ -130,7 +130,7 @@ export default function CandidateReport() {
 
     useEffect(() => {
         const fetchReport = async () => {
-            const token = localStorage.getItem("access_token");
+            const token = sessionStorage.getItem("access_token");
             if (!token) { navigate("/"); return; }
 
             try {
@@ -168,7 +168,7 @@ export default function CandidateReport() {
     if (!report) return (
         <AdminLayout>
             <div style={{ textAlign: 'center', padding: 80 }}>
-                <div style={{ fontSize: 48, marginBottom: 20 }}>📑</div>
+                <div style={{ fontSize: 48, marginBottom: 20 }}>{"\u{1F4D1}"}</div>
                 <h2 style={{ color: 'var(--text)', fontWeight: 800 }}>Report Not Found</h2>
                 <p style={{ color: 'var(--text-muted)', marginBottom: 32 }}>We couldn't locate the assessment data for this candidate.</p>
                 <button className="test-btn" onClick={() => navigate("/manage-candidates")}>Return to Candidate List</button>
@@ -196,8 +196,10 @@ export default function CandidateReport() {
                         <h1 className="report-title">{candidate.name}</h1>
                         <div style={{ display: 'flex', gap: 16, alignItems: 'center', color: 'var(--text-muted)', fontSize: 13, fontWeight: 600 }}>
                             <span>{exam_title}</span>
-                            <span>•</span>
+                            <span>â€¢</span>
                             <span>ID: {candidate.candidate_id || `CAND-${candidate.id}`}</span>
+                            <span>•</span>
+                            <span>{candidate.country_code} {candidate.phone_number}</span>
                             <span>•</span>
                             <span>{new Date(candidate.joined_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
                         </div>
@@ -229,7 +231,7 @@ export default function CandidateReport() {
                 </div>
 
                 <div className="section-card">
-                    <h2 className="section-title">📊 Skill-Wise Performance Matrix</h2>
+                    <h2 className="section-title">{"\u{1F4CA}"} Skill-Wise Performance Matrix</h2>
                     <table className="cat-table">
                         <thead>
                             <tr>
@@ -267,7 +269,7 @@ export default function CandidateReport() {
                 </div>
 
                 <div className="section-card">
-                    <h2 className="section-title">📝 Detailed Question Submission Log</h2>
+                    <h2 className="section-title">ðŸ“ Detailed Question Submission Log</h2>
                     {questions.map((q, idx) => {
                         const isCorrect = q.selected_index !== null && q.options[q.selected_index]?.is_correct;
                         const marksAwarded = isCorrect ? (q.marks || 1) : 0;
@@ -316,7 +318,7 @@ export default function CandidateReport() {
                 </div>
 
                 <div className="section-card">
-                    <h2 className="section-title">🛡️ Proctoring & Integrity Audit</h2>
+                    <h2 className="section-title">{"\u{1F6E1}\u{FE0F}"} Proctoring & Integrity Audit</h2>
                     {(!proctoring.start && !proctoring.mid && !proctoring.end) ? (
                         <div style={{ padding: '60px', textAlign: 'center', background: 'var(--bg-neutral)', borderRadius: '16px', border: '1px dashed var(--border)' }}>
                             <p style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Proctoring evidence has been purged for privacy reasons.</p>
@@ -326,7 +328,7 @@ export default function CandidateReport() {
                             <div className="proctor-grid" style={{ gridTemplateColumns: 'repeat(1, 1fr)', maxWidth: '400px', margin: '0 auto' }}>
                                 <div className="proctor-frame">
                                     {proctoring.start ? <img src={proctoring.start} className="proctor-img" alt="Start" /> : <div style={{ display: 'grid', placeItems: 'center', height: '100%', color: 'var(--text-muted)' }}>No Record</div>}
-                                    <div className="proctor-label">INITIAL PHASE · Q1 Snapshot</div>
+                                    <div className="proctor-label">INITIAL PHASE Â· Q1 Snapshot</div>
                                 </div>
                             </div>
                             <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 16, fontStyle: 'italic', fontWeight: 500 }}>
@@ -347,7 +349,7 @@ export default function CandidateReport() {
                         className="basic-btn"
                         onClick={async () => {
                             if (window.confirm("This will permanently delete all snapshots for this candidate. Verify you have saved or printed the report first. Proceed?")) {
-                                const token = localStorage.getItem("access_token");
+                                const token = sessionStorage.getItem("access_token");
                                 try {
                                     const res = await fetch(`${API_BASE_URL}/candidates/${candidateId}/cleanup-screenshots`, {
                                         method: "POST",

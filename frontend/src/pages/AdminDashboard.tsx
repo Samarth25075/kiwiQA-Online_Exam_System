@@ -4,7 +4,7 @@ import AdminLayout from "../components/AdminLayout";
 import CustomPopup, { PopupType } from "../components/CustomPopup";
 import API_BASE_URL from "../config";
 
-// ─── Icon Components ───────────────────────────────────────────────────────────
+// â”€â”€â”€ Icon Components â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const Icons = {
     Shield: ({ size = 14 }: { size?: number }) => (
         <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
@@ -132,7 +132,7 @@ const Icons = {
     ),
 };
 
-// ─── Types ─────────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 interface AdminProfile {
     email: string;
     role: string;
@@ -173,7 +173,7 @@ interface ExamStat {
     proctoring_type?: string;
 }
 
-// ─── Dashboard Component ───────────────────────────────────────────────────────
+// â”€â”€â”€ Dashboard Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export default function AdminDashboard() {
     const [viewMode, setViewMode] = useState<'card' | 'grid'>('grid');
     const [profile, setProfile] = useState<AdminProfile | null>(null);
@@ -259,7 +259,7 @@ export default function AdminDashboard() {
         onCancel?: () => void;
     } | null>(null);
 
-    // ─── Effects ──────────────────────────────────────────────────────────────────
+    // â”€â”€â”€ Effects â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     useEffect(() => {
         let pollId: ReturnType<typeof setInterval> | null = null;
         let timerId: ReturnType<typeof setInterval> | null = null;
@@ -271,7 +271,7 @@ export default function AdminDashboard() {
 
             // Poll every 5s instead of 15s for better responsiveness
             pollId = setInterval(() => {
-                if (!localStorage.getItem("access_token")) { cleanup(); navigate("/"); return; }
+                if (!sessionStorage.getItem("access_token")) { cleanup(); navigate("/"); return; }
                 // Fetch in parallel
                 Promise.all([
                     fetchCandidates(),
@@ -284,7 +284,7 @@ export default function AdminDashboard() {
         };
 
         const handleFocus = () => {
-            if (!cancelled && localStorage.getItem("access_token")) {
+            if (!cancelled && sessionStorage.getItem("access_token")) {
                 Promise.all([
                     fetchCandidates(),
                     fetchExamStats(),
@@ -316,21 +316,21 @@ export default function AdminDashboard() {
         };
     }, []);
 
-    // ─── Auth ────────────────────────────────────────────────────────────────────
+    // â”€â”€â”€ Auth â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const handleAuthFailure = () => {
-        localStorage.removeItem("access_token");
+        sessionStorage.removeItem("access_token");
         sessionStorage.removeItem("admin-profile");
         navigate("/");
     };
 
-    const getToken = () => localStorage.getItem("access_token");
+    const getToken = () => sessionStorage.getItem("access_token");
 
     const authHeaders = () => ({
         "Authorization": `Bearer ${getToken()}`,
         "Content-Type": "application/json",
     });
 
-    // ─── Data Fetching ────────────────────────────────────────────────────────────
+    // â”€â”€â”€ Data Fetching â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const fetchInitialData = async (): Promise<boolean> => {
         const token = getToken();
         if (!token) { handleAuthFailure(); return false; }
@@ -423,7 +423,7 @@ export default function AdminDashboard() {
         return () => clearInterval(timer);
     }, []);
 
-    // ─── Actions ──────────────────────────────────────────────────────────────────
+    // â”€â”€â”€ Actions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const copyLink = (link: string, id: string) => {
         navigator.clipboard.writeText(link);
         setCopyingId(id);
@@ -462,10 +462,9 @@ export default function AdminDashboard() {
         putExamExpiry(examId, { link_expiry: expiry.toISOString() }).catch(console.error);
     };
 
-    // ─── Permissions ──────────────────────────────────────────────────────────────
+    // â”€â”€â”€ Permissions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const hasPermission = (permission: string): boolean => {
         if (profile?.role === "admin") return true;
-        if (profile?.role === "member" && ["manage exam", "generate exam"].includes(permission)) return true;
         return profile?.permissions.includes(permission) ?? false;
     };
 
@@ -481,7 +480,7 @@ export default function AdminDashboard() {
         }
     };
 
-    // ─── Utilities ────────────────────────────────────────────────────────────────
+    // â”€â”€â”€ Utilities â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const formatCountdown = (expiryStr?: string): string | null => {
         if (!expiryStr) return null;
         const diff = new Date(expiryStr).getTime() - now.getTime();
@@ -503,7 +502,7 @@ export default function AdminDashboard() {
 
     if (loading || !profile) return null;
 
-    // ─── Render ───────────────────────────────────────────────────────────────────
+    // â”€â”€â”€ Render â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     return (
         <AdminLayout>
             <style>{`
@@ -540,7 +539,7 @@ export default function AdminDashboard() {
 
         *, *::before, *::after { box-sizing: border-box; }
 
-        /* ── Page Shell ──────────────────────────────────────────────── */
+        /* â”€â”€ Page Shell â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
         .db-page {
           font-family: var(--font-sans);
           background: var(--slate-50);
@@ -548,7 +547,7 @@ export default function AdminDashboard() {
           color: var(--slate-900);
         }
 
-        /* ── Top Bar ─────────────────────────────────────────────────── */
+        /* â”€â”€ Top Bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
         .db-topbar {
           position: sticky;
           top: 0;
@@ -656,7 +655,7 @@ export default function AdminDashboard() {
           text-transform: capitalize;
         }
 
-        /* ── Content Area ────────────────────────────────────────────── */
+        /* â”€â”€ Content Area â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
         .db-content {
           max-width: 1440px;
           margin: 0 auto;
@@ -669,7 +668,7 @@ export default function AdminDashboard() {
           to   { opacity: 1; transform: translateY(0); }
         }
 
-        /* ── Welcome Banner ──────────────────────────────────────────── */
+        /* â”€â”€ Welcome Banner â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
         .db-banner {
           background: var(--bg);
           border: 1px solid var(--border);
@@ -736,7 +735,7 @@ export default function AdminDashboard() {
           text-transform: uppercase;
         }
 
-        /* ── Deploy Button ────────────────────────────────────────────── */
+        /* â”€â”€ Deploy Button â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
         .btn-primary {
           display: inline-flex;
           align-items: center;
@@ -764,7 +763,7 @@ export default function AdminDashboard() {
 
         .btn-primary:active { transform: translateY(0); }
 
-        /* ── Stat Cards ──────────────────────────────────────────────── */
+        /* â”€â”€ Stat Cards â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
         .db-stats {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -840,7 +839,7 @@ export default function AdminDashboard() {
           gap: 5px;
         }
 
-        /* ── Section Header ──────────────────────────────────────────── */
+        /* â”€â”€ Section Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
         .section-header {
           display: flex;
           align-items: flex-end;
@@ -864,7 +863,7 @@ export default function AdminDashboard() {
           margin: 4px 0 0;
         }
 
-        /* ── Exam Cards ──────────────────────────────────────────────── */
+        /* â”€â”€ Exam Cards â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
         .exam-grid {
           display: grid;
           grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -889,7 +888,7 @@ export default function AdminDashboard() {
           transform: translateY(-2px);
         }
 
-        /* ── Exam Card Header ─────────────────────────────────────────── */
+        /* â”€â”€ Exam Card Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
         .exam-card-title {
           font-family: var(--font-heading);
           font-size: var(--font-size-emph);
@@ -929,7 +928,7 @@ export default function AdminDashboard() {
           line-height: 1;
         }
 
-        /* ── Stat Counters ────────────────────────────────────────────── */
+        /* â”€â”€ Stat Counters â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
         .exam-counters {
           display: grid;
           grid-template-columns: 1fr 1fr 1fr;
@@ -967,7 +966,7 @@ export default function AdminDashboard() {
           margin-top: 4px;
         }
 
-        /* ── Progress Bar ─────────────────────────────────────────────── */
+        /* â”€â”€ Progress Bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
         .progress-wrap {
           display: flex;
           justify-content: space-between;
@@ -1004,7 +1003,7 @@ export default function AdminDashboard() {
           color: var(--slate-700);
         }
 
-        /* ── Action Controls ──────────────────────────────────────────── */
+        /* â”€â”€ Action Controls â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
         .divider {
           border: none;
           border-top: 1px solid var(--slate-100);
@@ -1082,7 +1081,7 @@ export default function AdminDashboard() {
 
         .field-select:focus { border-color: var(--teal); }
 
-        /* ── Buttons ──────────────────────────────────────────────────── */
+        /* â”€â”€ Buttons â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
         .btn-refresh {
           padding: 8px 16px;
           font-size: 13px;
@@ -1200,7 +1199,7 @@ export default function AdminDashboard() {
             background: var(--slate-50);
         }
 
-        /* ── Empty State ──────────────────────────────────────────────── */
+        /* â”€â”€ Empty State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
         .empty-state {
           grid-column: 1 / -1;
           text-align: center;
@@ -1230,7 +1229,7 @@ export default function AdminDashboard() {
           margin: 0;
         }
 
-        /* ── Responsive ───────────────────────────────────────────────── */
+        /* â”€â”€ Responsive â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
         @media (max-width: 768px) {
           .db-topbar { padding: 0 16px; }
           .db-content { padding: 16px 16px 40px; }
@@ -1243,7 +1242,7 @@ export default function AdminDashboard() {
           .db-stats { grid-template-columns: 1fr; }
         }
 
-        /* ── Candidates Modal ─────────────────────────────────────────────────── */
+        /* â”€â”€ Candidates Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
         .candidates-modal-overlay {
           position: fixed; top: 0; left: 0; right: 0; bottom: 0;
           background: rgba(15, 23, 42, 0.6);
@@ -1325,7 +1324,7 @@ export default function AdminDashboard() {
         .result-score { font-family: var(--font-mono); font-size: 13px; font-weight: 700; color: var(--slate-700); }
         .result-meta { font-size: 11px; color: var(--slate-400); display: block; }
 
-        /* ── Table View ──────────────────────────────────────────────── */
+        /* â”€â”€ Table View â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
         .exam-table-container {
             width: 100%;
             overflow-x: auto;
@@ -1420,7 +1419,7 @@ export default function AdminDashboard() {
         }
       `}</style>
 
-            {/* ── Top Bar ─────────────────────────────────────────────────────────── */}
+            {/* â”€â”€ Top Bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
             <header className="db-topbar">
                 <div className="db-topbar-brand">
                     <div className="db-topbar-logo">
@@ -1450,7 +1449,7 @@ export default function AdminDashboard() {
                 </div>
             </header>
 
-            {/* ── Content ─────────────────────────────────────────────────────────── */}
+            {/* â”€â”€ Content â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
             <div className="db-content">
 
                 {/* Welcome Banner */}
@@ -1463,10 +1462,12 @@ export default function AdminDashboard() {
                             You have <strong>{stats.live} active</strong> candidate{stats.live !== 1 ? "s" : ""} across{" "}
                             <strong>{examStats.length} assessment{examStats.length !== 1 ? "s" : ""}</strong>. All systems operational.
                         </p>
-                        <button className="btn-primary" onClick={() => navigate("/create-exam")}>
-                            <Icons.Plus size={14} />
-                            New Assessment
-                        </button>
+                        {hasPermission("generate exam") && (
+                            <button className="btn-primary" onClick={() => navigate("/create-exam")}>
+                                <Icons.Plus size={14} />
+                                New Assessment
+                            </button>
+                        )}
                     </div>
 
 
@@ -1520,20 +1521,22 @@ export default function AdminDashboard() {
                         </div>
                     </div>
 
-                    <div className="stat-card">
-                        <div className="stat-card-accent" style={{ background: "var(--amber)" }} />
-                        <div className="stat-icon" style={{ background: "var(--amber-light)", color: "var(--amber)" }}>
-                            <Icons.Key size={18} />
+                    {profile?.role === "admin" && (
+                        <div className="stat-card">
+                            <div className="stat-card-accent" style={{ background: "var(--amber)" }} />
+                            <div className="stat-icon" style={{ background: "var(--amber-light)", color: "var(--amber)" }}>
+                                <Icons.Key size={18} />
+                            </div>
+                            <div className="stat-label">HR / Master OTP</div>
+                            <div className="stat-value" style={{ fontVariantNumeric: "tabular-nums", letterSpacing: "0.12em" }}>
+                                {adminOtp ?? "â€”â€”â€”â€”â€”â€”"}
+                            </div>
+                            <div className="stat-hint">
+                                <Icons.Clock size={12} />
+                                Rotates in {otpExpiresIn}s
+                            </div>
                         </div>
-                        <div className="stat-label">HR / Master OTP</div>
-                        <div className="stat-value" style={{ fontVariantNumeric: "tabular-nums", letterSpacing: "0.12em" }}>
-                            {adminOtp ?? "——————"}
-                        </div>
-                        <div className="stat-hint">
-                            <Icons.Clock size={12} />
-                            Rotates in {otpExpiresIn}s
-                        </div>
-                    </div>
+                    )}
                 </div>
 
                 <div className="section-header">
@@ -1606,7 +1609,7 @@ export default function AdminDashboard() {
                                                             <div style={{ fontWeight: 800, color: 'var(--slate-900)', fontSize: '15px', letterSpacing: '-0.01em' }}>{exam.title}</div>
                                                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                                                                 <span className="exam-id-chip" style={{ fontSize: '9px', padding: '1px 5px' }}>{exam.id.slice(0, 8)}</span>
-                                                                <span style={{ fontSize: '11px', color: 'var(--slate-500)', fontWeight: 600 }}>•</span>
+                                                                <span style={{ fontSize: '11px', color: 'var(--slate-500)', fontWeight: 600 }}>â€¢</span>
                                                                 <span style={{ fontSize: '11px', color: 'var(--slate-500)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{exam.difficulty}</span>
                                                             </div>
                                                         </div>
@@ -1673,13 +1676,15 @@ export default function AdminDashboard() {
                                                                 >
                                                                     {copyingId === exam.id ? <Icons.Check size={16} /> : <Icons.Copy size={16} />}
                                                                 </button>
-                                                                <button
-                                                                    className="action-icon-btn primary"
-                                                                    onClick={() => setSendLinkModal({ isOpen: true, examId: exam.id, publicLink, emails: "", message: "", loading: false })}
-                                                                    title="Email Pro Links"
-                                                                >
-                                                                    <Icons.Mail size={16} />
-                                                                </button>
+                                                                {hasPermission("send invitation") && (
+                                                                    <button
+                                                                        className="action-icon-btn primary"
+                                                                        onClick={() => setSendLinkModal({ isOpen: true, examId: exam.id, publicLink, emails: "", message: "", loading: false })}
+                                                                        title="Email Pro Links"
+                                                                    >
+                                                                        <Icons.Mail size={16} />
+                                                                    </button>
+                                                                )}
                                                             </div>
                                                         ) : (
                                                             <div className="activate-row" style={{ background: 'var(--slate-50)', padding: '6px', borderRadius: '12px', border: '1px solid var(--slate-100)' }}>
@@ -1790,13 +1795,15 @@ export default function AdminDashboard() {
                                                             : <><Icons.Copy size={13} /> Copy Link</>
                                                         }
                                                     </button>
-                                                    <button
-                                                        className="btn btn-copy"
-                                                        onClick={() => setSendLinkModal({ isOpen: true, examId: exam.id, publicLink, emails: "", message: "", loading: false })}
-                                                        style={{ flex: 1, background: "var(--teal)" }}
-                                                    >
-                                                        <Icons.Mail size={13} /> Send Link
-                                                    </button>
+                                                    {hasPermission("send invitation") && (
+                                                        <button
+                                                            className="btn btn-copy"
+                                                            onClick={() => setSendLinkModal({ isOpen: true, examId: exam.id, publicLink, emails: "", message: "", loading: false })}
+                                                            style={{ flex: 1, background: "var(--teal)" }}
+                                                        >
+                                                            <Icons.Mail size={13} /> Send Link
+                                                        </button>
+                                                    )}
                                                 </div>
                                                 <div className="expiry-banner">
                                                     <Icons.Clock size={13} />

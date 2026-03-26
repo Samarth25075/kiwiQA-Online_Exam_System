@@ -1,7 +1,7 @@
 # app/exams/router.py
 from typing import List, Annotated, Optional, Dict
 from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
-from app.auth.router import get_current_admin, check_permission
+from app.auth.router import get_current_admin, check_permission, check_permission_any
 from app.auth.schemas import AdminUser
 from app.exams.schemas import ExamCreate, ExamResponse, ExamFinalize, Question, ExamStatsResponse, SendExamLinkRequest
 from app.exams.service import save_exam, generate_questions, get_all_exams, delete_exam, get_exams_with_candidate_counts, get_bank_categories, get_bank_stats, get_exam_by_id, add_to_bank, upload_to_bank, get_bank_questions_by_category, update_bank_question, delete_bank_question
@@ -52,7 +52,7 @@ async def read_exam_stats(
 
 @router.get("/bank/categories", response_model=List[str])
 async def read_bank_categories(
-    current_admin: Annotated[AdminUser, Depends(check_permission("manage exam"))],
+    current_admin: Annotated[AdminUser, Depends(check_permission_any(["manage bank", "generate exam"]))],
     db: Session = Depends(get_db)
 ):
     """Get unique categories from the inbuilt question bank."""
@@ -60,7 +60,7 @@ async def read_bank_categories(
 
 @router.get("/bank/stats", response_model=List[Dict])
 async def read_bank_stats(
-    current_admin: Annotated[AdminUser, Depends(check_permission("manage exam"))],
+    current_admin: Annotated[AdminUser, Depends(check_permission_any(["manage bank", "generate exam"]))],
     db: Session = Depends(get_db)
 ):
     """Get category-wise stats (count, marks) from the question bank."""
@@ -68,7 +68,7 @@ async def read_bank_stats(
 
 @router.get("/bank/questions", response_model=List[Dict])
 async def read_bank_questions(
-    current_admin: Annotated[AdminUser, Depends(check_permission("manage exam"))],
+    current_admin: Annotated[AdminUser, Depends(check_permission("manage bank"))],
     category: Optional[str] = None
 ):
     """Get all questions in a category from the bank."""
@@ -79,7 +79,7 @@ async def read_bank_questions(
 async def update_bank_question_route(
     q_id: str,
     question: Dict,
-    current_admin: Annotated[AdminUser, Depends(check_permission("manage exam"))]
+    current_admin: Annotated[AdminUser, Depends(check_permission("manage bank"))]
 ):
     """Update a specific question in the bank."""
     from app.exams.service import update_bank_question
@@ -90,7 +90,7 @@ async def update_bank_question_route(
 @router.delete("/bank/questions/{q_id}")
 async def delete_bank_question_route(
     q_id: str,
-    current_admin: Annotated[AdminUser, Depends(check_permission("manage exam"))]
+    current_admin: Annotated[AdminUser, Depends(check_permission("manage bank"))]
 ):
     """Delete a specific question from the bank."""
     from app.exams.service import delete_bank_question
@@ -101,7 +101,7 @@ async def delete_bank_question_route(
 @router.post("/bank/add")
 async def add_individual_question_to_bank(
     question: Dict,
-    current_admin: Annotated[AdminUser, Depends(check_permission("manage exam"))]
+    current_admin: Annotated[AdminUser, Depends(check_permission("manage bank"))]
 ):
     """Add a single question to the inbuilt bank."""
     if add_to_bank(question):
@@ -111,7 +111,7 @@ async def add_individual_question_to_bank(
 @router.post("/bank/upload")
 async def upload_bulk_questions_to_bank(
     questions: List[Dict],
-    current_admin: Annotated[AdminUser, Depends(check_permission("manage exam"))]
+    current_admin: Annotated[AdminUser, Depends(check_permission("manage bank"))]
 ):
     """Upload a list of questions to the inbuilt bank."""
     if upload_to_bank(questions):
@@ -119,7 +119,7 @@ async def upload_bulk_questions_to_bank(
     raise HTTPException(status_code=500, detail="Failed to update bank")
 @router.get("/invitations/tracking")
 async def read_invitation_tracking(
-    current_admin: Annotated[AdminUser, Depends(check_permission("manage candidates"))],
+    current_admin: Annotated[AdminUser, Depends(check_permission("send invitation"))],
     db: Session = Depends(get_db)
 ):
     """Get detailed tracking of exam invitations vs candidate attempts."""
@@ -168,7 +168,7 @@ async def send_exam_link_custom(
     exam_id: str,
     payload: SendExamLinkRequest,
     background_tasks: BackgroundTasks,
-    current_admin: Annotated[AdminUser, Depends(check_permission("manage exam"))],
+    current_admin: Annotated[AdminUser, Depends(check_permission("send invitation"))],
     db: Session = Depends(get_db)
 ):
     """Send an exam link to multiple emails manually via custom message."""
@@ -259,7 +259,7 @@ async def update_exam_expiry(
 @router.delete("/bank/categories/{name}")
 async def remove_bank_category(
     name: str,
-    current_admin: Annotated[AdminUser, Depends(check_permission("manage exam"))]
+    current_admin: Annotated[AdminUser, Depends(check_permission("manage bank"))]
 ):
     """Delete a category and all its questions from the bank."""
     from app.exams.service import delete_bank_category

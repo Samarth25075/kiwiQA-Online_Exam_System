@@ -5,6 +5,7 @@ from typing import Optional
 class CandidateBase(BaseModel):
     name: str
     email: str
+    country_code: Optional[str] = None
     phone_number: Optional[str] = None
     dob: Optional[str] = None
     gender: Optional[str] = None
@@ -18,6 +19,7 @@ class CandidateCreate(CandidateBase):
 class CandidateEnrollOTPRequest(BaseModel):
     name: str
     email: str
+    country_code: Optional[str] = None
     phone_number: Optional[str] = None
     dob: Optional[str] = None
     gender: Optional[str] = None

@@ -117,3 +117,20 @@ def delete_user(db: Session, email: str):
         db.commit()
         return True
     return False
+
+def update_member(db: Session, email: str, update_data: dict) -> bool:
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        return False
+    
+    if "full_name" in update_data and update_data["full_name"]:
+        user.full_name = update_data["full_name"]
+    if "username" in update_data and update_data["username"]:
+        user.username = update_data["username"]
+    if "role" in update_data and update_data["role"]:
+        user.role = update_data["role"]
+    if "permissions" in update_data and update_data["permissions"] is not None:
+        user.permissions = json.dumps(update_data["permissions"])
+    
+    db.commit()
+    return True

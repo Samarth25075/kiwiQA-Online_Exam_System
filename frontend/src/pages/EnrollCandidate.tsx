@@ -112,6 +112,7 @@ export default function EnrollCandidate() {
 
     const [name, setName] = useState("");
     const [email, setEmail] = useState(preFilledEmail || "");
+    const [countryCode, setCountryCode] = useState("+91");
     const [phone, setPhone] = useState("");
     const [agreedToConsent, setAgreedToConsent] = useState(false);
     const [otp, setOtp] = useState("");
@@ -176,6 +177,7 @@ export default function EnrollCandidate() {
                     body: JSON.stringify({
                         name,
                         email,
+                        country_code: countryCode,
                         phone_number: phone
                     })
                 }
@@ -209,6 +211,7 @@ export default function EnrollCandidate() {
                         name,
                         email,
                         otp,
+                        country_code: countryCode,
                         phone_number: phone,
                         device_id: deviceId
                     })
@@ -589,20 +592,37 @@ export default function EnrollCandidate() {
 
                             <div className="form-field">
                                 <label className="form-label">Mobile Number</label>
-                                <div className="form-input-wrap">
-                                    <span className="form-input-icon"><Icons.Phone /></span>
-                                    <input
-                                        className="form-input"
-                                        type="tel"
-                                        placeholder="9876543210"
-                                        value={phone}
-                                        required
-                                        maxLength={10}
-                                        onChange={e => {
-                                            const val = e.target.value.replace(/\D/g, "").slice(0, 10);
-                                            setPhone(val);
-                                        }}
-                                    />
+                                <div style={{ display: 'flex', gap: 10 }}>
+                                    <div className="form-input-wrap" style={{ width: 100 }}>
+                                        <select 
+                                            className="form-input" 
+                                            style={{ paddingLeft: 12, paddingRight: 8, textAlign: 'center' }}
+                                            value={countryCode}
+                                            onChange={e => setCountryCode(e.target.value)}
+                                        >
+                                            <option value="+91">+91 (IN)</option>
+                                            <option value="+1">+1 (US)</option>
+                                            <option value="+44">+44 (UK)</option>
+                                            <option value="+61">+61 (AU)</option>
+                                            <option value="+971">+971 (UAE)</option>
+                                            <option value="+65">+65 (SG)</option>
+                                        </select>
+                                    </div>
+                                    <div className="form-input-wrap" style={{ flex: 1 }}>
+                                        <span className="form-input-icon"><Icons.Phone /></span>
+                                        <input
+                                            className="form-input"
+                                            type="tel"
+                                            placeholder="9876543210"
+                                            value={phone}
+                                            required
+                                            maxLength={10}
+                                            onChange={e => {
+                                                const val = e.target.value.replace(/\D/g, "").slice(0, 10);
+                                                setPhone(val);
+                                            }}
+                                        />
+                                    </div>
                                 </div>
                             </div>
 

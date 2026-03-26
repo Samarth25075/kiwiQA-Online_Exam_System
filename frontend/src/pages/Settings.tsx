@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import AdminLayout from "../components/AdminLayout";
 import API_BASE_URL from "../config";
 
-// ─── Types ────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 interface AdminProfile {
     email: string;
     username?: string;
@@ -20,7 +20,7 @@ interface Member {
     permissions: string[];
 }
 
-// ─── Theme Definitions ────────────────────────────────────────────────────
+// â”€â”€â”€ Theme Definitions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const THEMES = [
     { id: "default", name: "KiwiQA", description: "Teal & green", primary: "#1c848f", secondary: "#93c73d", bg: "#ffffff", bgNeutral: "#f8fafb", dark: false },
     { id: "dark", name: "Dark", description: "Dark navy", primary: "#2ab3c0", secondary: "#a3d44a", bg: "#1a1f2e", bgNeutral: "#141824", dark: true },
@@ -30,7 +30,7 @@ const THEMES = [
     { id: "dark-purple", name: "Midnight", description: "Dark with violet", primary: "#a78bfa", secondary: "#f472b6", bg: "#1e1b2e", bgNeutral: "#16132a", dark: true },
 ];
 
-// ─── SVG Icons ────────────────────────────────────────────────────────────
+// â”€â”€â”€ SVG Icons â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const Icons = {
     User: () => (
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -95,6 +95,7 @@ export default function Settings() {
     const navigate = useNavigate();
     const [profile, setProfile] = useState<AdminProfile | null>(null);
     const [loading, setLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState("profile");
 
     // Profile Editing
     const [isEditingProfile, setIsEditingProfile] = useState(false);
@@ -129,10 +130,11 @@ export default function Settings() {
         permissions: [] as string[]
     });
     const [memberMsg, setMemberMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
+    const [editingMember, setEditingMember] = useState<string | null>(null);
 
-    // ── Fetch profile ──────────────────────────────────────────────────────
+    // â”€â”€ Fetch profile â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     useEffect(() => {
-        const token = localStorage.getItem("access_token");
+        const token = sessionStorage.getItem("access_token");
         if (!token) { navigate("/"); return; }
         fetch(`${API_BASE_URL}/me`, { headers: { Authorization: `Bearer ${token}` } })
             .then(r => r.ok ? r.json() : Promise.reject())
@@ -163,7 +165,7 @@ export default function Settings() {
         }
     };
 
-    // ── Update Profile ─────────────────────────────────────────────────────
+    // â”€â”€ Update Profile â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const handleEditProfileClick = () => {
         setProfileMsg(null);
         setProfileForm({
@@ -176,7 +178,7 @@ export default function Settings() {
     const handleProfileSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setProfileMsg(null);
-        const token = localStorage.getItem("access_token");
+        const token = sessionStorage.getItem("access_token");
         setProfileLoading(true);
         try {
             const res = await fetch(`${API_BASE_URL}/me`, {
@@ -204,13 +206,13 @@ export default function Settings() {
 
 
 
-    // ── Apply theme ────────────────────────────────────────────────────────
+    // â”€â”€ Apply theme â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const applyTheme = (id: string) => {
         setActiveTheme(id);
-        
+
         // Always save to global key for current session persistence
         localStorage.setItem("kiwi-theme", id);
-        
+
         // Save to user-specific key if profile exists
         if (profile?.email) {
             localStorage.setItem(`kiwi-theme-${profile.email}`, id);
@@ -233,7 +235,7 @@ export default function Settings() {
         setActiveTheme(saved);
     }, []);
 
-    // ── Password strength ──────────────────────────────────────────────────
+    // â”€â”€ Password strength â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const getStrength = (pw: string) => {
         if (!pw) return null;
         const score =
@@ -249,7 +251,7 @@ export default function Settings() {
     };
     const strength = getStrength(pwForm.newPw);
 
-    // ── Change password ────────────────────────────────────────────────────
+    // â”€â”€ Change password â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const handlePwSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setPwMsg(null);
@@ -261,7 +263,7 @@ export default function Settings() {
             setPwMsg({ type: "error", text: "New passwords do not match." });
             return;
         }
-        const token = localStorage.getItem("access_token");
+        const token = sessionStorage.getItem("access_token");
         setPwLoading(true);
         try {
             const res = await fetch(`${API_BASE_URL}/change-password`, {
@@ -286,30 +288,47 @@ export default function Settings() {
     const handleAddMember = async (e: React.FormEvent) => {
         e.preventDefault();
         setMemberMsg(null);
-        const token = localStorage.getItem("access_token");
+        const token = sessionStorage.getItem("access_token");
+        const url = editingMember ? `${API_BASE_URL}/members/${editingMember}` : `${API_BASE_URL}/members`;
+        const method = editingMember ? "PUT" : "POST";
+
         try {
-            const res = await fetch(`${API_BASE_URL}/members`, {
-                method: "POST",
+            const res = await fetch(url, {
+                method: method,
                 headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
                 body: JSON.stringify(memberForm),
             });
             if (res.ok) {
-                setMemberMsg({ type: "success", text: "Member added successfully." });
+                setMemberMsg({ type: "success", text: editingMember ? "Member updated successfully." : "Member added successfully." });
                 setMemberForm({ email: "", username: "", full_name: "", password: "", role: "member", permissions: [] });
                 setShowAddMember(false);
+                setEditingMember(null);
                 fetchMembers(token!);
             } else {
                 const data = await res.json();
-                setMemberMsg({ type: "error", text: data.detail || "Failed to add member." });
+                setMemberMsg({ type: "error", text: data.detail || "Action failed." });
             }
         } catch {
-            setMemberMsg({ type: "error", text: "Network error." });
+            setMemberMsg({ type: "error", text: "Network error. Please try again." });
         }
+    };
+
+    const handleEditMember = (m: Member) => {
+        setMemberForm({
+            full_name: m.full_name,
+            email: m.email,
+            username: m.username || "",
+            password: "",
+            role: m.role,
+            permissions: m.permissions || []
+        });
+        setEditingMember(m.email);
+        setShowAddMember(true);
     };
 
     const handleDeleteMember = async (email: string) => {
         if (!confirm(`Are you sure you want to remove ${email}?`)) return;
-        const token = localStorage.getItem("access_token");
+        const token = sessionStorage.getItem("access_token");
         try {
             const res = await fetch(`${API_BASE_URL}/members/${email}`, {
                 method: "DELETE",
@@ -345,25 +364,70 @@ export default function Settings() {
                 .st-content {
                     padding: var(--space-24) var(--space-32);
                     display: grid;
-                    grid-template-columns: repeat(2, 1fr);
-                    gap: var(--space-24);
+                    grid-template-columns: 240px 1fr;
+                    gap: var(--space-32);
                     max-width: 1200px;
                     margin: 0 auto;
+                    align-items: start;
                 }
+                
+                /* â”€â”€ Sidebar Navigation â”€â”€ */
+                .st-sidebar {
+                    display: flex;
+                    flex-direction: column;
+                    gap: var(--space-8);
+                }
+                .st-nav-item {
+                    display: flex;
+                    align-items: center;
+                    justify-content: flex-start;
+                    gap: 12px;
+                    padding: 12px 16px;
+                    background: transparent;
+                    color: var(--text-muted);
+                    font-size: 14px;
+                    font-weight: 600;
+                    border: none;
+                    border-radius: var(--radius);
+                    cursor: pointer;
+                    text-align: left;
+                    transition: all 0.2s;
+                }
+                .st-nav-item svg { width: 18px; height: 18px; }
+                .st-nav-item:hover {
+                    background: var(--bg-neutral);
+                    color: var(--text);
+                }
+                .st-nav-item.active {
+                    background: color-mix(in srgb, var(--primary) 12%, transparent);
+                    color: var(--primary);
+                }
+                
+                .st-tab-panel {
+                    display: flex;
+                    flex-direction: column;
+                    gap: var(--space-24);
+                }
+
                 .st-full-width {
-                    grid-column: span 2;
+                    grid-column: span 1;
                 }
                 @media (max-width: 1024px) {
                     .st-content {
                         grid-template-columns: 1fr;
                         padding: 24px;
                     }
-                    .st-full-width {
-                        grid-column: span 1;
+                    .st-sidebar {
+                        flex-direction: row;
+                        overflow-x: auto;
+                        padding-bottom: 8px;
+                    }
+                    .st-nav-item {
+                        white-space: nowrap;
                     }
                 }
 
-                /* ── Section card — matches mc-form-card ─────────────────── */
+                /* â”€â”€ Section card â€” matches mc-form-card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
                 .st-card {
                     background: var(--bg);
                     border: 1px solid var(--border);
@@ -397,7 +461,7 @@ export default function Settings() {
                     padding: var(--space-24);
                 }
 
-                /* ── Profile fields ──────────────────────────────────────── */
+                /* â”€â”€ Profile fields â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
                 .st-profile-grid {
                     display: grid;
                     grid-template-columns: 1fr 1fr;
@@ -439,7 +503,7 @@ export default function Settings() {
                     letter-spacing: 0.05em;
                 }
 
-                /* ── Theme grid ──────────────────────────────────────────── */
+                /* â”€â”€ Theme grid â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
                 .st-theme-grid {
                     display: grid;
                     grid-template-columns: repeat(3, 1fr);
@@ -525,7 +589,7 @@ export default function Settings() {
                     display: inline-block;
                 }
 
-                /* ── Password form ────────────────────────────────────────── */
+                /* â”€â”€ Password form â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
                 .st-pw-grid {
                     display: grid;
                     gap: var(--space-16);
@@ -658,7 +722,7 @@ export default function Settings() {
                 }
                 @keyframes st-spin { to { transform: rotate(360deg); } }
 
-                /* ── Member Table ────────────────────────────────────────── */
+                /* â”€â”€ Member Table â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
                 .st-member-table {
                     width: 100%;
                     border-collapse: collapse;
@@ -701,19 +765,61 @@ export default function Settings() {
                     background: color-mix(in srgb, var(--primary) 10%, white);
                 }
 
+                .st-member-form {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 16px;
+                    padding: 20px;
+                    background: var(--bg-neutral);
+                    border-radius: var(--radius);
+                    border: 1px solid var(--border);
+                    margin-bottom: 24px;
+                }
+                .st-form-full { grid-column: span 2; }
+                .st-checkbox-group {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 12px;
+                    margin-top: 8px;
+                }
+                .st-checkbox-item {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    padding: 8px 12px;
+                    background: var(--bg);
+                    border: none;
+                    border-radius: var(--radius-sm);
+                    font-size: 13px;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    box-shadow: var(--shadow-sm);
+                }
+                .st-checkbox-item:hover { background: var(--bg-neutral); }
+                .st-checkbox-item input { 
+                    accent-color: var(--primary);
+                    width: 16px;
+                    height: 16px;
+                    cursor: pointer;
+                }
+                .st-checkbox-item.checked {
+                    background: color-mix(in srgb, var(--primary) 10%, var(--bg));
+                    color: var(--primary);
+                    font-weight: 600;
+                }
+
                 .st-perm-tag {
                     display: inline-block;
                     padding: 2px 8px;
                     background: var(--bg-neutral);
                     border: 1px solid var(--border);
-                       padding: 8px 16px;
-                    background: transparent;
                     color: var(--text-muted);
-                    border: 1px solid var(--border);
-                    border-radius: var(--radius-sm);
-                    font-size: 13px;
+                    border-radius: 4px;
+                    font-size: 11px;
                     font-weight: 600;
-                    cursor: pointer;
+                    margin-right: 4px;
+                    margin-bottom: 4px;
+                    text-transform: capitalize;
                 }
                 .st-add-btn {
                     display: flex;
@@ -727,247 +833,383 @@ export default function Settings() {
                     font-size: 13px;
                     font-weight: 600;
                     cursor: pointer;
+                    transition: all 0.2s;
                 }
                 .st-add-btn:hover { background: var(--primary-hover); }
+                .st-cancel-btn {
+                    padding: 8px 16px;
+                    background: transparent;
+                    color: var(--text-muted);
+                    border: 1px solid var(--border);
+                    border-radius: var(--radius-sm);
+                    font-size: 13px;
+                    font-weight: 600;
+                    cursor: pointer;
+                }
+                .st-cancel-btn:hover { background: var(--bg-neutral); color: var(--text); }
 
 
             `}</style>
 
-            {/* ── Page Header ── */}
+            {/* â”€â”€ Page Header â”€â”€ */}
             <header className="st-header">
                 <h2 className="st-header-title">Settings</h2>
             </header>
 
             <div className="st-content">
+                <nav className="st-sidebar">
+                    <button className={`st-nav-item ${activeTab === 'profile' ? 'active' : ''}`} onClick={() => setActiveTab('profile')}>
+                        <Icons.User /> Profile & Account
+                    </button>
+                    <button className={`st-nav-item ${activeTab === 'security' ? 'active' : ''}`} onClick={() => setActiveTab('security')}>
+                        <Icons.Lock /> Security
+                    </button>
+                    <button className={`st-nav-item ${activeTab === 'appearance' ? 'active' : ''}`} onClick={() => setActiveTab('appearance')}>
+                        <Icons.Palette /> Appearance
+                    </button>
+                    {profile.role === "admin" && (
+                        <button className={`st-nav-item ${activeTab === 'team' ? 'active' : ''}`} onClick={() => setActiveTab('team')}>
+                            <Icons.Users /> Team Management
+                        </button>
+                    )}
+                </nav>
 
-                {/* ── Admin Profile ── */}
-                <div className="st-card" style={{ alignSelf: 'start' }}>
-                    <div className="st-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div>
-                            <div className="st-card-title"><Icons.User /> Admin Profile</div>
-                            <div className="st-card-sub">Your account information</div>
-                        </div>
-                        {!isEditingProfile && (
-                            <button className="st-add-btn" onClick={handleEditProfileClick} style={{ padding: '6px 12px' }}>
-                                Edit Profile
-                            </button>
-                        )}
-                    </div>
-                    <div className="st-card-body">
-                        {profileMsg && !isEditingProfile && (
-                            <div className={`st-msg ${profileMsg.type}`} style={{ marginBottom: 16 }}>{profileMsg.text}</div>
-                        )}
-                        
-                        {isEditingProfile ? (
-                            <form className="st-pw-grid" onSubmit={handleProfileSubmit}>
-                                <div className="st-pw-field">
-                                    <label className="st-pw-label" htmlFor="st-full-name">Full Name</label>
-                                    <input id="st-full-name" className="st-pw-input" type="text" value={profileForm.full_name} onChange={e => setProfileForm(p => ({ ...p, full_name: e.target.value }))} required />
+                <div className="st-tab-panel">
+                    {/* â”€â”€ Admin Profile â”€â”€ */}
+                    {activeTab === 'profile' && (
+                        <div className="st-card">
+                            <div className="st-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <div>
+                                    <div className="st-card-title"><Icons.User /> Admin Profile</div>
+                                    <div className="st-card-sub">Your account information</div>
                                 </div>
-                                <div className="st-pw-field">
-                                    <label className="st-pw-label" htmlFor="st-username">Username</label>
-                                    <input id="st-username" className="st-pw-input" type="text" value={profileForm.username} onChange={e => setProfileForm(p => ({ ...p, username: e.target.value }))} />
-                                </div>
-                                <div className="st-field">
-                                    <div className="st-field-label">Email Address (Read-only)</div>
-                                    <div className="st-field-value" style={{ opacity: 0.7 }}><Icons.Mail /> {profile.email}</div>
-                                </div>
-                                
-                                {profileMsg && (
-                                    <div className={`st-msg ${profileMsg.type}`}>{profileMsg.text}</div>
-                                )}
-                                
-                                <div style={{ display: 'flex', gap: 12, marginTop: 12 }}>
-                                    <button type="submit" className="st-pw-btn" disabled={profileLoading}>
-                                        {profileLoading ? <div className="st-spinner" /> : <Icons.Check />} Save Changes
+                                {!isEditingProfile && (
+                                    <button className="st-add-btn" onClick={handleEditProfileClick} style={{ padding: '6px 12px' }}>
+                                        Edit Profile
                                     </button>
-                                    <button type="button" className="st-perm-tag" onClick={() => setIsEditingProfile(false)} disabled={profileLoading}>
-                                        Cancel
-                                    </button>
-                                </div>
-                            </form>
-                        ) : (
-                            <div className="st-profile-grid">
-                                <div className="st-field">
-                                    <div className="st-field-label">Full Name</div>
-                                    <div className="st-field-value"><Icons.User /> {profile.full_name}</div>
-                                </div>
-                                <div className="st-field">
-                                    <div className="st-field-label">Email Address</div>
-                                    <div className="st-field-value"><Icons.Mail /> {profile.email}</div>
-                                </div>
-                                <div className="st-field">
-                                    <div className="st-field-label">Role</div>
-                                    <div className="st-field-value">
-                                        <Icons.Shield />
-                                        <span className="st-role-badge">{profile.role}</span>
-                                    </div>
-                                </div>
-                                <div className="st-field">
-                                    <div className="st-field-label">Username</div>
-                                    <div className="st-field-value"><Icons.User /> {profile.username || "—"}</div>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </div>
-
-                {/* ── Security / Password ── */}
-                <div className="st-card" style={{ alignSelf: 'start' }}>
-                    <div className="st-card-header">
-                        <div className="st-card-title"><Icons.Lock /> Change Password</div>
-                        <div className="st-card-sub">Update your admin credentials</div>
-                    </div>
-                    <div className="st-card-body">
-                        <form className="st-pw-grid" onSubmit={handlePwSubmit}>
-                            <div className="st-pw-field">
-                                <label className="st-pw-label" htmlFor="st-curr-pw">Current Password</label>
-                                <div className="st-pw-wrap">
-                                    <input
-                                        id="st-curr-pw" className="st-pw-input"
-                                        type={showCurrent ? "text" : "password"}
-                                        placeholder="Enter current password"
-                                        value={pwForm.current}
-                                        onChange={e => setPwForm(p => ({ ...p, current: e.target.value }))}
-                                        required
-                                    />
-                                    <button type="button" className="st-pw-eye" onClick={() => setShowCurrent(v => !v)}>
-                                        {showCurrent ? <Icons.EyeOff /> : <Icons.Eye />}
-                                    </button>
-                                </div>
-                            </div>
-                            <div className="st-pw-field">
-                                <label className="st-pw-label" htmlFor="st-new-pw">New Password</label>
-                                <div className="st-pw-wrap">
-                                    <input
-                                        id="st-new-pw" className="st-pw-input"
-                                        type={showNew ? "text" : "password"}
-                                        placeholder="Min 6 characters"
-                                        value={pwForm.newPw}
-                                        onChange={e => setPwForm(p => ({ ...p, newPw: e.target.value }))}
-                                        required
-                                    />
-                                    <button type="button" className="st-pw-eye" onClick={() => setShowNew(v => !v)}>
-                                        {showNew ? <Icons.EyeOff /> : <Icons.Eye />}
-                                    </button>
-                                </div>
-                                {strength && (
-                                    <div style={{ marginTop: 8 }}>
-                                        <div className="st-strength-track"><div className="st-strength-fill" style={{ width: strength.pct, background: strength.color }} /></div>
-                                        <div className="st-strength-label" style={{ color: strength.color }}>{strength.label}</div>
-                                    </div>
                                 )}
                             </div>
-                            <div className="st-pw-field">
-                                <label className="st-pw-label" htmlFor="st-conf-pw">Confirm New Password</label>
-                                <div className="st-pw-wrap">
-                                    <input
-                                        id="st-conf-pw" className="st-pw-input"
-                                        type="password" placeholder="Re-enter password"
-                                        value={pwForm.confirm}
-                                        onChange={e => setPwForm(p => ({ ...p, confirm: e.target.value }))}
-                                        required
-                                    />
-                                    {pwForm.confirm && (
-                                        <span className="st-match-icon" style={{ color: pwForm.confirm === pwForm.newPw ? "#22c55e" : "var(--primary)" }}>
-                                            {pwForm.confirm === pwForm.newPw ? "✓" : "✗"}
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
-                            {pwMsg && (
-                                <div className={`st-msg ${pwMsg.type}`}>
-                                    {pwMsg.text}
-                                </div>
-                            )}
-                            <button type="submit" className="st-pw-btn" disabled={pwLoading}>
-                                {pwLoading ? <div className="st-spinner" /> : <Icons.Lock />} Update Password
-                            </button>
-                        </form>
-                    </div>
-                </div>
+                            <div className="st-card-body">
+                                {profileMsg && !isEditingProfile && (
+                                    <div className={`st-msg ${profileMsg.type}`} style={{ marginBottom: 16 }}>{profileMsg.text}</div>
+                                )}
 
+                                {isEditingProfile ? (
+                                    <form className="st-pw-grid" onSubmit={handleProfileSubmit}>
+                                        <div className="st-pw-field">
+                                            <label className="st-pw-label" htmlFor="st-full-name">Full Name</label>
+                                            <input id="st-full-name" className="st-pw-input" type="text" value={profileForm.full_name} onChange={e => setProfileForm(p => ({ ...p, full_name: e.target.value }))} required />
+                                        </div>
+                                        <div className="st-pw-field">
+                                            <label className="st-pw-label" htmlFor="st-username">Username</label>
+                                            <input id="st-username" className="st-pw-input" type="text" placeholder="e.g. admin_jane" value={profileForm.username} onChange={e => setProfileForm(p => ({ ...p, username: e.target.value }))} />
+                                        </div>
+                                        <div className="st-field">
+                                            <div className="st-field-label">Email Address (Read-only)</div>
+                                            <div className="st-field-value" style={{ opacity: 0.7 }}><Icons.Mail /> {profile.email}</div>
+                                        </div>
 
+                                        {profileMsg && (
+                                            <div className={`st-msg ${profileMsg.type}`}>{profileMsg.text}</div>
+                                        )}
 
-                {/* ── Appearance ── */}
-                <div className="st-card st-full-width">
-                    <div className="st-card-header">
-                        <div className="st-card-title"><Icons.Palette /> Appearance</div>
-                        <div className="st-card-sub">Choose your preferred colour theme</div>
-                    </div>
-                    <div className="st-card-body">
-                        <div className="st-active-label">
-                            <span className="st-active-dot" />
-                            Active theme: <strong>{THEMES.find(t => t.id === activeTheme)?.name}</strong>
-                        </div>
-                        <div className="st-theme-grid">
-                            {THEMES.map(theme => {
-                                const isActive = activeTheme === theme.id;
-                                return (
-                                    <div key={theme.id} className={`st-theme-card${isActive ? " st-theme-active" : ""}`} onClick={() => applyTheme(theme.id)}>
-                                        <div className="st-theme-preview" style={{ background: theme.bgNeutral }}>
-                                            <div className="st-preview-sidebar" style={{ background: theme.primary }} />
-                                            <div className="st-preview-main">
-                                                <div className="st-preview-bar" style={{ background: theme.primary, width: "100%" }} />
-                                                <div className="st-preview-bar" style={{ background: theme.secondary, width: "70%" }} />
+                                        <div style={{ display: 'flex', gap: 12, marginTop: 12 }}>
+                                            <button type="submit" className="st-pw-btn" disabled={profileLoading}>
+                                                {profileLoading ? <div className="st-spinner" /> : <Icons.Check />} Save Changes
+                                            </button>
+                                            <button type="button" className="st-perm-tag" onClick={() => setIsEditingProfile(false)} disabled={profileLoading}>
+                                                Cancel
+                                            </button>
+                                        </div>
+                                    </form>
+                                ) : (
+                                    <div className="st-profile-grid">
+                                        <div className="st-field">
+                                            <div className="st-field-label">Full Name</div>
+                                            <div className="st-field-value"><Icons.User /> {profile.full_name}</div>
+                                        </div>
+                                        <div className="st-field">
+                                            <div className="st-field-label">Email Address</div>
+                                            <div className="st-field-value"><Icons.Mail /> {profile.email}</div>
+                                        </div>
+                                        <div className="st-field">
+                                            <div className="st-field-label">Role</div>
+                                            <div className="st-field-value">
+                                                <Icons.Shield />
+                                                <span className="st-role-badge">{profile.role}</span>
                                             </div>
                                         </div>
-                                        <div className="st-theme-foot" style={{ background: theme.bg }}>
-                                            <div className="st-theme-name" style={{ color: theme.dark ? "#e2e8f0" : "#1a202c" }}>{theme.name}</div>
-                                            {isActive && <div className="st-theme-check"><Icons.Check /></div>}
+                                        <div className="st-field">
+                                            <div className="st-field-label">Username</div>
+                                            <div className="st-field-value"><Icons.User /> {profile.username || "—"}</div>
                                         </div>
                                     </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-                </div>
-
-                {/* ── Team Management ── */}
-                {profile.role === "admin" && (
-                    <div className="st-card st-full-width">
-                        <div className="st-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <div>
-                                <div className="st-card-title"><Icons.Users /> Team Management</div>
-                                <div className="st-card-sub">Manage portal members and their authorities</div>
+                                )}
                             </div>
-                            {!showAddMember && (
-                                <button className="st-add-btn" onClick={() => setShowAddMember(true)}><Icons.Plus /> Add Member</button>
-                            )}
                         </div>
-                        <div className="st-card-body">
-                            {memberMsg && (
-                                <div className={`st-msg ${memberMsg.type}`} style={{ marginBottom: '20px' }}>
-                                    {memberMsg.text}
-                                </div>
-                            )}
-                            {showAddMember && (
-                                <form className="st-member-form" onSubmit={handleAddMember}>
-                                    <div className="st-field"><label className="st-field-label">Full Name</label><input className="st-pw-input" value={memberForm.full_name} onChange={e => setMemberForm(p => ({ ...p, full_name: e.target.value }))} required /></div>
-                                    <div className="st-field"><label className="st-field-label">Username</label><input className="st-pw-input" value={memberForm.username} onChange={e => setMemberForm(p => ({ ...p, username: e.target.value }))} /></div>
-                                    <div className="st-field"><label className="st-field-label">Email</label><input type="email" className="st-pw-input" value={memberForm.email} onChange={e => setMemberForm(p => ({ ...p, email: e.target.value }))} required /></div>
-                                    <div className="st-field"><label className="st-field-label">Password</label><input type="password" className="st-pw-input" value={memberForm.password} onChange={e => setMemberForm(p => ({ ...p, password: e.target.value }))} required /></div>
-                                    <div className="st-field"><label className="st-field-label">Role</label><select className="st-pw-input" value={memberForm.role} onChange={e => setMemberForm(p => ({ ...p, role: e.target.value }))}><option value="member">Member</option><option value="admin">Admin</option></select></div>
-                                    <div className="st-form-full">
-                                        <label className="st-field-label">Authorities</label>
-                                        <div className="st-checkbox-group">
-                                            {["generate exam", "manage exam", "manage candidates"].map(perm => (
-                                                <label key={perm} className="st-checkbox-item">
-                                                    <input type="checkbox" checked={memberForm.permissions.includes(perm)} onChange={e => {
-                                                        const checked = e.target.checked;
-                                                        setMemberForm(p => ({ ...p, permissions: checked ? [...p.permissions, perm] : p.permissions.filter(x => x !== perm) }));
-                                                    }} />
-                                                    {perm}
-                                                </label>
-                                            ))}
+                    )}
+
+                    {/* â”€â”€ Security / Password â”€â”€ */}
+                    {activeTab === 'security' && (
+                        <div className="st-card">
+                            <div className="st-card-header">
+                                <div className="st-card-title"><Icons.Lock /> Change Password</div>
+                                <div className="st-card-sub">Update your admin credentials</div>
+                            </div>
+                            <div className="st-card-body">
+                                <form className="st-pw-grid" onSubmit={handlePwSubmit}>
+                                    <div className="st-pw-field">
+                                        <label className="st-pw-label" htmlFor="st-curr-pw">Current Password</label>
+                                        <div className="st-pw-wrap">
+                                            <input
+                                                id="st-curr-pw" className="st-pw-input"
+                                                type={showCurrent ? "text" : "password"}
+                                                placeholder="Enter current password"
+                                                value={pwForm.current}
+                                                onChange={e => setPwForm(p => ({ ...p, current: e.target.value }))}
+                                                required
+                                            />
+                                            <button type="button" className="st-pw-eye" onClick={() => setShowCurrent(v => !v)}>
+                                                {showCurrent ? <Icons.EyeOff /> : <Icons.Eye />}
+                                            </button>
                                         </div>
                                     </div>
-                                    <div className="st-form-full" style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
-                                        <button type="submit" className="st-add-btn">Create Account</button>
-                                        <button type="button" className="st-cancel-btn" onClick={() => setShowAddMember(false)}>Cancel</button>
+                                    <div className="st-pw-field">
+                                        <label className="st-pw-label" htmlFor="st-new-pw">New Password</label>
+                                        <div className="st-pw-wrap">
+                                            <input
+                                                id="st-new-pw" className="st-pw-input"
+                                                type={showNew ? "text" : "password"}
+                                                placeholder="Min 6 characters"
+                                                value={pwForm.newPw}
+                                                onChange={e => setPwForm(p => ({ ...p, newPw: e.target.value }))}
+                                                required
+                                            />
+                                            <button type="button" className="st-pw-eye" onClick={() => setShowNew(v => !v)}>
+                                                {showNew ? <Icons.EyeOff /> : <Icons.Eye />}
+                                            </button>
+                                        </div>
+                                        {strength && (
+                                            <div style={{ marginTop: 8 }}>
+                                                <div className="st-strength-track"><div className="st-strength-fill" style={{ width: strength.pct, background: strength.color }} /></div>
+                                                <div className="st-strength-label" style={{ color: strength.color }}>{strength.label}</div>
+                                            </div>
+                                        )}
                                     </div>
+                                    <div className="st-pw-field">
+                                        <label className="st-pw-label" htmlFor="st-conf-pw">Confirm New Password</label>
+                                        <div className="st-pw-wrap">
+                                            <input
+                                                id="st-conf-pw" className="st-pw-input"
+                                                type="password" placeholder="Re-enter password"
+                                                value={pwForm.confirm}
+                                                onChange={e => setPwForm(p => ({ ...p, confirm: e.target.value }))}
+                                                required
+                                            />
+                                            {pwForm.confirm && (
+                                                <span className="st-match-icon" style={{ color: pwForm.confirm === pwForm.newPw ? "#22c55e" : "var(--primary)" }}>
+                                                    {pwForm.confirm === pwForm.newPw ? "✓" : "✗"}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                    {pwMsg && (
+                                        <div className={`st-msg ${pwMsg.type}`}>
+                                            {pwMsg.text}
+                                        </div>
+                                    )}
+                                    <button type="submit" className="st-pw-btn" disabled={pwLoading}>
+                                        {pwLoading ? <div className="st-spinner" /> : <Icons.Lock />} Update Password
+                                    </button>
                                 </form>
-                            )}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* â”€â”€ Appearance â”€â”€ */}
+                    {activeTab === 'appearance' && (
+                        <div className="st-card st-full-width">
+                            <div className="st-card-header">
+                                <div className="st-card-title"><Icons.Palette /> Appearance</div>
+                                <div className="st-card-sub">Choose your preferred colour theme</div>
+                            </div>
+                            <div className="st-card-body">
+                                <div className="st-active-label">
+                                    <span className="st-active-dot" />
+                                    Active theme: <strong>{THEMES.find(t => t.id === activeTheme)?.name}</strong>
+                                </div>
+                                <div className="st-theme-grid">
+                                    {THEMES.map(theme => {
+                                        const isActive = activeTheme === theme.id;
+                                        return (
+                                            <div key={theme.id} className={`st-theme-card${isActive ? " st-theme-active" : ""}`} onClick={() => applyTheme(theme.id)}>
+                                                <div className="st-theme-preview" style={{ background: theme.bgNeutral }}>
+                                                    <div className="st-preview-sidebar" style={{ background: theme.primary }} />
+                                                    <div className="st-preview-main">
+                                                        <div className="st-preview-bar" style={{ background: theme.primary, width: "100%" }} />
+                                                        <div className="st-preview-bar" style={{ background: theme.secondary, width: "70%" }} />
+                                                    </div>
+                                                </div>
+                                                <div className="st-theme-foot" style={{ background: theme.bg }}>
+                                                    <div className="st-theme-name" style={{ color: theme.dark ? "#e2e8f0" : "#1a202c" }}>{theme.name}</div>
+                                                    {isActive && <div className="st-theme-check"><Icons.Check /></div>}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* â”€â”€ Team Management â”€â”€ */}
+                    {activeTab === 'team' && profile.role === "admin" && (
+                        <div className="st-card st-full-width">
+                            <div className="st-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <div>
+                                    <div className="st-card-title"><Icons.Users /> Team Management</div>
+                                    <div className="st-card-sub">{showAddMember ? (editingMember ? "Modify member permissions and profile" : "Grant portal access to new team members") : "Manage portal members and their authorities"}</div>
+                                </div>
+                                {!showAddMember && (
+                                    <button className="st-add-btn" onClick={() => { setEditingMember(null); setMemberForm({ email: "", username: "", full_name: "", password: "", role: "member", permissions: [] }); setShowAddMember(true); }}><Icons.Plus /> Add Member</button>
+                                )}
+                            </div>
+                            <div className="st-card-body">
+                                {memberMsg && (
+                                    <div className={`st-msg ${memberMsg.type}`} style={{ marginBottom: '20px' }}>
+                                        {memberMsg.text}
+                                    </div>
+                                )}
+                                {showAddMember && (
+                                    <form className="st-member-form" onSubmit={handleAddMember}>
+                                        <div className="st-field">
+                                            <label className="st-field-label">Full Name</label>
+                                            <input 
+                                                className="st-pw-input" 
+                                                placeholder="e.g. John Doe"
+                                                value={memberForm.full_name} 
+                                                onChange={e => setMemberForm(p => ({ ...p, full_name: e.target.value }))} 
+                                                required 
+                                            />
+                                        </div>
+                                        <div className="st-field">
+                                            <label className="st-field-label">Username</label>
+                                            <input 
+                                                className="st-pw-input" 
+                                                placeholder="e.g. john_doe"
+                                                value={memberForm.username} 
+                                                onChange={e => setMemberForm(p => ({ ...p, username: e.target.value }))} 
+                                            />
+                                        </div>
+                                        <div className="st-field">
+                                            <label className="st-field-label">Email Address</label>
+                                            <input 
+                                                type="email" 
+                                                className="st-pw-input" 
+                                                placeholder="e.g. john@kiwiqa.com"
+                                                value={memberForm.email} 
+                                                onChange={e => setMemberForm(p => ({ ...p, email: e.target.value }))} 
+                                                required 
+                                            />
+                                        </div>
+                                        {!editingMember && (
+                                            <div className="st-field">
+                                                <label className="st-field-label">Temporary Password</label>
+                                                <input 
+                                                    type="password" 
+                                                    className="st-pw-input" 
+                                                    placeholder="••••••••"
+                                                    value={memberForm.password} 
+                                                    onChange={e => setMemberForm(p => ({ ...p, password: e.target.value }))} 
+                                                    required 
+                                                />
+                                            </div>
+                                        )}
+                                        <div className="st-field">
+                                            <label className="st-field-label">System Role</label>
+                                            <select 
+                                                className="st-pw-input" 
+                                                style={{ height: '42px' }}
+                                                value={memberForm.role} 
+                                                onChange={e => {
+                                                    const newRole = e.target.value;
+                                                    const allPerms = ["generate exam", "manage exam", "manage bank", "manage candidates", "send invitation", "download report", "view results"];
+                                                    setMemberForm(p => ({ 
+                                                        ...p, 
+                                                        role: newRole,
+                                                        permissions: newRole === 'admin' ? allPerms : [] 
+                                                    }));
+                                                }}
+                                            >
+                                                <option value="member">Member (Limited Access)</option>
+                                                <option value="admin">Admin (Full Control)</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div className="st-form-full">
+                                            <label className="st-field-label" style={{ marginBottom: '16px', display: 'block', fontSize: '14px', borderBottom: '1px solid var(--border)', paddingBottom: '8px' }}>
+                                                Exam Management Authorities
+                                            </label>
+                                            <div className="st-checkbox-group" style={{ marginBottom: '24px' }}>
+                                                {[
+                                                    { id: "generate exam", label: "Generate Exams" },
+                                                    { id: "manage exam", label: "Manage Exams" },
+                                                    { id: "manage bank", label: "Manage Question Bank" }
+                                                ].map(perm => (
+                                                    <label key={perm.id} className={`st-checkbox-item ${memberForm.permissions.includes(perm.id) ? 'checked' : ''}`}>
+                                                        <input 
+                                                            type="checkbox" 
+                                                            checked={memberForm.permissions.includes(perm.id)} 
+                                                            onChange={e => {
+                                                                const checked = e.target.checked;
+                                                                setMemberForm(p => ({ 
+                                                                    ...p, 
+                                                                    permissions: checked 
+                                                                        ? [...p.permissions, perm.id] 
+                                                                        : p.permissions.filter(x => x !== perm.id) 
+                                                                }));
+                                                            }} 
+                                                        />
+                                                        {perm.label}
+                                                    </label>
+                                                ))}
+                                            </div>
+
+                                            <label className="st-field-label" style={{ marginBottom: '16px', display: 'block', fontSize: '14px', borderBottom: '1px solid var(--border)', paddingBottom: '8px' }}>
+                                                Candidate Management Authorities
+                                            </label>
+                                            <div className="st-checkbox-group">
+                                                {[
+                                                    { id: "manage candidates", label: "Enroll / Delete Candidates" },
+                                                    { id: "send invitation", label: "Send Exam Links" },
+                                                    { id: "view results", label: "View Performance Reports" },
+                                                    { id: "download report", label: "Download CSV Data" }
+                                                ].map(perm => (
+                                                    <label key={perm.id} className={`st-checkbox-item ${memberForm.permissions.includes(perm.id) ? 'checked' : ''}`}>
+                                                        <input 
+                                                            type="checkbox" 
+                                                            checked={memberForm.permissions.includes(perm.id)} 
+                                                            onChange={e => {
+                                                                const checked = e.target.checked;
+                                                                setMemberForm(p => ({ 
+                                                                    ...p, 
+                                                                    permissions: checked 
+                                                                        ? [...p.permissions, perm.id] 
+                                                                        : p.permissions.filter(x => x !== perm.id) 
+                                                                }));
+                                                            }} 
+                                                        />
+                                                        {perm.label}
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <div className="st-form-full" style={{ display: 'flex', gap: '12px', marginTop: '16px', paddingTop: '16px', borderTop: '1px solid var(--border)' }}>
+                                            <button type="submit" className="st-add-btn">{editingMember ? 'Update Team Account' : 'Create Team Account'}</button>
+                                            <button type="button" className="st-cancel-btn" onClick={() => setShowAddMember(false)}>Cancel</button>
+                                        </div>
+                                    </form>
+                                )}
 
                             {membersLoading ? <div>Loading...</div> : (
                                 <table className="st-member-table">
@@ -991,7 +1233,10 @@ export default function Settings() {
                                                 </td>
                                                 <td style={{ textAlign: 'right' }}>
                                                     {m.email !== profile.email && (
-                                                        <button className="st-delete-btn" onClick={() => handleDeleteMember(m.email)}><Icons.Trash /></button>
+                                                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                                                            <button className="st-delete-btn" title="Edit Permissions" onClick={() => handleEditMember(m)} style={{ color: 'var(--primary)' }}><Icons.User /></button>
+                                                            <button className="st-delete-btn" title="Remove Member" onClick={() => handleDeleteMember(m.email)}><Icons.Trash /></button>
+                                                        </div>
                                                     )}
                                                 </td>
                                             </tr>
@@ -1000,10 +1245,11 @@ export default function Settings() {
                                 </table>
                             )}
                         </div>
-                    </div>
-                )}
+                        </div>
+                    )}
             </div>
-        </AdminLayout>
+        </div>
+        </AdminLayout >
     );
 }
 

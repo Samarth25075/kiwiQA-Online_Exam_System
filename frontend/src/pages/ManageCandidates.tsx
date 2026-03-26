@@ -4,13 +4,14 @@ import AdminLayout from "../components/AdminLayout";
 import CustomPopup, { PopupType } from "../components/CustomPopup";
 import API_BASE_URL from "../config";
 
-// ─── Types ────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 interface Candidate {
     id: number;
     candidate_id?: string;
     name: string;
     email: string;
     phone_number: string;
+    country_code?: string;
     dob?: string;
     gender?: string;
     address?: string;
@@ -94,6 +95,7 @@ export default function ManageCandidates() {
     const [formData, setFormData] = useState({ 
         name: "", 
         email: "", 
+        country_code: "",
         phone_number: "", 
         dob: "", 
         gender: "", 
@@ -106,7 +108,7 @@ export default function ManageCandidates() {
     useEffect(() => { fetchData(); }, []);
 
     const fetchData = async () => {
-        const token = localStorage.getItem("access_token");
+        const token = sessionStorage.getItem("access_token");
         if (!token) { navigate("/"); return; }
 
         try {
@@ -116,7 +118,7 @@ export default function ManageCandidates() {
             ]);
 
             if (candRes.status === 401 || examRes.status === 401) {
-                localStorage.removeItem("access_token");
+                sessionStorage.removeItem("access_token");
                 sessionStorage.removeItem("admin-profile");
                 navigate("/");
                 return;
@@ -140,6 +142,7 @@ export default function ManageCandidates() {
         setFormData({ 
             name: candidate.name, 
             email: candidate.email, 
+            country_code: candidate.country_code || "",
             phone_number: candidate.phone_number || "", 
             dob: candidate.dob || "", 
             gender: candidate.gender || "", 
@@ -156,7 +159,7 @@ export default function ManageCandidates() {
             confirmText: 'Delete',
             onConfirm: async () => {
                 setPopup(null);
-                const token = localStorage.getItem("access_token");
+                const token = sessionStorage.getItem("access_token");
                 try {
                     const res = await fetch(`${API_BASE_URL}/candidates/${id}`, { method: "DELETE", headers: { "Authorization": `Bearer ${token}` } });
                     if (res.ok) { fetchData(); }
@@ -172,7 +175,7 @@ export default function ManageCandidates() {
 
 
     const handleSendLink = async (id: number) => {
-        const token = localStorage.getItem("access_token");
+        const token = sessionStorage.getItem("access_token");
         try {
             const res = await fetch(`${API_BASE_URL}/candidates/${id}/send-link`, {
                 method: "POST",
@@ -341,7 +344,7 @@ export default function ManageCandidates() {
                   style={{ width: 'auto', padding: '8px 16px', marginTop: 0 }}
                   onClick={() => {
                     setEditingId(-1); // Use -1 to indicate "Adding New"
-                    setFormData({ name: "", email: "", phone_number: "", dob: "", gender: "", address: "", cv_url: "" });
+                    setFormData({ name: "", email: "", country_code: "", phone_number: "", dob: "", gender: "", address: "", cv_url: "" });
                   }}
                 >
                   <Icons.User /> Add Candidate
@@ -353,15 +356,15 @@ export default function ManageCandidates() {
                     <div className="mc-edit-card">
                         <div className="mc-edit-header">
                             <div className="mc-edit-title">
-                                {editingId === -1 ? "🆕 Add New Candidate" : "✏️ Update Candidate Profile"}
+                                {editingId === -1 ? "&#x1F195; Add New Candidate" : "âœï¸ Update Candidate Profile"}
                             </div>
-                            <button className="mc-edit-cancel" onClick={() => { setEditingId(null); setFormData({ name: "", email: "", phone_number: "", dob: "", gender: "", address: "", cv_url: "" }); }}>
+                            <button className="mc-edit-cancel" onClick={() => { setEditingId(null); setFormData({ name: "", email: "", country_code: "", phone_number: "", dob: "", gender: "", address: "", cv_url: "" }); }}>
                                 <Icons.X />
                             </button>
                         </div>
                         <form className="mc-form-grid" onSubmit={async (e) => {
                             e.preventDefault();
-                            const token = localStorage.getItem("access_token");
+                            const token = sessionStorage.getItem("access_token");
                             try {
                                 const method = editingId === -1 ? "POST" : "PUT";
                                 const url = editingId === -1 ? `${API_BASE_URL}/candidates` : `${API_BASE_URL}/candidates/${editingId}`;
@@ -379,7 +382,7 @@ export default function ManageCandidates() {
                                         uploadData.append("file", cvFile);
                                         await fetch(`${API_BASE_URL}/candidates/${candidate.id}/upload-cv`, { method: "POST", headers: { "Authorization": `Bearer ${token}` }, body: uploadData });
                                     }
-                                    setFormData({ name: "", email: "", phone_number: "", dob: "", gender: "", address: "", cv_url: "" });
+                                    setFormData({ name: "", email: "", country_code: "", phone_number: "", dob: "", gender: "", address: "", cv_url: "" });
                                     setCvFile(null);
                                     setEditingId(null);
                                     fetchData();
@@ -397,8 +400,14 @@ export default function ManageCandidates() {
                                 <label className="mc-label">Email Address</label>
                                 <input className="mc-input" type="email" placeholder="john@example.com" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} required />
                             </div>
-                            {/* Phone number hidden from UI per request */}
-                            {/* Personal information fields hidden from UI per request */}
+                            <div className="mc-field">
+                                <label className="mc-label">Country Code</label>
+                                <input className="mc-input" placeholder="+91" value={formData.country_code} onChange={e => setFormData({ ...formData, country_code: e.target.value })} />
+                            </div>
+                            <div className="mc-field">
+                                <label className="mc-label">Phone Number</label>
+                                <input className="mc-input" placeholder="9876543210" value={formData.phone_number} onChange={e => setFormData({ ...formData, phone_number: e.target.value })} />
+                            </div>
                             <div className="mc-field" style={{ gridColumn: 'span 2' }}>
                                 <label className="mc-label">Upload CV / Resume</label>
                                 <input className="mc-input" type="file" accept=".pdf,.doc,.docx" style={{ padding: '7px 10px' }} onChange={e => setCvFile(e.target.files?.[0] || null)} />
@@ -413,7 +422,7 @@ export default function ManageCandidates() {
                 {candidates.length === 0 ? (
                     <div className="mc-table-wrap">
                         <div className="mc-empty">
-                            <div className="mc-empty-icon">👥</div>
+                            <div className="mc-empty-icon">{"\u{1F465}"}</div>
                             <div className="mc-empty-title">No Candidates Yet</div>
                             <div className="mc-empty-sub">Enroll candidates via the dashboard or add them manually to get started.</div>
                         </div>
@@ -445,13 +454,14 @@ export default function ManageCandidates() {
                                                 <div>
                                                     <div className="mc-id">{group.candidate_id || 'Generating...'}</div>
                                                     <div className="mc-name">{group.name}</div>
-                                                    <div className="mc-sub">Joined: {group.joined_date?.split('T')[0] || '—'}</div>
+                                                    <div className="mc-sub">Joined: {group.joined_date?.split('T')[0] || 'â€”'}</div>
                                                 </div>
                                             </div>
                                         </td>
                                         {/* Profile Details column hidden per request */}
                                         <td>
                                             <div className="mc-name">{group.email}</div>
+                                            <div className="mc-sub">{group.country_code} {group.phone_number}</div>
                                             {group.cv_url && (
                                                 <a href={group.cv_url} target="_blank" rel="noreferrer" className="mc-resume-link" style={{ marginTop: '4px' }}>
                                                     <Icons.FileText /> CV

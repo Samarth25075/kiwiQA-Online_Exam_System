@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import API_BASE_URL from '../config';
 import AdminLayout from '../components/AdminLayout';
 import CustomPopup from '../components/CustomPopup';
@@ -82,7 +82,7 @@ const QuestionBank: React.FC = () => {
         setLoading(true);
         setError(null);
         try {
-            const token = localStorage.getItem("access_token");
+            const token = sessionStorage.getItem("access_token");
             const res = await fetch(`${API_BASE_URL}/exams/bank/stats`, {
                 headers: { "Authorization": `Bearer ${token}` }
             });
@@ -102,7 +102,7 @@ const QuestionBank: React.FC = () => {
     const fetchQuestions = async (category: string) => {
         setLoading(true);
         try {
-            const token = localStorage.getItem("access_token");
+            const token = sessionStorage.getItem("access_token");
             const res = await fetch(`${API_BASE_URL}/exams/bank/questions?category=${encodeURIComponent(category)}`, {
                 headers: { "Authorization": `Bearer ${token}` }
             });
@@ -139,7 +139,7 @@ const QuestionBank: React.FC = () => {
             onConfirm: async () => {
                 setPopup(null);
                 try {
-                    const token = localStorage.getItem("access_token");
+                    const token = sessionStorage.getItem("access_token");
                     const res = await fetch(`${API_BASE_URL}/categories/${categoryName}`, {
                         method: 'DELETE',
                         headers: { "Authorization": `Bearer ${token}` }
@@ -175,7 +175,7 @@ const QuestionBank: React.FC = () => {
             type: 'confirm',
             onConfirm: async () => {
                 try {
-                    const token = localStorage.getItem("access_token");
+                    const token = sessionStorage.getItem("access_token");
                     const res = await fetch(`${API_BASE_URL}/exams/bank/questions/${q_id}`, {
                         method: 'DELETE',
                         headers: { "Authorization": `Bearer ${token}` }
@@ -198,7 +198,7 @@ const QuestionBank: React.FC = () => {
         if (!editingQuestion) return;
 
         try {
-            const token = localStorage.getItem("access_token");
+            const token = sessionStorage.getItem("access_token");
             const res = await fetch(`${API_BASE_URL}/exams/bank/questions/${editingQuestion.q_id}`, {
                 method: 'PUT',
                 headers: {
@@ -222,7 +222,7 @@ const QuestionBank: React.FC = () => {
     const handleCreate = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const token = localStorage.getItem("access_token");
+            const token = sessionStorage.getItem("access_token");
             const res = await fetch(`${API_BASE_URL}/exams/bank/add`, {
                 method: 'POST',
                 headers: {
@@ -259,7 +259,7 @@ const QuestionBank: React.FC = () => {
     const handleQuickCreate = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const token = localStorage.getItem("access_token");
+            const token = sessionStorage.getItem("access_token");
             const res = await fetch(`${API_BASE_URL}/categories`, {
                 method: 'POST',
                 headers: {
@@ -612,7 +612,7 @@ const QuestionBank: React.FC = () => {
                     }
                 `}</style>
 
-                {/* ── Header ── */}
+                {/* â”€â”€ Header â”€â”€ */}
                 <header className="qb-header">
                     <div className="qb-title-group">
                         {selectedCategory && (
@@ -680,13 +680,13 @@ const QuestionBank: React.FC = () => {
 
                 {error && (
                     <div style={{ textAlign: 'center', padding: '60px 0', color: '#dc2626' }}>
-                        <div style={{ fontSize: '40px', marginBottom: '16px' }}>⚠️</div>
+                        <div style={{ fontSize: '40px', marginBottom: '16px' }}>âš ï¸</div>
                         <h4>{error}</h4>
                         <button onClick={fetchStats} className="refresh-btn">Try Again</button>
                     </div>
                 )}
 
-                {/* ── Category Step ── */}
+                {/* â”€â”€ Category Step â”€â”€ */}
                 {!selectedCategory && !loading && (
                     viewMode === 'card' ? (
                         <div className="category-grid">
@@ -779,7 +779,7 @@ const QuestionBank: React.FC = () => {
                     )
                 )}
 
-                {/* ── Questions Step ── */}
+                {/* â”€â”€ Questions Step â”€â”€ */}
                 {selectedCategory && !loading && (
                     viewMode === 'card' ? (
                         <div className="question-list">
@@ -844,7 +844,7 @@ const QuestionBank: React.FC = () => {
                                             <td style={{ verticalAlign: 'middle' }}>
                                                 <div className="q-text-cell" title={q.text}>{q.text}</div>
                                                 <div style={{ fontSize: '12px', color: 'var(--slate-400)', marginTop: '4px', display: 'flex', gap: '8px' }}>
-                                                    {q.options.length} Options • Correct: {q.options.find(o => o.is_correct)?.text.slice(0, 30)}...
+                                                    {q.options.length} Options â€¢ Correct: {q.options.find(o => o.is_correct)?.text.slice(0, 30)}...
                                                 </div>
                                             </td>
                                             <td>
@@ -883,7 +883,7 @@ const QuestionBank: React.FC = () => {
                     )
                 )}
 
-                {/* ── Edit Modal ── */}
+                {/* â”€â”€ Edit Modal â”€â”€ */}
                 {editingQuestion && (
                     <div className="modal-overlay">
                         <div className="modal-content">
@@ -892,7 +892,7 @@ const QuestionBank: React.FC = () => {
                                     <Icons.Edit /> Edit Question
                                 </h3>
                                 <button onClick={() => setEditingQuestion(null)} style={{ background: 'rgba(0,0,0,0.05)', border: 'none', cursor: 'pointer', width: 40, height: 40, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    ✕
+                                    âœ•
                                 </button>
                             </div>
                             <div className="modal-body">
@@ -1008,7 +1008,7 @@ const QuestionBank: React.FC = () => {
                     </div>
                 )}
 
-                {/* ── Add New Modal ── */}
+                {/* â”€â”€ Add New Modal â”€â”€ */}
                 {isAdding && (
                     <div className="modal-overlay">
                         <div className="modal-content">
@@ -1017,7 +1017,7 @@ const QuestionBank: React.FC = () => {
                                     <Icons.Bank /> Add New Question
                                 </h3>
                                 <button onClick={() => setIsAdding(false)} style={{ background: 'rgba(0,0,0,0.05)', border: 'none', cursor: 'pointer', width: 40, height: 40, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    ✕
+                                    âœ•
                                 </button>
                             </div>
                             <div className="modal-body">
@@ -1160,7 +1160,7 @@ const QuestionBank: React.FC = () => {
                         onCancel={() => setPopup(null)}
                     />
                 )}
-                {/* ── Quick Add Category Modal ── */}
+                {/* â”€â”€ Quick Add Category Modal â”€â”€ */}
                 {isQuickAdding && (
                     <div className="modal-overlay">
                         <div className="modal-content" style={{ maxWidth: '440px' }}>
@@ -1169,7 +1169,7 @@ const QuestionBank: React.FC = () => {
                                     <Icons.Category /> New Category
                                 </h3>
                                 <button onClick={() => setIsQuickAdding(false)} style={{ background: 'rgba(0,0,0,0.05)', border: 'none', cursor: 'pointer', width: 40, height: 40, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    ✕
+                                    âœ•
                                 </button>
                             </div>
                             <div className="modal-body">

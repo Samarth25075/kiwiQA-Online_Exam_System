@@ -44,7 +44,7 @@ const InvitationTracking: React.FC = () => {
         setLoading(true);
         setError(null);
         try {
-            const token = localStorage.getItem("access_token");
+            const token = sessionStorage.getItem("access_token");
             const res = await fetch(`${API_BASE_URL}/exams/invitations/tracking`, {
                 headers: { "Authorization": `Bearer ${token}` }
             });
@@ -248,8 +248,8 @@ const InvitationTracking: React.FC = () => {
                                         </span>
                                     </div>
                                     <div className="tracking-stats">
-                                        <span className="stat-pill sat">Sat: {exam.sat_count}</span>
-                                        <span className="stat-pill not-sat">Not Sat: {exam.not_sat_count}</span>
+                                        <span className="stat-pill sat">✅ Sat: {exam.sat_count}</span>
+                                        <span className="stat-pill not-sat">⏳ Not Sat: {exam.not_sat_count}</span>
                                         <div style={{ marginLeft: '10px', color: 'var(--slate-400)' }}>
                                             {expandedExam === exam.exam_id ? <Icons.ChevronUp /> : <Icons.ChevronDown />}
                                         </div>

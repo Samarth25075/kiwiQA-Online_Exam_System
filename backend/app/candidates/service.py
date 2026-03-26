@@ -28,6 +28,7 @@ def _to_summary_dict(c: Candidate) -> Dict:
         "candidate_id": c.candidate_id,
         "name": c.name or "",
         "email": c.email or "",
+        "country_code": c.country_code or "",
         "phone_number": c.phone_number or "",
         "status": c.status or "",
         "joined_date": c.joined_date or "",
@@ -90,7 +91,7 @@ def get_all_candidates(db: Session, **kwargs) -> List[Dict]:
     set_cached_data("all_candidates_list_summary", res, expire=300)
     return res
 
-def create_candidate(db: Session, name: str, email: str, phone_number: str = "", dob: str = "", gender: str = "", address: str = "", profile_photo: str = "", cv_url: str = "", device_id: str = "") -> Dict:
+def create_candidate(db: Session, name: str, email: str, country_code: str = "", phone_number: str = "", dob: str = "", gender: str = "", address: str = "", profile_photo: str = "", cv_url: str = "", device_id: str = "") -> Dict:
     from app.core.redis import redis_client
     current_year = datetime.now().year
     
@@ -103,6 +104,7 @@ def create_candidate(db: Session, name: str, email: str, phone_number: str = "",
         candidate_id=candidate_id_str,
         name=name,
         email=email,
+        country_code=country_code,
         phone_number=phone_number,
         dob=dob,
         gender=gender,

@@ -190,6 +190,7 @@ async def verify_enroll_otp(exam_id: str, req: CandidateEnrollOTPVerify, db: Ses
         db=db,
         name=str(candidate_data.get("name", record.get("name", ""))), 
         email=str(candidate_data.get("email", record.get("email", ""))), 
+        country_code=str(candidate_data.get("country_code", "")),
         phone_number=str(candidate_data.get("phone_number", "")), 
         dob=str(candidate_data.get("dob", "")),
         gender=str(candidate_data.get("gender", "")),

@@ -21,8 +21,23 @@ from .utils import _format_candidate, send_invitation_email, send_email
 
 router = APIRouter(prefix="/candidates", tags=["admin-candidates"])
 
+def check_any_authority(required_perms: list):
+    async def authority_dependency(current_admin: Annotated[AdminUser, Depends(get_current_admin)]):
+        if current_admin.role == "admin":
+            return current_admin
+        if any(p in current_admin.permissions for p in required_perms):
+            return current_admin
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Access denied. You need one of these authorities: {', '.join(required_perms)}"
+        )
+    return authority_dependency
+
 @router.get("", response_model=List[CandidateResponse])
-async def read_candidates(current_admin: Annotated[AdminUser, Depends(check_permission("manage candidates"))], db: Session = Depends(get_db)):
+async def read_candidates(
+    current_admin: Annotated[AdminUser, Depends(check_any_authority(["manage candidates", "send invitation", "view results"]))], 
+    db: Session = Depends(get_db)
+):
     """Fetch list of all candidates (Admin only)."""
     candidates = get_all_candidates(db)
     return [_format_candidate(c) for c in candidates]
@@ -38,6 +53,7 @@ async def admin_create_candidate(
         db=db,
         name=candidate_in.name,
         email=candidate_in.email,
+        country_code=candidate_in.country_code or "",
         phone_number=candidate_in.phone_number or "",
         dob=candidate_in.dob or "",
         gender=candidate_in.gender or "",
@@ -106,7 +122,7 @@ async def cleanup_screenshots(
 @router.get("/{candidate_id}/report")
 async def get_candidate_report(
     candidate_id: str,
-    current_admin: Annotated[AdminUser, Depends(check_permission("manage candidates"))],
+    current_admin: Annotated[AdminUser, Depends(check_permission("view results"))],
     db: Session = Depends(get_db)
 ):
     """Generate a detailed report for a candidate including proctoring and performance stats."""
@@ -175,7 +191,7 @@ async def get_candidate_report(
 async def assign_exam(
     candidate_id: str, 
     assignment: CandidateAssign,
-    current_admin: Annotated[AdminUser, Depends(get_current_admin)], # Reverted redundant permission check for assign
+    current_admin: Annotated[AdminUser, Depends(check_permission("manage candidates"))],
     db: Session = Depends(get_db)
 ):
     """Assign an exam to a candidate."""
@@ -193,7 +209,7 @@ async def assign_exam(
 async def send_candidate_link(
     candidate_id: str,
     background_tasks: BackgroundTasks,
-    current_admin: Annotated[AdminUser, Depends(check_permission("manage candidates"))],
+    current_admin: Annotated[AdminUser, Depends(check_permission("send invitation"))],
     db: Session = Depends(get_db)
 ):
     """Send (or resend) the unique exam link to the candidate's email."""

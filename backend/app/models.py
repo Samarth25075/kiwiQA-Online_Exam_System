@@ -41,6 +41,7 @@ class Candidate(Base):
     candidate_id = Column(String, unique=True, index=True)
     name = Column(String)
     email = Column(String, index=True)
+    country_code = Column(String, nullable=True)
     phone_number = Column(String)
     dob = Column(String)
     gender = Column(String)
