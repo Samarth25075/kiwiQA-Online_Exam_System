@@ -114,11 +114,11 @@ export default function AdminLogin() {
    const [resendCooldown, setResendCooldown] = useState(0);
 
    useEffect(() => {
-     let timer: NodeJS.Timeout;
+     let timer: any;
      if (resendCooldown > 0) {
        timer = setInterval(() => setResendCooldown(c => c - 1), 1000);
      }
-     return () => clearInterval(timer);
+     return () => { if (timer) clearInterval(timer); };
    }, [resendCooldown]);
 
   useEffect(() => {

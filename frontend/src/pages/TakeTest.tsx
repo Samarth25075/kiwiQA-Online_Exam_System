@@ -1642,11 +1642,6 @@ export default function TakeTest() {
         }
     };
 
-    const toggleReview = (idx: number) => {
-        setReviewIndices(prev => 
-            prev.includes(idx) ? prev.filter(i => i !== idx) : [...prev, idx]
-        );
-    };
 
     // ── Render: Loading ───────────────────────────────────────────────────
     if (loading) return (
