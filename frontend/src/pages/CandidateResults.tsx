@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import AdminLayout from "../components/AdminLayout";
 import API_BASE_URL from "../config";
@@ -222,7 +222,7 @@ export default function CandidateResults() {
   return (
     <AdminLayout>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap');
 
         .cr-wrap {
           padding: 32px;
@@ -245,7 +245,7 @@ export default function CandidateResults() {
           align-items: flex-end;
         }
         .cr-header-text h1 {
-          font-family: 'Outfit', sans-serif;
+          font-family: 'Inter', sans-serif;
           font-size: 32px;
           font-weight: 900;
           color: var(--text);
@@ -291,7 +291,7 @@ export default function CandidateResults() {
           display: block;
         }
         .stat-val {
-          font-family: 'Outfit', sans-serif;
+          font-family: 'Inter', sans-serif;
           font-size: 28px;
           font-weight: 900;
           color: var(--text);
@@ -303,8 +303,8 @@ export default function CandidateResults() {
             padding: 2px 8px;
             border-radius: 6px;
         }
-        .stat-pct.pos { background: #d1fae5; color: #065f46; }
-        .stat-pct.neg { background: #fee2e2; color: #991b1b; }
+        .stat-pct.pos { background: var(--color-success-light); color: var(--color-success); }
+        .stat-pct.neg { background: var(--color-danger-light); color: var(--color-danger); }
 
         /* Controls */
         .cr-controls {
@@ -401,7 +401,7 @@ export default function CandidateResults() {
             cursor: pointer;
         }
         .cr-table tr:hover {
-            background: #f8fafc;
+            background: var(--bg-neutral);
         }
         .cr-table td {
             padding: 20px 24px;
@@ -454,9 +454,9 @@ export default function CandidateResults() {
             text-transform: uppercase;
             letter-spacing: 0.03em;
         }
-        .badge.passed { background: #ecfdf5; color: #065f46; border: 1px solid #10b98133; }
-        .badge.failed { background: #fff1f2; color: #9f1239; border: 1px solid #f43f5e33; }
-        .badge.eliminated { background: #fff7ed; color: #9a3412; border: 1px solid #f9731633; }
+        .badge.passed { background: var(--color-success-light); color: var(--color-success); border: 1px solid var(--color-success-border); }
+        .badge.failed { background: var(--color-danger-light); color: var(--color-danger); border: 1px solid var(--color-danger-border); }
+        .badge.eliminated { background: var(--color-warning-light); color: var(--color-warning); border: 1px solid var(--color-warning-border); }
 
         /* Score Display */
         .score-display {
@@ -570,17 +570,17 @@ export default function CandidateResults() {
           </div>
           <div className="cr-stat-card">
             <span className="stat-label">Completion Threshold Met</span>
-            <div className="stat-val" style={{ color: '#10b981' }}>{stats.passed}</div>
+            <div className="stat-val" style={{ color: 'var(--color-success)' }}>{stats.passed}</div>
             <span className="stat-pct pos">+{Math.round((stats.passed/stats.total || 0)*100)}%</span>
           </div>
           <div className="cr-stat-card">
             <span className="stat-label">Below Threshold</span>
-            <div className="stat-val" style={{ color: '#f43f5e' }}>{stats.failed}</div>
+            <div className="stat-val" style={{ color: 'var(--color-danger)' }}>{stats.failed}</div>
             <span className="stat-pct neg">-{Math.round((stats.failed/stats.total || 0)*100)}%</span>
           </div>
           <div className="cr-stat-card">
             <span className="stat-label">Integrity Flags</span>
-            <div className="stat-val" style={{ color: '#f97316' }}>{stats.eliminated}</div>
+            <div className="stat-val" style={{ color: 'var(--color-warning)' }}>{stats.eliminated}</div>
           </div>
         </section>
 
@@ -589,7 +589,7 @@ export default function CandidateResults() {
             <i><Icons.Search /></i>
             <input 
               className="cr-search-input" 
-              placeholder="Search by name, email or candidate ID..." 
+              placeholder="Search by name or email..." 
               value={search}
               onChange={e => setSearch(e.target.value)}
             />
@@ -665,7 +665,7 @@ export default function CandidateResults() {
                       <td>
                         <div className="cand-info">
                           <h3 style={{ fontSize: 13 }}>{exam.title}</h3>
-                          <p style={{ fontFamily: 'JetBrains Mono', fontSize: 10 }}>ID: {c.candidate_id || `CAND-${c.id}`}</p>
+                          {/* <p style={{ fontFamily: 'JetBrains Mono', fontSize: 10 }}>ID: {c.candidate_id || `CAND-${c.id}`}</p> */}
                         </div>
                       </td>
                       <td>
@@ -677,7 +677,7 @@ export default function CandidateResults() {
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                           <span style={{ 
                             width: 8, height: 8, borderRadius: '50%', 
-                            background: violations > 0 ? '#f43f5e' : '#10b981' 
+                            background: violations > 0 ? 'var(--color-danger)' : 'var(--color-success)' 
                           }} />
                           <span style={{ fontWeight: 700, fontSize: 13 }}>{violations}</span>
                         </div>
@@ -691,7 +691,7 @@ export default function CandidateResults() {
                           <div className="score-bar-bg">
                             <div className="score-bar-fill" style={{ 
                                 width: `${pct}%`, 
-                                background: pct < 40 ? '#f43f5e' : pct < 70 ? '#f59e0b' : '#10b981' 
+                                background: pct < 40 ? 'var(--color-danger)' : pct < 70 ? 'var(--color-warning)' : 'var(--color-success)' 
                             }} />
                           </div>
                         </div>

@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import AdminLayout from "../components/AdminLayout";
 import CustomPopup, { PopupType } from "../components/CustomPopup";
@@ -37,22 +37,22 @@ const DIFFICULTY_MAP: Record<DifficultyLevel, DifficultyConfig> = {
   Beginner: {
     label: "Beginner",
     description: "Foundational concepts & basic recall",
-    color: "#15803d", bg: "#f0fdf4", border: "#bbf7d0",
+    color: "var(--color-success)", bg: "var(--color-success-light)", border: "var(--color-success-border)",
   },
   Intermediate: {
     label: "Intermediate",
     description: "Applied knowledge & problem solving",
-    color: "#b45309", bg: "#fffbeb", border: "#fde68a",
+    color: "var(--color-warning)", bg: "var(--color-warning-light)", border: "var(--color-warning-border)",
   },
   Advanced: {
     label: "Advanced",
     description: "Complex analysis & critical thinking",
-    color: "#b91c1c", bg: "#fef2f2", border: "#fecaca",
+    color: "var(--color-danger)", bg: "var(--color-danger-light)", border: "var(--color-danger-border)",
   },
   Mixed: {
     label: "Mixed",
     description: "Combination of all difficulty levels",
-    color: "#4f46e5", bg: "#e0e7ff", border: "#c7d2fe",
+    color: "var(--primary)", bg: "var(--primary-light)", border: "var(--primary-border)",
   },
 };
 
@@ -249,6 +249,18 @@ export default function CreateExam() {
 
   const getToken = () => sessionStorage.getItem("access_token");
   const authHeaders = () => ({ "Content-Type": "application/json", Authorization: `Bearer ${getToken()}` });
+
+  const triggerAlert = (message: string, title: string = "Selection Restricted") => {
+    setPopup({
+      isOpen: true,
+      type: "alert",
+      title,
+      message,
+      onConfirm: () => setPopup(null)
+    });
+  };
+
+
 
   const fetchBankStats = () => {
     fetch(`${API_BASE_URL}/exams/bank/stats`, { headers: authHeaders() })
@@ -464,7 +476,7 @@ export default function CreateExam() {
         message: "Exam has been saved and is ready to deploy.",
         onConfirm: () => {
           new BroadcastChannel("exam_portal_updates").postMessage("refresh_dashboard");
-          navigate("/manage-exams");
+          navigate("/dashboard");
         },
       });
     } catch {
@@ -488,7 +500,7 @@ export default function CreateExam() {
   return (
     <AdminLayout>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap');
 
         :root {
           --ink:        var(--text);
@@ -507,8 +519,8 @@ export default function CreateExam() {
           --success:    #15803d;
           --success-bg: color-mix(in srgb, #15803d 10%, var(--bg));
           --success-ln: color-mix(in srgb, #15803d 30%, var(--bg));
-          --font-serif: 'DM Serif Display', serif;
-          --font-sans:  'DM Sans', sans-serif;
+          --font-serif: 'Inter', sans-serif;
+          --font-sans:  'Inter', sans-serif;
           --font-mono:  'JetBrains Mono', monospace;
           --radius:     10px;
           --radius-sm:  6px;
@@ -1460,10 +1472,17 @@ export default function CreateExam() {
                                 }}
                                 onClick={() => {
                                   if (!isSelected) {
+                                    const totalCurrent = selectedBankCats.reduce((sum, c) => sum + (catConfigs[c]?.count || 0), 0);
+                                    if (totalCurrent >= numQuestions) {
+                                      triggerAlert("Global Question Limit reached. Increase budget to add more categories.");
+                                      return;
+                                    }
+                                    
                                     setSelectedBankCats(prev => [...prev, cat]);
                                     setEditingCat(cat);
                                     if (!catConfigs[cat]) {
-                                      setCatConfigs(prev => ({ ...prev, [cat]: { count: 5, marks: 5 } }));
+                                      const defaultCount = Math.min(5, numQuestions - totalCurrent, bankStats[cat]?.count || 5);
+                                      setCatConfigs(prev => ({ ...prev, [cat]: { count: defaultCount, marks: defaultCount } }));
                                     }
                                   } else {
                                     setEditingCat(cat);
@@ -1494,7 +1513,7 @@ export default function CreateExam() {
                                         <span style={{ fontSize: "14px", fontWeight: "bold" }}>×</span>
                                       </span>
                                     )}
-                                    {isSelected && (
+                                    {isSelected && editingCat !== cat && (
                                       <div style={{ display: "flex", gap: 4 }}>
                                         <button
                                           type="button"
@@ -1524,10 +1543,40 @@ export default function CreateExam() {
                                     </div>
                                   ) : (
                                     <div style={{ display: "flex", flexDirection: "column", gap: 8, width: "100%", marginTop: 4 }}>
-                                      <div style={{ display: "flex", gap: 6, fontSize: "10px", fontWeight: 700, color: "var(--teal)" }}>
-                                        <span>CHOSEN: {catConfigs[cat]?.count || 0} Qs</span>
-                                        <span>•</span>
-                                        <span>{catConfigs[cat]?.marks || 0} Marks</span>
+                                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                        <div style={{ display: "flex", gap: 6, fontSize: "10px", fontWeight: 700, color: "var(--teal)" }}>
+                                          <span>CHOSEN: {catConfigs[cat]?.count || 0} Qs</span>
+                                          <span>•</span>
+                                          <span>{catConfigs[cat]?.marks || 0} Marks</span>
+                                        </div>
+                                        <button
+                                          type="button"
+                                          onClick={e => {
+                                            e.stopPropagation();
+                                            if (isSelected) {
+                                              setSelectedBankCats(prev => prev.filter(c => c !== cat));
+                                              setEditingCat(null);
+                                            } else {
+                                              setSelectedBankCats(prev => [...prev, cat]);
+                                            }
+                                          }}
+                                          style={{
+                                            padding: "4px 10px",
+                                            fontSize: "10px",
+                                            fontWeight: 800,
+                                            borderRadius: "6px",
+                                            border: "1px solid",
+                                            borderColor: isSelected ? "var(--line)" : "var(--teal)",
+                                            background: isSelected ? "var(--bg-neutral)" : "var(--teal-light)",
+                                            color: isSelected ? "var(--ink-3)" : "var(--teal)",
+                                            cursor: "pointer",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: 4
+                                          }}
+                                        >
+                                          {isSelected ? <><Icons.X size={12} /> Deselect</> : <><Icons.Plus size={12} /> Select</>}
+                                        </button>
                                       </div>
                                       <div style={{ display: "flex", gap: 8, width: "100%" }}>
                                         <div style={{ flex: 1 }}>
@@ -1538,13 +1587,30 @@ export default function CreateExam() {
                                               autoFocus
                                               onClick={e => e.stopPropagation()}
                                               className="form-input"
-                                              style={{ height: 28, fontSize: "12px", padding: "0 8px", borderColor: "var(--teal)", background: "white", flex: 1 }}
+                                              style={{ height: 28, fontSize: "12px", padding: "0 8px", borderColor: "var(--teal)", background: "var(--bg-neutral)", flex: 1 }}
                                               value={catConfigs[cat]?.count || ""}
                                               onChange={e => {
                                                 const valStr = e.target.value;
                                                 const val = valStr === "" ? 0 : Number(valStr);
-                                                const max = bankStats[cat]?.count || 0;
-                                                const safeVal = Math.min(val, max);
+                                                const maxInBank = bankStats[cat]?.count || 0;
+                                                
+                                                const otherSelectedCount = selectedBankCats
+                                                  .filter(c => c !== cat)
+                                                  .reduce((sum, c) => sum + (catConfigs[c]?.count || 0), 0);
+                                                const remainingBudget = Math.max(0, numQuestions - otherSelectedCount);
+                                                
+                                                if (val > remainingBudget) {
+                                                  triggerAlert("Increase the Global Question Limit to add more questions.");
+                                                  const safeVal = Math.min(maxInBank, remainingBudget);
+                                                  setCatConfigs(prev => {
+                                                    const current = prev[cat] || { count: 0, marks: 0 };
+                                                    const newMarks = (current.marks === current.count || current.marks === 0) ? safeVal : current.marks;
+                                                    return { ...prev, [cat]: { ...current, count: safeVal, marks: newMarks } };
+                                                  });
+                                                  return;
+                                                }
+                                                
+                                                const safeVal = Math.min(val, maxInBank);
                                                 setCatConfigs(prev => {
                                                   const current = prev[cat] || { count: 0, marks: 0 };
                                                   const newMarks = (current.marks === current.count || current.marks === 0) ? safeVal : current.marks;
@@ -1556,15 +1622,27 @@ export default function CreateExam() {
                                               type="button"
                                               onClick={e => {
                                                 e.stopPropagation();
-                                                const max = bankStats[cat]?.count || 0;
-                                                setCatConfigs(prev => ({ ...prev, [cat]: { ...(prev[cat] || { marks: max }), count: max } }));
+                                                const maxInBank = bankStats[cat]?.count || 0;
+                                                const otherSelectedCount = selectedBankCats
+                                                  .filter(c => c !== cat)
+                                                  .reduce((sum, c) => sum + (catConfigs[c]?.count || 0), 0);
+                                                const remainingBudget = Math.max(0, numQuestions - otherSelectedCount);
+                                                
+                                                if (maxInBank > remainingBudget) {
+                                                  triggerAlert("Increase the Global Question Limit to add more questions.");
+                                                }
+                                                
+                                                const safeMax = Math.min(maxInBank, remainingBudget);
+                                                setCatConfigs(prev => ({ ...prev, [cat]: { ...(prev[cat] || { marks: safeMax }), count: safeMax } }));
                                               }}
                                               style={{ padding: "4px 8px", fontSize: "9px", fontWeight: 800, background: "var(--teal-light)", color: "var(--teal-dark)", border: "1px solid var(--teal)", borderRadius: "4px", cursor: "pointer" }}
                                             >
                                               MAX
                                             </button>
                                           </div>
-                                          <span style={{ fontSize: "9px", opacity: 0.6 }}>Available: {bankStats[cat]?.count || 0}</span>
+                                           <div style={{ display: "flex", justifyContent: "space-between", marginTop: 2 }}>
+                                             <span style={{ fontSize: "9px", opacity: 0.6 }}>Available in Bank: {bankStats[cat]?.count || 0} Qs</span>
+                                           </div>
                                         </div>
                                         <div style={{ flex: 1 }}>
                                           <label style={{ fontSize: "9px", textTransform: "uppercase", fontWeight: 800, color: "var(--teal)", display: "block", marginBottom: 2 }}>Total Marks</label>
@@ -1572,7 +1650,7 @@ export default function CreateExam() {
                                             type="number"
                                             onClick={e => e.stopPropagation()}
                                             className="form-input"
-                                            style={{ height: 28, fontSize: "12px", padding: "0 8px", borderColor: "var(--teal)", background: "white" }}
+                                            style={{ height: 28, fontSize: "12px", padding: "0 8px", borderColor: "var(--teal)", background: "var(--bg-neutral)" }}
                                             value={catConfigs[cat]?.marks ?? ""}
                                             onChange={e => {
                                               const valStr = e.target.value;
@@ -1632,20 +1710,44 @@ export default function CreateExam() {
                                         )}
                                       </div>
 
-                                      <button
-                                        type="button"
-                                        className="btn btn-secondary"
-                                        style={{ height: 24, fontSize: "10px", marginTop: 8, width: "100%" }}
-                                        onClick={e => { e.stopPropagation(); setEditingCat(null); }}
-                                      >
-                                        Done
-                                      </button>
+                                      <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
+                                        <button
+                                          type="button"
+                                          className="btn btn-secondary"
+                                          style={{ height: 28, fontSize: "11px", flex: 1 }}
+                                          onClick={e => { e.stopPropagation(); setEditingCat(null); }}
+                                        >
+                                          Cancel
+                                        </button>
+                                        <button
+                                          type="button"
+                                          className="btn btn-publish"
+                                          style={{ height: 28, fontSize: "11px", flex: 1.5, background: "var(--teal)" }}
+                                          onClick={e => { e.stopPropagation(); setEditingCat(null); }}
+                                        >
+                                          Apply
+                                        </button>
+                                      </div>
                                     </div>
                                   )}
                                 </div>
                               </div>
                             );
                           })}
+
+                          {bankCategories.length > 4 && (
+                            <div style={{ width: "100%", display: "flex", justifyContent: "center", margin: "14px 0" }}>
+                              <button
+                                type="button"
+                                onClick={() => setShowAllBankCats(!showAllBankCats)}
+                                style={{ background: "var(--bg-neutral)", border: "1px solid var(--line)", padding: "6px 16px", borderRadius: "100px", fontSize: "11px", fontWeight: 700, color: "var(--ink-2)", cursor: "pointer", transition: "all 0.2s" }}
+                                onMouseOver={e => (e.currentTarget.style.borderColor = "var(--teal)")}
+                                onMouseOut={e => (e.currentTarget.style.borderColor = "var(--line)")}
+                              >
+                                {showAllBankCats ? "Show Less" : "See All"}
+                              </button>
+                            </div>
+                          )}
 
                           {bankCategories.length > 0 && !showBankAdd && (
                             <div style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "16px", padding: "12px 16px", background: "var(--teal-light)", borderRadius: "12px", border: "1px solid var(--teal)" }}>
@@ -1663,65 +1765,73 @@ export default function CreateExam() {
                                   </span>
                                 </div>
                               </div>
-                              <div style={{ display: "flex", gap: 8 }}>
+                              <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
                                 <button
                                   type="button"
                                   onClick={() => {
                                     const newTotal = selectedBankCats.reduce((sum, cat) => sum + (catConfigs[cat]?.count || 0), 0);
                                     setNumQuestions(newTotal);
                                   }}
-                                  style={{ padding: "4px 10px", fontSize: "10px", fontWeight: 700, borderRadius: "6px", border: "1px solid var(--teal)", background: "white", color: "var(--teal)", cursor: "pointer" }}
-                                  title="Set the Global Limit to match your current selection"
+                                  style={{ height: 38, padding: "0 14px", fontSize: "11px", fontWeight: 800, borderRadius: "10px", border: "1px solid var(--teal)", background: "var(--bg)", color: "var(--teal)", cursor: "pointer", textTransform: "uppercase" }}
+                                  title="Expand Question Limit to match selection"
                                 >
                                   SYNC LIMIT
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => setShowBankAdd(true)}
-                                  style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: "12px", fontSize: "12px", fontWeight: 700, cursor: "pointer", border: "none", background: "var(--teal)", color: "white", transition: "all 0.2s" }}
+                                  style={{ height: 38, display: "flex", alignItems: "center", gap: 6, padding: "0 18px", borderRadius: "10px", fontSize: "13px", fontWeight: 700, cursor: "pointer", border: "none", background: "var(--teal)", color: "white", transition: "all 0.2s" }}
                                   onMouseOver={e => (e.currentTarget.style.transform = "translateY(-1px)")}
                                   onMouseOut={e => (e.currentTarget.style.transform = "none")}
                                 >
-                                  <Icons.Plus size={16} /> Add Category
+                                  <Icons.Plus size={18} /> Add Category
                                 </button>
                               </div>
                             </div>
                           )}
 
-                          {bankCategories.length > 4 && (
-                            <button
-                              type="button"
-                              onClick={() => setShowAllBankCats(!showAllBankCats)}
-                              style={{ background: "none", border: "1px solid var(--line)", padding: "4px 12px", borderRadius: "100px", fontSize: "11px", fontWeight: 700, color: "var(--ink-2)", cursor: "pointer" }}
-                            >
-                              {showAllBankCats ? "Show Less" : "See All"}
-                            </button>
-                          )}
-                        </div>
-                      </div>
 
-                      <div className="form-field">
-                        <label className="form-label">Global Question Limit <span className="req-star">*</span></label>
-                        <p style={{ fontSize: "11px", color: "var(--ink-3)", marginTop: -8, marginBottom: 8 }}>This will balance your selected category counts.</p>
-                        <input
-                          className="form-input"
-                          type="text"
-                          value={numQuestions}
-                          onChange={e => {
-                            const val = e.target.value.replace(/\D/g, "");
-                            let n = val ? Number(val) : 0;
-                            const totalAvailable = selectedBankCats.reduce((sum, c) => sum + (bankStats[c]?.count || 0), 0);
-                            if (n > totalAvailable) n = totalAvailable;
-                            setNumQuestions(n);
-                          }}
-                          required
-                        />
+
+                        </div>
                       </div>
                     </>
                   )}
+                </div>
+
+                <div className="form-grid" style={{ marginTop: 24 }}>
+                  {creationMode === "bank" && (
+                    <div className="form-field">
+                      <div style={{ minHeight: 44 }}>
+                        <label className="form-label">Global Question Limit <span className="req-star">*</span></label>
+                        <p style={{ fontSize: "11px", color: "var(--ink-3)", marginTop: -8 }}>Total questions to pull from bank.</p>
+                      </div>
+                      <input
+                        className="form-input"
+                        type="text"
+                        value={numQuestions}
+                        onChange={e => {
+                          const val = e.target.value.replace(/\D/g, "");
+                          let n = val ? Number(val) : 0;
+                          
+                          const allocatedTotal = selectedBankCats.reduce((sum, c) => sum + (catConfigs[c]?.count || 0), 0);
+                          if (n < allocatedTotal && n !== 0) {
+                            triggerAlert("Global limit cannot be less than current total allocated questions. Decrease individual category counts first.", "Limit Mismatch");
+                            return;
+                          }
+
+                          const totalAvailable = selectedBankCats.reduce((sum, c) => sum + (bankStats[c]?.count || 0), 0);
+                          if (n > totalAvailable) n = totalAvailable;
+                          setNumQuestions(n);
+                        }}
+                        required
+                      />
+                    </div>
+                  )}
 
                   <div className="form-field">
-                    <label className="form-label">Passing Score (%) <span className="req-star">*</span></label>
+                    <div style={{ minHeight: 44 }}>
+                      <label className="form-label">Passing Score (%) <span className="req-star">*</span></label>
+                    </div>
                     <input
                       className="form-input"
                       type="text"

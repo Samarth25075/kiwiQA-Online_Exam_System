@@ -4,7 +4,7 @@ import AdminLayout from "../components/AdminLayout";
 import CustomPopup, { PopupType } from "../components/CustomPopup";
 import API_BASE_URL from "../config";
 
-// â”€â”€â”€ Icon Components â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -â”€ Icon Components -----------------------------â”€
 const Icons = {
     Shield: ({ size = 14 }: { size?: number }) => (
         <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
@@ -132,7 +132,7 @@ const Icons = {
     ),
 };
 
-// â”€â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -â”€ Types ----------------------------------â”€
 interface AdminProfile {
     email: string;
     role: string;
@@ -173,7 +173,7 @@ interface ExamStat {
     proctoring_type?: string;
 }
 
-// â”€â”€â”€ Dashboard Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -â”€ Dashboard Component ---------------------------â”€
 export default function AdminDashboard() {
     const [viewMode, setViewMode] = useState<'card' | 'grid'>('grid');
     const [profile, setProfile] = useState<AdminProfile | null>(null);
@@ -259,7 +259,7 @@ export default function AdminDashboard() {
         onCancel?: () => void;
     } | null>(null);
 
-    // â”€â”€â”€ Effects â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // -â”€ Effects ---------------------------------
     useEffect(() => {
         let pollId: ReturnType<typeof setInterval> | null = null;
         let timerId: ReturnType<typeof setInterval> | null = null;
@@ -316,7 +316,7 @@ export default function AdminDashboard() {
         };
     }, []);
 
-    // â”€â”€â”€ Auth â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // -â”€ Auth ----------------------------------
     const handleAuthFailure = () => {
         sessionStorage.removeItem("access_token");
         sessionStorage.removeItem("admin-profile");
@@ -330,7 +330,7 @@ export default function AdminDashboard() {
         "Content-Type": "application/json",
     });
 
-    // â”€â”€â”€ Data Fetching â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // -â”€ Data Fetching ------------------------------
     const fetchInitialData = async (): Promise<boolean> => {
         const token = getToken();
         if (!token) { handleAuthFailure(); return false; }
@@ -423,7 +423,7 @@ export default function AdminDashboard() {
         return () => clearInterval(timer);
     }, []);
 
-    // â”€â”€â”€ Actions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // -â”€ Actions ---------------------------------
     const copyLink = (link: string, id: string) => {
         navigator.clipboard.writeText(link);
         setCopyingId(id);
@@ -462,7 +462,7 @@ export default function AdminDashboard() {
         putExamExpiry(examId, { link_expiry: expiry.toISOString() }).catch(console.error);
     };
 
-    // â”€â”€â”€ Permissions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // -â”€ Permissions -------------------------------
     const hasPermission = (permission: string): boolean => {
         if (profile?.role === "admin") return true;
         return profile?.permissions.includes(permission) ?? false;
@@ -480,7 +480,7 @@ export default function AdminDashboard() {
         }
     };
 
-    // â”€â”€â”€ Utilities â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // -â”€ Utilities --------------------------------
     const formatCountdown = (expiryStr?: string): string | null => {
         if (!expiryStr) return null;
         const diff = new Date(expiryStr).getTime() - now.getTime();
@@ -502,12 +502,10 @@ export default function AdminDashboard() {
 
     if (loading || !profile) return null;
 
-    // â”€â”€â”€ Render â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // -â”€ Render ---------------------------------â”€
     return (
         <AdminLayout>
             <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono:wght@500;700&display=swap');
-
         :root {
           --teal:        var(--primary);
           --teal-light:  color-mix(in srgb, var(--primary) 10%, var(--bg));
@@ -520,34 +518,20 @@ export default function AdminDashboard() {
           --slate-50:    var(--bg-neutral);
           --white:       var(--bg);
           --danger:      #dc2626;
-          --danger-light:color-mix(in srgb, #dc2626 10%, var(--bg));
           --success:     #059669;
           --amber:       #d97706;
-          --amber-light: color-mix(in srgb, #d97706 10%, var(--bg));
-          --radius-sm:   6px;
-          --radius-md:   10px;
-          --radius-lg:   14px;
-          --shadow-xs:   var(--shadow-sm, 0 1px 2px rgba(0,0,0,0.06));
-          --shadow-sm:   var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.07));
-          --shadow-md:   var(--shadow, 0 4px 16px rgba(0,0,0,0.09));
-          --shadow-lg:   var(--shadow, 0 8px 32px rgba(0,0,0,0.11));
-          --font-sans:   'DM Sans', sans-serif;
-          --font-serif:  'DM Serif Display', serif;
-          --font-mono:   'JetBrains Mono', monospace;
           --transition:  0.2s cubic-bezier(0.4,0,0.2,1);
         }
 
         *, *::before, *::after { box-sizing: border-box; }
 
-        /* â”€â”€ Page Shell â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
         .db-page {
-          font-family: var(--font-sans);
+          font-family: var(--font-body);
           background: var(--slate-50);
           min-height: 100vh;
           color: var(--slate-900);
         }
 
-        /* â”€â”€ Top Bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
         .db-topbar {
           position: sticky;
           top: 0;
@@ -555,7 +539,7 @@ export default function AdminDashboard() {
           height: 60px;
           background: var(--white);
           border-bottom: 1px solid var(--slate-100);
-          box-shadow: var(--shadow-xs);
+          box-shadow: var(--shadow-sm);
           display: flex;
           align-items: center;
           justify-content: space-between;
@@ -598,7 +582,7 @@ export default function AdminDashboard() {
           font-size: var(--font-size-badge);
           font-weight: 600;
           letter-spacing: 0.04em;
-          text-transform: uppercase;
+          text-transform: none;
           padding: var(--space-4) var(--space-8);
           border-radius: var(--radius-sm);
           background: var(--primary-light);
@@ -655,7 +639,7 @@ export default function AdminDashboard() {
           text-transform: capitalize;
         }
 
-        /* â”€â”€ Content Area â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+        /* - Content Area ----------------------- */
         .db-content {
           max-width: 1440px;
           margin: 0 auto;
@@ -668,7 +652,7 @@ export default function AdminDashboard() {
           to   { opacity: 1; transform: translateY(0); }
         }
 
-        /* â”€â”€ Welcome Banner â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+        /* - Welcome Banner ---------------------- */
         .db-banner {
           background: var(--bg);
           border: 1px solid var(--border);
@@ -732,10 +716,10 @@ export default function AdminDashboard() {
           font-weight: 600;
           color: var(--success);
           letter-spacing: 0.03em;
-          text-transform: uppercase;
+          text-transform: none;
         }
 
-        /* â”€â”€ Deploy Button â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+        /* - Deploy Button ----------------------- */
         .btn-primary {
           display: inline-flex;
           align-items: center;
@@ -763,7 +747,7 @@ export default function AdminDashboard() {
 
         .btn-primary:active { transform: translateY(0); }
 
-        /* â”€â”€ Stat Cards â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+        /* - Stat Cards ------------------------ */
         .db-stats {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -811,12 +795,12 @@ export default function AdminDashboard() {
         }
 
         .stat-label {
-          font-size: 11.5px;
-          font-weight: 600;
+          font-size: 12px;
+          font-weight: 500;
           color: var(--slate-500);
-          text-transform: uppercase;
-          letter-spacing: 0.06em;
-          margin-bottom: 6px;
+          text-transform: none;
+          letter-spacing: 0.01em;
+          margin-bottom: 4px;
           display: flex;
           align-items: center;
           gap: 6px;
@@ -824,22 +808,23 @@ export default function AdminDashboard() {
 
         .stat-value {
           font-family: var(--font-mono);
-          font-size: var(--font-size-title); /* 24px */
-          font-weight: 700;
-          color: var(--text);
-          line-height: 1;
+          font-size: 28px;
+          font-weight: 800;
+          color: var(--slate-900);
+          line-height: 1.1;
         }
 
         .stat-hint {
-          font-size: 12px;
-          color: var(--slate-500);
-          margin-top: 8px;
+          font-size: 11px;
+          font-weight: 500;
+          color: var(--slate-400);
+          margin-top: 10px;
           display: flex;
           align-items: center;
           gap: 5px;
         }
 
-        /* â”€â”€ Section Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+        /* - Section Header ---------------------- */
         .section-header {
           display: flex;
           align-items: flex-end;
@@ -859,11 +844,12 @@ export default function AdminDashboard() {
 
         .section-subtitle {
           font-size: 13px;
-          color: var(--slate-500);
+          color: var(--slate-400);
           margin: 4px 0 0;
+          font-weight: 400;
         }
 
-        /* â”€â”€ Exam Cards â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+        /* - Exam Cards ------------------------ */
         .exam-grid {
           display: grid;
           grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -888,7 +874,7 @@ export default function AdminDashboard() {
           transform: translateY(-2px);
         }
 
-        /* â”€â”€ Exam Card Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+        /* - Exam Card Header ---------------------â”€ */
         .exam-card-title {
           font-family: var(--font-heading);
           font-size: var(--font-size-emph);
@@ -928,7 +914,7 @@ export default function AdminDashboard() {
           line-height: 1;
         }
 
-        /* â”€â”€ Stat Counters â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+        /* - Stat Counters ----------------------- */
         .exam-counters {
           display: grid;
           grid-template-columns: 1fr 1fr 1fr;
@@ -959,14 +945,14 @@ export default function AdminDashboard() {
 
         .exam-counter-label {
           font-size: 10.5px;
-          font-weight: 600;
-          color: var(--slate-500);
-          text-transform: uppercase;
-          letter-spacing: 0.06em;
+          font-weight: 500;
+          color: var(--slate-400);
+          text-transform: none;
+          letter-spacing: 0.02em;
           margin-top: 4px;
         }
 
-        /* â”€â”€ Progress Bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+        /* - Progress Bar -----------------------â”€ */
         .progress-wrap {
           display: flex;
           justify-content: space-between;
@@ -990,10 +976,10 @@ export default function AdminDashboard() {
 
         .progress-label {
           font-size: 11px;
-          font-weight: 600;
-          color: var(--slate-500);
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
+          font-weight: 500;
+          color: var(--slate-400);
+          text-transform: none;
+          letter-spacing: 0.02em;
         }
 
         .progress-pct {
@@ -1003,7 +989,7 @@ export default function AdminDashboard() {
           color: var(--slate-700);
         }
 
-        /* â”€â”€ Action Controls â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+        /* - Action Controls ---------------------- */
         .divider {
           border: none;
           border-top: 1px solid var(--slate-100);
@@ -1081,7 +1067,7 @@ export default function AdminDashboard() {
 
         .field-select:focus { border-color: var(--teal); }
 
-        /* â”€â”€ Buttons â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+        /* - Buttons -------------------------- */
         .btn-refresh {
           padding: 8px 16px;
           font-size: 13px;
@@ -1199,7 +1185,7 @@ export default function AdminDashboard() {
             background: var(--slate-50);
         }
 
-        /* â”€â”€ Empty State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+        /* - Empty State ------------------------ */
         .empty-state {
           grid-column: 1 / -1;
           text-align: center;
@@ -1229,7 +1215,7 @@ export default function AdminDashboard() {
           margin: 0;
         }
 
-        /* â”€â”€ Responsive â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+        /* - Responsive ------------------------â”€ */
         @media (max-width: 768px) {
           .db-topbar { padding: 0 16px; }
           .db-content { padding: 16px 16px 40px; }
@@ -1242,7 +1228,7 @@ export default function AdminDashboard() {
           .db-stats { grid-template-columns: 1fr; }
         }
 
-        /* â”€â”€ Candidates Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+        /* - Candidates Modal -------------------------â”€ */
         .candidates-modal-overlay {
           position: fixed; top: 0; left: 0; right: 0; bottom: 0;
           background: rgba(15, 23, 42, 0.6);
@@ -1278,7 +1264,7 @@ export default function AdminDashboard() {
         .exam-candidate-item { background: var(--slate-50); border: 1px solid var(--slate-100); padding: 10px 14px; border-radius: var(--radius-md); display: flex; justify-content: space-between; align-items: center; }
         .candidate-name { font-size: 13px; font-weight: 500; color: var(--slate-900); }
         .candidate-email { font-size: 12px; color: var(--slate-500); }
-        .candidate-status { font-size: 11px; padding: 2px 8px; border-radius: 100px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+        .candidate-status { font-size: 11px; padding: 2px 8px; border-radius: 100px; font-weight: 600; text-transform: none; letter-spacing: 0.04em; }
         .status-started, .status-live { background: #fde68a; color: #92400e; }
         .status-completed { background: #d1fae5; color: #065f46; }
         .status-not_started { background: var(--slate-100); color: var(--slate-600); }
@@ -1294,7 +1280,7 @@ export default function AdminDashboard() {
           padding: 8px 16px;
           font-size: 11px;
           font-weight: 700;
-          text-transform: uppercase;
+          text-transform: none;
           letter-spacing: 0.05em;
           display: flex;
           align-items: center;
@@ -1324,7 +1310,7 @@ export default function AdminDashboard() {
         .result-score { font-family: var(--font-mono); font-size: 13px; font-weight: 700; color: var(--slate-700); }
         .result-meta { font-size: 11px; color: var(--slate-400); display: block; }
 
-        /* â”€â”€ Table View â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+        /* - Table View ------------------------ */
         .exam-table-container {
             width: 100%;
             overflow-x: auto;
@@ -1339,10 +1325,10 @@ export default function AdminDashboard() {
         .exam-table th {
             padding: 0 24px 12px;
             font-size: 11px;
-            font-weight: 800;
-            color: var(--slate-500);
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
+            font-weight: 700;
+            color: var(--slate-400);
+            text-transform: none;
+            letter-spacing: 0.04em;
             white-space: nowrap;
         }
         .exam-table tr {
@@ -1419,7 +1405,7 @@ export default function AdminDashboard() {
         }
       `}</style>
 
-            {/* â”€â”€ Top Bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+            {/* - Top Bar -----------------------------â”€ */}
             <header className="db-topbar">
                 <div className="db-topbar-brand">
                     <div className="db-topbar-logo">
@@ -1449,19 +1435,23 @@ export default function AdminDashboard() {
                 </div>
             </header>
 
-            {/* â”€â”€ Content â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+            {/* - Content -----------------------------â”€ */}
             <div className="db-content">
 
                 {/* Welcome Banner */}
                 <div className="db-banner">
                     <div>
                         <h3 className="db-banner-greeting">
-                            {getGreeting()}, {profile.full_name.split(" ")[0]}!
+                            {getGreeting()}, {(profile.full_name.toLowerCase() === "google" || profile.full_name.toLowerCase() === "admin") ? "Administrator" : profile.full_name.split(" ")[0]}!
                         </h3>
                         <p className="db-banner-subtitle">
                             You have <strong>{stats.live} active</strong> candidate{stats.live !== 1 ? "s" : ""} across{" "}
-                            <strong>{examStats.length} assessment{examStats.length !== 1 ? "s" : ""}</strong>. All systems operational.
+                            <strong>{examStats.length} assessment{examStats.length !== 1 ? "s" : ""}</strong>.
                         </p>
+                        <div className="db-banner-status" style={{ marginTop: '12px', border: 'none', background: 'transparent', padding: 0 }}>
+                            <div className="db-status-dot"></div>
+                            <span className="db-status-text" style={{ textTransform: 'none', fontSize: '12px', color: 'var(--success)' }}>All systems operational</span>
+                        </div>
                         {hasPermission("generate exam") && (
                             <button className="btn-primary" onClick={() => navigate("/create-exam")}>
                                 <Icons.Plus size={14} />
@@ -1517,7 +1507,7 @@ export default function AdminDashboard() {
                         </div>
                         <div className="stat-hint" style={{ opacity: hasPermission("manage exam") ? 1 : 0.3 }}>
                             <Icons.Users size={12} />
-                            {examStats.reduce((sum, exam) => sum + exam.completed + exam.live, 0)} Candidates Appeared
+                            {examStats.reduce((sum, exam) => sum + exam.completed + exam.live, 0)} candidates attempted
                         </div>
                     </div>
 
@@ -1528,12 +1518,12 @@ export default function AdminDashboard() {
                                 <Icons.Key size={18} />
                             </div>
                             <div className="stat-label">HR / Master OTP</div>
-                            <div className="stat-value" style={{ fontVariantNumeric: "tabular-nums", letterSpacing: "0.12em" }}>
-                                {adminOtp ?? "------"}
+                            <div className="stat-value" style={{ fontVariantNumeric: "tabular-nums", letterSpacing: "0.05em" }}>
+                                {adminOtp ? adminOtp.slice(0, 3) + "" + adminOtp.slice(3) : "--- ---"}
                             </div>
                             <div className="stat-hint">
                                 <Icons.Clock size={12} />
-                                Rotates in {otpExpiresIn}s
+                                Rotates in {otpExpiresIn} sec
                             </div>
                         </div>
                     )}
@@ -1608,42 +1598,39 @@ export default function AdminDashboard() {
                                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                                                             <div style={{ fontWeight: 800, color: 'var(--slate-900)', fontSize: '15px', letterSpacing: '-0.01em' }}>{exam.title}</div>
                                                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                                <span className="exam-id-chip" style={{ fontSize: '9px', padding: '1px 5px' }}>{exam.id.slice(0, 8)}</span>
                                                                 <span style={{ fontSize: '11px', color: 'var(--slate-500)', fontWeight: 600 }}>•</span>
-                                                                <span style={{ fontSize: '11px', color: 'var(--slate-500)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{exam.difficulty}</span>
+                                                                <span style={{ fontSize: '11px', color: 'var(--slate-500)', fontWeight: 600, textTransform: 'capitalize', letterSpacing: '0.02em' }}>{exam.difficulty}</span>
                                                             </div>
                                                         </div>
                                                     </td>
                                                     <td>
-                                                        <div style={{ display: 'flex', gap: '8px' }}>
-                                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                                    <div style={{ width: 28, height: 28, borderRadius: '8px', background: 'var(--slate-50)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                                        <Icons.Users size={14} />
-                                                                    </div>
-                                                                    <span style={{ fontSize: '13px', fontWeight: 700 }}>{exam.total_assigned} <span style={{ color: 'var(--slate-400)', fontWeight: 500, fontSize: '11px' }}>Enrolled</span></span>
+                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                                <div style={{ width: 28, height: 28, borderRadius: '8px', background: 'var(--slate-50)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                    <Icons.Users size={14} />
                                                                 </div>
-                                                                {(exam.total_invited ?? 0) > 0 && (
-                                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                                        <div style={{ width: 28, height: 28, borderRadius: '8px', background: '#fdf4ff', color: '#a21caf', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                                            <Icons.Mail size={14} />
-                                                                        </div>
-                                                                        <span style={{ fontSize: '13px', fontWeight: 700 }}>{exam.total_invited} <span style={{ color: 'var(--slate-400)', fontWeight: 500, fontSize: '11px' }}>Sent</span></span>
-                                                                    </div>
-                                                                )}
+                                                                <span style={{ fontSize: '13px', fontWeight: 700 }}>{exam.total_assigned} <span style={{ color: 'var(--slate-400)', fontWeight: 500, fontSize: '11px' }}>Enrolled</span></span>
                                                             </div>
+                                                            {(exam.total_invited ?? 0) > 0 && (
+                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                                    <div style={{ width: 28, height: 28, borderRadius: '8px', background: '#fdf4ff', color: '#a21caf', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                        <Icons.Mail size={14} />
+                                                                    </div>
+                                                                    <span style={{ fontSize: '13px', fontWeight: 700 }}>{exam.total_invited} <span style={{ color: 'var(--slate-400)', fontWeight: 500, fontSize: '11px' }}>Sent</span></span>
+                                                                </div>
+                                                            )}
                                                         </div>
                                                     </td>
                                                     <td>
-                                                        <div style={{ display: 'flex', gap: '6px', marginBottom: 12 }}>
-                                                            <div className="perf-chip p">P: {exam.passed}</div>
-                                                            <div className="perf-chip f">F: {exam.failed}</div>
-                                                            <div className="perf-chip e">E: {exam.eliminated}</div>
+                                                        <div style={{ display: 'flex', gap: '6px', marginBottom: 10 }}>
+                                                            <div className="perf-chip p" title="Passed">P: {exam.passed}</div>
+                                                            <div className="perf-chip f" title="Failed">F: {exam.failed}</div>
+                                                            <div className="perf-chip e" title="Exempt / Eliminated">E: {exam.eliminated}</div>
                                                         </div>
                                                         <div style={{ width: '100%', maxWidth: '160px' }}>
                                                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                                                                <span style={{ fontSize: '10px', fontWeight: 800, color: 'var(--slate-400)', textTransform: 'uppercase' }}>Completion</span>
-                                                                <span style={{ fontSize: '10px', fontWeight: 800, color: 'var(--teal)' }}>{completionRate}%</span>
+                                                                <span style={{ fontSize: '10px', fontWeight: 500, color: 'var(--slate-400)' }}>Completion</span>
+                                                                <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--teal)' }}>{completionRate}%</span>
                                                             </div>
                                                             <div style={{ height: 4, background: 'var(--slate-100)', borderRadius: 2, overflow: 'hidden' }}>
                                                                 <div style={{ width: `${completionRate}%`, height: '100%', background: 'var(--teal)', borderRadius: 2 }} />
@@ -1652,9 +1639,9 @@ export default function AdminDashboard() {
                                                     </td>
                                                     <td>
                                                         {isActive ? (
-                                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                                                {/* LIVE Badge removed */}
-                                                                <span style={{ fontSize: '12px', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--slate-500)', marginLeft: 4 }}>{countdown}</span>
+                                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                                                <span style={{ fontSize: '10px', fontWeight: 500, color: 'var(--slate-400)' }}>Time left</span>
+                                                                <span style={{ fontSize: '12px', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--slate-500)' }}>{countdown}</span>
                                                             </div>
                                                         ) : isExpired ? (
                                                             <span className="badge" style={{ background: 'var(--slate-100)', color: 'var(--slate-500)', borderRadius: '8px', padding: '6px 12px' }}>

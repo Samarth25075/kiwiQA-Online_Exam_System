@@ -22,7 +22,7 @@ const PageLoading = () => (
   <div style={{ 
     display: 'flex', justifyContent: 'center', alignItems: 'center', 
     height: '100vh', background: 'var(--bg-neutral)', color: 'var(--primary)',
-    fontFamily: 'Outfit, sans-serif', fontWeight: 900, fontSize: '20px'
+    fontFamily: 'Inter, sans-serif', fontWeight: 900, fontSize: '20px'
   }}>
     <div className="loader">KiwiQA...</div>
   </div>

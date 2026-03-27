@@ -29,8 +29,8 @@ const STYLES = `
     max-width: 1000px; 
     margin: 0 auto; 
     padding: 40px 24px; 
-    color: #333;
-    background: #fff;
+    color: var(--text);
+    background: var(--bg);
 }
 
 .report-top-branding { 
@@ -39,14 +39,14 @@ const STYLES = `
     align-items: center; 
     margin-bottom: 40px; 
     padding-bottom: 24px; 
-    border-bottom: 1px solid #ddd; 
+    border-bottom: 1px solid var(--border); 
 }
 .company-logo { height: 48px; object-fit: contain; }
-.report-id { font-family: 'monospace'; font-size: 11px; color: #666; font-weight: 700; letter-spacing: 0.05em; }
+.report-id { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); font-weight: 700; letter-spacing: 0.05em; }
 
 .report-header { 
-    background: #f9f9f9; 
-    border: 1px solid #eee; 
+    background: var(--bg-neutral); 
+    border: 1px solid var(--border); 
     padding: 30px; 
     margin-bottom: 32px; 
     display: flex; 
@@ -55,64 +55,66 @@ const STYLES = `
 }
 
 .header-info { flex: 1; }
-.report-title { font-size: 30px; font-weight: 700; color: #000; margin: 6px 0 10px; }
+.report-title { font-family: var(--font-heading); font-size: 30px; font-weight: 800; color: var(--text); margin: 6px 0 10px; }
 .report-badge { 
     padding: 4px 10px; 
     font-size: 10px; 
     font-weight: 700; 
     text-transform: uppercase; 
-    background: #eee; 
-    color: #333; 
-    border: 1px solid #ccc; 
+    background: var(--bg-neutral); 
+    color: var(--text-muted); 
+    border: 1px solid var(--border); 
     display: inline-block; 
 }
 
 .status-box { text-align: right; min-width: 160px; }
-.status-val { font-size: 28px; font-weight: 700; text-transform: uppercase; }
-.status-val.pass { color: #000; }
-.status-val.fail { color: #000; }
-.status-val.eliminated { color: #000; }
+.status-val { font-size: 28px; font-weight: 800; text-transform: uppercase; letter-spacing: -0.02em; }
+.status-val.pass { color: var(--color-success); }
+.status-val.fail { color: var(--color-danger); }
+.status-val.eliminated { color: var(--color-danger); }
 
-.section-card { background: #fff; border: 1px solid #eee; padding: 30px; margin-bottom: 32px; }
-.section-title { font-size: 20px; font-weight: 700; color: #000; margin-bottom: 24px; border-bottom: 2px solid #333; padding-bottom: 8px; }
+.section-card { background: var(--bg); border: 1px solid var(--border); padding: 30px; margin-bottom: 32px; border-radius: var(--radius-lg); }
+.section-title { font-family: var(--font-heading); font-size: 20px; font-weight: 800; color: var(--text); margin-bottom: 24px; border-bottom: 2px solid var(--primary); padding-bottom: 8px; }
 
 .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 32px; }
-.stat-pill { background: #fdfdfd; border: 1px solid #eee; padding: 20px; text-align: center; }
-.stat-val { font-size: 24px; font-weight: 700; color: #000; }
-.stat-label { font-size: 10px; font-weight: 700; color: #666; text-transform: uppercase; margin-top: 8px; }
+.stat-pill { background: var(--bg-neutral); border: 1px solid var(--border); padding: 20px; text-align: center; border-radius: var(--radius-md); }
+.stat-val { font-size: 24px; font-weight: 800; color: var(--text); }
+.stat-label { font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-top: 8px; }
 
 .cat-table { width: 100%; border-collapse: collapse; }
-.cat-table th { text-align: left; padding: 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #333; border-bottom: 2px solid #ddd; }
-.cat-table td { padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; }
-.cat-table .cat-name { font-weight: 700; color: #000; }
+.cat-table th { text-align: left; padding: 12px; font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--text-muted); border-bottom: 2px solid var(--border); }
+.cat-table td { padding: 12px; border-bottom: 1px solid var(--border); font-size: 14px; color: var(--text); }
+.cat-table .cat-name { font-weight: 700; color: var(--text); }
 
-.score-cell { font-weight: 700; color: #000; }
+.score-cell { font-weight: 800; color: var(--primary); }
 
 .proctor-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-.proctor-frame { background: #eee; border: 1px solid #ddd; overflow: hidden; position: relative; aspect-ratio: 4/3; }
+.proctor-frame { background: var(--bg-sunken); border: 1px solid var(--border); overflow: hidden; position: relative; aspect-ratio: 4/3; border-radius: var(--radius-md); }
 .proctor-img { width: 100%; height: 100%; object-fit: cover; }
-.proctor-label { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.9); color: #000; padding: 4px; font-size: 9px; font-weight: 700; text-align: center; border-top: 1px solid #ddd; }
+.proctor-label { position: absolute; bottom: 0; left: 0; right: 0; background: var(--bg-raised); color: var(--text); padding: 6px; font-size: 9px; font-weight: 700; text-align: center; border-top: 1px solid var(--border); opacity: 0.9; }
 
-.q-item { border-left: 3px solid #eee; padding: 0 0 10px 20px; margin-bottom: 30px; }
-.q-item.correct { border-left-color: #ddd; }
-.q-item.incorrect { border-left-color: #ddd; }
+.q-item { border-left: 3px solid var(--border); padding: 0 0 10px 20px; margin-bottom: 30px; }
+.q-item.correct { border-left-color: var(--color-success); }
+.q-item.incorrect { border-left-color: var(--color-danger); }
 
-.q-text { font-size: 15px; font-weight: 700; margin-bottom: 12px; color: #000; }
+.q-text { font-size: 15px; font-weight: 700; margin-bottom: 12px; color: var(--text); }
 .opt-list { display: grid; gap: 8px; }
-.opt-item { padding: 10px 14px; border: 1px solid #eee; font-size: 13px; display: flex; justify-content: space-between; align-items: center; }
-.opt-item.selected { background: #f9f9f9; border-color: #ddd; }
-.opt-item.correct { border-color: #000; font-weight: 700; }
-.opt-item.both { border-color: #000; background: #f0f0f0; font-weight: 700; }
+.opt-item { padding: 10px 14px; border: 1px solid var(--border); font-size: 13px; display: flex; justify-content: space-between; align-items: center; border-radius: var(--radius-sm); color: var(--text); }
+.opt-item.selected { background: var(--bg-neutral); border-color: var(--primary); }
+.opt-item.correct { border-color: var(--color-success); background: var(--color-success-light); font-weight: 700; }
+.opt-item.both { border-color: var(--color-success); background: var(--color-success-light); font-weight: 700; color: var(--color-success); }
 
 .no-print-controls { text-align: center; padding: 40px 0 80px; display: flex; justify-content: center; gap: 16px; }
-.basic-btn { padding: 12px 24px; border: 1px solid #333; background: #fff; color: #333; font-weight: 700; cursor: pointer; transition: all 0.2s; }
-.basic-btn:hover { background: #333; color: #fff; }
+.basic-btn { padding: 12px 24px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-weight: 700; cursor: pointer; transition: all 0.2s; border-radius: var(--radius-md); }
+.basic-btn:hover { background: var(--primary); color: var(--text-on-primary); border-color: var(--primary); }
 
 @media print {
-    body { background: white !important; }
-    .report-container { padding: 0; margin: 0; max-width: 100%; }
+    body { background: white !important; color: black !important; }
+    .report-container { padding: 0; margin: 0; max-width: 100%; background: white !important; color: black !important; }
+    .section-card, .report-header, .stat-pill, .proctor-frame { background: white !important; border: 1px solid #ddd !important; }
     .no-print, .no-print-controls { display: none !important; }
-    .section-card, .report-header { border: 1px solid #eee; break-inside: avoid; }
+    .section-title { border-bottom-color: black !important; color: black !important; }
+    .report-title, .stat-val, .cat-name, .score-cell, .q-text, .opt-item { color: black !important; }
 }
 `;
 
@@ -179,18 +181,18 @@ export default function CandidateReport() {
     const { candidate, stats, questions, proctoring, exam_title, passing_score } = report;
     const scorePct = Math.round((candidate.score / (candidate.total_marks || candidate.total_questions || 1)) * 100);
     const status = getStatus(scorePct, candidate.violations || 0, passing_score || 50);
-    
+
     // Time calculations
     const formatDateTime = (dateStr: string) => {
         if (!dateStr) return "N/A";
         try {
             const date = new Date(dateStr);
             if (isNaN(date.getTime())) return dateStr; // Return as is if not a valid date string
-            return date.toLocaleString('en-GB', { 
+            return date.toLocaleString('en-GB', {
                 day: '2-digit', month: 'short', year: 'numeric',
                 hour: '2-digit', minute: '2-digit'
             });
-        } catch(e) { return dateStr; }
+        } catch (e) { return dateStr; }
     };
 
     const calculateDuration = () => {
@@ -199,16 +201,16 @@ export default function CandidateReport() {
             const start = new Date(candidate.joined_date).getTime();
             const end = new Date(candidate.completed_at).getTime();
             if (isNaN(start) || isNaN(end)) return null;
-            
+
             const diffMs = end - start;
             if (diffMs < 0) return null;
-            
+
             const totalSeconds = Math.floor(diffMs / 1000);
             const minutes = Math.floor(totalSeconds / 60);
             const seconds = totalSeconds % 60;
-            
+
             return `${minutes}m ${seconds}s`;
-        } catch(e) { return null; }
+        } catch (e) { return null; }
     };
 
     const duration = calculateDuration();
@@ -217,6 +219,16 @@ export default function CandidateReport() {
         <AdminLayout plain={true}>
             <style>{STYLES}</style>
             <div className="report-container">
+                <div className="no-print" style={{ marginBottom: 20 }}>
+                    <button 
+                        className="basic-btn" 
+                        onClick={() => navigate(-1)} 
+                        style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 16px', fontSize: 13 }}
+                    >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                        Back
+                    </button>
+                </div>
                 <div className="report-top-branding">
                     <img src={logo} alt="Company Logo" className="company-logo" />
                     <div className="report-id">REF: REPT-{candidate.candidate_id || candidate.id}-{new Date().getFullYear()}</div>
@@ -315,7 +327,7 @@ export default function CandidateReport() {
                 </div>
 
                 <div className="section-card">
-                    <h2 className="section-title">ðŸ“ Detailed Question Submission Log</h2>
+                    <h2 className="section-title">Detailed Question Submission Log</h2>
                     {questions.map((q, idx) => {
                         const isCorrect = q.selected_index !== null && q.options[q.selected_index]?.is_correct;
                         const marksAwarded = isCorrect ? (q.marks || 1) : 0;
@@ -364,7 +376,7 @@ export default function CandidateReport() {
                 </div>
 
                 <div className="section-card">
-                    <h2 className="section-title">{"\u{1F6E1}\u{FE0F}"} Proctoring & Integrity Audit</h2>
+                    <h2 className="section-title">Proctoring & Integrity Audit</h2>
                     {(!proctoring.start && !proctoring.mid && !proctoring.end) ? (
                         <div style={{ padding: '60px', textAlign: 'center', background: 'var(--bg-neutral)', borderRadius: '16px', border: '1px dashed var(--border)' }}>
                             <p style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Proctoring evidence has been purged for privacy reasons.</p>

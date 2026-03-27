@@ -134,3 +134,11 @@ def update_member(db: Session, email: str, update_data: dict) -> bool:
     
     db.commit()
     return True
+
+def reset_password_in_db(db: Session, email: str, new_password: str) -> bool:
+    user = db.query(User).filter(User.email == email).first()
+    if user:
+        user.hashed_password = hash_password(new_password)
+        db.commit()
+        return True
+    return False

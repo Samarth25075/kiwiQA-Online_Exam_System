@@ -17,11 +17,12 @@ from pydantic import BaseModel
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 
-from app.auth.schemas import Token, TokenPayload, AdminUser, Member, MemberCreate, MemberUpdate
+from app.auth.schemas import Token, TokenPayload, AdminUser, Member, MemberCreate, MemberUpdate, ForgotPasswordRequest, ResetPasswordRequest
 from app.auth.service import (
     authenticate, get_user, add_user, change_password, 
     get_all_users, delete_user, hash_password, 
-    update_user_session, verify_session, update_user_profile, update_member
+    update_user_session, verify_session, update_user_profile, update_member,
+    reset_password_in_db
 )
 from app.core.config import ACCESS_TOKEN_EXPIRE_MINUTES, GOOGLE_CLIENT_ID, AUTHORIZED_GOOGLE_EMAIL
 from app.core.security import create_access_token, decode_access_token
@@ -31,6 +32,9 @@ from sqlalchemy.orm import Session
 router = APIRouter(tags=["auth"])
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+
+# In-memory store for Forgot Password OTPs
+AUTH_OTP_STORE = {} 
 
 
 # ── POST /login ───────────────────────────────
@@ -184,6 +188,73 @@ async def logout(current_admin: Annotated[AdminUser, Depends(get_current_admin)]
     """Invalidate the current session."""
     update_user_session(db, current_admin.email, None)
     return {"message": "Logged out successfully"}
+
+
+# ── Password Reset Flow ───────────────────────
+
+@router.post("/forgot-password")
+async def forgot_password(body: ForgotPasswordRequest, db: Session = Depends(get_db)):
+    """Generate and email an OTP for password reset."""
+    user = get_user(db, body.email)
+    if not user:
+        # Don't reveal if user exists for security, but we'll return success anyway
+        return {"message": "If an account exists with that email, an OTP has been sent."}
+    
+    # Check if this email is an authorized Google account
+    authorized_list = [e.strip().lower() for e in AUTHORIZED_GOOGLE_EMAIL.split(",") if e.strip()]
+    if body.email.lower() in authorized_list:
+        raise HTTPException(
+            status_code=400,
+            detail="This account is configured for Google Login. Please use the 'Sign in with Google' button on the login page."
+        )
+
+    import random
+    from datetime import datetime
+    from app.candidates.utils import send_otp_email
+    
+    otp = str(random.randint(100000, 999999))
+    expires_at = datetime.now() + timedelta(minutes=10)
+    
+    AUTH_OTP_STORE[body.email] = {
+        "otp": otp,
+        "expires_at": expires_at
+    }
+    
+    # Send email
+    print(f"DEBUG: OTP generated for {body.email} is: {otp}")
+    send_otp_email(body.email, user["full_name"], otp)
+    
+    return {"message": "If an account exists with that email, an OTP has been sent."}
+
+
+@router.post("/reset-password")
+async def reset_password(body: ResetPasswordRequest, db: Session = Depends(get_db)):
+    """Verify OTP and update the user's password."""
+    from datetime import datetime
+    
+    record = AUTH_OTP_STORE.get(body.email)
+    if not record:
+        raise HTTPException(status_code=400, detail="No password reset request found for this email.")
+    
+    if datetime.now() > record["expires_at"]:
+        AUTH_OTP_STORE.pop(body.email, None)
+        raise HTTPException(status_code=400, detail="OTP has expired.")
+    
+    if record["otp"] != body.otp:
+        raise HTTPException(status_code=400, detail="Invalid OTP.")
+    
+    # Update password and clear session
+    success = reset_password_in_db(db, body.email, body.new_password)
+    if not success:
+        raise HTTPException(status_code=404, detail="User not found.")
+    
+    # Invalidate all current sessions for security
+    update_user_session(db, body.email, None)
+    
+    # Cleanup OTP
+    AUTH_OTP_STORE.pop(body.email, None)
+    
+    return {"message": "Password reset successfully. All active sessions have been invalidated. Please log in with your new password."}
 
 
 # ── POST /auth/google ─────────────────────────

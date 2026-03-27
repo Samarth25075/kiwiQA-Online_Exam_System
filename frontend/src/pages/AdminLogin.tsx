@@ -4,14 +4,14 @@ import { GoogleLogin } from "@react-oauth/google";
 import API_BASE_URL from "../config";
 import logo from "../assets/logo.png";
 
-// â”€â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -------------------------------------------- Types -----------------------------------------------
 interface FormErrors {
   email?: string;
   password?: string;
   auth?: string;
 }
 
-// â”€â”€â”€ API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── API ─────────────────────────────────────────────────────────────
 async function loginRequest(email: string, password: string) {
   const res = await fetch(`${API_BASE_URL}/login`, {
     method: "POST",
@@ -66,7 +66,17 @@ const Icons = {
   ),
   Help: () => (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+      <circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><line x1="12" y1="17" x2="12.01" y2="17" />
+    </svg>
+  ),
+  Check: () => (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+  ),
+  ChevronLeft: ({ size = 15 }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="15 18 9 12 15 6" />
     </svg>
   ),
 };
@@ -92,6 +102,24 @@ export default function AdminLogin() {
   const [shake, setShake] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+
+  // Forgot Password State
+  const [isForgotPass, setIsForgotPass] = useState(false);
+  const [forgotStep, setForgotStep] = useState(1); // 1: Email, 2: OTP + New Pass
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotOtp, setForgotOtp] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [forgotLoading, setForgotLoading] = useState(false);
+   const [forgotMsg, setForgotMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
+   const [resendCooldown, setResendCooldown] = useState(0);
+
+   useEffect(() => {
+     let timer: NodeJS.Timeout;
+     if (resendCooldown > 0) {
+       timer = setInterval(() => setResendCooldown(c => c - 1), 1000);
+     }
+     return () => clearInterval(timer);
+   }, [resendCooldown]);
 
   useEffect(() => {
     document.title = "Login | KiwiQA";
@@ -145,7 +173,7 @@ export default function AdminLogin() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || "Google authentication failed");
-      
+
       sessionStorage.setItem("access_token", data.access_token);
       navigate("/dashboard");
     } catch (err) {
@@ -156,13 +184,74 @@ export default function AdminLogin() {
     }
   };
 
+  const handleForgotRequest = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setForgotMsg(null);
+    if (!forgotEmail) { setForgotMsg({ type: "error", text: "Please enter your email." }); return; }
+
+    setForgotLoading(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/forgot-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: forgotEmail }),
+      });
+      if (res.ok) {
+        setForgotMsg({ type: "success", text: "OTP sent! Please check your email." });
+        setForgotStep(2);
+        setResendCooldown(30);
+      } else {
+        const data = await res.json();
+        setForgotMsg({ type: "error", text: data.detail || "Failed to send OTP." });
+      }
+    } catch {
+      setForgotMsg({ type: "error", text: "Network error. Please try again." });
+    } finally {
+      setForgotLoading(false);
+    }
+  };
+
+  const handleResetSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setForgotMsg(null);
+    if (!forgotOtp || !newPassword) {
+      setForgotMsg({ type: "error", text: "Please fill all fields." });
+      return;
+    }
+
+    setForgotLoading(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/reset-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: forgotEmail, otp: forgotOtp, new_password: newPassword }),
+      });
+      if (res.ok) {
+        setForgotMsg({ type: "success", text: "Password reset successful! You can now log in." });
+        setTimeout(() => {
+          setIsForgotPass(false);
+          setForgotMsg(null);
+          setForgotStep(1);
+          setForgotEmail("");
+          setForgotOtp("");
+          setNewPassword("");
+        }, 2500);
+      } else {
+        const data = await res.json();
+        setForgotMsg({ type: "error", text: data.detail || "Failed to reset password." });
+      }
+    } catch {
+      setForgotMsg({ type: "error", text: "Network error. Please try again." });
+    } finally {
+      setForgotLoading(false);
+    }
+  };
+
   const isBusy = loading;
 
   return (
     <div className="login-page">
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@400;500;600;700&display=swap');
-
         :root {
           --ink:         #0f1923;
           --ink-2:       #334155;
@@ -176,8 +265,8 @@ export default function AdminLogin() {
           --danger:      #dc2626;
           --danger-bg:   #fef2f2;
           --danger-line: #fecaca;
-          --font-serif:  'DM Serif Display', serif;
-          --font-sans:   'DM Sans', sans-serif;
+          --font-serif:  'Inter', sans-serif;
+          --font-sans:   'Inter', sans-serif;
           --radius:      10px;
           --transition:  0.2s cubic-bezier(0.4,0,0.2,1);
         }
@@ -339,13 +428,16 @@ export default function AdminLogin() {
         .login-input-wrap { position: relative; display: flex; align-items: center; }
 
         .login-input-icon {
-          position: absolute; left: 13px;
+          position: absolute; left: 16px;
           color: var(--ink-3); pointer-events: none;
           display: flex; align-items: center;
+          z-index: 10;
         }
 
         .login-input {
-          width: 100%; height: 42px; padding: 0 42px;
+          width: 100%; height: 44px; 
+          padding-left: 48px !important;
+          padding-right: 48px !important;
           background: var(--bg); border: 1px solid var(--line);
           border-radius: var(--radius);
           color: var(--ink); font-family: var(--font-sans);
@@ -353,7 +445,15 @@ export default function AdminLogin() {
           transition: border-color var(--transition), background var(--transition), box-shadow var(--transition);
         }
 
-        .login-input::placeholder { color: #b0bec5; }
+        .login-input:-webkit-autofill,
+        .login-input:-webkit-autofill:hover,
+        .login-input:-webkit-autofill:focus {
+          -webkit-text-fill-color: var(--ink);
+          -webkit-box-shadow: 0 0 0px 1000px var(--bg) inset;
+          transition: background-color 5000s ease-in-out 0s;
+        }
+
+        .login-input::placeholder { color: #b0bec5; font-size: 13px; }
 
         .login-input:focus {
           background: var(--white); border-color: var(--teal);
@@ -426,10 +526,39 @@ export default function AdminLogin() {
         }
         .login-divider-line { flex: 1; height: 1px; background: var(--line); }
         .login-divider-text { font-size: 11px; font-weight: 700; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.05em; }
+
+        .login-forgot-btn {
+          background: none; border: none; color: var(--teal); font-size: 12px; font-weight: 600;
+          cursor: pointer; transition: opacity 0.2s;
+        }
+        .login-forgot-btn:hover { text-decoration: underline; opacity: 0.8; }
         
         .login-google-wrap {
           display: flex; justify-content: center;
         }
+
+        .login-notice {
+          display: flex; gap: 12px; padding: 12px 14px; border-radius: var(--radius);
+          font-size: 13px; line-height: 1.4; margin-bottom: 24px; animation: formIn 0.3s ease;
+        }
+        .login-notice.is-error { background: var(--danger-bg); border: 1px solid var(--danger-line); color: var(--danger); }
+        .login-notice.is-success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #16a34a; }
+        .login-notice-icon { flex-shrink: 0; display: flex; align-items: center; }
+        .login-notice-text { font-weight: 500; }
+
+        .login-form-tip { font-size: 13px; color: var(--ink-3); line-height: 1.5; margin-bottom: 20px; }
+        .login-back-btn {
+          width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px;
+          background: none; border: none; color: var(--ink-3); font-size: 13px; font-weight: 600;
+          cursor: pointer; margin-top: 16px; transition: color 0.2s;
+        }
+        .login-back-btn:hover { color: var(--teal); }
+        .login-form-tip-btn {
+          background: none; border: none; color: var(--teal); font-size: 12px; font-weight: 600;
+          cursor: pointer; transition: opacity 0.2s;
+        }
+        .login-form-tip-btn:hover:not(:disabled) { text-decoration: underline; opacity: 0.8; }
+        .login-form-tip-btn:disabled { opacity: 0.5; cursor: not-allowed; }
       `}</style>
 
       {/* Left Panel */}
@@ -482,96 +611,197 @@ export default function AdminLogin() {
             <img src={logo} alt="KiwiQA" className="login-logo" />
           </div>
 
-          <h1 className="login-heading">Sign in</h1>
+          <h1 className="login-heading">{isForgotPass ? "Reset Password" : "Sign in"}</h1>
           <p className="login-subheading">
-            Access the KiwiQA assessment dashboard with your email or username.
+            {isForgotPass
+              ? "Follow the steps to recover your account access."
+              : "Access the KiwiQA assessment dashboard with your email or username."}
           </p>
 
-          {errors.auth && (
-            <div className="login-auth-error">
-              <Icons.Alert />
-              {errors.auth}
-            </div>
-          )}
+          {isForgotPass ? (
+            <div className="login-forgot-flow" style={{ animation: 'formIn 0.35s ease-out' }}>
+              {forgotMsg && (
+                <div className={`login-notice ${forgotMsg.type === 'success' ? 'is-success' : 'is-error'}`}>
+                  <div className="login-notice-icon">
+                    {forgotMsg.type === 'success' ? <Icons.Check /> : <Icons.Alert />}
+                  </div>
+                  <div className="login-notice-text">{forgotMsg.text}</div>
+                </div>
+              )}
 
-          <form onSubmit={handleSubmit} noValidate>
-
-            {/* Email */}
-            <div className="login-field">
-              <label className="login-label" htmlFor="login-email">Email or Username</label>
-              <div className="login-input-wrap">
-                <span className="login-input-icon"><Icons.Mail /></span>
-                <input
-                  id="login-email"
-                  type="email"
-                  className={`login-input${errors.email ? " has-error" : ""}`}
-                  placeholder="admin@kiwiqa.com or 'admin'"
-                  value={email}
-                  autoComplete="email"
-                  onChange={e => { setEmail(e.target.value); clearFieldErr("email"); }}
-                />
-              </div>
-              {errors.email && (
-                <div className="login-field-error"><Icons.Alert /> {errors.email}</div>
+              {forgotStep === 1 ? (
+                <form onSubmit={handleForgotRequest} noValidate>
+                  <p className="login-form-tip">We'll send a 6-digit verification code to your registered admin email.</p>
+                  <div className="login-field">
+                    <label className="login-label">Admin Email</label>
+                    <div className="login-input-wrap">
+                      <span className="login-input-icon"><Icons.Mail /></span>
+                      <input
+                        type="email"
+                        className="login-input"
+                        placeholder="Enter your registered email"
+                        value={forgotEmail}
+                        onChange={e => setForgotEmail(e.target.value)}
+                        required
+                      />
+                    </div>
+                  </div>
+                  <button className="login-btn-primary" type="submit" disabled={forgotLoading}>
+                    {forgotLoading ? <LoaderDots color="white" /> : "Send Verification Code"}
+                  </button>
+                  <button
+                    type="button"
+                    className="login-back-btn"
+                    onClick={() => { setIsForgotPass(false); setForgotMsg(null); }}
+                  >
+                    <Icons.ChevronLeft size={14} /> Back to login
+                  </button>
+                </form>
+              ) : (
+                <form onSubmit={handleResetSubmit} noValidate>
+                  <div className="login-field">
+                    <label className="login-label">Verification Code (OTP)</label>
+                    <div className="login-input-wrap">
+                      <span className="login-input-icon"><Icons.Shield /></span>
+                      <input
+                        type="text"
+                        className="login-input"
+                        placeholder="6-digit code"
+                        value={forgotOtp}
+                        onChange={e => setForgotOtp(e.target.value)}
+                        maxLength={6}
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="login-field">
+                    <label className="login-label">New Secure Password</label>
+                    <div className="login-input-wrap">
+                      <span className="login-input-icon"><Icons.Lock /></span>
+                      <input
+                        type="password"
+                        className="login-input"
+                        placeholder="Min 6 characters"
+                        value={newPassword}
+                        onChange={e => setNewPassword(e.target.value)}
+                        required
+                        minLength={6}
+                      />
+                    </div>
+                  </div>
+                  <button className="login-btn-primary" type="submit" disabled={forgotLoading}>
+                    {forgotLoading ? <LoaderDots color="white" /> : "Verify & Update Password"}
+                  </button>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '16px' }}>
+                     <button
+                       type="button"
+                       className="login-form-tip-btn"
+                       onClick={handleForgotRequest}
+                       disabled={forgotLoading || resendCooldown > 0}
+                     >
+                       {resendCooldown > 0 ? `Resend Code (${resendCooldown}s)` : "Resend Code"}
+                     </button>
+                    <button
+                      type="button"
+                      className="login-form-tip-btn"
+                      onClick={() => { setForgotStep(1); setForgotMsg(null); }}
+                    >
+                      Try different email
+                    </button>
+                  </div>
+                </form>
               )}
             </div>
+          ) : (
+            <>
+              <form onSubmit={handleSubmit} noValidate>
+                {/* Email */}
+                <div className="login-field">
+                  <label className="login-label" htmlFor="login-email">Email or Username</label>
+                  <div className="login-input-wrap">
+                    <span className="login-input-icon"><Icons.Mail /></span>
+                    <input
+                      id="login-email"
+                      type="email"
+                      className={`login-input${errors.email ? " has-error" : ""}`}
+                      placeholder="admin@kiwiqa.com or 'admin'"
+                      value={email}
+                      autoComplete="email"
+                      onChange={e => { setEmail(e.target.value); clearFieldErr("email"); }}
+                    />
+                  </div>
+                  {errors.email && (
+                    <div className="login-field-error"><Icons.Alert /> {errors.email}</div>
+                  )}
+                </div>
 
-            {/* Password */}
-            <div className="login-field">
-              <label className="login-label" htmlFor="login-password">Password</label>
-              <div className="login-input-wrap">
-                <span className="login-input-icon"><Icons.Lock /></span>
-                <input
-                  id="login-password"
-                  type={showPass ? "text" : "password"}
-                  className={`login-input${errors.password ? " has-error" : ""}`}
-                  placeholder="••••••••"
-                  value={password}
-                  autoComplete="current-password"
-                  onChange={e => { setPassword(e.target.value); clearFieldErr("password"); }}
-                />
-                <button
-                  type="button"
-                  className="login-eye-btn"
-                  onClick={() => setShowPass(v => !v)}
-                  aria-label={showPass ? "Hide password" : "Show password"}
-                >
-                  {showPass ? <Icons.EyeOff /> : <Icons.Eye />}
+                {/* Password */}
+                <div className="login-field">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '7px' }}>
+                    <label className="login-label" htmlFor="login-password" style={{ marginBottom: 0 }}>Password</label>
+                    <button
+                      type="button"
+                      className="login-forgot-btn"
+                      onClick={() => { setIsForgotPass(true); setForgotStep(1); setForgotMsg(null); }}
+                    >
+                      Forgot Password?
+                    </button>
+                  </div>
+                  <div className="login-input-wrap">
+                    <span className="login-input-icon"><Icons.Lock /></span>
+                    <input
+                      id="login-password"
+                      type={showPass ? "text" : "password"}
+                      className={`login-input${errors.password ? " has-error" : ""}`}
+                      placeholder="••••••••"
+                      value={password}
+                      autoComplete="current-password"
+                      onChange={e => { setPassword(e.target.value); clearFieldErr("password"); }}
+                    />
+                    <button
+                      type="button"
+                      className="login-eye-btn"
+                      onClick={() => setShowPass(v => !v)}
+                      aria-label={showPass ? "Hide password" : "Show password"}
+                    >
+                      {showPass ? <Icons.EyeOff /> : <Icons.Eye />}
+                    </button>
+                  </div>
+                  {errors.password && (
+                    <div className="login-field-error"><Icons.Alert /> {errors.password}</div>
+                  )}
+                </div>
+
+                <button className="login-btn-primary" type="submit" disabled={isBusy}>
+                  {loading ? <LoaderDots color="white" /> : "Sign in to Dashboard"}
                 </button>
+              </form>
+
+              <div className="login-divider">
+                <div className="login-divider-line"></div>
+                <div className="login-divider-text">or continue with</div>
+                <div className="login-divider-line"></div>
               </div>
-              {errors.password && (
-                <div className="login-field-error"><Icons.Alert /> {errors.password}</div>
-              )}
-            </div>
 
-            <button className="login-btn-primary" type="submit" disabled={isBusy}>
-              {loading ? <LoaderDots color="white" /> : "Sign in to Dashboard"}
-            </button>
-          </form>
-
-          <div className="login-divider">
-            <div className="login-divider-line"></div>
-            <div className="login-divider-text">or continue with</div>
-            <div className="login-divider-line"></div>
-          </div>
-
-          <div className="login-google-wrap">
-            <GoogleLogin
-               onSuccess={handleGoogleSuccess}
-               onError={() => setErrors({ auth: "Google Login failed. Please try again." })}
-               useOneTap
-               theme="outline"
-               shape="rectangular"
-               width="380"
-            />
-          </div>
+              <div className="login-google-wrap">
+                <GoogleLogin
+                  onSuccess={handleGoogleSuccess}
+                  onError={() => setErrors({ auth: "Google Login failed. Please try again." })}
+                  useOneTap
+                  theme="outline"
+                  shape="rectangular"
+                  width="380"
+                />
+              </div>
+            </>
+          )}
 
           <div className="login-form-footer">
             <div style={{ marginBottom: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
               <span style={{ color: 'var(--teal)', display: 'flex', alignItems: 'center' }}><Icons.Help /></span>
-              <a 
-                href="/Userguide.html" 
-                target="_blank" 
+              <a
+                href="/Userguide.html"
+                target="_blank"
                 rel="noopener noreferrer"
                 style={{ color: 'var(--teal)', textDecoration: 'none', fontWeight: 600, fontSize: '13px' }}
                 onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'}

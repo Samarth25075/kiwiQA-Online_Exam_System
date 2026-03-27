@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import API_BASE_URL from '../config';
 import AdminLayout from '../components/AdminLayout';
 import CustomPopup from '../components/CustomPopup';
@@ -26,10 +26,16 @@ const Icons = {
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
     ),
     Grid: ({ size = 16 }) => (
-        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
     ),
     List: ({ size = 16 }) => (
-        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+    ),
+    Close: ({ size = 18 }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+    ),
+    ChevronDown: ({ size = 14 }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9" /></svg>
     )
 };
 
@@ -77,6 +83,20 @@ const QuestionBank: React.FC = () => {
         ]
     });
     const [popup, setPopup] = useState<{ isOpen: boolean; title: string; message: string; type: 'alert' | 'confirm'; onConfirm?: () => void } | null>(null);
+
+    // Prevent background scrolling when any modal is open
+    useEffect(() => {
+        const isAnyModalOpen = isAdding || editingQuestion !== null || isQuickAdding;
+        if (isAnyModalOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'auto';
+        }
+        // Cleanup on unmount
+        return () => {
+            document.body.style.overflow = 'auto';
+        };
+    }, [isAdding, editingQuestion, isQuickAdding]);
 
     const fetchStats = async () => {
         setLoading(true);
@@ -283,14 +303,23 @@ const QuestionBank: React.FC = () => {
 
     return (
         <AdminLayout>
-            <div className="qb-container" style={{ padding: '24px' }}>
+            <div className="qb-container">
                 <style>{`
+                    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap');
+
+                    .qb-container {
+                        min-height: calc(100vh - 80px);
+                        background: var(--bg-neutral);
+                        font-family: var(--font-body);
+                        padding: 24px;
+                    }
+
                     .qb-header {
                         display: flex;
                         justify-content: space-between;
                         align-items: center;
-                        margin-bottom: var(--space-32);
-                        padding-bottom: var(--space-24);
+                        margin-bottom: 32px;
+                        padding-bottom: 24px;
                         border-bottom: 1px solid var(--border);
                     }
                     .qb-title-group {
@@ -300,80 +329,197 @@ const QuestionBank: React.FC = () => {
                     }
                     .qb-title {
                         margin: 0;
-                        font-size: var(--font-size-title);
+                        font-size: 24px;
                         font-weight: 700;
                         color: var(--text);
                         font-family: var(--font-heading);
+                        letter-spacing: -0.01em;
                     }
                     .qb-subtitle {
                         margin: 2px 0 0;
-                        color: var(--slate-500);
+                        color: var(--text-muted);
                         font-size: 14px;
+                        font-weight: 400;
                     }
 
-                    /* Category Cards */
+                    /* Category Cards Redesign */
                     .category-grid {
                         display: grid;
-                        grid-template-columns: repeat(auto-fill, 240px);
-                        gap: var(--space-16);
+                        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                        gap: 16px;
                         animation: fadeIn 0.4s ease-out;
                     }
-                    @keyframes fadeIn {
-                        from { opacity: 0; transform: translateY(10px); }
-                        to { opacity: 1; transform: translateY(0); }
-                    }
+
                     .category-card {
                         background: var(--bg);
                         border: 1px solid var(--border);
-                        border-radius: var(--radius-lg);
-                        padding: var(--space-16);
-                        height: 120px;
-                        cursor: pointer;
-                        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                        border-radius: 14px;
+                        padding: 20px;
                         display: flex;
                         flex-direction: column;
-                        justify-content: space-between;
-                        box-shadow: var(--shadow-sm);
+                        gap: 16px;
+                        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                        position: relative;
+                        cursor: default;
                     }
+
                     .category-card:hover {
-                        transform: translateY(-6px);
-                        border-color: var(--primary);
-                        box-shadow: 0 20px 25px -5px rgba(28, 132, 143, 0.1), 0 10px 10px -5px rgba(28, 132, 143, 0.04);
+                        transform: translateY(-3px);
+                        border-color: #B8B0F5;
+                        box-shadow: 0 10px 20px rgba(99, 84, 220, 0.13);
                     }
+
+                    .card-top {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                    }
+
                     .category-icon {
-                        width: 32px;
-                        height: 32px;
+                        width: 40px;
+                        height: 40px;
                         background: var(--primary-light);
-                        color: var(--primary);
-                        border-radius: var(--radius-md);
+                        border-radius: 10px;
                         display: flex;
                         align-items: center;
                         justify-content: center;
+                        color: var(--primary);
                     }
+
                     .category-icon svg {
-                        width: 16px;
-                        height: 16px;
+                        width: 20px;
+                        height: 20px;
+                        stroke: var(--primary);
+                        stroke-width: 1.8;
                     }
+
+                    .cat-badge {
+                        padding: 4px 12px;
+                        border-radius: 20px;
+                        font-size: 10px;
+                        font-weight: 600;
+                        text-transform: uppercase;
+                        letter-spacing: 0.04em;
+                    }
+
+                    .badge-agile { background: color-mix(in srgb, var(--primary), transparent 85%); color: var(--primary); }
+                    .badge-hr { background: color-mix(in srgb, var(--color-danger), transparent 85%); color: var(--color-danger); }
+                    .badge-project-mg { background: color-mix(in srgb, var(--color-success), transparent 85%); color: var(--color-success); }
+                    .badge-default { background: var(--bg-neutral); color: var(--primary); }
+
                     .category-name {
                         margin: 0;
-                        font-size: var(--font-size-emph);
-                        font-weight: 700;
+                        font-size: 16px;
+                        font-weight: 600;
                         color: var(--text);
+                        letter-spacing: -0.2px;
                         font-family: var(--font-heading);
                     }
-                    .category-meta {
-                        display: flex;
-                        gap: var(--space-12);
-                        padding-top: var(--space-8);
-                        border-top: 1px solid var(--border);
-                        font-size: var(--font-size-badge);
+
+                    .category-description {
+                        margin: 4px 0 0;
+                        font-size: 12px;
+                        font-weight: 400;
                         color: var(--text-muted);
-                        font-weight: 500;
+                        line-height: 1.4;
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        font-family: var(--font-body);
                     }
-                    .meta-item strong { 
-                        color: var(--text); 
-                        font-family: var(--font-mono);
-                        font-weight: 700;
+
+                    .card-divider {
+                        height: 1px;
+                        background: var(--border);
+                        margin: 0;
+                    }
+
+                    .card-stats {
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                    }
+
+                    .stat-col {
+                        flex: 1;
+                        display: flex;
+                        flex-direction: column;
+                        gap: 2px;
+                    }
+
+                    .stat-num {
+                        font-size: 18px;
+                        font-weight: 600;
+                        color: var(--primary);
+                        letter-spacing: -0.5px;
+                        font-family: 'DM Sans', sans-serif;
+                    }
+
+                    .stat-label {
+                        font-size: 11px;
+                        font-weight: 500;
+                        text-transform: uppercase;
+                        letter-spacing: 0.04em;
+                        color: var(--text-muted);
+                        font-family: 'DM Sans', sans-serif;
+                    }
+
+                    .stat-divider {
+                        width: 1px;
+                        height: 30px;
+                        background: var(--border);
+                        margin: 0 16px;
+                    }
+
+                    .card-actions {
+                        display: flex;
+                        gap: 8px;
+                        margin-top: 4px;
+                    }
+
+                    .btn-delete-bank {
+                        flex: 1;
+                        height: 36px;
+                        background: var(--color-danger-light);
+                        border: 1px solid var(--color-danger-border);
+                        border-radius: 8px;
+                        color: var(--color-danger);
+                        font-size: 12px;
+                        font-weight: 500;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 6px;
+                        cursor: pointer;
+                        transition: all 0.2s;
+                        font-family: 'DM Sans', sans-serif;
+                    }
+
+                    .btn-delete-bank:hover { background: #FFECEC; }
+
+                    .btn-edit-bank {
+                        flex: 2;
+                        height: 36px;
+                        background: var(--primary);
+                        color: var(--text-on-primary);
+                        border: none;
+                        border-radius: 8px;
+                        font-size: 12px;
+                        font-weight: 500;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 6px;
+                        cursor: pointer;
+                        transition: all 0.2s;
+                        font-family: 'DM Sans', sans-serif;
+                    }
+
+                    .btn-edit-bank:hover { background: #4439C0; }
+
+                    @keyframes fadeIn {
+                        from { opacity: 0; transform: translateY(10px); }
+                        to { opacity: 1; transform: translateY(0); }
                     }
 
                     /* Questions Styling */
@@ -384,19 +530,20 @@ const QuestionBank: React.FC = () => {
                         animation: fadeIn 0.4s ease-out;
                     }
                     .question-card {
-                        background: white;
-                        border: 1px solid var(--slate-100);
-                        border-radius: 12px;
-                        padding: 16px 20px;
-                        transition: all 0.2s;
+                        background: var(--bg-raised);
+                        border: 1px solid var(--border);
+                        border-radius: 14px;
+                        padding: 24px 28px;
+                        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
                         display: flex;
                         flex-direction: column;
-                        gap: 12px;
-                        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+                        gap: 16px;
+                        box-shadow: var(--shadow-sm);
                     }
                     .question-card:hover {
                         border-color: var(--primary-light);
-                        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+                        transform: translateY(-2px);
+                        box-shadow: var(--shadow);
                     }
                     .q-header {
                         display: flex;
@@ -407,94 +554,104 @@ const QuestionBank: React.FC = () => {
                         font-size: 10px;
                         font-weight: 800;
                         text-transform: uppercase;
-                        letter-spacing: 0.05em;
-                        padding: 3px 8px;
-                        border-radius: 4px;
+                        letter-spacing: 0.08em;
+                        padding: 4px 10px;
+                        border-radius: 6px;
                     }
-                    .q-badge-beginner { background: #dcfce7; color: #15803d; }
-                    .q-badge-intermediate { background: #fef9c3; color: #a16207; }
-                    .q-badge-advanced { background: #fee2e2; color: #b91c1c; }
+                    .q-badge-beginner { background: var(--color-success-light); color: var(--color-success); border: 1px solid var(--color-success-border); }
+                    .q-badge-intermediate { background: var(--color-warning-light); color: var(--color-warning); border: 1px solid var(--color-warning-border); }
+                    .q-badge-advanced { background: var(--color-danger-light); color: var(--color-danger); border: 1px solid var(--color-danger-border); }
+                    
                     .q-marks {
-                        font-size: 12px;
-                        font-weight: 600;
-                        color: var(--slate-500);
-                        background: var(--slate-50);
-                        padding: 3px 8px;
-                        border-radius: 4px;
+                        font-size: 11px;
+                        font-weight: 800;
+                        color: var(--text);
+                        background: var(--bg-sunken);
+                        padding: 4px 12px;
+                        border-radius: 6px;
+                        border: 1px solid var(--border);
                     }
                     
                     .q-text {
-                        font-family: 'Outfit', sans-serif;
+                        font-family: var(--font-body);
                         font-size: 15px;
-                        font-weight: 600;
-                        color: var(--slate-900);
-                        margin: 0;
-                        line-height: 1.5;
+                        font-weight: 500;
+                        color: var(--text-muted);
+                        margin: 4px 0;
+                        line-height: 1.7;
+                        letter-spacing: 0.015em;
+                        display: -webkit-box;
+                        -webkit-line-clamp: 3;
+                        -webkit-box-orient: vertical;
+                        overflow: hidden;
                     }
                     .q-options {
                         display: grid;
                         grid-template-columns: 1fr 1fr;
-                        gap: 10px;
+                        gap: 12px;
+                        margin-top: 4px;
                     }
                     @media (max-width: 768px) {
                         .q-options { grid-template-columns: 1fr; }
                     }
                     .opt-item {
-                        padding: 8px 12px;
-                        background: #f8fafc;
-                        border: 1px solid transparent;
-                        border-radius: 8px;
-                        font-size: 13px;
-                        color: var(--slate-600);
+                        padding: 14px 20px;
+                        background: var(--bg-sunken);
+                        border: 2px solid transparent;
+                        border-radius: 12px;
+                        font-size: 14px;
+                        font-weight: 600;
+                        color: var(--text-muted);
                         display: flex;
                         align-items: center;
-                        gap: 10px;
-                        transition: all 0.2s;
+                        gap: 12px;
+                        transition: all 0.2s ease;
                     }
                     .opt-item.correct {
-                        background: #f0fdf4;
-                        border-color: #10b981;
-                        color: #15803d;
-                        font-weight: 600;
+                        background: var(--color-success-light);
+                        border-color: var(--color-success);
+                        color: var(--color-success);
+                        box-shadow: 0 0 15px var(--color-success-light);
                     }
                     .opt-dot {
-                        width: 6px;
-                        height: 6px;
+                        width: 8px;
+                        height: 8px;
                         border-radius: 50%;
                         flex-shrink: 0;
+                        background: var(--border-strong);
+                    }
+                    .opt-item.correct .opt-dot {
+                        background: var(--color-success);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        width: 14px;
+                        height: 14px;
+                        border-radius: 4px;
                     }
                     .q-actions {
                         display: flex;
                         justify-content: flex-end;
-                        gap: 10px;
-                        margin-top: 0px;
-                        padding-top: 14px;
-                        border-top: 1px solid var(--slate-50);
+                        gap: 12px;
+                        margin-top: 8px;
+                        padding-top: 20px;
                     }
                     .btn-action {
-                        padding: 8px 16px;
-                        border-radius: 8px;
-                        font-size: 13px;
-                        font-weight: 600;
+                        padding: 10px 20px;
+                        border-radius: 10px;
+                        font-size: 13.5px;
+                        font-weight: 700;
                         display: flex;
                         align-items: center;
-                        gap: 8px;
+                        gap: 10px;
                         cursor: pointer;
                         transition: all 0.2s;
-                        border: 1.2px solid var(--slate-200);
-                        background: white;
-                        color: var(--slate-600);
+                        border: none;
+                        background: var(--bg-sunken);
+                        color: var(--text-muted);
                     }
-                    .btn-edit:hover { 
-                        border-color: var(--primary); 
-                        color: var(--primary); 
-                        background: rgba(28, 132, 143, 0.05); 
-                    }
-                    .btn-delete:hover { 
-                        border-color: #e11d48; 
-                        color: #e11d48; 
-                        background: rgba(225, 29, 72, 0.05); 
-                    }
+                    .btn-edit:hover { background: var(--primary-light); color: var(--primary); }
+                    .btn-delete:hover { background: var(--color-danger-light); color: var(--color-danger); }
                     .modal-overlay {
                         position: fixed;
                         inset: 0;
@@ -512,7 +669,7 @@ const QuestionBank: React.FC = () => {
                         to { opacity: 1; }
                     }
                     .modal-content {
-                        background: rgba(255, 255, 255, 0.95);
+                        background: var(--bg-raised);
                         width: 100%;
                         max-width: 640px;
                         max-height: 85vh;
@@ -537,7 +694,7 @@ const QuestionBank: React.FC = () => {
                         background: linear-gradient(to right, rgba(28, 132, 143, 0.02), transparent);
                     }
                     .modal-title {
-                        font-family: 'Outfit', sans-serif;
+                        font-family: 'Inter', sans-serif;
                         font-size: 22px;
                         font-weight: 800;
                         color: var(--slate-900);
@@ -549,45 +706,84 @@ const QuestionBank: React.FC = () => {
                         padding: 32px;
                         overflow-y: auto;
                         scrollbar-width: thin;
-                        scrollbar-color: var(--slate-200) transparent;
+                        scrollbar-color: var(--border) transparent;
                     }
                     .modal-footer {
-                        padding: 20px 32px;
-                        border-top: 1px solid var(--slate-100);
+                        padding: 24px 32px;
+                        border-top: 1px solid var(--border);
                         display: flex;
                         justify-content: flex-end;
                         gap: 16px;
-                        background: var(--slate-50);
+                        background: var(--bg-sunken);
+                        border-radius: 0 0 24px 24px;
                     }
                     .form-section-title {
-                        font-size: 14px;
-                        font-weight: 700;
-                        color: var(--slate-900);
-                        margin: 24px 0 16px;
+                        font-size: 11px;
+                        font-weight: 800;
+                        color: var(--primary);
+                        text-transform: uppercase;
+                        letter-spacing: 0.1em;
+                        margin: 28px 0 16px;
                         display: flex;
                         align-items: center;
                         gap: 8px;
                     }
                     .form-section-title:first-child { margin-top: 0; }
                     
-                    .form-group { margin-bottom: 20px; }
-                    .form-label { display: block; font-size: 13px; font-weight: 700; color: var(--slate-700); margin-bottom: 8px; }
+                    .form-group { margin-bottom: 24px; }
+                    .form-label { 
+                        display: block; 
+                        font-size: 11px; 
+                        font-weight: 900; 
+                        color: var(--text); 
+                        margin-bottom: 10px; 
+                        text-transform: uppercase; 
+                        letter-spacing: 0.1em;
+                    }
                     .form-input, .form-select, .form-textarea {
                         width: 100%;
-                        padding: 12px 14px;
-                        border: 1.5px solid var(--slate-100);
+                        padding: 12px 16px;
+                        border: 1.5px solid var(--border);
                         border-radius: 12px;
-                        background: white;
+                        background: var(--bg-sunken);
                         font-family: inherit;
-                        font-size: 14px;
-                        transition: all 0.2s;
-                        color: var(--slate-900);
+                        font-size: 14.5px;
+                        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+                        color: var(--text);
                     }
+                    
+                    /* Specific light-mode overrides */
+                    [data-theme="light"] .form-input, 
+                    [data-theme="light"] .form-select, 
+                    [data-theme="light"] .form-textarea {
+                        background: #f0f9ff !important;
+                        border-color: #e0f2fe !important;
+                    }
+                    
                     .form-input:focus, .form-select:focus, .form-textarea:focus { 
                         outline: none; 
                         border-color: var(--primary); 
-                        box-shadow: 0 0 0 4px rgba(28, 132, 143, 0.1);
+                        box-shadow: 0 0 0 4px var(--primary-light);
                         transform: translateY(-1px);
+                        background: var(--bg);
+                    }
+
+                    .form-select {
+                        appearance: none !important;
+                        -webkit-appearance: none !important;
+                        -moz-appearance: none !important;
+                        /* Default / Light Mode Icon (Dark Stroke) */
+                        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%232c3e50' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+                        background-repeat: no-repeat !important;
+                        background-position: right 14px center !important;
+                        background-size: 16px !important;
+                        padding-right: 40px !important;
+                        cursor: pointer;
+                    }
+
+                    /* Dark Mode Icon Override (White Stroke) */
+                    [data-theme="dark"] .form-select {
+                        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
                     }
 
                     .option-input-group {
@@ -595,20 +791,64 @@ const QuestionBank: React.FC = () => {
                         gap: 12px;
                         margin-bottom: 12px;
                         align-items: center;
-                        background: white;
-                        padding: 6px;
+                        background: var(--bg-sunken);
+                        padding: 10px 14px;
                         border-radius: 14px;
-                        border: 1px solid var(--slate-50);
-                        transition: all 0.2s;
+                        border: 1.5px solid var(--border);
+                        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
                     }
                     .option-input-group:focus-within {
-                        border-color: var(--slate-200);
-                        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+                        border-color: var(--primary);
+                        background: var(--bg);
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
                     }
+
+                    /* Hide spin buttons for Marks input */
+                    input[type=number]::-webkit-inner-spin-button, 
+                    input[type=number]::-webkit-outer-spin-button { 
+                        -webkit-appearance: none; 
+                        margin: 0; 
+                    }
+                    input[type=number] { -moz-appearance: textfield; }
+
                     .radio-custom {
                         width: 20px; height: 20px;
                         cursor: pointer;
                         accent-color: var(--primary);
+                    }
+
+                    .view-mode-toggle {
+                        display: flex;
+                        background: var(--bg-sunken);
+                        padding: 4.5px;
+                        border-radius: 14px;
+                        margin-right: 12px;
+                        border: 1px solid var(--border);
+                    }
+                    .view-toggle-btn {
+                        padding: 7px 18px;
+                        background: transparent;
+                        border: none;
+                        border-radius: 10px;
+                        cursor: pointer;
+                        display: flex;
+                        align-items: center;
+                        gap: 10px;
+                        font-family: var(--font-heading);
+                        font-size: 13.5px;
+                        font-weight: 700;
+                        color: var(--text-muted);
+                        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+                        white-space: nowrap;
+                    }
+                    .view-toggle-btn.active {
+                        background: var(--bg);
+                        color: var(--primary);
+                        box-shadow: var(--shadow-sm);
+                    }
+                    .view-toggle-btn:hover:not(.active) {
+                        background: var(--primary-lighter);
+                        color: var(--primary);
                     }
                 `}</style>
 
@@ -624,34 +864,38 @@ const QuestionBank: React.FC = () => {
                             </button>
                         )}
                         <div>
-                            <h2 className="qb-title">
+                            <div className="qb-breadcrumb" style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-subtle)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <span>Question Bank</span>
+                                {selectedCategory && (
+                                    <>
+                                        <Icons.ChevronRight />
+                                        <span style={{ color: 'var(--primary)' }}>{selectedCategory}</span>
+                                    </>
+                                )}
+                            </div>
+                            <h2 className="qb-title" style={{ fontSize: '26px', color: 'var(--text)' }}>
                                 {selectedCategory ? selectedCategory : "Question Bank"}
                             </h2>
-                            <p className="qb-subtitle">
-                                {selectedCategory
-                                    ? `Manage questions for ${selectedCategory}`
-                                    : "Organize and curate your exam questions by category."}
-                            </p>
                         </div>
                     </div>
 
                     <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                        <div className="view-mode-toggle" style={{ display: 'flex', background: 'var(--slate-50)', padding: '4px', borderRadius: '10px', marginRight: '12px' }}>
+                        <div className="view-mode-toggle">
                             <button
+                                className={`view-toggle-btn ${viewMode === 'card' ? 'active' : ''}`}
                                 onClick={() => { setViewMode('card'); localStorage.setItem('qb_view_mode', 'card'); }}
-                                style={{ padding: '6px 12px', background: viewMode === 'card' ? 'white' : 'transparent', border: 'none', borderRadius: '7px', cursor: 'pointer', boxShadow: viewMode === 'card' ? '0 2px 4px rgba(0,0,0,0.05)' : 'none', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: 600, color: viewMode === 'card' ? 'var(--slate-900)' : 'var(--slate-500)', transition: 'all 0.2s' }}
                             >
-                                <Icons.Grid size={13} /> Card view
+                                <Icons.Grid size={14} /> Card view
                             </button>
                             <button
+                                className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
                                 onClick={() => { setViewMode('grid'); localStorage.setItem('qb_view_mode', 'grid'); }}
-                                style={{ padding: '6px 12px', background: viewMode === 'grid' ? 'white' : 'transparent', border: 'none', borderRadius: '7px', cursor: 'pointer', boxShadow: viewMode === 'grid' ? '0 2px 4px rgba(0,0,0,0.05)' : 'none', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: 600, color: viewMode === 'grid' ? 'var(--slate-900)' : 'var(--slate-500)', transition: 'all 0.2s' }}
                             >
-                                <Icons.List size={13} /> Detailed Grid
+                                <Icons.List size={14} /> Detailed Grid
                             </button>
                         </div>
                         <button
-                            className="btn-add-q"
+                            className="btn-primary"
                             onClick={() => {
                                 if (selectedCategory) {
                                     setNewQuestion({ ...newQuestion, category: selectedCategory });
@@ -659,11 +903,6 @@ const QuestionBank: React.FC = () => {
                                 } else {
                                     setIsQuickAdding(true);
                                 }
-                            }}
-                            style={{
-                                padding: '10px 16px', borderRadius: '10px', background: 'var(--primary)', color: 'white',
-                                border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px',
-                                fontWeight: 700, fontSize: '14px', boxShadow: '0 4px 12px rgba(28, 132, 143, 0.2)'
                             }}
                         >
                             <Icons.Plus /> {selectedCategory ? "Add Question" : "Add Category"}
@@ -690,48 +929,71 @@ const QuestionBank: React.FC = () => {
                 {!selectedCategory && !loading && (
                     viewMode === 'card' ? (
                         <div className="category-grid">
-                            {stats.map(s => (
-                                <div key={s.category} className="category-card" onClick={() => fetchQuestions(s.category)}>
-                                    <div className="category-icon">
-                                        <Icons.Category />
-                                    </div>
-                                    <h3 className="category-name">{s.category}</h3>
-                                    <div className="category-meta">
-                                        <div className="meta-item">
-                                            <strong>{s.count}</strong> questions
-                                        </div>
-                                        <div className="meta-item">
-                                            <strong>{s.total_marks}</strong> total marks
-                                        </div>
-                                    </div>
-                                    <div style={{ position: 'absolute', right: '20px', bottom: '20px', color: 'var(--slate-300)' }}>
-                                        <Icons.ChevronRight />
-                                    </div>
+                            {stats.map(s => {
+                                let badgeClass = "badge-default";
+                                const catLower = s.category.toLowerCase();
+                                if (catLower.includes('agile')) badgeClass = "badge-agile";
+                                else if (catLower.includes('hr')) badgeClass = "badge-hr";
+                                else if (catLower.includes('project') || catLower.includes('mgmt')) badgeClass = "badge-project-mg";
 
-                                    {/* Delete Category Button */}
-                                    <button
-                                        className="btn-delete-cat"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleDeleteCategory(s.category);
-                                        }}
-                                        title="Delete Category"
-                                    >
-                                        <Icons.Delete />
-                                    </button>
-                                </div>
-                            ))}
+                                return (
+                                    <div key={s.category} className="category-card">
+                                        <div className="card-top">
+                                            <div className="category-icon">
+                                                <Icons.Category />
+                                            </div>
+                                            <div className="badge-area">
+                                                <span className={`cat-badge ${badgeClass}`}>{s.category}</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="card-content">
+                                            <h3 className="category-name">{s.category}</h3>
+                                            <p className="category-description">Management of questions related to {s.category}.</p>
+                                        </div>
+
+                                        <div className="card-divider"></div>
+
+                                        <div className="card-stats">
+                                            <div className="stat-col">
+                                                <span className="stat-num">{s.count}</span>
+                                                <span className="stat-label">Questions</span>
+                                            </div>
+                                            <div className="stat-divider"></div>
+                                            <div className="stat-col">
+                                                <span className="stat-num">{s.total_marks}</span>
+                                                <span className="stat-label">Total Marks</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="card-actions">
+                                            <button
+                                                className="btn-delete-bank"
+                                                onClick={(e) => { e.stopPropagation(); handleDeleteCategory(s.category); }}
+                                            >
+                                                <Icons.Delete /> Delete
+                                            </button>
+                                            <button
+                                                className="btn-edit-bank"
+                                                onClick={() => fetchQuestions(s.category)}
+                                            >
+                                                <Icons.Edit /> Edit Bank
+                                            </button>
+                                        </div>
+                                    </div>
+                                );
+                            })}
                         </div>
                     ) : (
                         <div className="qb-table-container">
                             <style>{`
                                 .qb-table { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
-                                .qb-table th { text-align: left; padding: 12px 16px; font-size: 11px; font-weight: 800; color: var(--slate-400); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 2px solid var(--slate-50); }
-                                .qb-table td { background: white; padding: 16px; border-bottom: 1px solid var(--slate-50); transition: all 0.2s; cursor: pointer; }
-                                .qb-table tr:hover td { background: #fafbfc; border-color: var(--slate-100); }
-                                .qb-table td:first-child { border-radius: 12px 0 0 12px; border-left: 1px solid var(--slate-50); }
-                                .qb-table td:last-child { border-radius: 0 12px 12px 0; border-right: 1px solid var(--slate-50); }
-                                .cat-name-cell { font-family: 'Outfit', sans-serif; font-weight: 700; color: var(--slate-900); font-size: 16px; }
+                                .qb-table th { text-align: left; padding: 12px 16px; font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 2px solid var(--border); }
+                                .qb-table td { background: var(--bg); padding: 16px; border-bottom: 1px solid var(--border); transition: all 0.2s; cursor: pointer; }
+                                .qb-table tr:hover td { background: var(--bg-neutral); border-color: var(--border); }
+                                .qb-table td:first-child { border-radius: 12px 0 0 12px; border-left: 1px solid var(--border); }
+                                .qb-table td:last-child { border-radius: 0 12px 12px 0; border-right: 1px solid var(--border); }
+                                .cat-name-cell { font-family: var(--font-heading); font-weight: 700; color: var(--text); font-size: 16px; }
                             `}</style>
                             <table className="qb-table">
                                 <thead>
@@ -801,7 +1063,7 @@ const QuestionBank: React.FC = () => {
                                             <div key={idx} className={`opt-item ${opt.is_correct ? 'correct' : ''}`}>
                                                 <div
                                                     className="opt-dot"
-                                                    style={{ background: opt.is_correct ? '#10b981' : '#cbd5e1' }}
+                                                    style={{ background: opt.is_correct ? 'var(--color-success)' : 'var(--border)' }}
                                                 />
                                                 {opt.text}
                                             </div>
@@ -822,12 +1084,12 @@ const QuestionBank: React.FC = () => {
                         <div className="qb-table-container">
                             <style>{`
                                 .qb-table { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
-                                .qb-table th { text-align: left; padding: 12px 16px; font-size: 11px; font-weight: 800; color: var(--slate-400); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 2px solid var(--slate-50); }
-                                .qb-table td { background: white; padding: 16px; border-bottom: 1px solid var(--slate-50); transition: all 0.2s; }
-                                .qb-table tr:hover td { background: #fafbfc; border-color: var(--slate-100); }
-                                .qb-table td:first-child { border-radius: 12px 0 0 12px; border-left: 1px solid var(--slate-50); }
-                                .qb-table td:last-child { border-radius: 0 12px 12px 0; border-right: 1px solid var(--slate-50); }
-                                .qb-table .q-text-cell { font-family: 'DM Sans', sans-serif; font-weight: 600; color: var(--slate-900); font-size: 14px; max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+                                .qb-table th { text-align: left; padding: 12px 16px; font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 2px solid var(--border); }
+                                .qb-table td { background: var(--bg); padding: 16px; border-bottom: 1px solid var(--border); transition: all 0.2s; }
+                                .qb-table tr:hover td { background: var(--bg-neutral); border-color: var(--border); }
+                                .qb-table td:first-child { border-radius: 12px 0 0 12px; border-left: 1px solid var(--border); }
+                                .qb-table td:last-child { border-radius: 0 12px 12px 0; border-right: 1px solid var(--border); }
+                                .qb-table .q-text-cell { font-family: var(--font-body); font-weight: 600; color: var(--text); font-size: 14px; max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
                             `}</style>
                             <table className="qb-table">
                                 <thead>
@@ -843,9 +1105,10 @@ const QuestionBank: React.FC = () => {
                                         <tr key={q.q_id}>
                                             <td style={{ verticalAlign: 'middle' }}>
                                                 <div className="q-text-cell" title={q.text}>{q.text}</div>
-                                                <div style={{ fontSize: '12px', color: 'var(--slate-400)', marginTop: '4px', display: 'flex', gap: '8px' }}>
-                                                    {q.options.length} Options â€¢ Correct: {q.options.find(o => o.is_correct)?.text.slice(0, 30)}...
-                                                </div>
+                                                {q.options.length} Options •
+                                                <span style={{ color: 'var(--color-success)' }}>
+                                                    ✅ {q.options.find(o => o.is_correct)?.text.slice(0, 30)}...
+                                                </span>
                                             </td>
                                             <td>
                                                 <span className={`q-badge q-badge-${q.difficulty.toLowerCase()}`}>
@@ -886,18 +1149,37 @@ const QuestionBank: React.FC = () => {
                 {/* â”€â”€ Edit Modal â”€â”€ */}
                 {editingQuestion && (
                     <div className="modal-overlay">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h3 className="modal-title">
+                        <div className="modal-content" style={{ maxWidth: '600px', background: 'var(--bg-raised)', border: '1px solid var(--border)' }}>
+                            <div className="modal-header" style={{ borderBottom: 'none', padding: '32px 32px 14px' }}>
+                                <h3 className="modal-title" style={{ color: 'var(--text)', fontSize: '24px', fontWeight: 800 }}>
                                     <Icons.Edit /> Edit Question
                                 </h3>
-                                <button onClick={() => setEditingQuestion(null)} style={{ background: 'rgba(0,0,0,0.05)', border: 'none', cursor: 'pointer', width: 40, height: 40, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    âœ•
+                                <button onClick={() => setEditingQuestion(null)} style={{ background: 'var(--bg-sunken)', border: 'none', cursor: 'pointer', width: 40, height: 40, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
+                                    <Icons.Close size={20} />
                                 </button>
                             </div>
-                            <div className="modal-body">
+                            <div className="modal-body" style={{ padding: '0 32px 32px' }}>
                                 <form id="edit-q-form" onSubmit={handleUpdate}>
-                                    <div className="form-section-title">
+                                    <div className="form-section-title" style={{ color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '12px', letterSpacing: '0.05em', marginBottom: '12px', fontWeight: 800, borderBottom: '1px solid var(--border)', paddingBottom: '12px', marginTop: '32px' }}>
+                                        GENERAL INFORMATION
+                                    </div>
+                                    <div className="form-group">
+                                        <label className="form-label">Category Name</label>
+                                        <select
+                                            className="form-select"
+                                            value={editingQuestion.category}
+                                            onChange={e => setEditingQuestion({ ...editingQuestion, category: e.target.value })}
+                                            required
+                                            style={{ background: 'var(--bg-sunken)', border: '1px solid var(--border)', color: 'var(--text)', height: '52px', fontSize: '15px', width: '100%' }}
+                                        >
+                                            <option value="">Select Category</option>
+                                            {stats.map(s => (
+                                                <option key={s.category} value={s.category}>{s.category}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div className="form-section-title" style={{ color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '12px', letterSpacing: '0.05em', marginBottom: '12px', fontWeight: 800, borderBottom: '1px solid var(--border)', paddingBottom: '12px', marginTop: '32px' }}>
                                         QUESTION CONTENT
                                     </div>
                                     <div className="form-group">
@@ -908,20 +1190,32 @@ const QuestionBank: React.FC = () => {
                                             value={editingQuestion.text}
                                             onChange={e => setEditingQuestion({ ...editingQuestion, text: e.target.value })}
                                             required
+                                            style={{ background: 'var(--bg-sunken)', border: '1px solid var(--border)', color: 'var(--text)', height: 'auto', minHeight: '100px', fontSize: '15px' }}
                                         />
                                     </div>
                                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                                         <div className="form-group">
                                             <label className="form-label">Difficulty Level</label>
-                                            <select
-                                                className="form-select"
-                                                value={editingQuestion.difficulty}
-                                                onChange={e => setEditingQuestion({ ...editingQuestion, difficulty: e.target.value })}
-                                            >
-                                                <option>Beginner</option>
-                                                <option>Intermediate</option>
-                                                <option>Advanced</option>
-                                            </select>
+                                            <div style={{ position: 'relative' }}>
+                                                <select
+                                                    className="form-select"
+                                                    value={editingQuestion.difficulty}
+                                                    onChange={e => setEditingQuestion({ ...editingQuestion, difficulty: e.target.value })}
+                                                    style={{ 
+                                                        background: 'var(--bg-sunken)', 
+                                                        border: '1px solid var(--border)', 
+                                                        color: 'var(--text)', 
+                                                        height: '52px', 
+                                                        fontSize: '15px',
+                                                        width: '100%',
+                                                        paddingRight: '40px'
+                                                    }}
+                                                >
+                                                    <option>Beginner</option>
+                                                    <option>Intermediate</option>
+                                                    <option>Advanced</option>
+                                                </select>
+                                            </div>
                                         </div>
                                         <div className="form-group">
                                             <label className="form-label">Marks</label>
@@ -930,16 +1224,17 @@ const QuestionBank: React.FC = () => {
                                                 className="form-input"
                                                 value={editingQuestion.marks}
                                                 onChange={e => setEditingQuestion({ ...editingQuestion, marks: parseInt(e.target.value) })}
+                                                style={{ background: 'var(--bg-sunken)', border: '1px solid var(--border)', color: 'var(--text)', height: '52px', fontSize: '15px' }}
                                             />
                                         </div>
                                     </div>
 
-                                    <div className="form-section-title">
+                                    <div className="form-section-title" style={{ color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '12px', letterSpacing: '0.05em', marginBottom: '12px', fontWeight: 800, borderBottom: '1px solid var(--border)', paddingBottom: '12px', marginTop: '32px' }}>
                                         ANSWER OPTIONS (Select one correct answer)
                                     </div>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                         {editingQuestion.options.map((opt, idx) => (
-                                            <div key={idx} className="option-input-group">
+                                            <div key={idx} className="option-input-group" style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--bg-sunken)', border: '1px solid var(--border)', borderRadius: '12px', padding: '8px 16px' }}>
                                                 <div style={{ padding: '0 8px' }}>
                                                     <input
                                                         type="radio"
@@ -956,7 +1251,8 @@ const QuestionBank: React.FC = () => {
                                                 </div>
                                                 <input
                                                     className="form-input"
-                                                    style={{ border: 'none', background: 'transparent', padding: '10px 0' }}
+                                                    style={{ border: 'none', background: 'transparent', padding: '10px 0', flexGrow: 1, color: 'var(--text)' }}
+                                                    placeholder={`Option ${idx + 1}`}
                                                     value={opt.text}
                                                     onChange={e => {
                                                         const newOpts = [...editingQuestion.options];
@@ -969,10 +1265,10 @@ const QuestionBank: React.FC = () => {
                                         ))}
                                     </div>
 
-                                    <div className="form-section-title">
+                                    <div className="form-section-title" style={{ color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '12px', letterSpacing: '0.05em', marginBottom: '12px', fontWeight: 800, borderBottom: '1px solid var(--border)', paddingBottom: '12px', marginTop: '32px' }}>
                                         ADDITIONAL DETAILS
                                     </div>
-                                    <div className="form-group">
+                                    <div className="form-group" style={{ marginBottom: 0 }}>
                                         <label className="form-label">Explanation (Optional)</label>
                                         <textarea
                                             className="form-textarea"
@@ -980,15 +1276,16 @@ const QuestionBank: React.FC = () => {
                                             value={editingQuestion.explanation || ''}
                                             onChange={e => setEditingQuestion({ ...editingQuestion, explanation: e.target.value })}
                                             placeholder="Explain why this answer is correct..."
+                                            style={{ background: 'var(--bg-sunken)', border: '1px solid var(--border)', color: 'var(--text)', height: 'auto', minHeight: '80px', fontSize: '15px' }}
                                         />
                                     </div>
                                 </form>
                             </div>
-                            <div className="modal-footer">
+                            <div className="modal-footer" style={{ background: 'var(--bg-sunken)', borderTop: '1px solid var(--border)', padding: '24px 32px', borderRadius: '0 0 24px 24px' }}>
                                 <button
                                     type="button"
                                     onClick={() => setEditingQuestion(null)}
-                                    style={{ padding: '12px 24px', borderRadius: '12px', background: 'white', border: '1px solid var(--slate-200)', cursor: 'pointer', fontWeight: 600, color: 'var(--slate-600)' }}
+                                    style={{ padding: '12px 28px', borderRadius: '14px', background: 'var(--bg)', border: '1px solid var(--border)', cursor: 'pointer', fontWeight: 800, fontSize: '14px', color: 'var(--text)', minWidth: '100px' }}
                                 >
                                     Cancel
                                 </button>
@@ -996,9 +1293,9 @@ const QuestionBank: React.FC = () => {
                                     form="edit-q-form"
                                     type="submit"
                                     style={{
-                                        padding: '12px 24px', borderRadius: '12px', background: 'var(--primary)', color: 'white',
-                                        border: 'none', cursor: 'pointer', fontWeight: 700,
-                                        boxShadow: '0 4px 12px rgba(28, 132, 143, 0.2)'
+                                        padding: '12px 28px', borderRadius: '14px', background: 'var(--primary)', color: 'white',
+                                        border: 'none', cursor: 'pointer', fontWeight: 800, fontSize: '14px',
+                                        boxShadow: 'var(--shadow-primary)', minWidth: '160px'
                                     }}
                                 >
                                     Save Changes
@@ -1011,32 +1308,37 @@ const QuestionBank: React.FC = () => {
                 {/* â”€â”€ Add New Modal â”€â”€ */}
                 {isAdding && (
                     <div className="modal-overlay">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h3 className="modal-title">
+                        <div className="modal-content" style={{ maxWidth: '600px', background: 'var(--bg-raised)', border: '1px solid var(--border)' }}>
+                            <div className="modal-header" style={{ borderBottom: 'none', padding: '32px 32px 14px' }}>
+                                <h3 className="modal-title" style={{ color: 'var(--text)', fontSize: '24px', fontWeight: 800 }}>
                                     <Icons.Bank /> Add New Question
                                 </h3>
-                                <button onClick={() => setIsAdding(false)} style={{ background: 'rgba(0,0,0,0.05)', border: 'none', cursor: 'pointer', width: 40, height: 40, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    âœ•
+                                <button onClick={() => setIsAdding(false)} style={{ background: 'var(--bg-sunken)', border: 'none', cursor: 'pointer', width: 40, height: 40, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
+                                    <Icons.Close size={20} />
                                 </button>
                             </div>
-                            <div className="modal-body">
+                            <div className="modal-body" style={{ padding: '0 32px 32px' }}>
                                 <form id="add-q-form" onSubmit={handleCreate}>
-                                    <div className="form-section-title">
+                                    <div className="form-section-title" style={{ color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '12px', letterSpacing: '0.05em', marginBottom: '12px', fontWeight: 800, borderBottom: '1px solid var(--border)', paddingBottom: '12px', marginTop: '32px' }}>
                                         GENERAL INFORMATION
                                     </div>
                                     <div className="form-group">
                                         <label className="form-label">Category Name</label>
-                                        <input
-                                            className="form-input"
-                                            placeholder="e.g. Logical Reasoning"
+                                        <select
+                                            className="form-select"
                                             value={newQuestion.category}
                                             onChange={e => setNewQuestion({ ...newQuestion, category: e.target.value })}
                                             required
-                                        />
+                                            style={{ background: 'var(--bg-sunken)', border: '1px solid var(--border)', color: 'var(--text)', height: '52px', fontSize: '15px', width: '100%' }}
+                                        >
+                                            <option value="">Select Category</option>
+                                            {stats.map(s => (
+                                                <option key={s.category} value={s.category}>{s.category}</option>
+                                            ))}
+                                        </select>
                                     </div>
 
-                                    <div className="form-section-title">
+                                    <div className="form-section-title" style={{ color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '12px', letterSpacing: '0.05em', marginBottom: '12px', fontWeight: 800, borderBottom: '1px solid var(--border)', paddingBottom: '12px', marginTop: '32px' }}>
                                         QUESTION CONTENT
                                     </div>
                                     <div className="form-group">
@@ -1048,21 +1350,33 @@ const QuestionBank: React.FC = () => {
                                             value={newQuestion.text}
                                             onChange={e => setNewQuestion({ ...newQuestion, text: e.target.value })}
                                             required
+                                            style={{ background: 'var(--bg-sunken)', border: '1px solid var(--border)', color: 'var(--text)', height: 'auto', minHeight: '100px', fontSize: '15px' }}
                                         />
                                     </div>
 
                                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                                         <div className="form-group">
                                             <label className="form-label">Difficulty Level</label>
-                                            <select
-                                                className="form-select"
-                                                value={newQuestion.difficulty}
-                                                onChange={e => setNewQuestion({ ...newQuestion, difficulty: e.target.value })}
-                                            >
-                                                <option>Beginner</option>
-                                                <option>Intermediate</option>
-                                                <option>Advanced</option>
-                                            </select>
+                                            <div style={{ position: 'relative' }}>
+                                                <select
+                                                    className="form-select"
+                                                    value={newQuestion.difficulty}
+                                                    onChange={e => setNewQuestion({ ...newQuestion, difficulty: e.target.value })}
+                                                    style={{ 
+                                                        background: 'var(--bg-sunken)', 
+                                                        border: '1px solid var(--border)', 
+                                                        color: 'var(--text)', 
+                                                        height: '52px', 
+                                                        fontSize: '15px',
+                                                        width: '100%',
+                                                        paddingRight: '40px'
+                                                    }}
+                                                >
+                                                    <option>Beginner</option>
+                                                    <option>Intermediate</option>
+                                                    <option>Advanced</option>
+                                                </select>
+                                            </div>
                                         </div>
                                         <div className="form-group">
                                             <label className="form-label">Marks</label>
@@ -1071,16 +1385,17 @@ const QuestionBank: React.FC = () => {
                                                 className="form-input"
                                                 value={newQuestion.marks}
                                                 onChange={e => setNewQuestion({ ...newQuestion, marks: parseInt(e.target.value) })}
+                                                style={{ background: 'var(--bg-sunken)', border: '1px solid var(--border)', color: 'var(--text)', height: '52px', fontSize: '15px' }}
                                             />
                                         </div>
                                     </div>
 
-                                    <div className="form-section-title">
+                                    <div className="form-section-title" style={{ color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '12px', letterSpacing: '0.05em', marginBottom: '12px', fontWeight: 800, borderBottom: '1px solid var(--border)', paddingBottom: '12px', marginTop: '32px' }}>
                                         ANSWER OPTIONS (Select one correct answer)
                                     </div>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                         {newQuestion.options?.map((opt, idx) => (
-                                            <div key={idx} className="option-input-group">
+                                            <div key={idx} className="option-input-group" style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--bg-sunken)', border: '1px solid var(--border)', borderRadius: '12px', padding: '8px 16px' }}>
                                                 <div style={{ padding: '0 8px' }}>
                                                     <input
                                                         type="radio"
@@ -1097,7 +1412,7 @@ const QuestionBank: React.FC = () => {
                                                 </div>
                                                 <input
                                                     className="form-input"
-                                                    style={{ border: 'none', background: 'transparent', padding: '10px 0' }}
+                                                    style={{ border: 'none', background: 'transparent', padding: '10px 0', flexGrow: 1, color: 'var(--text)' }}
                                                     placeholder={`Option ${idx + 1}`}
                                                     value={opt.text}
                                                     onChange={e => {
@@ -1111,10 +1426,10 @@ const QuestionBank: React.FC = () => {
                                         ))}
                                     </div>
 
-                                    <div className="form-section-title">
+                                    <div className="form-section-title" style={{ color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '12px', letterSpacing: '0.05em', marginBottom: '12px', fontWeight: 800, borderBottom: '1px solid var(--border)', paddingBottom: '12px', marginTop: '32px' }}>
                                         ADDITIONAL DETAILS
                                     </div>
-                                    <div className="form-group">
+                                    <div className="form-group" style={{ marginBottom: 0 }}>
                                         <label className="form-label">Explanation (Optional)</label>
                                         <textarea
                                             className="form-textarea"
@@ -1122,15 +1437,16 @@ const QuestionBank: React.FC = () => {
                                             placeholder="Explain why this answer is correct..."
                                             value={newQuestion.explanation || ''}
                                             onChange={e => setNewQuestion({ ...newQuestion, explanation: e.target.value })}
+                                            style={{ background: 'var(--bg-sunken)', border: '1px solid var(--border)', color: 'var(--text)', height: 'auto', minHeight: '80px', fontSize: '15px' }}
                                         />
                                     </div>
                                 </form>
                             </div>
-                            <div className="modal-footer">
+                            <div className="modal-footer" style={{ background: 'var(--bg-sunken)', borderTop: '1px solid var(--border)', padding: '24px 32px', borderRadius: '0 0 24px 24px' }}>
                                 <button
                                     type="button"
                                     onClick={() => setIsAdding(false)}
-                                    style={{ padding: '12px 24px', borderRadius: '12px', background: 'white', border: '1px solid var(--slate-200)', cursor: 'pointer', fontWeight: 600, color: 'var(--slate-600)' }}
+                                    style={{ padding: '12px 28px', borderRadius: '14px', background: 'var(--bg)', border: '1px solid var(--border)', cursor: 'pointer', fontWeight: 800, fontSize: '14px', color: 'var(--text)', minWidth: '100px' }}
                                 >
                                     Cancel
                                 </button>
@@ -1138,9 +1454,9 @@ const QuestionBank: React.FC = () => {
                                     form="add-q-form"
                                     type="submit"
                                     style={{
-                                        padding: '12px 24px', borderRadius: '12px', background: 'var(--primary)', color: 'white',
-                                        border: 'none', cursor: 'pointer', fontWeight: 700,
-                                        boxShadow: '0 4px 12px rgba(28, 132, 143, 0.2)'
+                                        padding: '12px 28px', borderRadius: '14px', background: 'var(--primary)', color: 'white',
+                                        border: 'none', cursor: 'pointer', fontWeight: 800, fontSize: '14px',
+                                        boxShadow: 'var(--shadow-primary)', minWidth: '160px'
                                     }}
                                 >
                                     Add Question
@@ -1163,22 +1479,21 @@ const QuestionBank: React.FC = () => {
                 {/* â”€â”€ Quick Add Category Modal â”€â”€ */}
                 {isQuickAdding && (
                     <div className="modal-overlay">
-                        <div className="modal-content" style={{ maxWidth: '440px' }}>
-                            <div className="modal-header">
-                                <h3 className="modal-title">
+                        <div className="modal-content" style={{ maxWidth: '480px', background: 'var(--bg-raised)', border: '1px solid var(--border)' }}>
+                            <div className="modal-header" style={{ borderBottom: 'none', padding: '32px 32px 14px' }}>
+                                <h3 className="modal-title" style={{ color: 'var(--text)', fontSize: '26px', fontWeight: 800, letterSpacing: '-0.02em' }}>
                                     <Icons.Category /> New Category
                                 </h3>
-                                <button onClick={() => setIsQuickAdding(false)} style={{ background: 'rgba(0,0,0,0.05)', border: 'none', cursor: 'pointer', width: 40, height: 40, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    âœ•
-                                </button>
                             </div>
-                            <div className="modal-body">
-                                <p style={{ fontSize: '14px', color: 'var(--slate-500)', marginBottom: '24px' }}>
+                            <div className="modal-body" style={{ padding: '0 32px 32px' }}>
+                                <p style={{ fontSize: '15px', color: 'var(--text-muted)', marginBottom: '32px', fontWeight: 500 }}>
                                     Create a new folder to organize your questions.
                                 </p>
                                 <form id="quick-add-cat-form" onSubmit={handleQuickCreate}>
                                     <div className="form-group">
-                                        <label className="form-label">Category Name</label>
+                                        <label className="form-label" style={{ color: 'var(--text)', textTransform: 'uppercase', fontSize: '12px', letterSpacing: '0.05em', marginBottom: '12px', fontWeight: 800 }}>
+                                            CATEGORY NAME
+                                        </label>
                                         <input
                                             className="form-input"
                                             placeholder="e.g. Cognitive Psychology"
@@ -1186,15 +1501,16 @@ const QuestionBank: React.FC = () => {
                                             onChange={e => setQuickCategoryName(e.target.value)}
                                             required
                                             autoFocus
+                                            style={{ background: 'var(--bg-sunken)', border: '1px solid var(--border)', color: 'var(--text)', height: '52px', fontSize: '15px' }}
                                         />
                                     </div>
                                 </form>
                             </div>
-                            <div className="modal-footer">
+                            <div className="modal-footer" style={{ background: 'var(--bg-sunken)', borderTop: '1px solid var(--border)', padding: '24px 32px', borderRadius: '0 0 24px 24px' }}>
                                 <button
                                     type="button"
                                     onClick={() => setIsQuickAdding(false)}
-                                    style={{ padding: '12px 20px', borderRadius: '12px', background: 'white', border: '1px solid var(--slate-200)', cursor: 'pointer', fontWeight: 600 }}
+                                    style={{ padding: '12px 28px', borderRadius: '14px', background: 'var(--bg)', border: '1px solid var(--border)', cursor: 'pointer', fontWeight: 800, fontSize: '14px', color: 'var(--text)', minWidth: '100px' }}
                                 >
                                     Cancel
                                 </button>
@@ -1202,9 +1518,9 @@ const QuestionBank: React.FC = () => {
                                     form="quick-add-cat-form"
                                     type="submit"
                                     style={{
-                                        padding: '12px 20px', borderRadius: '12px', background: 'var(--primary)', color: 'white',
-                                        border: 'none', cursor: 'pointer', fontWeight: 700,
-                                        boxShadow: '0 4px 12px rgba(28, 132, 143, 0.2)'
+                                        padding: '12px 28px', borderRadius: '14px', background: 'var(--primary)', color: 'white',
+                                        border: 'none', cursor: 'pointer', fontWeight: 800, fontSize: '14px',
+                                        boxShadow: 'var(--shadow-primary)', minWidth: '160px'
                                     }}
                                 >
                                     Create Category

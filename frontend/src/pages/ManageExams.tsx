@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import AdminLayout from "../components/AdminLayout";
 import CustomPopup, { PopupType } from "../components/CustomPopup";
@@ -206,23 +206,23 @@ export default function ManageExams() {
             );
 
             const mergedQuestions = fullExams.flatMap(e => e.questions || []);
-        const mergedDuration = selected.reduce((sum, e) => sum + (e.duration || 30), 0);
-        const topics = Array.from(new Set(selected.map(e => e.topic).filter(Boolean)));
+            const mergedDuration = selected.reduce((sum, e) => sum + (e.duration || 30), 0);
+            const topics = Array.from(new Set(selected.map(e => e.topic).filter(Boolean)));
 
-        const diffLevels = ["Beginner", "Intermediate", "Advanced"];
-        let maxDiffIndex = 0;
-        selected.forEach(e => {
-            const idx = diffLevels.indexOf(e.difficulty);
-            if (idx > maxDiffIndex) maxDiffIndex = idx;
-        });
+            const diffLevels = ["Beginner", "Intermediate", "Advanced"];
+            let maxDiffIndex = 0;
+            selected.forEach(e => {
+                const idx = diffLevels.indexOf(e.difficulty);
+                if (idx > maxDiffIndex) maxDiffIndex = idx;
+            });
 
-        setMergedExam({
-            title: `Merged Exam (${selected.length} combined)`,
-            topic: topics.join(", "),
-            difficulty: diffLevels[maxDiffIndex] || "Intermediate",
-            duration: mergedDuration,
-            questions: mergedQuestions
-        });
+            setMergedExam({
+                title: `Merged Exam (${selected.length} combined)`,
+                topic: topics.join(", "),
+                difficulty: diffLevels[maxDiffIndex] || "Intermediate",
+                duration: mergedDuration,
+                questions: mergedQuestions
+            });
         } catch (err) {
             console.error(err);
         } finally {
@@ -281,9 +281,9 @@ export default function ManageExams() {
     if (loading) {
         return (
             <AdminLayout>
-                <div style={{ 
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', 
-                    height: '60vh', gap: '12px' 
+                <div style={{
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                    height: '60vh', gap: '12px'
                 }}>
                     <div className="mc-spinner" style={{
                         width: '40px', height: '40px', border: '4px solid var(--border)',
@@ -300,11 +300,11 @@ export default function ManageExams() {
     return (
         <AdminLayout>
             <style>{`
-        .me-header { height: 5rem; background: var(--bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 2.5rem; }
+        .me-header { padding: 1.5rem 2.5rem 1rem; background: var(--bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
         @media (max-width: 768px) {
-          .me-header { padding: 0 1rem; height: auto; padding-top: 1rem; padding-bottom: 1rem; flex-direction: column; align-items: flex-start; gap: 1rem; }
+          .me-header { padding: 1rem; flex-direction: column; align-items: flex-start; gap: 1rem; }
         }
-        .me-header-title { font-family: var(--font-heading); font-size: 1.5rem; font-weight: 700; color: var(--text); }
+        .me-header-title { font-family: var(--font-heading); font-size: 1.375rem; font-weight: 700; color: var(--text); margin: 0; }
         .me-content { padding: 2.5rem; }
         @media (max-width: 768px) {
           .me-content { padding: 1rem; }
@@ -322,21 +322,32 @@ export default function ManageExams() {
         .select-pill-lbl { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.05em; }
         
         .difficulty-badge { padding: 4px 12px; border-radius: 100px; font-size: 11px; font-weight: 700; text-transform: uppercase; display: inline-flex; }
-        .diff-beginner { background: color-mix(in srgb, #166534 10%, var(--bg)); color: #22c55e; border: 1px solid color-mix(in srgb, #166534 30%, var(--bg)); }
-        .diff-intermediate { background: color-mix(in srgb, #92400e 10%, var(--bg)); color: #f59e0b; border: 1px solid color-mix(in srgb, #92400e 30%, var(--bg)); }
-        .diff-advanced { background: color-mix(in srgb, var(--primary) 10%, var(--bg)); color: var(--primary); border: 1px solid color-mix(in srgb, var(--primary) 25%, var(--bg)); }
+        .diff-beginner { background: var(--color-success-light); color: var(--color-success); border: 1px solid var(--color-success-border); }
+        .diff-intermediate { background: var(--color-warning-light); color: var(--color-warning); border: 1px solid var(--color-warning-border); }
+        .diff-advanced { background: var(--primary-light); color: var(--primary); border: 1px solid var(--primary-border, var(--primary-light)); }
         
-        .delete-btn { padding: 8px 16px; background: var(--bg); border: 1px solid #fee2e2; color: #dc2626; border-radius: 8px; font-weight: 700; font-size: 11px; transition: all 0.2s; cursor: pointer; text-transform: uppercase; letter-spacing: 0.02em; }
-        .delete-btn:hover { background: #fef2f2; border-color: #ef4444; transform: translateY(-1px); }
-        .merge-btn { padding: 10px 24px; background: var(--text); color: var(--bg); border: none; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 8px; box-shadow: var(--shadow); }
-        .merge-btn:hover { opacity: 0.85; transform: translateY(-1px); }
-        .create-btn { padding: 10px 20px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 8px; text-decoration: none; box-shadow: 0 4px 12px rgba(28, 132, 143, 0.15); }
-        .create-btn:hover { background: var(--primary-hover); transform: translateY(-1px); }
+        .delete-btn { padding: 8px 16px; background: var(--bg); border: 1px solid var(--border); color: var(--text-muted); border-radius: 8px; font-weight: 700; font-size: 11px; transition: all 0.2s; cursor: pointer; text-transform: uppercase; letter-spacing: 0.02em; }
+        .delete-btn:hover { background: var(--color-danger-light); border-color: var(--color-danger); color: var(--color-danger); }
+        .me-btn-pill {
+            padding: 9px 23px; background: transparent; color: var(--primary); 
+            border: 2px solid var(--primary); border-radius: 999px !important; 
+            font-weight: 700; font-size: 13px; cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.16,1,0.3,1); display: flex; align-items: center; gap: 8px;
+            text-decoration: none;
+        }
+        .me-btn-pill:hover { 
+            background: #00609b !important; color: white !important; 
+            border-color: #00609b !important; transform: translateY(-1px); 
+        }
+        .me-btn-pill:active { transform: translateY(0); }
+
+        .create-btn { display: none; } /* Replaced by class logic */
+        .merge-btn { display: none; } /* Replaced by class logic */
 
         /* Modern Exam Card Layout */
         .mgmt-card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; padding-bottom: 40px; }
-        .mgmt-card { background: var(--bg); border: 2px solid var(--border); border-radius: 20px; padding: 24px; display: flex; flex-direction: column; gap: 16px; position: relative; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); cursor: pointer; }
-        .mgmt-card:hover { border-color: var(--primary); transform: translateY(-4px); box-shadow: var(--card-hover-shadow); }
+        .mgmt-card { background: var(--bg); border: 1px solid var(--border); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 16px; position: relative; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); cursor: pointer; }
+        .mgmt-card:hover { border-color: var(--primary); transform: translateY(-2px); }
         .mgmt-card.selected { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 6%, var(--bg)); }
         .mgmt-card-select-overlay { position: absolute; top: 16px; right: 16px; z-index: 10; }
         .mgmt-card-title { font-size: 19px; font-weight: 800; color: var(--text); line-height: 1.3; }
@@ -365,11 +376,11 @@ export default function ManageExams() {
         .aig-q-num { width: 34px; height: 34px; background: var(--bg-neutral); border: 1px solid var(--border); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: var(--text-muted); flex-shrink: 0; }
         .aig-q-text { font-size: 17px; font-weight: 600; line-height: 1.6; color: var(--text); flex: 1; }
         .aig-q-delete { width: 34px; height: 34px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
-        .aig-q-delete:hover { background: #fef2f2; color: #ef4444; border-color: #fee2e2; transform: scale(1.05); }
+        .aig-q-delete:hover { background: var(--color-danger-light); color: var(--color-danger); border-color: var(--color-danger-border); transform: scale(1.05); }
 
         .aig-opt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
         .aig-opt { padding: 16px 20px; border: 1px solid var(--border); border-radius: 12px; font-size: 14px; background: var(--bg-neutral); color: var(--text-muted); display: flex; align-items: center; gap: 12px; }
-        .aig-opt-correct { background: color-mix(in srgb, #166534 10%, var(--bg)); border-color: color-mix(in srgb, #166534 30%, var(--bg)); color: #22c55e; font-weight: 600; }
+        .aig-opt-correct { background: var(--color-success-light); border-color: var(--color-success-border); color: var(--color-success); font-weight: 600; }
         
         .aig-btn-confirm { padding: 10px 24px; background: var(--primary); color: #fff; border: none; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 12px rgba(28, 132, 143, 0.15); }
         .aig-btn-confirm:hover:not(:disabled) { background: var(--primary-hover); transform: translateY(-1px); }
@@ -415,10 +426,10 @@ export default function ManageExams() {
                             </div>
                         </div>
 
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 28, alignItems: 'center', background: '#fff', padding: '16px 24px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 28, alignItems: 'center', background: 'var(--bg)', padding: '16px 24px', borderRadius: '12px', border: '1px solid var(--border)' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                                 <div style={{ width: 4, height: 24, background: "var(--primary)", borderRadius: 2 }} />
-                                <h2 style={{ fontSize: '18px', fontWeight: 800, margin: 0, color: '#0f172a' }}>Questions ({mergedExam.questions?.length})</h2>
+                                <h2 style={{ fontSize: '18px', fontWeight: 800, margin: 0, color: 'var(--text)' }}>Questions ({mergedExam.questions?.length})</h2>
                             </div>
                             <button className="aig-btn-confirm" onClick={handlePublishMerged} disabled={saving}>
                                 {saving ? (
@@ -464,6 +475,7 @@ export default function ManageExams() {
                                         type="checkbox"
                                         checked={selectedExamIds.size === exams.length}
                                         onChange={toggleAll}
+                                        onClick={(e) => e.stopPropagation()}
                                         style={{ width: 14, height: 14, cursor: 'pointer', accentColor: 'var(--primary)' }}
                                     />
                                     <span className="select-pill-lbl">Select All</span>
@@ -471,19 +483,19 @@ export default function ManageExams() {
                             )}
                             <div>
                                 <h2 className="me-header-title">Management Dashboard</h2>
-                                <div style={{ fontSize: 10, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: 2 }}>
-                                    {exams.length} Assessments â€¢ {selectedExamIds.size} Marked
+                                <div style={{ fontSize: 10, fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: 2 }}>
+                                    {exams.length} Assessments  &nbsp;&nbsp;&nbsp; {selectedExamIds.size} Marked
                                 </div>
                             </div>
                         </div>
 
                         <div style={{ display: 'flex', gap: 10 }}>
                             {selectedExamIds.size >= 2 && (
-                                <button className="merge-btn" onClick={handleMergeSetup} disabled={saving}>
+                                <button className="me-btn-pill" style={{ background: 'var(--text)', color: 'var(--bg)' }} onClick={handleMergeSetup} disabled={saving}>
                                     <Icons.Merge size={12} /> {saving ? "Loading..." : "Merge Marked"}
                                 </button>
                             )}
-                            <a href="/#/create-exam" className="create-btn">
+                            <a href="/#/create-exam" className="me-btn-pill">
                                 <Icons.Plus size={12} /> New AI Assessment
                             </a>
                         </div>
@@ -518,8 +530,8 @@ export default function ManageExams() {
                                     </thead>
                                     <tbody>
                                         {exams.map(exam => (
-                                            <tr 
-                                                key={exam.id} 
+                                            <tr
+                                                key={exam.id}
                                                 className={`me-row ${selectedExamIds.has(exam.id) ? 'selected' : ''}`}
                                                 onClick={() => toggleSelection(exam.id)}
                                             >
@@ -553,7 +565,7 @@ export default function ManageExams() {
                                                 <td style={{ textAlign: "right", display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                                                     <button
                                                         className="delete-btn"
-                                                        style={{ padding: '6px 10px', borderColor: '#e2e8f0', color: 'var(--text-muted)' }}
+                                                        style={{ padding: '6px 10px', borderColor: 'var(--border)', color: 'var(--text-muted)' }}
                                                         onClick={(e) => handleDuplicate(exam.id, e)}
                                                         title="Duplicate Assessment"
                                                         disabled={saving}

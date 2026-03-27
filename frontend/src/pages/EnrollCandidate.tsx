@@ -233,7 +233,7 @@ export default function EnrollCandidate() {
     return (
         <div className="enroll-page">
             <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@600;700&display=swap');
 
         :root {
           --ink:        var(--text);
@@ -249,8 +249,8 @@ export default function EnrollCandidate() {
           --danger:     #dc2626;
           --danger-bg:  color-mix(in srgb, #dc2626 10%, var(--bg));
           --danger-ln:  color-mix(in srgb, #dc2626 30%, var(--bg));
-          --font-serif: 'DM Serif Display', serif;
-          --font-sans:  'DM Sans', sans-serif;
+          --font-serif: 'Inter', sans-serif;
+          --font-sans:  'Inter', sans-serif;
           --font-mono:  'JetBrains Mono', monospace;
           --radius:     10px;
           --radius-sm:  6px;

@@ -7,34 +7,34 @@ import logo from "../assets/logo.png";
 // â”€â”€â”€ Icons â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const Icons = {
     Dashboard: () => (
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /></svg>
     ),
     Generate: () => (
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/><path d="M18 2v4"/><path d="M20 4h-4"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a10 10 0 1 0 10 10" /><path d="M12 6v6l4 2" /><path d="M18 2v4" /><path d="M20 4h-4" /></svg>
     ),
     Exams: () => (
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /></svg>
     ),
     Users: () => (
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
     ),
     Results: () => (
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83" /><path d="M22 12A10 10 0 0 0 12 2v10z" /></svg>
     ),
     Settings: () => (
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>
     ),
     Logout: () => (
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
     ),
     Lock: () => (
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
     ),
     Menu: () => (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
     ),
     Help: () => (
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>
     )
 };
 
@@ -66,14 +66,14 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, plain = false }) =>
         if (profile?.email) {
             // Get user theme or default specifically for this user
             const userTheme = localStorage.getItem(`kiwi-theme-${profile.email}`) || "default";
-            
+
             // Apply the user's theme
             if (userTheme === "default") {
                 document.documentElement.removeAttribute("data-theme");
             } else {
                 document.documentElement.setAttribute("data-theme", userTheme);
             }
-            
+
             // Sync the global key so it persists for this session
             localStorage.setItem("kiwi-theme", userTheme);
         }
@@ -93,11 +93,11 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, plain = false }) =>
         }
         sessionStorage.removeItem("access_token");
         sessionStorage.removeItem("admin-profile");
-        
+
         // Reset theme to default on logout to prevent theme bleeding between users
         localStorage.removeItem("kiwi-theme");
         document.documentElement.removeAttribute("data-theme");
-        
+
         navigate("/");
     };
 
@@ -130,7 +130,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, plain = false }) =>
                 }
                 return res.json();
             })
-            .then(data => { 
+            .then(data => {
                 if (!cancelled && data) {
                     setProfile(data);
                     sessionStorage.setItem("admin-profile", JSON.stringify(data));
@@ -146,7 +146,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, plain = false }) =>
     const hasPermission = (perm: string) => {
         if (!profile) return true;
         if (profile.role === 'admin') return true;
-        
+
         // Members always have dashboard, settings, and guide
         if (perm === null) return true;
 
@@ -226,13 +226,12 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, plain = false }) =>
     return (
         <div className={`al-layout-wrap ${plain ? 'plain' : ''}`}>
             <style>{`
-                @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&family=Inter:wght@400;500;600;700;800&display=swap');
-
                 .al-layout-wrap {
                     display: flex;
                     min-height: 100vh;
                     background: var(--bg-neutral);
-                    font-family: 'Inter', sans-serif;
+                    color: var(--text);
+                    font-family: var(--font-body);
                 }
 
                 /* â”€â”€ Sidebar â”€â”€ */
@@ -310,7 +309,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, plain = false }) =>
                     font-weight: 900;
                     text-transform: uppercase;
                     letter-spacing: 0.12em;
-                    color: rgba(255,255,255,0.25);
+                    color: var(--sidebar-text);
+                    opacity: 0.5;
                     padding: 12px 10px 4px;
                     display: block;
                 }
@@ -325,7 +325,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, plain = false }) =>
                     cursor: pointer;
                     font-size: var(--font-size-body);
                     font-weight: 600;
-                    color: rgba(255,255,255,0.5);
+                    color: var(--sidebar-text);
                     transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
                     position: relative;
                     white-space: nowrap;
@@ -338,17 +338,17 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, plain = false }) =>
                     outline: 2px solid var(--primary);
                     outline-offset: -2px;
                     background: rgba(255,255,255,0.07);
-                    color: rgba(255,255,255,0.9);
+                    color: var(--text-on-primary);
                 }
 
                 .al-nav-item:hover {
                     background: rgba(255,255,255,0.07);
-                    color: rgba(255,255,255,0.9);
+                    color: var(--text-on-primary);
                 }
 
                 .al-nav-item.active {
                     background: var(--primary);
-                    color: var(--white);
+                    color: var(--text-on-primary);
                     font-weight: 700;
                 }
 
@@ -393,7 +393,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, plain = false }) =>
                     padding: var(--space-8) var(--space-16);
                     background: rgba(255,255,255,0.03);
                     border: 1px solid rgba(255,255,255,0.08);
-                    color: rgba(255,255,255,0.5);
+                    color: var(--sidebar-text);
                     font-size: var(--font-size-body);
                     font-weight: 600;
                     display: flex;
@@ -475,121 +475,121 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, plain = false }) =>
             <div className={`al-sidebar-overlay ${sidebarOpen ? 'open' : ''}`} onClick={() => setSidebarOpen(false)} />
 
             {!plain && (
-              <aside className={`al-sidebar ${sidebarOpen ? 'open' : ''}`} aria-label="Main navigation">
-                  <div
-                      className="al-logo-area"
-                      onClick={() => { navigate("/dashboard"); setSidebarOpen(false); }}
-                      onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { navigate("/dashboard"); setSidebarOpen(false); } }}
-                      tabIndex={0}
-                      role="button"
-                      aria-label="Go to Dashboard"
-                  >
-                      <img src={logo} alt="KiwiQA Logo" />
-                  </div>
+                <aside className={`al-sidebar ${sidebarOpen ? 'open' : ''}`} aria-label="Main navigation">
+                    <div
+                        className="al-logo-area"
+                        onClick={() => { navigate("/dashboard"); setSidebarOpen(false); }}
+                        onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { navigate("/dashboard"); setSidebarOpen(false); } }}
+                        tabIndex={0}
+                        role="button"
+                        aria-label="Go to Dashboard"
+                    >
+                        <img src={logo} alt="KiwiQA Logo" />
+                    </div>
 
-                  <nav className="al-nav">
-                      <span className="al-nav-label">Main</span>
-                      {navItems.slice(0, 1).map(item => (
-                          <div
-                              key={item.path}
-                              role="button"
-                              tabIndex={0}
-                              className={`al-nav-item ${isActive(item.path) ? "active" : ""}`}
-                              onClick={() => { navigate(item.path); setSidebarOpen(false); }}
-                              onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate(item.path); setSidebarOpen(false); focusMain(); } }}
-                              aria-current={isActive(item.path) ? 'page' : undefined}
-                          >
-                              <span className="al-nav-icon"><item.icon /></span>
-                              {item.label}
-                          </div>
-                      ))}
+                    <nav className="al-nav">
+                        <span className="al-nav-label">Main</span>
+                        {navItems.slice(0, 1).map(item => (
+                            <div
+                                key={item.path}
+                                role="button"
+                                tabIndex={0}
+                                className={`al-nav-item ${isActive(item.path) ? "active" : ""}`}
+                                onClick={() => { navigate(item.path); setSidebarOpen(false); }}
+                                onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate(item.path); setSidebarOpen(false); focusMain(); } }}
+                                aria-current={isActive(item.path) ? 'page' : undefined}
+                            >
+                                <span className="al-nav-icon"><item.icon /></span>
+                                {item.label}
+                            </div>
+                        ))}
 
-                      <span className="al-nav-label">Assessments</span>
-                      {navItems.slice(1, 4).map(item => (
-                          <div
-                              key={item.path}
-                              role="button"
-                              tabIndex={0}
-                              className={`al-nav-item ${isActive(item.path) ? "active" : ""} ${item.perm && !hasPermission(item.perm) ? "locked" : ""}`}
-                              onClick={() => item.perm ? navTo(item.path, item.perm, item.task!) : (navigate(item.path), setSidebarOpen(false))}
-                              onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); item.perm ? navTo(item.path, item.perm, item.task!) : (navigate(item.path), setSidebarOpen(false)); } }}
-                              aria-current={isActive(item.path) ? 'page' : undefined}
-                              aria-disabled={item.perm && !hasPermission(item.perm) ? true : undefined}
-                          >
-                              <span className="al-nav-icon"><item.icon /></span>
-                              {item.label}
-                              {item.perm && !hasPermission(item.perm) && <span className="al-lock-badge"><Icons.Lock /></span>}
-                          </div>
-                      ))}
+                        <span className="al-nav-label">Assessments</span>
+                        {navItems.slice(1, 4).map(item => (
+                            <div
+                                key={item.path}
+                                role="button"
+                                tabIndex={0}
+                                className={`al-nav-item ${isActive(item.path) ? "active" : ""} ${item.perm && !hasPermission(item.perm) ? "locked" : ""}`}
+                                onClick={() => item.perm ? navTo(item.path, item.perm, item.task!) : (navigate(item.path), setSidebarOpen(false))}
+                                onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); item.perm ? navTo(item.path, item.perm, item.task!) : (navigate(item.path), setSidebarOpen(false)); } }}
+                                aria-current={isActive(item.path) ? 'page' : undefined}
+                                aria-disabled={item.perm && !hasPermission(item.perm) ? true : undefined}
+                            >
+                                <span className="al-nav-icon"><item.icon /></span>
+                                {item.label}
+                                {item.perm && !hasPermission(item.perm) && <span className="al-lock-badge"><Icons.Lock /></span>}
+                            </div>
+                        ))}
 
-                      <span className="al-nav-label">People</span>
-                      {navItems.slice(4, 7).map(item => (
-                          <div
-                              key={item.path}
-                              role="button"
-                              tabIndex={0}
-                              className={`al-nav-item ${isActive(item.path) ? "active" : ""} ${item.perm && !hasPermission(item.perm) ? "locked" : ""}`}
-                              onClick={() => item.perm ? navTo(item.path, item.perm, item.task!) : (navigate(item.path), setSidebarOpen(false))}
-                              onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); item.perm ? navTo(item.path, item.perm, item.task!) : (navigate(item.path), setSidebarOpen(false)); } }}
-                              aria-current={isActive(item.path) ? 'page' : undefined}
-                              aria-disabled={item.perm && !hasPermission(item.perm) ? true : undefined}
-                          >
-                              <span className="al-nav-icon"><item.icon /></span>
-                              {item.label}
-                              {item.perm && !hasPermission(item.perm) && <span className="al-lock-badge"><Icons.Lock /></span>}
-                          </div>
-                      ))}
+                        <span className="al-nav-label">People</span>
+                        {navItems.slice(4, 7).map(item => (
+                            <div
+                                key={item.path}
+                                role="button"
+                                tabIndex={0}
+                                className={`al-nav-item ${isActive(item.path) ? "active" : ""} ${item.perm && !hasPermission(item.perm) ? "locked" : ""}`}
+                                onClick={() => item.perm ? navTo(item.path, item.perm, item.task!) : (navigate(item.path), setSidebarOpen(false))}
+                                onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); item.perm ? navTo(item.path, item.perm, item.task!) : (navigate(item.path), setSidebarOpen(false)); } }}
+                                aria-current={isActive(item.path) ? 'page' : undefined}
+                                aria-disabled={item.perm && !hasPermission(item.perm) ? true : undefined}
+                            >
+                                <span className="al-nav-icon"><item.icon /></span>
+                                {item.label}
+                                {item.perm && !hasPermission(item.perm) && <span className="al-lock-badge"><Icons.Lock /></span>}
+                            </div>
+                        ))}
 
-                      <span className="al-nav-label">System</span>
-                      {navItems.slice(7).map(item => (
-                          <div
-                              key={item.path}
-                              role="button"
-                              tabIndex={0}
-                              className={`al-nav-item ${isActive(item.path) ? "active" : ""}`}
-                              onClick={() => {
-                                  if (item.isExternal) {
-                                      window.open(item.externalPath, "_blank");
-                                  } else {
-                                      navigate(item.path);
-                                  }
-                                  setSidebarOpen(false);
-                              }}
-                              onKeyDown={e => {
-                                  if (e.key === 'Enter' || e.key === ' ') {
-                                      e.preventDefault();
-                                      if (item.isExternal) {
-                                          window.open(item.externalPath, "_blank");
-                                      } else {
-                                          navigate(item.path);
-                                      }
-                                      setSidebarOpen(false);
-                                  }
-                              }}
-                              aria-current={isActive(item.path) ? 'page' : undefined}
-                          >
-                              <span className="al-nav-icon"><item.icon /></span>
-                              {item.label}
-                          </div>
-                      ))}
-                  </nav>
+                        <span className="al-nav-label">System</span>
+                        {navItems.slice(7).map(item => (
+                            <div
+                                key={item.path}
+                                role="button"
+                                tabIndex={0}
+                                className={`al-nav-item ${isActive(item.path) ? "active" : ""}`}
+                                onClick={() => {
+                                    if (item.isExternal) {
+                                        window.open(item.externalPath, "_blank");
+                                    } else {
+                                        navigate(item.path);
+                                    }
+                                    setSidebarOpen(false);
+                                }}
+                                onKeyDown={e => {
+                                    if (e.key === 'Enter' || e.key === ' ') {
+                                        e.preventDefault();
+                                        if (item.isExternal) {
+                                            window.open(item.externalPath, "_blank");
+                                        } else {
+                                            navigate(item.path);
+                                        }
+                                        setSidebarOpen(false);
+                                    }
+                                }}
+                                aria-current={isActive(item.path) ? 'page' : undefined}
+                            >
+                                <span className="al-nav-icon"><item.icon /></span>
+                                {item.label}
+                            </div>
+                        ))}
+                    </nav>
 
-                  <div className="al-logout-area">
-                      <button className="al-logout-btn" onClick={handleLogout}>
-                          <Icons.Logout /> Logout
-                      </button>
-                  </div>
-              </aside>
+                    <div className="al-logout-area">
+                        <button className="al-logout-btn" onClick={handleLogout}>
+                            <Icons.Logout /> Logout
+                        </button>
+                    </div>
+                </aside>
             )}
 
             <main className="al-main-content">
                 {!plain && (
-                  <header className="al-mobile-header">
-                      <img src={logo} alt="Logo" style={{ height: 40 }} />
-                      <button className="al-menu-toggle" onClick={() => setSidebarOpen(true)}>
-                          <Icons.Menu />
-                      </button>
-                  </header>
+                    <header className="al-mobile-header">
+                        <img src={logo} alt="Logo" style={{ height: 40 }} />
+                        <button className="al-menu-toggle" onClick={() => setSidebarOpen(true)}>
+                            <Icons.Menu />
+                        </button>
+                    </header>
                 )}
 
                 <div className="al-content-inner" id="main-content" tabIndex={-1}>

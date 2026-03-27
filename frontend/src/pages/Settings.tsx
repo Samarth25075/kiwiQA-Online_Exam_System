@@ -140,6 +140,7 @@ export default function Settings() {
             .then(r => r.ok ? r.json() : Promise.reject())
             .then(data => {
                 setProfile(data);
+                sessionStorage.setItem("admin-profile", JSON.stringify(data));
                 if (data.role === "admin") {
                     fetchMembers(token);
                 }
@@ -188,7 +189,11 @@ export default function Settings() {
             });
             if (res.ok) {
                 const data = await res.json();
-                setProfile(prev => prev ? { ...prev, full_name: data.full_name, username: data.username } : null);
+                const updatedProfile = profile ? { ...profile, full_name: data.full_name, username: data.username } : null;
+                setProfile(updatedProfile);
+                if (updatedProfile) {
+                    sessionStorage.setItem("admin-profile", JSON.stringify(updatedProfile));
+                }
                 setProfileMsg({ type: "success", text: "Profile updated successfully." });
                 setIsEditingProfile(false);
             } else {
@@ -991,8 +996,10 @@ export default function Settings() {
                                         </div>
                                         {strength && (
                                             <div style={{ marginTop: 8 }}>
-                                                <div className="st-strength-track"><div className="st-strength-fill" style={{ width: strength.pct, background: strength.color }} /></div>
-                                                <div className="st-strength-label" style={{ color: strength.color }}>{strength.label}</div>
+                                                <div className="st-strength-bar">
+                                                    <div className="st-strength-fill" style={{ width: strength.pct, background: strength.color }} />
+                                                </div>
+                                                <div className="st-strength-label" style={{ color: strength.color, fontWeight: 800 }}>{strength.label}</div>
                                             </div>
                                         )}
                                     </div>
@@ -1007,7 +1014,7 @@ export default function Settings() {
                                                 required
                                             />
                                             {pwForm.confirm && (
-                                                <span className="st-match-icon" style={{ color: pwForm.confirm === pwForm.newPw ? "#22c55e" : "var(--primary)" }}>
+                                                <span className="st-match-icon" style={{ color: pwForm.confirm === pwForm.newPw ? "var(--color-success)" : "var(--color-danger)" }}>
                                                     {pwForm.confirm === pwForm.newPw ? "✓" : "✗"}
                                                 </span>
                                             )}
@@ -1050,8 +1057,8 @@ export default function Settings() {
                                                         <div className="st-preview-bar" style={{ background: theme.secondary, width: "70%" }} />
                                                     </div>
                                                 </div>
-                                                <div className="st-theme-foot" style={{ background: theme.bg }}>
-                                                    <div className="st-theme-name" style={{ color: theme.dark ? "#e2e8f0" : "#1a202c" }}>{theme.name}</div>
+                                                <div className="st-theme-foot" style={{ background: theme.bg, color: theme.dark ? "var(--text)" : "#1a202c" }}>
+                                                    <div className="st-theme-name" style={{ color: 'inherit' }}>{theme.name}</div>
                                                     {isActive && <div className="st-theme-check"><Icons.Check /></div>}
                                                 </div>
                                             </div>

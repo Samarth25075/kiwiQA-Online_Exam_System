@@ -137,19 +137,43 @@ const STYLES = `
   border-color: var(--primary);
   color: var(--primary);
 }
-.q-btn.current {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 2px var(--primary);
-}
 .q-btn.answered {
   background: var(--q-answered-bg);
   border-color: var(--q-answered-border);
   color: var(--q-answered-text);
+  box-shadow: 0 2px 4px rgba(5, 150, 105, 0.2);
 }
 .q-btn.visited-unanswered {
   background: var(--q-visited-bg);
   border-color: var(--q-visited-border);
   color: var(--q-visited-text);
+  box-shadow: 0 2px 4px rgba(217, 119, 6, 0.2);
+}
+.q-btn.review {
+  background: var(--q-review-bg);
+  border-color: var(--q-review-border);
+  color: var(--q-review-text);
+  box-shadow: 0 2px 4px rgba(124, 58, 237, 0.3);
+}
+.q-btn.review-answered {
+  background: var(--q-review-bg);
+  border-color: var(--q-review-border);
+  color: var(--q-review-text);
+  box-shadow: 0 2px 4px rgba(124, 58, 237, 0.3);
+  position: relative;
+}
+.q-btn.review-answered::after {
+    content: '⭐';
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    font-size: 8px;
+}
+.q-btn.current {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--primary-light), 0 4px 12px rgba(28, 132, 143, 0.15);
+  z-index: 2;
+  transform: translateY(-1px);
 }
 .q-legend {
   margin-top: 24px;
@@ -328,7 +352,7 @@ const STYLES = `
 }
 
 .test-btn.secondary {
-  background: white;
+  background: var(--bg);
   color: var(--text-muted);
   border: 1px solid var(--border);
 }
@@ -347,6 +371,36 @@ const STYLES = `
   background: var(--secondary-hover);
   color: white;
   box-shadow: 0 4px 12px rgba(147, 199, 61, 0.2);
+}
+
+.test-btn.review-btn {
+    background: var(--q-review-bg);
+    color: var(--q-review-text);
+    border: 1px solid var(--q-review-border);
+}
+.test-btn.review-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+.test-btn.review-btn.active {
+    background: var(--q-review-bg);
+    color: white;
+    border-color: var(--q-review-border);
+    box-shadow: 0 0 0 2px var(--q-review-border);
+}
+
+.test-progress-bar {
+    width: 100%;
+    height: 6px;
+    background: var(--bg-neutral);
+    border-radius: 100px;
+    overflow: hidden;
+    margin-top: 8px;
+}
+.test-progress-fill {
+    height: 100%;
+    background: var(--primary);
+    transition: width 0.4s ease-out;
 }
 
 .test-timer {
@@ -532,15 +586,15 @@ const STYLES = `
 }
 
 .sec-modal {
-  background: #ffffff;
+  background: var(--bg-raised);
   width: 90%;
   max-width: 420px;
   border-radius: 16px;
   padding: 32px 24px;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+  box-shadow: var(--shadow-lg);
   animation: modalPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   text-align: center;
-  border: 1px solid var(--border, #e2e8f0);
+  border: 1px solid var(--border);
 }
 
 @keyframes modalPop {
@@ -552,7 +606,7 @@ const STYLES = `
   width: 72px;
   height: 72px;
   border-radius: 50%;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--primary) 10%, #fff), color-mix(in srgb, var(--primary) 20%, #fff));
+  background: var(--primary-light);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -568,7 +622,7 @@ const STYLES = `
   letter-spacing: 0.12em;
   color: var(--primary);
   margin-bottom: 12px;
-  background: color-mix(in srgb, var(--primary) 8%, #fff);
+  background: var(--primary-light);
   display: inline-block;
   padding: 4px 14px;
   border-radius: 100px;
@@ -606,7 +660,7 @@ const STYLES = `
   height: 14px;
   border-radius: 4px;
   border: 1px solid var(--border);
-  background: #fff;
+  background: var(--bg-neutral);
   transition: all 0.3s;
 }
 
@@ -673,25 +727,25 @@ const STYLES = `
   transition: all 0.4s ease;
 }
 .gaze-badge.ok {
-  background: #f0fdf4;
-  color: #166534;
-  border: 1px solid #86efac;
+  background: var(--color-success-light);
+  color: var(--color-success);
+  border: 1px solid var(--color-success-border);
 }
 .gaze-badge.warning {
-  background: #fefce8;
-  color: #854d0e;
-  border: 1px solid #fde047;
+  background: var(--color-warning-light);
+  color: var(--color-warning);
+  border: 1px solid var(--color-warning-border);
 }
 .gaze-badge.away {
-  background: color-mix(in srgb, var(--primary) 10%, var(--bg));
+  background: var(--primary-light);
   color: var(--primary);
-  border: 1px solid color-mix(in srgb, var(--primary) 30%, var(--bg));
+  border: 1px solid var(--primary);
   animation: gazeAlert 0.5s ease infinite alternate;
 }
 .gaze-badge.noface {
-  background: #fdf2f8;
-  color: #701a75;
-  border: 1px solid #e879f9;
+  background: var(--bg-neutral);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
   animation: gazeAlert 0.5s ease infinite alternate;
 }
 @keyframes gazeAlert {
@@ -802,6 +856,7 @@ export default function TakeTest() {
     const [currentIdx, setCurrentIdx] = useState(0);
     const [answers, setAnswers] = useState<Record<number, number>>({});
     const [visited, setVisited] = useState<number[]>([0]);
+    const [reviewIndices, setReviewIndices] = useState<number[]>([]);
     const [loading, setLoading] = useState(true);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
     const [started, setStarted] = useState(false);
@@ -1570,6 +1625,29 @@ export default function TakeTest() {
         setAnswers(prev => ({ ...prev, [qIdx]: oIdx }));
     };
 
+    const clearResponse = (qIdx: number) => {
+        setAnswers(prev => {
+            const next = { ...prev };
+            delete next[qIdx];
+            return next;
+        });
+    };
+
+    const toggleReviewAndNext = (qIdx: number) => {
+        setReviewIndices(prev =>
+            prev.includes(qIdx) ? prev.filter(i => i !== qIdx) : [...prev, qIdx]
+        );
+        if (qIdx < shuffledQuestions.length - 1) {
+            setCurrentIdx(qIdx + 1);
+        }
+    };
+
+    const toggleReview = (idx: number) => {
+        setReviewIndices(prev => 
+            prev.includes(idx) ? prev.filter(i => i !== idx) : [...prev, idx]
+        );
+    };
+
     // ── Render: Loading ───────────────────────────────────────────────────
     if (loading) return (
         <div className="test-wrap" style={{ display: 'grid', placeItems: 'center' }}>
@@ -1926,8 +2004,16 @@ export default function TakeTest() {
                         <div className="test-q-card" key={currentIdx}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
                                 <div className="test-q-num">Question {currentIdx + 1} of {shuffledQuestions.length}</div>
-                                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-muted)' }}>
-                                    {Math.round(((currentIdx + 1) / shuffledQuestions.length) * 100)}% Complete
+                                <div style={{ textAlign: 'right', minWidth: 120 }}>
+                                    <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-muted)' }}>
+                                        {Math.round((Object.keys(answers).length / shuffledQuestions.length) * 100)}% Complete
+                                    </div>
+                                    <div className="test-progress-bar">
+                                        <div 
+                                            className="test-progress-fill" 
+                                            style={{ width: `${(Object.keys(answers).length / shuffledQuestions.length) * 100}%` }}
+                                        />
+                                    </div>
                                 </div>
                             </div>
                             <div className="test-q-text">
@@ -1960,12 +2046,29 @@ export default function TakeTest() {
                         </div>
 
                         <div className="test-nav">
+                            <div style={{ display: 'flex', gap: 12 }}>
+                                <button
+                                    className="test-btn secondary"
+                                    disabled={currentIdx === 0}
+                                    onClick={() => setCurrentIdx(i => i - 1)}
+                                >
+                                    &larr; Previous
+                                </button>
+                                <button
+                                    className="test-btn secondary"
+                                    style={{ color: '#ef4444' }}
+                                    onClick={() => clearResponse(currentIdx)}
+                                    disabled={answers[currentIdx] === undefined}
+                                >
+                                    Clear Response
+                                </button>
+                            </div>
+
                             <button
-                                className="test-btn secondary"
-                                disabled={currentIdx === 0}
-                                onClick={() => setCurrentIdx(i => i - 1)}
+                                className={`test-btn review-btn ${reviewIndices.includes(currentIdx) ? 'active' : ''}`}
+                                onClick={() => toggleReviewAndNext(currentIdx)}
                             >
-                                &larr; Previous Question
+                                {reviewIndices.includes(currentIdx) ? '⭐ Unmark & Next' : '☆ Mark for Review & Next'}
                             </button>
 
                             <div style={{ display: 'flex', gap: 16 }}>
@@ -1987,7 +2090,7 @@ export default function TakeTest() {
                                             });
                                         }}
                                     >
-                                        Submit Final Responses
+                                        Submit Final
                                     </button>
                                 ) : (
                                     <button
@@ -2081,11 +2184,13 @@ export default function TakeTest() {
                             {shuffledQuestions.map((_, i) => {
                                 const isAnswered = answers[i] !== undefined;
                                 const isVisited = visited.includes(i);
+                                const isReview = reviewIndices.includes(i);
                                 const isCurrent = currentIdx === i;
 
                                 let btnClass = "q-btn";
                                 if (isCurrent) btnClass += " current";
-                                if (isAnswered) btnClass += " answered";
+                                if (isReview) btnClass += " review";
+                                else if (isAnswered) btnClass += " answered";
                                 else if (isVisited) btnClass += " visited-unanswered";
 
                                 return (
@@ -2102,18 +2207,47 @@ export default function TakeTest() {
 
                         <div className="q-legend">
                             <div className="q-legend-item">
+                                <div className="q-legend-box" style={{ background: '#db2777', borderColor: '#be185d' }} />
+                                Answered & Marked Review
+                            </div>
+                            <div className="q-legend-item">
+                                <div className="q-legend-box" style={{ background: 'var(--q-review-bg)', borderColor: 'var(--q-review-border)' }} />
+                                Marked for Review
+                            </div>
+                            <div className="q-legend-item">
                                 <div className="q-legend-box" style={{ background: 'var(--q-answered-bg)', borderColor: 'var(--q-answered-border)' }} />
-                                Answered
+                                Answered Questions
                             </div>
                             <div className="q-legend-item">
                                 <div className="q-legend-box" style={{ background: 'var(--q-visited-bg)', borderColor: 'var(--q-visited-border)' }} />
                                 Visited (Not Answered)
                             </div>
                             <div className="q-legend-item">
-                                <div className="q-legend-box" style={{ background: 'var(--bg-neutral)', borderColor: 'var(--border)' }} />
+                                <div className="q-legend-box" style={{ background: 'var(--q-notvisited-bg, var(--bg-neutral))', borderColor: 'var(--q-notvisited-border, var(--border))' }} />
                                 Not Visited
                             </div>
                         </div>
+
+                        <button
+                            className="test-btn finish"
+                            style={{ width: '100%', marginTop: 24, padding: '12px' }}
+                            onClick={() => {
+                                setPopup({
+                                    isOpen: true,
+                                    type: 'confirm',
+                                    title: 'Submit Assessment',
+                                    message: 'Are you sure you want to finalize and submit your assessment? You cannot change your answers after submission.',
+                                    confirmText: 'Submit Assessment',
+                                    onConfirm: () => {
+                                        setPopup(null);
+                                        setFinished(true);
+                                    },
+                                    onCancel: () => setPopup(null)
+                                });
+                            }}
+                        >
+                            Submit Assessment
+                        </button>
                     </aside>
                 </div>
             </div>
