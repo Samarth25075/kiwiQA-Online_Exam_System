@@ -29,6 +29,11 @@ def send_invitation_email(receiver_email: str, candidate_name: str, test_link: s
     content = f"Hello {candidate_name},\n\nYou have been invited to complete an online assessment. Please use the link below to begin your test:\n\n{test_link}\n\nGood luck!"
     send_email(receiver_email, subject, content)
 
+def send_report_email(receiver_email: str, candidate_name: str, report_link: str):
+    subject = 'Your Assessment Report is Ready'
+    content = f"Hello {candidate_name},\n\nYour assessment results and detailed report are now available. You can view them using the secure link below:\n\n{report_link}\n\nThank you for your time."
+    send_email(receiver_email, subject, content)
+
 def get_admin_otp():
     """Generate a 6-digit OTP that remains valid for a 80-second window."""
     window = int(time.time() / 80)

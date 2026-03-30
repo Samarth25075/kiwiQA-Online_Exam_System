@@ -17,7 +17,7 @@ from app.candidates.service import (
     _to_full_dict, _to_summary_dict
 )
 from app.exams.service import get_exam_by_id
-from .utils import _format_candidate, send_invitation_email, send_email
+from .utils import _format_candidate, send_invitation_email, send_email, send_report_email
 
 router = APIRouter(prefix="/candidates", tags=["admin-candidates"])
 
@@ -130,94 +130,13 @@ async def get_candidate_report(
     candidate_obj = db.query(Candidate).filter(Candidate.id == int(candidate_id)).first()
     if not candidate_obj:
         raise HTTPException(status_code=404, detail="Candidate not found")
-    candidate = _to_full_dict(candidate_obj)
-    
-    if not candidate:
-        raise HTTPException(status_code=404, detail="Candidate not found")
         
-    if candidate.get("status") != "Completed":
-         raise HTTPException(status_code=400, detail="Candidate has not completed the exam yet.")
-
-    exam = get_exam_by_id(db, candidate["assigned_exam_id"])
-    if not exam:
-        raise HTTPException(status_code=404, detail="Exam data not found")
-
-    # performance stats by category
-    stats = {}
-    questions = exam.get("questions", [])
-    answers = candidate.get("answers", [])
-    
-    # Create a lookup for answers by original question index
-    # We use string keys and also handle any empty/None answers
-    ans_lookup = {}
-    if answers:
-        for a in answers:
-            if a and "question_index" in a:
-                ans_lookup[str(a["question_index"])] = a
-
-    report_questions = []
-    for idx, q in enumerate(questions):
-        cat = q.get("category", "General")
-        marks = q.get("marks", 1.0)
-        q_type = str(q.get("type", "multiple-choice")).lower()
+    from app.candidates.service import get_report_data
+    report = get_report_data(db, candidate_obj)
+    if not report:
+        raise HTTPException(status_code=400, detail="Could not generate report. Check candidate status or exam data.")
         
-        if cat not in stats:
-            stats[cat] = {"correct": 0, "total": 0, "count": 0, "attempted": 0}
-        
-        stats[cat]["count"] += 1
-        stats[cat]["total"] += marks
-        
-        # Robust lookup by index
-        curr_ans = ans_lookup.get(str(idx))
-        is_correct = False
-        
-        if curr_ans:
-             stats[cat]["attempted"] += 1
-             if q_type == 'coding':
-                 results = curr_ans.get("test_results", [])
-                 passed_count = len([r for r in results if r.get("passed")])
-                 total_test_cases = len(results)
-                 pass_pct = (passed_count / total_test_cases * 100) if total_test_cases > 0 else 0
-                 
-                 threshold = q.get("threshold_pct", 100)
-                 if pass_pct >= threshold:
-                     is_correct = True
-                     stats[cat]["correct"] += marks
-             else:
-                 selected = curr_ans.get("selected_option_index")
-                 options = q.get("options", [])
-                 if selected is not None and 0 <= selected < len(options):
-                     if options[selected].get("is_correct"):
-                         is_correct = True
-                         stats[cat]["correct"] += marks
-
-        report_questions.append({
-            "text": q["text"],
-            "type": q_type,
-            "options": q.get("options", []),
-            "selected_index": curr_ans.get("selected_option_index") if curr_ans else None,
-            "code": curr_ans.get("code") if curr_ans else None,
-            "language": curr_ans.get("language", q.get("language", "javascript")) if curr_ans else q.get("language", "javascript"),
-            "test_results": curr_ans.get("test_results") if curr_ans else None,
-            "category": cat,
-            "marks": marks,
-            "explanation": q.get("explanation"),
-            "is_correct": is_correct
-        })
-
-    return {
-        "candidate": candidate,
-        "exam_title": exam["title"],
-        "passing_score": exam.get("passing_score", 50),
-        "stats": stats,
-        "questions": report_questions,
-        "proctoring": {
-            "start": candidate.get("screenshot_start"),
-            "mid": candidate.get("screenshot_mid"),
-            "end": candidate.get("screenshot_end")
-        }
-    }
-
+    return report
 @router.post("/{candidate_id}/assign-exam", response_model=CandidateResponse)
 async def assign_exam(
     candidate_id: str, 
@@ -265,7 +184,13 @@ async def send_candidate_link(
     db.add(inv)
     db.commit()
 
-    background_tasks.add_task(send_invitation_email, candidate['email'], candidate['name'], test_link)
+    if candidate_obj.status.lower() == "completed":
+        # Report Link only
+        report_link = f"{FRONTEND_URL}/#/test-results/{candidate['token']}"
+        background_tasks.add_task(send_report_email, candidate['email'], candidate['name'], report_link)
+    else:
+        # Invitation Link
+        background_tasks.add_task(send_invitation_email, candidate['email'], candidate['name'], test_link)
     return {"message": "Exam link sent successfully"}
 
 @router.post("/{candidate_id}/retest", response_model=CandidateResponse)

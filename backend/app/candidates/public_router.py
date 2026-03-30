@@ -210,3 +210,18 @@ async def verify_enroll_otp(exam_id: str, req: CandidateEnrollOTPVerify, db: Ses
     if not updated:
         raise HTTPException(status_code=500, detail="Failed to assign exam.")
     return _format_candidate(updated)
+@router.get("/test-results/{token}")
+async def get_public_test_results(token: str, db: Session = Depends(get_db)):
+    """Allow a candidate to view their results and report via their unique token."""
+    from app.models import Candidate
+    from app.candidates.service import get_report_data
+    
+    candidate_obj = db.query(Candidate).filter(Candidate.token == token).first()
+    if not candidate_obj:
+        raise HTTPException(status_code=404, detail="Invalid assessment token")
+        
+    report = get_report_data(db, candidate_obj)
+    if not report:
+        raise HTTPException(status_code=400, detail="Report not available yet or assessment incomplete.")
+        
+    return report

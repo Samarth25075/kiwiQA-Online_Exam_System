@@ -47,6 +47,7 @@ function App() {
 
           {/* Candidate Testing Flow (Publicly Accessible via URL) */}
           <Route path="/test/:token" element={<TakeTest />} />
+          <Route path="/test-results/:token" element={<CandidateReport />} />
           <Route path="/enroll/:examId" element={<EnrollCandidate />} />
 
           {/* Protected Administrative Routes */}

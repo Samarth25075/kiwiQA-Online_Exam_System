@@ -143,57 +143,79 @@ function getStatus(pct: number, violations: number, passingScore: number) {
 }
 
 export default function CandidateReport() {
-    const { candidateId } = useParams();
+    const { candidateId, token: publicToken } = useParams();
     const navigate = useNavigate();
     const [report, setReport] = useState<ReportData | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchReport = async () => {
-            const token = sessionStorage.getItem("access_token");
-            if (!token) { navigate("/"); return; }
+            const adminToken = sessionStorage.getItem("access_token");
+            
+            // Explicitly check for public token from URL params
+            const hasPublicToken = !!publicToken;
+            const hasCandidateId = !!candidateId;
+
+            let url = "";
+            let headers: any = {};
+
+            if (hasPublicToken) {
+                // PUBLIC MODE: Fetching results via secure token
+                url = `${API_BASE_URL}/test-results/${publicToken}`;
+                headers = {}; // No auth needed for public endpoint
+            } else if (hasCandidateId) {
+                // ADMIN MODE: Requires authentication
+                if (!adminToken) {
+                    navigate("/");
+                    return;
+                }
+                url = `${API_BASE_URL}/candidates/${candidateId}/report`;
+                headers = { "Authorization": `Bearer ${adminToken}` };
+            } else {
+                // Unknown route/params
+                navigate("/");
+                return;
+            }
 
             try {
-                const res = await fetch(`${API_BASE_URL}/candidates/${candidateId}/report`, {
-                    headers: { "Authorization": `Bearer ${token}` }
-                });
+                setLoading(true);
+                const res = await fetch(url, { headers });
+                
                 if (res.ok) {
                     const data = await res.json();
                     setReport(data);
-                } else if (res.status === 401) {
+                } else if (res.status === 401 && !hasPublicToken) {
+                    // Only redirect on 401 if we're NOT in public mode
                     navigate("/");
                 }
             } catch (err) {
-                console.error("Report fetch error:", err);
+                console.error("Critical Failure: Report retrieval error:", err);
             } finally {
                 setLoading(false);
             }
         };
         fetchReport();
-    }, [candidateId, navigate]);
+    }, [candidateId, publicToken, navigate]);
 
     if (loading) return (
-        <AdminLayout>
-            <div style={{ display: 'grid', placeItems: 'center', height: '60vh' }}>
-                <div style={{ textAlign: 'center' }}>
-                    <div style={{ width: 44, height: 44, border: '4px solid var(--border)', borderTopColor: 'var(--primary)', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 20px' }} />
-                    <p style={{ fontWeight: 700, color: 'var(--text)', fontSize: '18px' }}>Generating Detailed Analysis...</p>
-                    <p style={{ color: 'var(--text-muted)', fontSize: '14px', marginTop: 8 }}>Cross-referencing proctoring logs and category performance.</p>
-                </div>
-                <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        <div style={{ display: 'grid', placeItems: 'center', minHeight: '80vh', background: 'var(--bg-neutral)', color: 'var(--text)' }}>
+            <div style={{ textAlign: 'center' }}>
+                <div style={{ width: 44, height: 44, border: '4px solid var(--border)', borderTopColor: 'var(--primary)', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 24px' }} />
+                <p style={{ fontWeight: 800, fontSize: '20px', letterSpacing: '-0.02em' }}>Compiling Results...</p>
+                <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginTop: 10, fontWeight: 500 }}>Finalizing candidate performance analysis.</p>
             </div>
-        </AdminLayout>
+            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        </div>
     );
 
     if (!report) return (
-        <AdminLayout>
-            <div style={{ textAlign: 'center', padding: 80 }}>
-                <div style={{ fontSize: 48, marginBottom: 20 }}>{"\u{1F4D1}"}</div>
-                <h2 style={{ color: 'var(--text)', fontWeight: 800 }}>Report Not Found</h2>
-                <p style={{ color: 'var(--text-muted)', marginBottom: 32 }}>We couldn't locate the assessment data for this candidate.</p>
-                <button className="test-btn" onClick={() => navigate("/manage-candidates")}>Return to Candidate List</button>
-            </div>
-        </AdminLayout>
+        <div style={{ display: 'grid', placeItems: 'center', minHeight: '80vh', background: 'var(--bg-neutral)', color: 'var(--text)' }}>
+           <div style={{ textAlign: 'center' }}>
+               <h2 style={{ fontWeight: 900, marginBottom: 12 }}>Report Not Found</h2>
+               <p style={{ color: 'var(--text-muted)', marginBottom: 32 }}>We couldn't retrieve the assessment data for this session.</p>
+               {!publicToken && <button className="basic-btn" onClick={() => navigate("/manage-candidates")}>Return to List</button>}
+           </div>
+        </div>
     );
 
     const { candidate, stats, questions, proctoring, exam_title, passing_score } = report;
@@ -233,17 +255,17 @@ export default function CandidateReport() {
 
     const duration = calculateDuration();
 
-    return (
-        <AdminLayout plain={true}>
+    const reportContent = (
+        <>
             <style>{STYLES}</style>
             <div className="report-container">
                 <div className="no-print" style={{ marginBottom: 20 }}>
-                    <button 
-                        className="basic-btn" 
-                        onClick={() => navigate(-1)} 
+                    <button
+                        className="basic-btn"
+                        onClick={() => navigate(-1)}
                         style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 16px', fontSize: 13 }}
                     >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></svg>
                         Back
                     </button>
                 </div>
@@ -350,7 +372,7 @@ export default function CandidateReport() {
                         const isCorrect = q.is_correct ?? (q.selected_index !== null && Array.isArray(q.options) && q.options[q.selected_index]?.is_correct);
                         const isCoding = q.type?.toLowerCase() === 'coding';
                         const marksAwarded = isCorrect ? (q.marks || 1) : 0;
-                        
+
                         return (
                             <div key={idx} className={`q-item ${isCorrect ? 'correct' : 'incorrect'}`}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
@@ -366,16 +388,60 @@ export default function CandidateReport() {
                                     </div>
                                 </div>
                                 <div className="q-text">{q.text}</div>
-                                
+
                                 {isCoding ? (
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginTop: 12 }}>
-                                        <div style={{ background: '#0f172a', borderRadius: 8, padding: '16px', position: 'relative' }}>
-                                            <div style={{ position: 'absolute', top: 0, right: 0, background: '#1e293b', color: '#94a3b8', fontSize: 9, fontWeight: 700, padding: '4px 10px', borderRadius: '0 8px 0 8px', borderLeft: '1px solid #334155', borderBottom: '1px solid #334155' }}>
-                                                CANDIDATE SOURCE CODE ({q.language?.toUpperCase() || 'JAVASCRIPT'})
+                                        <div style={{
+                                            background: '#1e1e1e',
+                                            borderRadius: 10,
+                                            overflow: 'hidden',
+                                            border: '1px solid #334155',
+                                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                                        }}>
+                                            <div style={{
+                                                background: '#2d3748',
+                                                padding: '8px 16px',
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'center',
+                                                borderBottom: '1px solid #4a5568'
+                                            }}>
+                                                <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                                                    <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#ff5f56' }} />
+                                                    <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#ffbd2e' }} />
+                                                    <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#27c93f' }} />
+                                                    <span style={{ marginLeft: 10, fontSize: 10, fontWeight: 700, color: '#e2e8f0', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                                        {q.language || 'javascript'}
+                                                    </span>
+                                                </div>
+                                                <span style={{ fontSize: 9, color: '#718096', fontWeight: 600 }}>CANDIDATE SUBMISSION</span>
                                             </div>
-                                            <pre style={{ margin: 0, color: '#e2e8f0', fontSize: '13px', fontFamily: '"Fira Code", "Source Code Pro", monospace', whiteSpace: 'pre-wrap', overflow: 'hidden' }}>
-                                                {q.code || "// No code was written for this question"}
-                                            </pre>
+                                            <div style={{ display: 'flex', padding: 16, gap: 16 }}>
+                                                {/* Simulated Line Numbers */}
+                                                <div style={{
+                                                    color: '#4a5568',
+                                                    textAlign: 'right',
+                                                    userSelect: 'none',
+                                                    fontSize: 12,
+                                                    fontFamily: '"Fira Code", monospace',
+                                                    lineHeight: '22px',
+                                                    minWidth: 20
+                                                }}>
+                                                    {(q.code || "").split('\n').map((_, i) => <div key={i}>{i + 1}</div>)}
+                                                </div>
+                                                {/* Code Snippet */}
+                                                <pre style={{
+                                                    margin: 0,
+                                                    color: '#d1d5db',
+                                                    fontSize: '13px',
+                                                    fontFamily: '"Fira Code", "Source Code Pro", monospace',
+                                                    lineHeight: '22px',
+                                                    whiteSpace: 'pre-wrap',
+                                                    wordBreak: 'break-all'
+                                                }}>
+                                                    {q.code || "// No code was written for this question"}
+                                                </pre>
+                                            </div>
                                         </div>
                                         {Array.isArray(q.test_results) && q.test_results.length > 0 && (
                                             <div style={{ background: 'var(--bg-neutral)', border: '1px solid var(--border)', borderRadius: 8, padding: 12 }}>
@@ -427,7 +493,7 @@ export default function CandidateReport() {
 
                 <div className="section-card">
                     <h2 className="section-title">🛡️ Proctoring & Integrity Audit</h2>
-                    
+
                     {candidate.violation_logs && candidate.violation_logs.length > 0 ? (
                         <div className="heatmap-container" style={{ marginBottom: 40 }}>
                             <div className="heatmap-title">
@@ -440,7 +506,7 @@ export default function CandidateReport() {
                                     const examEnd = new Date(candidate.completed_at).getTime();
                                     const current = log.unix || examStart;
                                     const pct = Math.min(100, Math.max(0, ((current - examStart) / (examEnd - examStart)) * 100));
-                                    
+
                                     return (
                                         <div key={i} className="heatmap-pip" style={{ left: `${pct}%` }}>
                                             <div className="heatmap-tooltip">
@@ -515,6 +581,12 @@ export default function CandidateReport() {
                     </button>
                 </div>
             </div>
-        </AdminLayout>
+        </>
     );
+
+    if (publicToken) {
+        return <div className="al-layout-wrap plain" style={{ flex: 1, minHeight: '100vh', background: 'var(--bg-neutral)' }}>{reportContent}</div>;
+    }
+
+    return <AdminLayout plain={true}>{reportContent}</AdminLayout>;
 }

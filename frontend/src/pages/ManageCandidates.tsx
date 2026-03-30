@@ -208,12 +208,12 @@ export default function ManageCandidates() {
                 setPopup(null);
                 const token = sessionStorage.getItem("access_token");
                 try {
-                    const res = await fetch(`${API_BASE_URL}/candidates/${id}/retest`, { 
-                        method: "POST", 
-                        headers: { "Authorization": `Bearer ${token}` } 
+                    const res = await fetch(`${API_BASE_URL}/candidates/${id}/retest`, {
+                        method: "POST",
+                        headers: { "Authorization": `Bearer ${token}` }
                     });
-                    if (res.ok) { 
-                        fetchData(); 
+                    if (res.ok) {
+                        fetchData();
                         setPopup({ isOpen: true, type: 'alert', title: 'Session Resetted', message: 'Candidate session has been reset. They can now access the exam using their original link.', onConfirm: () => setPopup(null) });
                     }
                     else {
@@ -541,11 +541,20 @@ export default function ManageCandidates() {
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <thead>
                             <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                                <th style={{ textAlign: 'left', padding: '16px 0', fontSize: '11px', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' }}>CANDIDATE</th>
-                                <th style={{ textAlign: 'left', padding: '16px 0', fontSize: '11px', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' }}>CONTACT & CV</th>
-                                <th style={{ textAlign: 'left', padding: '16px 0', fontSize: '11px', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' }}>ASSIGNED EXAM</th>
-                                <th style={{ textAlign: 'left', padding: '16px 0', fontSize: '11px', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' }}>STATUS</th>
-                                <th style={{ textAlign: 'right', padding: '16px 0', fontSize: '11px', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' }}>ACTIONS</th>
+                                <th style={{ textAlign: 'left', padding: '16px 0', fontSize: '9px', fontWeight: 900, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>CANDIDATE</th>
+                                <th style={{ textAlign: 'left', padding: '16px 0', fontSize: '9px', fontWeight: 900, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>CONTACT & CV</th>
+                                <th style={{ textAlign: 'left', padding: '16px 0', fontSize: '9px', fontWeight: 900, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>ASSIGNED EXAM</th>
+                                <th style={{ textAlign: 'left', padding: '16px 0', fontSize: '9px', fontWeight: 900, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>STATUS</th>
+                                <th style={{ padding: '16px 24px 16px 0' }}>
+                                    <div style={{ display: 'flex', gap: 20, justifyContent: 'flex-end', fontSize: '9px', fontWeight: 900, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                        <div style={{ width: 36, textAlign: 'center' }}>REPORT</div>
+                                        <div style={{ width: 36, textAlign: 'center' }}>RESET</div>
+                                        <div style={{ width: 36, textAlign: 'center' }}>COPY</div>
+                                        <div style={{ width: 36, textAlign: 'center' }}>SEND</div>
+                                        <div style={{ width: 36, textAlign: 'center' }}>EDIT</div>
+                                        <div style={{ width: 36, textAlign: 'center' }}>DELETE</div>
+                                    </div>
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
@@ -574,12 +583,14 @@ export default function ManageCandidates() {
                                     <td style={{ padding: '20px 0', borderBottom: '1px solid var(--border)' }}>
                                         <StatusChip status={candidate.status} />
                                     </td>
-                                    <td style={{ padding: '20px 0', borderBottom: '1px solid var(--border)' }}>
+                                    <td style={{ padding: '20px 24px 20px 0', borderBottom: '1px solid var(--border)' }}>
                                         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', alignItems: 'center' }}>
-                                            {candidate.status.toLowerCase() === 'completed' && (
+                                            {candidate.status.toLowerCase() === 'completed' ? (
                                                 <button className="mc-action-btn" onClick={() => navigate(`/report/${candidate.id}`)} title="View Report" style={{ color: 'var(--text)' }}>
                                                     <Icons.FileText />
                                                 </button>
+                                            ) : (
+                                                <div style={{ width: 32 }} />
                                             )}
                                             <button className="mc-action-btn" onClick={() => handleRetest(candidate.id)} title="Reset / Retest Session" style={{ color: 'var(--color-info)' }}>
                                                 <Icons.CPU />

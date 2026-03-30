@@ -291,3 +291,90 @@ def reset_candidate_for_retest(db: Session, candidate_id: str) -> Dict | None:
             redis_client.delete("all_candidates_list", "all_candidates_list_summary", "exams_with_counts")
         return _to_full_dict(c)
     return None
+def get_report_data(db: Session, candidate_obj: Candidate) -> Dict | None:
+    """Consolidated logic to generate assessment report data."""
+    if not candidate_obj:
+        return None
+        
+    candidate = _to_full_dict(candidate_obj)
+    if candidate.get("status") != "Completed":
+        return None
+
+    from app.exams.service import get_exam_by_id
+    exam = get_exam_by_id(db, candidate["assigned_exam_id"])
+    if not exam:
+        return None
+
+    # Performance stats by category
+    stats = {}
+    questions = exam.get("questions", [])
+    answers = candidate.get("answers", [])
+    
+    # Create a lookup for answers by original question index
+    ans_lookup = {}
+    if answers:
+        for a in answers:
+            if a and "question_index" in a:
+                ans_lookup[str(a["question_index"])] = a
+
+    report_questions = []
+    for idx, q in enumerate(questions):
+        cat = q.get("category", "General")
+        marks = q.get("marks", 1.0)
+        q_type = str(q.get("type", "multiple-choice")).lower()
+        
+        if cat not in stats:
+            stats[cat] = {"correct": 0, "total": 0, "count": 0, "attempted": 0}
+        
+        stats[cat]["count"] += 1
+        stats[cat]["total"] += marks
+        
+        curr_ans = ans_lookup.get(str(idx))
+        is_correct = False
+        
+        if curr_ans:
+             stats[cat]["attempted"] += 1
+             if q_type == 'coding':
+                 results = curr_ans.get("test_results", [])
+                 passed_count = len([r for r in results if r.get("passed")])
+                 total_test_cases = len(results)
+                 pass_pct = (passed_count / total_test_cases * 100) if total_test_cases > 0 else 0
+                 
+                 threshold = q.get("threshold_pct", 100)
+                 if pass_pct >= threshold:
+                     is_correct = True
+                     stats[cat]["correct"] += marks
+             else:
+                 selected = curr_ans.get("selected_option_index")
+                 options = q.get("options", [])
+                 if selected is not None and 0 <= selected < len(options):
+                     if options[selected].get("is_correct"):
+                         is_correct = True
+                         stats[cat]["correct"] += marks
+
+        report_questions.append({
+            "text": q["text"],
+            "type": q_type,
+            "options": q.get("options", []),
+            "selected_index": curr_ans.get("selected_option_index") if curr_ans else None,
+            "code": curr_ans.get("code") if curr_ans else None,
+            "language": curr_ans.get("language", q.get("language", "javascript")) if curr_ans else q.get("language", "javascript"),
+            "test_results": curr_ans.get("test_results") if curr_ans else None,
+            "category": cat,
+            "marks": marks,
+            "explanation": q.get("explanation"),
+            "is_correct": is_correct
+        })
+
+    return {
+        "candidate": candidate,
+        "exam_title": exam["title"],
+        "passing_score": exam.get("passing_score", 50),
+        "stats": stats,
+        "questions": report_questions,
+        "proctoring": {
+            "start": candidate.get("screenshot_start"),
+            "mid": candidate.get("screenshot_mid"),
+            "end": candidate.get("screenshot_end")
+        }
+    }
