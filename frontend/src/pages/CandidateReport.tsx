@@ -11,11 +11,16 @@ interface ReportData {
     stats: Record<string, { correct: number; total: number; count: number; attempted: number }>;
     questions: Array<{
         text: string;
+        type?: string;
         options: Array<{ text: string; is_correct: boolean }>;
         selected_index: number | null;
+        code?: string | null;
+        language?: string | null;
+        test_results?: any[] | null;
         category: string;
         explanation?: string;
         marks?: number;
+        is_correct?: boolean;
     }>;
     proctoring: {
         start: string | null;
@@ -116,6 +121,19 @@ const STYLES = `
     .section-title { border-bottom-color: black !important; color: black !important; }
     .report-title, .stat-val, .cat-name, .score-cell, .q-text, .opt-item { color: black !important; }
 }
+
+/* ── Heatmap Styles ── */
+.heatmap-container { margin-top: 32px; background: var(--bg-neutral); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; position: relative; }
+.heatmap-title { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 20px; display: flex; justify-content: space-between; }
+.heatmap-track { height: 12px; background: #eee; border-radius: 100px; position: relative; margin: 0 10px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); }
+.heatmap-pip { position: absolute; top: -14px; width: 4px; height: 36px; background: #ef4444; border-radius: 100px; transform: translateX(-50%); box-shadow: 0 0 8px rgba(239, 68, 68, 0.4); cursor: pointer; transition: transform 0.2s; }
+.heatmap-pip:hover { transform: translateX(-50%) scaleX(2); z-index: 10; }
+.heatmap-tooltip { position: absolute; bottom: 44px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 6px 12px; border-radius: 6px; font-size: 10px; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+.heatmap-pip:hover .heatmap-tooltip { opacity: 1; }
+.heatmap-labels { display: flex; justify-content: space-between; margin-top: 14px; font-size: 9px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+.heatmap-legend { display: flex; gap: 20px; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border); }
+.legend-item { display: flex; alignItems: center; gap: 8px; font-size: 10px; font-weight: 600; color: var(--text-muted); }
+.legend-dot { width: 8px; height: 8px; background: #ef4444; border-radius: 50%; }
 `;
 
 function getStatus(pct: number, violations: number, passingScore: number) {
@@ -329,41 +347,73 @@ export default function CandidateReport() {
                 <div className="section-card">
                     <h2 className="section-title">Detailed Question Submission Log</h2>
                     {questions.map((q, idx) => {
-                        const isCorrect = q.selected_index !== null && q.options[q.selected_index]?.is_correct;
+                        const isCorrect = q.is_correct ?? (q.selected_index !== null && Array.isArray(q.options) && q.options[q.selected_index]?.is_correct);
+                        const isCoding = q.type?.toLowerCase() === 'coding';
                         const marksAwarded = isCorrect ? (q.marks || 1) : 0;
+                        
                         return (
                             <div key={idx} className={`q-item ${isCorrect ? 'correct' : 'incorrect'}`}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                                     <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
                                         <span style={{ fontSize: 11, fontWeight: 900, color: 'var(--primary)', textTransform: 'uppercase', background: 'var(--bg-neutral)', padding: '2px 8px', borderRadius: 4 }}>Q {idx + 1}</span>
                                         <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>{q.category}</span>
+                                        {isCoding && <span style={{ fontSize: 9, fontWeight: 800, color: 'var(--primary)', border: '1px solid var(--primary)', padding: '1px 5px', borderRadius: 3 }}>CODING</span>}
                                     </div>
                                     <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                                        {q.selected_index === null && <span style={{ fontSize: 10, color: '#ef4444', fontWeight: 800, padding: '2px 8px', border: '1px solid #fee2e2', borderRadius: 4 }}>UNANSWERED</span>}
+                                        {!isCoding && q.selected_index === null && <span style={{ fontSize: 10, color: '#ef4444', fontWeight: 800, padding: '2px 8px', border: '1px solid #fee2e2', borderRadius: 4 }}>UNANSWERED</span>}
+                                        {isCoding && !q.code && <span style={{ fontSize: 10, color: '#ef4444', fontWeight: 800, padding: '2px 8px', border: '1px solid #fee2e2', borderRadius: 4 }}>NO CODE SUBMITTED</span>}
                                         <span style={{ fontSize: 12, fontWeight: 800 }}>Marks: {marksAwarded} / {q.marks || 1}</span>
                                     </div>
                                 </div>
                                 <div className="q-text">{q.text}</div>
-                                <div className="opt-list">
-                                    {q.options.map((opt, oIdx) => {
-                                        const isSelected = q.selected_index === oIdx;
-                                        const isCorrectOpt = opt.is_correct;
-                                        let classStr = "opt-item";
-                                        if (isSelected && isCorrectOpt) classStr += " both";
-                                        else if (isSelected) classStr += " selected";
-                                        else if (isCorrectOpt) classStr += " correct";
-
-                                        return (
-                                            <div key={oIdx} className={classStr}>
-                                                <span>{opt.text}</span>
-                                                <div style={{ display: 'flex', gap: 8 }}>
-                                                    {isCorrectOpt && <span style={{ fontSize: 10, fontWeight: 700, background: '#10b981', color: 'white', padding: '1px 6px', borderRadius: 4 }}>CORRECT</span>}
-                                                    {(isSelected && !isCorrectOpt) && <span style={{ fontSize: 10, fontWeight: 700, background: '#ef4444', color: 'white', padding: '1px 6px', borderRadius: 4 }}>YOUR CHOICE</span>}
+                                
+                                {isCoding ? (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginTop: 12 }}>
+                                        <div style={{ background: '#0f172a', borderRadius: 8, padding: '16px', position: 'relative' }}>
+                                            <div style={{ position: 'absolute', top: 0, right: 0, background: '#1e293b', color: '#94a3b8', fontSize: 9, fontWeight: 700, padding: '4px 10px', borderRadius: '0 8px 0 8px', borderLeft: '1px solid #334155', borderBottom: '1px solid #334155' }}>
+                                                CANDIDATE SOURCE CODE ({q.language?.toUpperCase() || 'JAVASCRIPT'})
+                                            </div>
+                                            <pre style={{ margin: 0, color: '#e2e8f0', fontSize: '13px', fontFamily: '"Fira Code", "Source Code Pro", monospace', whiteSpace: 'pre-wrap', overflow: 'hidden' }}>
+                                                {q.code || "// No code was written for this question"}
+                                            </pre>
+                                        </div>
+                                        {Array.isArray(q.test_results) && q.test_results.length > 0 && (
+                                            <div style={{ background: 'var(--bg-neutral)', border: '1px solid var(--border)', borderRadius: 8, padding: 12 }}>
+                                                <div style={{ fontSize: 10, fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 10 }}>Test Execution Summary</div>
+                                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 8 }}>
+                                                    {q.test_results.map((tr, trIdx) => (
+                                                        <div key={trIdx} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 10px', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 6, fontSize: 11 }}>
+                                                            <div style={{ width: 8, height: 8, borderRadius: '50%', background: tr.passed ? '#10b981' : '#ef4444' }} />
+                                                            <span style={{ fontWeight: 600 }}>Test Case {trIdx + 1}:</span>
+                                                            <span style={{ color: tr.passed ? '#059669' : '#dc2626', fontWeight: 700 }}>{tr.passed ? 'PASSED' : 'FAILED'}</span>
+                                                        </div>
+                                                    ))}
                                                 </div>
                                             </div>
-                                        );
-                                    })}
-                                </div>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <div className="opt-list">
+                                        {Array.isArray(q.options) && q.options.map((opt, oIdx) => {
+                                            const isSelected = q.selected_index === oIdx;
+                                            const isCorrectOpt = opt.is_correct;
+                                            let classStr = "opt-item";
+                                            if (isSelected && isCorrectOpt) classStr += " both";
+                                            else if (isSelected) classStr += " selected";
+                                            else if (isCorrectOpt) classStr += " correct";
+
+                                            return (
+                                                <div key={oIdx} className={classStr}>
+                                                    <span>{opt.text}</span>
+                                                    <div style={{ display: 'flex', gap: 8 }}>
+                                                        {isCorrectOpt && <span style={{ fontSize: 10, fontWeight: 700, background: '#10b981', color: 'white', padding: '1px 6px', borderRadius: 4 }}>CORRECT</span>}
+                                                        {(isSelected && !isCorrectOpt) && <span style={{ fontSize: 10, fontWeight: 700, background: '#ef4444', color: 'white', padding: '1px 6px', borderRadius: 4 }}>YOUR CHOICE</span>}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
                                 {q.explanation && (
                                     <div style={{ marginTop: 16, padding: 16, background: 'var(--bg-neutral)', borderRadius: 12, border: '1px solid var(--border)', fontSize: 13, color: 'var(--text)' }}>
                                         <div style={{ fontWeight: 800, fontSize: 10, marginBottom: 8, textTransform: 'uppercase', color: 'var(--primary)', letterSpacing: '0.05em' }}>Explanation & Rationale:</div>
@@ -376,7 +426,41 @@ export default function CandidateReport() {
                 </div>
 
                 <div className="section-card">
-                    <h2 className="section-title">Proctoring & Integrity Audit</h2>
+                    <h2 className="section-title">🛡️ Proctoring & Integrity Audit</h2>
+                    
+                    {candidate.violation_logs && candidate.violation_logs.length > 0 ? (
+                        <div className="heatmap-container" style={{ marginBottom: 40 }}>
+                            <div className="heatmap-title">
+                                <span>Exam Activity Integrity Timeline (Audit Visualization)</span>
+                                <span style={{ color: '#ef4444' }}>{candidate.violation_logs.length} Violations Logged</span>
+                            </div>
+                            <div className="heatmap-track">
+                                {candidate.violation_logs.map((log: any, i: number) => {
+                                    const examStart = new Date(candidate.joined_date).getTime();
+                                    const examEnd = new Date(candidate.completed_at).getTime();
+                                    const current = log.unix || examStart;
+                                    const pct = Math.min(100, Math.max(0, ((current - examStart) / (examEnd - examStart)) * 100));
+                                    
+                                    return (
+                                        <div key={i} className="heatmap-pip" style={{ left: `${pct}%` }}>
+                                            <div className="heatmap-tooltip">
+                                                {log.type} at {log.timestamp}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                            <div className="heatmap-labels">
+                                <span>Session Start: {formatDateTime(candidate.joined_date).split(',')[1] || formatDateTime(candidate.joined_date)}</span>
+                                <span style={{ opacity: 0.6 }}>Continuous Monitoring Signal Active</span>
+                                <span>Submitted: {formatDateTime(candidate.completed_at).split(',')[1] || formatDateTime(candidate.completed_at)}</span>
+                            </div>
+                        </div>
+                    ) : (
+                        <div style={{ padding: '24px', textAlign: 'center', background: 'var(--bg-neutral)', borderRadius: '12px', border: '1px dashed var(--border)', marginBottom: '32px' }}>
+                            <p style={{ color: 'var(--text-muted)', fontSize: '13px', fontWeight: 600 }}>No security violations were detected during this assessment session. ✅</p>
+                        </div>
+                    )}
                     {(!proctoring.start && !proctoring.mid && !proctoring.end) ? (
                         <div style={{ padding: '60px', textAlign: 'center', background: 'var(--bg-neutral)', borderRadius: '16px', border: '1px dashed var(--border)' }}>
                             <p style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Proctoring evidence has been purged for privacy reasons.</p>

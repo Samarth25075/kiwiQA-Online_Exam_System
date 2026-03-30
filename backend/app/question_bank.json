@@ -1,5 +1,35 @@
 [
     {
+        "category": "Programming (Advanced)",
+        "difficulty": "Beginner",
+        "type": "coding",
+        "text": "Write a function 'sayHello' that returns the string 'Hello World'.",
+        "skeleton_code": "function sayHello() {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            { "input": "", "expected": "\"Hello World\"" }
+        ],
+        "threshold_pct": 100,
+        "marks": 2,
+        "q_id": "code_hw_001"
+    },
+    {
+        "category": "Programming (Advanced)",
+        "difficulty": "Intermediate",
+        "type": "coding",
+        "text": "Write a function 'findMax' that takes an array of integers and returns the largest number. If the array is empty, return null.",
+        "skeleton_code": "function findMax(nums) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            { "input": "[1, 5, 3, 9, 2]", "expected": "9" },
+            { "input": "[10, -5, 20, 8]", "expected": "20" },
+            { "input": "[]", "expected": "null" }
+        ],
+        "threshold_pct": 100,
+        "marks": 5,
+        "q_id": "code_fm_101"
+    },
+    {
         "category": "Aptitude",
         "difficulty": "Beginner",
         "text": "If a train runs at 60 km/hr, it reaches its destination late by 15 minutes. But, if it runs at 85 km/hr it is late by only 4 minutes. Find the distance to be covered by the train.",

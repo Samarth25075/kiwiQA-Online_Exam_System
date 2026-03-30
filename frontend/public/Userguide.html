@@ -580,29 +580,6 @@
     transition: transform 0.1s;
   }
 
-  /* ── BACK TO TOP ── */
-  #back-top {
-    position: fixed;
-    bottom: 28px; right: 28px;
-    width: 42px; height: 42px;
-    background: var(--teal);
-    color: #fff;
-    border: none;
-    border-radius: 50%;
-    font-size: 18px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 16px rgba(13,148,136,0.35);
-    opacity: 0;
-    transform: translateY(12px);
-    transition: opacity 0.25s, transform 0.25s;
-    z-index: 150;
-  }
-
-  #back-top.visible { opacity: 1; transform: translateY(0); }
-  #back-top:hover { background: var(--teal-dim); }
 
   @media (max-width: 900px) {
     #sidebar { transform: translateX(-100%); }
@@ -631,13 +608,194 @@
     font-size: 18px;
     cursor: pointer;
   }
+
+  /* ── CHATBOT ── */
+  #chat-widget {
+    position: fixed;
+    bottom: 28px; right: 28px;
+    z-index: 200;
+  }
+
+  #chat-btn {
+    width: 42px; height: 42px;
+    background: var(--teal-light);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 16px rgba(20,184,166,0.35);
+    transition: transform 0.25s, background 0.25s;
+  }
+
+  #chat-btn:hover { transform: scale(1.1); background: var(--teal); }
+
+  #chat-box {
+    position: absolute;
+    bottom: 56px; right: 0;
+    width: 320px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    animation: slideUp 0.3s ease-out;
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  #chat-box.visible { display: flex; }
+
+  .chat-header {
+    background: var(--teal);
+    color: #fff;
+    padding: 14px 18px;
+    font-weight: 600;
+    font-size: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .chat-body {
+    height: 360px;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: #fdfdfd;
+  }
+
+  .message {
+    max-width: 85%;
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .msg-ai {
+    align-self: flex-start;
+    background: #eee;
+    color: var(--text2);
+    border-bottom-left-radius: 2px;
+  }
+
+  .msg-user {
+    align-self: flex-end;
+    background: var(--teal);
+    color: #fff;
+    border-bottom-right-radius: 2px;
+  }
+
+  .chat-footer {
+    padding: 12px;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .quick-qs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .q-chip {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--teal-dim);
+    font-size: 11.5px;
+    padding: 5px 10px;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .q-chip:hover {
+    background: var(--teal-light);
+    color: #fff;
+    border-color: var(--teal-light);
+  }
+
+  .chat-input-wrap {
+    display: flex;
+    gap: 8px;
+  }
+
+  #chat-input {
+    flex: 1;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 13px;
+    outline: none;
+  }
+
+  #chat-input:focus { border-color: var(--teal-light); }
+
+  #chat-send {
+    background: var(--teal-light);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0 12px;
+    cursor: pointer;
+  }
+
+  /* Responsive Chatbot */
+  @media (max-width: 480px) {
+    #chat-box {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      width: 100%; height: 100%;
+      border-radius: 0;
+    }
+    .chat-body { height: calc(100% - 120px); }
+  }
 </style>
 </head>
 <body>
 
 <div id="progress-bar"></div>
 <button id="hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
-<button id="back-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<!-- CHATBOT -->
+<div id="chat-widget">
+  <button id="chat-btn" onclick="toggleChat()">💬</button>
+  <div id="chat-box">
+    <div class="chat-header">
+      <span>KiwiAssistant 🥝</span>
+      <button onclick="toggleChat()" style="background:none; border:none; color:#fff; font-size:18px; cursor:pointer;">×</button>
+    </div>
+    <div class="chat-body" id="chat-content">
+      <div class="message msg-ai">Hi! I'm your Guide Assistant. How can I help you today?</div>
+      <div class="quick-qs" id="preset-questions">
+        <div class="q-chip" onclick="askPreset('How do I create a new exam?')">Create Exam</div>
+        <div class="q-chip" onclick="askPreset('How does proctoring work?')">Proctoring</div>
+        <div class="q-chip" onclick="askPreset('Can I import questions?')">Bulk Import</div>
+        <div class="q-chip" onclick="askPreset('How to manage candidates?')">Enrollment</div>
+        <div class="q-chip" onclick="askPreset('How do I see results?')">Reports</div>
+        <div class="q-chip" onclick="askPreset('What is the Master OTP?')">Master OTP</div>
+      </div>
+    </div>
+    <div class="chat-footer">
+      <div class="chat-input-wrap">
+        <input type="text" id="chat-input" placeholder="Type a question..." onkeypress="if(event.key==='Enter') sendMessage()">
+        <button id="chat-send" onclick="sendMessage()">➤</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- SIDEBAR -->
 <nav id="sidebar">
@@ -1253,11 +1411,6 @@
     const scrollHeight = doc.scrollHeight - doc.clientHeight;
     const pct = scrollTop / scrollHeight;
     document.getElementById('progress-bar').style.transform = `scaleX(${pct})`;
-
-    // Back to top
-    const btn = document.getElementById('back-top');
-    if (scrollTop > 300) btn.classList.add('visible');
-    else btn.classList.remove('visible');
   });
 
   // Intersection observer for active nav
@@ -1277,6 +1430,60 @@
   }, { threshold: 0.3 });
 
   sections.forEach(s => observer.observe(s));
+
+  // CHATBOT LOGIC
+  const knowledgeBase = {
+    "create exam": "To create an exam, go to the <b>Create Exam</b> module. You can pick questions from the Question Bank, add them manually, or use the <b>Bulk Upload</b> feature (JSON/CSV).",
+    "proctoring": "Our smart proctoring includes <b>Webcam monitoring</b>, <b>Face detection</b>, and <b>Tab-switch tracking</b>. If a candidate switches tabs, it's logged and they may be cautioned or eliminated.",
+    "bulk import": "You can import questions using the <b>JSON/CSV Upload</b> tool in the 'Create Exam' module. Ensure your file follows the required schema as shown in the documentation.",
+    "enrollment": "Candidates are managed in the <b>Candidate Management</b> section. You can enroll them individually, send email invites, and track their status in real-time.",
+    "reports": "Detailed results are available in the <b>Results & Reports</b> section. You can view category-wise performance, proctoring logs, and pass/fail analysis for every candidate.",
+    "master otp": "The <b>Master OTP</b> is a rotating code displayed on your Admin Dashboard. Share this with candidates during enrollment to verify their identity.",
+    "default": "I'm sorry, I don't have a specific answer for that yet. Please check the relevant section in this User Guide! 🥝"
+  };
+
+  function toggleChat() {
+    document.getElementById('chat-box').classList.toggle('visible');
+  }
+
+  function askPreset(question) {
+    appendMessage(question, 'user');
+    processQuestion(question);
+  }
+
+  function sendMessage() {
+    const input = document.getElementById('chat-input');
+    const msg = input.value.trim();
+    if (!msg) return;
+    input.value = '';
+    appendMessage(msg, 'user');
+    processQuestion(msg);
+  }
+
+  function appendMessage(text, sender) {
+    const content = document.getElementById('chat-content');
+    const msgDiv = document.createElement('div');
+    msgDiv.className = `message msg-${sender}`;
+    msgDiv.innerHTML = text;
+    content.appendChild(msgDiv);
+    content.scrollTop = content.scrollHeight;
+  }
+
+  function processQuestion(query) {
+    const q = query.toLowerCase();
+    let answer = knowledgeBase["default"];
+    
+    if (q.includes("create") || q.includes("exam")) answer = knowledgeBase["create exam"];
+    else if (q.includes("proctor") || q.includes("cheat") || q.includes("webcam")) answer = knowledgeBase["proctoring"];
+    else if (q.includes("import") || q.includes("upload") || q.includes("bulk")) answer = knowledgeBase["bulk import"];
+    else if (q.includes("candidate") || q.includes("enroll") || q.includes("manage")) answer = knowledgeBase["enrollment"];
+    else if (q.includes("result") || q.includes("report") || q.includes("score")) answer = knowledgeBase["reports"];
+    else if (q.includes("otp") || q.includes("code")) answer = knowledgeBase["master otp"];
+
+    setTimeout(() => {
+      appendMessage(answer, 'ai');
+    }, 600);
+  }
 </script>
 </body>
 </html>

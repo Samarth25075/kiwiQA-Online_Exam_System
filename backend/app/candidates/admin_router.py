@@ -146,33 +146,63 @@ async def get_candidate_report(
     stats = {}
     questions = exam.get("questions", [])
     answers = candidate.get("answers", [])
-    ans_lookup = {a.get("question_index"): a.get("selected_option_index") for a in answers if a}
+    
+    # Create a lookup for answers by original question index
+    # We use string keys and also handle any empty/None answers
+    ans_lookup = {}
+    if answers:
+        for a in answers:
+            if a and "question_index" in a:
+                ans_lookup[str(a["question_index"])] = a
 
+    report_questions = []
     for idx, q in enumerate(questions):
         cat = q.get("category", "General")
         marks = q.get("marks", 1.0)
+        q_type = str(q.get("type", "multiple-choice")).lower()
+        
         if cat not in stats:
             stats[cat] = {"correct": 0, "total": 0, "count": 0, "attempted": 0}
         
         stats[cat]["count"] += 1
         stats[cat]["total"] += marks
         
-        selected = ans_lookup.get(idx)
-        if selected is not None:
+        # Robust lookup by index
+        curr_ans = ans_lookup.get(str(idx))
+        is_correct = False
+        
+        if curr_ans:
              stats[cat]["attempted"] += 1
-             options = q.get("options", [])
-             if 0 <= selected < len(options) and options[selected].get("is_correct"):
-                 stats[cat]["correct"] += marks
+             if q_type == 'coding':
+                 results = curr_ans.get("test_results", [])
+                 passed_count = len([r for r in results if r.get("passed")])
+                 total_test_cases = len(results)
+                 pass_pct = (passed_count / total_test_cases * 100) if total_test_cases > 0 else 0
+                 
+                 threshold = q.get("threshold_pct", 100)
+                 if pass_pct >= threshold:
+                     is_correct = True
+                     stats[cat]["correct"] += marks
+             else:
+                 selected = curr_ans.get("selected_option_index")
+                 options = q.get("options", [])
+                 if selected is not None and 0 <= selected < len(options):
+                     if options[selected].get("is_correct"):
+                         is_correct = True
+                         stats[cat]["correct"] += marks
 
-    report_questions = []
-    for idx, q in enumerate(questions):
         report_questions.append({
             "text": q["text"],
-            "options": q["options"],
-            "selected_index": ans_lookup.get(idx),
-            "category": q.get("category", "General"),
-            "marks": q.get("marks", 1.0),
-            "explanation": q.get("explanation")
+            "type": q_type,
+            "options": q.get("options", []),
+            "selected_index": curr_ans.get("selected_option_index") if curr_ans else None,
+            "code": curr_ans.get("code") if curr_ans else None,
+            "language": curr_ans.get("language", q.get("language", "javascript")) if curr_ans else q.get("language", "javascript"),
+            "test_results": curr_ans.get("test_results") if curr_ans else None,
+            "category": cat,
+            "marks": marks,
+            "explanation": q.get("explanation"),
+            "is_correct": is_correct
         })
 
     return {

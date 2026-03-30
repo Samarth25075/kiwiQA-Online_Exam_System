@@ -14,11 +14,11 @@ const Icons = {
     ChevronLeft: ({ size = 14 }) => (
         <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
     ),
-    Merge: ({ size = 14 }) => (
-        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><circle cx="3" cy="6" r="1"></circle><circle cx="3" cy="12" r="1"></circle><circle cx="3" cy="18" r="1"></circle></svg>
+    Merge: () => (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><circle cx="3" cy="6" r="1"></circle><circle cx="3" cy="12" r="1"></circle><circle cx="3" cy="18" r="1"></circle></svg>
     ),
-    Plus: ({ size = 14 }) => (
-        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+    Plus: () => (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
     ),
     Layers: ({ size = 14 }) => (
         <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
@@ -328,19 +328,6 @@ export default function ManageExams() {
         
         .delete-btn { padding: 8px 16px; background: var(--bg); border: 1px solid var(--border); color: var(--text-muted); border-radius: 8px; font-weight: 700; font-size: 11px; transition: all 0.2s; cursor: pointer; text-transform: uppercase; letter-spacing: 0.02em; }
         .delete-btn:hover { background: var(--color-danger-light); border-color: var(--color-danger); color: var(--color-danger); }
-        .me-btn-pill {
-            padding: 9px 23px; background: transparent; color: var(--primary); 
-            border: 2px solid var(--primary); border-radius: 999px !important; 
-            font-weight: 700; font-size: 13px; cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.16,1,0.3,1); display: flex; align-items: center; gap: 8px;
-            text-decoration: none;
-        }
-        .me-btn-pill:hover { 
-            background: #00609b !important; color: white !important; 
-            border-color: #00609b !important; transform: translateY(-1px); 
-        }
-        .me-btn-pill:active { transform: translateY(0); }
-
         .create-btn { display: none; } /* Replaced by class logic */
         .merge-btn { display: none; } /* Replaced by class logic */
 
@@ -491,12 +478,12 @@ export default function ManageExams() {
 
                         <div style={{ display: 'flex', gap: 10 }}>
                             {selectedExamIds.size >= 2 && (
-                                <button className="me-btn-pill" style={{ background: 'var(--text)', color: 'var(--bg)' }} onClick={handleMergeSetup} disabled={saving}>
-                                    <Icons.Merge size={12} /> {saving ? "Loading..." : "Merge Marked"}
+                                <button className="btn btn-primary" style={{ background: 'var(--text)', color: 'var(--bg)', borderColor: 'var(--text)' }} onClick={handleMergeSetup} disabled={saving}>
+                                    <Icons.Merge /> {saving ? "Loading..." : "Merge Marked"}
                                 </button>
                             )}
-                            <a href="/#/create-exam" className="me-btn-pill">
-                                <Icons.Plus size={12} /> New AI Assessment
+                            <a href="/#/create-exam" className="btn btn-primary">
+                                <Icons.Plus /> New AI Assessment
                             </a>
                         </div>
                     </header>

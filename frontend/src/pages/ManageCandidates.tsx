@@ -60,7 +60,7 @@ const Icons = {
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
     ),
     Plus: () => (
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
     ),
 };
 
@@ -197,6 +197,33 @@ export default function ManageCandidates() {
         } catch {
             setPopup({ isOpen: true, type: 'alert', title: 'Error', message: 'Network error while sending link.', onConfirm: () => setPopup(null) });
         }
+    };
+
+    const handleRetest = async (id: number) => {
+        setPopup({
+            isOpen: true, type: 'confirm', title: 'Reset Session',
+            message: 'Are you sure you want to reset this candidate session? This will clear their previous results and allow them to take the exam again from any device.',
+            confirmText: 'Reset Now',
+            onConfirm: async () => {
+                setPopup(null);
+                const token = sessionStorage.getItem("access_token");
+                try {
+                    const res = await fetch(`${API_BASE_URL}/candidates/${id}/retest`, { 
+                        method: "POST", 
+                        headers: { "Authorization": `Bearer ${token}` } 
+                    });
+                    if (res.ok) { 
+                        fetchData(); 
+                        setPopup({ isOpen: true, type: 'alert', title: 'Session Resetted', message: 'Candidate session has been reset. They can now access the exam using their original link.', onConfirm: () => setPopup(null) });
+                    }
+                    else {
+                        const data = await res.json().catch(() => ({}));
+                        setPopup({ isOpen: true, type: 'alert', title: 'Reset Failed', message: data.detail || "Could not reset the candidate session.", onConfirm: () => setPopup(null) });
+                    }
+                } catch { setPopup({ isOpen: true, type: 'alert', title: 'Error', message: "Error resetting candidate", onConfirm: () => setPopup(null) }); }
+            },
+            onCancel: () => setPopup(null)
+        });
     };
 
     const copyToClipboard = (text: string, id: number) => {
@@ -381,9 +408,9 @@ export default function ManageCandidates() {
                             setEditingId(-1);
                             setFormData({ name: "", email: "", country_code: "", phone_number: "", dob: "", gender: "", address: "", cv_url: "" });
                         }}
-                        className="btn-primary"
+                        className="btn btn-primary"
                     >
-                        <Icons.Plus /> Add candidate
+                        <Icons.Plus /> Add Candidate
                     </button>
                 </div>
 
@@ -405,24 +432,36 @@ export default function ManageCandidates() {
 
                 <div style={{ display: 'flex', gap: '32px', borderBottom: 'none', paddingBottom: '0' }}>
                     {[
-                        { id: 'all', label: 'All' },
-                        { id: 'completed', label: 'Completed' },
-                        { id: 'pending', label: 'Pending' },
-                        { id: 'in_progress', label: 'In Progress' }
+                        { id: 'all', label: 'All', color: 'var(--primary)' },
+                        { id: 'completed', label: 'Completed', color: 'var(--color-success)' },
+                        { id: 'pending', label: 'Pending', color: 'var(--color-warning)' },
+                        { id: 'in_progress', label: 'In Progress', color: 'var(--color-info)' }
                     ].map(tab => (
                         <button
                             key={tab.id}
                             onClick={() => setFilterTab(tab.id as any)}
                             style={{
                                 background: 'none', border: 'none', padding: '0 0 12px 0',
-                                fontSize: '14px', fontWeight: filterTab === tab.id ? 600 : 400,
+                                fontSize: '14px', fontWeight: filterTab === tab.id ? 700 : 500,
                                 color: filterTab === tab.id ? 'var(--text)' : 'var(--text-muted)',
-                                borderBottom: filterTab === tab.id ? '3px solid var(--primary)' : 'none',
+                                borderBottom: filterTab === tab.id ? `3px solid ${tab.color}` : '3px solid transparent',
                                 cursor: 'pointer', transition: 'all 0.2s', position: 'relative',
                                 boxShadow: 'none', borderRadius: 0
                             }}
                         >
-                            {tab.label} ({counts[tab.id as keyof typeof counts]})
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                {tab.label}
+                                <span style={{
+                                    fontSize: '11px',
+                                    padding: '2px 8px',
+                                    borderRadius: '10px',
+                                    background: filterTab === tab.id ? tab.color : 'var(--bg-neutral)',
+                                    color: filterTab === tab.id ? '#fff' : 'var(--text-muted)',
+                                    transition: 'all 0.2s'
+                                }}>
+                                    {counts[tab.id as keyof typeof counts]}
+                                </span>
+                            </span>
                         </button>
                     ))}
                 </div>
@@ -542,6 +581,9 @@ export default function ManageCandidates() {
                                                     <Icons.FileText />
                                                 </button>
                                             )}
+                                            <button className="mc-action-btn" onClick={() => handleRetest(candidate.id)} title="Reset / Retest Session" style={{ color: 'var(--color-info)' }}>
+                                                <Icons.CPU />
+                                            </button>
                                             <button className="mc-action-btn" onClick={() => copyToClipboard(`${window.location.origin}/#/test/${candidate.token}`, candidate.id)} title="Copy Link" style={{ color: 'var(--text)' }}>
                                                 <Icons.Copy />
                                             </button>

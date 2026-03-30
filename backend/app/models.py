@@ -63,6 +63,7 @@ class Candidate(Base):
     total_questions = Column(Integer, nullable=True)
     total_marks = Column(Float, nullable=True)
     violations = Column(Integer, default=0)
+    violation_logs = Column(JSON, nullable=True) # List of {type, timestamp}
     device_id = Column(String, index=True)
     
     # Detailed result data

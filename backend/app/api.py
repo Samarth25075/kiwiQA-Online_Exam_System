@@ -34,6 +34,7 @@ from .candidates.admin_router import router as candidates_admin_router
 from .candidates.public_router import router as candidates_public_router
 from .exams.router import router as exams_router
 from .categories.router import router as categories_router
+from .chat.router import router as chat_router
 from .exams.service import check_and_delete_expired_exams
 
 app = FastAPI(
@@ -87,6 +88,7 @@ app.include_router(candidates_admin_router)
 app.include_router(candidates_public_router, prefix="/candidates")
 app.include_router(exams_router, prefix="/exams")       # /exams
 app.include_router(categories_router)
+app.include_router(chat_router, prefix="/chat")
 
 # ── Background Cleanup ────────────────────────
 @app.on_event("startup")

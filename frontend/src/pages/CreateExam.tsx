@@ -13,7 +13,12 @@ interface Option {
 
 interface Question {
   text: string;
-  options: Option[];
+  options?: Option[];
+  type?: "multiple-choice" | "coding";
+  skeleton_code?: string;
+  language?: string;
+  test_cases?: Array<{ input: string; expected: string }>;
+  threshold_pct?: number;
   explanation?: string;
   category?: string;
   marks?: number;
@@ -2103,80 +2108,154 @@ export default function CreateExam() {
                       )}
 
                       <div style={{ paddingLeft: 10, marginTop: 10, display: "flex", flexDirection: "column", gap: 8 }}>
-                        {q.options.map((opt, oIdx) => (
-                          <div key={oIdx} style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                            <input
-                              type="radio"
-                              checked={opt.is_correct}
-                              style={{ width: 16, height: 16, accentColor: "var(--primary)", cursor: "pointer" }}
-                              onChange={() => {
-                                const nq = [...questions];
-                                nq[idx].options = nq[idx].options.map((o, i) => ({ ...o, is_correct: i === oIdx }));
-                                setQuestions(nq);
-                              }}
-                            />
-                            <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 6 }}>
-                              <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                                <input
-                                  className="form-input"
-                                  style={{ flex: 1 }}
-                                  value={opt.text}
-                                  onChange={e => {
-                                    const nq = [...questions]; nq[idx].options[oIdx].text = e.target.value; setQuestions(nq);
-                                  }}
-                                  placeholder={`Option ${String.fromCharCode(65 + oIdx)}`}
+                        {q.type === 'coding' ? (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                            <div>
+                                <label className="form-label" style={{ marginBottom: 4, display: 'block' }}>Skeleton Code / Boilerplate</label>
+                                <textarea
+                                    className="form-input"
+                                    style={{ width: '100%', height: '120px', fontFamily: 'var(--font-mono)', fontSize: '13px', paddingTop: 8 }}
+                                    value={q.skeleton_code}
+                                    onChange={e => {
+                                        const nq = [...questions!]; nq[idx].skeleton_code = e.target.value; setQuestions(nq);
+                                    }}
                                 />
-                                <input
-                                  type="file"
-                                  id={`o-img-${idx}-${oIdx}`}
-                                  style={{ display: "none" }}
-                                  accept="image/*"
-                                  onChange={async e => {
-                                    const file = e.target.files?.[0];
-                                    if (file) {
-                                      const base64 = await handleImageUpload(file);
-                                      const nq = [...questions]; nq[idx].options[oIdx].image = base64; setQuestions(nq);
-                                    }
-                                  }}
-                                />
-                                <button className="q-delete" type="button" onClick={() => document.getElementById(`o-img-${idx}-${oIdx}`)?.click()} title="Upload option image">
-                                  <Icons.Upload />
-                                </button>
-                                <button
-                                  className="q-delete"
-                                  type="button"
-                                  onClick={() => { const nq = [...questions]; nq[idx].options.splice(oIdx, 1); setQuestions(nq); }}
-                                >
-                                  <Icons.Trash />
-                                </button>
-                              </div>
-                              {opt.image && (
-                                <div style={{ position: "relative", width: "fit-content" }}>
-                                  <img src={opt.image} alt="Option" style={{ maxWidth: "100px", borderRadius: 4, border: "1px solid var(--line)" }} />
-                                  <button
-                                    className="q-delete"
-                                    style={{ position: "absolute", top: -5, right: -5, width: 20, height: 20 }}
-                                    onClick={() => { const nq = [...questions]; delete nq[idx].options[oIdx].image; setQuestions(nq); }}
-                                  >
-                                    <Icons.X />
-                                  </button>
+                            </div>
+                            <div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                                    <label className="form-label">Test Cases (Validator)</label>
+                                    <button 
+                                        type="button" 
+                                        className="btn btn-secondary" 
+                                        style={{ height: 24, fontSize: '11px', padding: '0 8px' }}
+                                        onClick={() => {
+                                            const nq = [...questions!];
+                                            nq[idx].test_cases = [...(nq[idx].test_cases || []), { input: '', expected: '' }];
+                                            setQuestions(nq);
+                                        }}
+                                    >
+                                        <Icons.Plus /> Add Test Case
+                                    </button>
                                 </div>
-                              )}
+                                <div style={{ display: 'grid', gap: 8 }}>
+                                    {(q.test_cases || []).map((tc, tcIdx) => (
+                                        <div key={tcIdx} style={{ display: 'flex', gap: 8 }}>
+                                            <input 
+                                                className="form-input" 
+                                                placeholder="Input (e.g. [1,2,3])" 
+                                                style={{ flex: 1, height: 32, fontSize: '12px' }}
+                                                value={tc.input}
+                                                onChange={e => {
+                                                    const nq = [...questions!]; nq[idx].test_cases![tcIdx].input = e.target.value; setQuestions(nq);
+                                                }}
+                                            />
+                                            <input 
+                                                className="form-input" 
+                                                placeholder="Expected (e.g. 3)" 
+                                                style={{ flex: 1, height: 32, fontSize: '12px' }}
+                                                value={tc.expected}
+                                                onChange={e => {
+                                                    const nq = [...questions!]; nq[idx].test_cases![tcIdx].expected = e.target.value; setQuestions(nq);
+                                                }}
+                                            />
+                                            <button 
+                                                type="button" 
+                                                className="q-delete" 
+                                                style={{ width: 32, height: 32 }}
+                                                onClick={() => {
+                                                    const nq = [...questions!];
+                                                    nq[idx].test_cases!.splice(tcIdx, 1);
+                                                    setQuestions(nq);
+                                                }}
+                                            >
+                                                <Icons.Trash />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                           </div>
-                        ))}
+                        ) : (
+                          <>
+                            {q.options?.map((opt, oIdx) => (
+                              <div key={oIdx} style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                                <input
+                                  type="radio"
+                                  checked={opt.is_correct}
+                                  style={{ width: 16, height: 16, accentColor: "var(--primary)", cursor: "pointer" }}
+                                  onChange={() => {
+                                    const nq = [...questions!];
+                                    nq[idx].options = nq[idx].options?.map((o, i) => ({ ...o, is_correct: i === oIdx }));
+                                    setQuestions(nq);
+                                  }}
+                                />
+                                <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 6 }}>
+                                  <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                                    <input
+                                      className="form-input"
+                                      style={{ flex: 1 }}
+                                      value={opt.text}
+                                      onChange={e => {
+                                        const nq = [...questions!]; nq[idx].options![oIdx].text = e.target.value; setQuestions(nq);
+                                      }}
+                                      placeholder={`Option ${String.fromCharCode(65 + oIdx)}`}
+                                    />
+                                    <input
+                                      type="file"
+                                      id={`o-img-${idx}-${oIdx}`}
+                                      style={{ display: "none" }}
+                                      accept="image/*"
+                                      onChange={async e => {
+                                        const file = e.target.files?.[0];
+                                        if (file) {
+                                          const base64 = await handleImageUpload(file);
+                                          const nq = [...questions!]; nq[idx].options![oIdx].image = base64; setQuestions(nq);
+                                        }
+                                      }}
+                                    />
+                                    <button className="q-delete" type="button" onClick={() => document.getElementById(`o-img-${idx}-${oIdx}`)?.click()} title="Upload option image">
+                                      <Icons.Upload />
+                                    </button>
+                                    <button
+                                      className="q-delete"
+                                      type="button"
+                                      onClick={() => { const nq = [...questions!]; nq[idx].options?.splice(oIdx, 1); setQuestions(nq); }}
+                                    >
+                                      <Icons.Trash />
+                                    </button>
+                                  </div>
+                                  {opt.image && (
+                                    <div style={{ position: "relative", width: "fit-content" }}>
+                                      <img src={opt.image} alt="Option" style={{ maxWidth: "100px", borderRadius: 4, border: "1px solid var(--line)" }} />
+                                      <button
+                                        className="q-delete"
+                                        style={{ position: "absolute", top: -5, right: -5, width: 20, height: 20 }}
+                                        onClick={() => { const nq = [...questions!]; delete nq[idx].options![oIdx].image; setQuestions(nq); }}
+                                      >
+                                        <Icons.X />
+                                      </button>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </>
+                        )}
+
                       </div>
 
                       <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
-                        <button
-                          className="btn btn-secondary"
-                          type="button"
-                          onClick={() => {
-                            const nq = [...questions]; nq[idx].options.push({ text: "", is_correct: false }); setQuestions(nq);
-                          }}
-                        >
-                          <Icons.Plus /> Add Option
-                        </button>
+                        {q.type !== 'coding' && (
+                          <button
+                            className="btn btn-secondary"
+                            type="button"
+                            onClick={() => {
+                              const nq = [...questions!]; nq[idx].options = [...(nq[idx].options || []), { text: "", is_correct: false }]; setQuestions(nq);
+                            }}
+                          >
+                            <Icons.Plus /> Add Option
+                          </button>
+                        )}
                         <button
                           className="btn btn-publish"
                           type="button"
@@ -2225,19 +2304,41 @@ export default function CreateExam() {
                         </div>
                       </div>
 
-                      <div className="opt-grid">
-                        {q.options.map((opt, oIdx) => (
-                          <div key={oIdx} className={`opt ${opt.is_correct ? "opt--correct" : ""}`} style={{ flexDirection: "column", alignItems: "flex-start", gap: 8 }}>
-                            <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                              <span className="opt-letter">{String.fromCharCode(65 + oIdx)}.</span>
-                              {opt.text}
+                      {q.type === 'coding' ? (
+                        <div style={{ marginTop: 12, border: '1px solid var(--line)', borderRadius: 8, padding: 16, background: 'var(--bg)' }}>
+                          <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--teal)', marginBottom: 8, textTransform: 'uppercase' }}>Skeleton Code ({q.language})</div>
+                          <pre style={{ margin: 0, padding: 12, background: 'var(--bg-neutral)', borderRadius: 4, fontFamily: 'var(--font-mono)', fontSize: '13px', border: '1px solid var(--line)', whiteSpace: 'pre-wrap' }}>
+                            {q.skeleton_code}
+                          </pre>
+                          {q.test_cases && q.test_cases.length > 0 && (
+                            <div style={{ marginTop: 12 }}>
+                              <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--teal)', marginBottom: 8, textTransform: 'uppercase' }}>Test Cases</div>
+                              <div style={{ display: 'grid', gap: 8 }}>
+                                {q.test_cases.map((tc, tcIdx) => (
+                                  <div key={tcIdx} style={{ fontSize: '12px', padding: '8px 12px', background: 'var(--bg-neutral)', borderRadius: 4, border: '1px solid var(--line)', display: 'flex', gap: 12 }}>
+                                    <span style={{ fontWeight: 600, color: 'var(--ink)' }}>Input: <code>{tc.input}</code></span>
+                                    <span style={{ fontWeight: 600, color: 'var(--ink)' }}>Expected: <code>{tc.expected}</code></span>
+                                  </div>
+                                ))}
+                              </div>
                             </div>
-                            {opt.image && (
-                              <img src={opt.image} alt="Option" style={{ maxWidth: "100%", maxHeight: "100px", borderRadius: 4, marginLeft: 22 }} />
-                            )}
-                          </div>
-                        ))}
-                      </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="opt-grid">
+                          {q.options?.map((opt, oIdx) => (
+                            <div key={oIdx} className={`opt ${opt.is_correct ? "opt--correct" : ""}`} style={{ flexDirection: "column", alignItems: "flex-start", gap: 8 }}>
+                              <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                                <span className="opt-letter">{String.fromCharCode(65 + oIdx)}.</span>
+                                {opt.text}
+                              </div>
+                              {opt.image && (
+                                <img src={opt.image} alt="Option" style={{ maxWidth: "100%", maxHeight: "100px", borderRadius: 4, marginLeft: 22 }} />
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
 
                       {q.explanation && (
                         <div className="q-explanation">

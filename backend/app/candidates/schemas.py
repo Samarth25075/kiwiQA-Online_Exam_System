@@ -43,6 +43,7 @@ class Candidate(CandidateBase):
     total_questions: Optional[int] = None
     total_marks: Optional[float] = None
     violations: Optional[int] = 0
+    violation_logs: Optional[list] = None
     device_id: Optional[str] = None
 
 class CandidateAssign(BaseModel):
@@ -53,6 +54,7 @@ class CandidateResult(BaseModel):
     total_questions: int
     total_marks: float
     violations: int = 0
+    violation_logs: Optional[list] = None
     answers: Optional[list] = None # List of {question_index, selected_option_index}
     screenshot: Optional[str] = None # Legacy
     screenshot_start: Optional[str] = None

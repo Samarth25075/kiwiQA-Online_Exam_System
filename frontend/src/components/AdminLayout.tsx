@@ -3,6 +3,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import CustomPopup from "./CustomPopup";
 import API_BASE_URL from "../config";
 import logo from "../assets/logo.png";
+import KiwiAssistantPopup from "./KiwiAssistantPopup";
+import "./KiwiAssistantPopup.css";
 
 // â”€â”€â”€ Icons â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const Icons = {
@@ -35,6 +37,9 @@ const Icons = {
     ),
     Help: () => (
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>
+    ),
+    Chat: () => (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /><path d="M8 9h8" /><path d="M8 13h6" /></svg>
     )
 };
 
@@ -49,7 +54,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, plain = false }) =>
     const [profile, setProfile] = React.useState<{ email: string; role: string; permissions: string[] } | null>(null);
     const [popup, setPopup] = React.useState<{ isOpen: boolean; title: string; message: string } | null>(null);
     const [sidebarOpen, setSidebarOpen] = React.useState(false);
-
+    const [kiwiAssistantOpen, setKiwiAssistantOpen] = React.useState(false);
     // â”€â”€ Apply saved theme (Global then User-Specific) â”€â”€
     useEffect(() => {
         // First application of global/last-used theme
@@ -179,6 +184,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, plain = false }) =>
         { path: "/invitation-tracking", label: "Invites Tracking", icon: Icons.Results, perm: "send invitation", task: "Invites" },
         { path: "/candidate-results", label: "Results", icon: Icons.Results, perm: "view results", task: "Results" },
         { path: "/settings", label: "Settings", icon: Icons.Settings, perm: null },
+        { path: "/ai-assistant", label: "AI Assistant", icon: Icons.Chat, perm: null, isAction: true, onAction: () => setKiwiAssistantOpen(true) },
         { path: "/user-guide", label: "User Guide", icon: Icons.Help, perm: null, isExternal: true, externalPath: "/Userguide.html" },
     ];
 
@@ -548,7 +554,9 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, plain = false }) =>
                                 tabIndex={0}
                                 className={`al-nav-item ${isActive(item.path) ? "active" : ""}`}
                                 onClick={() => {
-                                    if (item.isExternal) {
+                                    if ((item as any).isAction && (item as any).onAction) {
+                                        (item as any).onAction();
+                                    } else if (item.isExternal) {
                                         window.open(item.externalPath, "_blank");
                                     } else {
                                         navigate(item.path);
@@ -558,7 +566,9 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, plain = false }) =>
                                 onKeyDown={e => {
                                     if (e.key === 'Enter' || e.key === ' ') {
                                         e.preventDefault();
-                                        if (item.isExternal) {
+                                        if ((item as any).isAction && (item as any).onAction) {
+                                            (item as any).onAction();
+                                        } else if (item.isExternal) {
                                             window.open(item.externalPath, "_blank");
                                         } else {
                                             navigate(item.path);
@@ -579,6 +589,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, plain = false }) =>
                             <Icons.Logout /> Logout
                         </button>
                     </div>
+
+                    <KiwiAssistantPopup isOpen={kiwiAssistantOpen} onClose={() => setKiwiAssistantOpen(false)} />
                 </aside>
             )}
 

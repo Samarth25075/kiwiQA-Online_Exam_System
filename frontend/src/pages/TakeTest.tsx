@@ -22,8 +22,12 @@ interface Question {
     marks?: number;
     category?: string;
     originalIndex?: number;
+    type?: 'multiple-choice' | 'coding';
+    skeleton_code?: string;
+    language?: string;
+    test_cases?: Array<{ input: string; expected: string }>;
+    threshold_pct?: number;
 }
-
 interface Exam {
     id: string;
     title: string;
@@ -758,6 +762,17 @@ const STYLES = `
   border-radius: 50%;
   flex-shrink: 0;
 }
+.coding-wrap { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: #1e1e1e; margin-top: 24px; box-shadow: var(--shadow-sm); border: 1px solid #333; }
+.coding-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: #252525; border-bottom: 1px solid #333; }
+.coding-lang { font-family: 'Fira Code', monospace; font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.1em; }
+.coding-input { width: 100%; min-height: 400px; background: #1e1e1e; color: #d4d4d4; font-family: 'Fira Code', 'Courier New', monospace; font-size: 14px; padding: 24px; border: none; outline: none; resize: vertical; line-height: 1.6; white-space: pre; border-radius: 0; }
+.test-cases-wrap { background: var(--bg-neutral); border-top: 1px solid var(--border); padding: 24px; border-radius: 0 0 12px 12px; }
+.test-case-row { display: flex; gap: 12px; margin-bottom: 12px; font-family: monospace; font-size: 13px; align-items: center; background: var(--bg); padding: 12px 16px; border-radius: 8px; border: 1px solid var(--border); }
+.tc-badge { padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 800; text-transform: uppercase; color: white; min-width: 70px; text-align: center; }
+.tc-passed { background: #10b981; box-shadow: 0 0 10px rgba(16, 185, 129, 0.2); }
+.tc-failed { background: #ef4444; box-shadow: 0 0 10px rgba(239, 68, 68, 0.2); }
+.tc-running { background: var(--primary); animation: pulse 1.5s infinite; }
+@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
 `;
 
 
@@ -816,14 +831,14 @@ export default function TakeTest() {
 
     // ─── Theme ─────────────────────────────────────────────────────────────
     useEffect(() => {
-      const saved = localStorage.getItem("kiwi-theme") || "default";
-      if (saved === "dark") {
-        document.documentElement.setAttribute("data-theme", "dark");
-      } else if (saved === "default") {
-        document.documentElement.removeAttribute("data-theme");
-      } else {
-        document.documentElement.setAttribute("data-theme", saved);
-      }
+        const saved = localStorage.getItem("kiwi-theme") || "default";
+        if (saved === "dark") {
+            document.documentElement.setAttribute("data-theme", "dark");
+        } else if (saved === "default") {
+            document.documentElement.removeAttribute("data-theme");
+        } else {
+            document.documentElement.setAttribute("data-theme", saved);
+        }
     }, []);
 
     // ─── Block Inspect / Developer Tools ────────────────────────────────────
@@ -863,6 +878,11 @@ export default function TakeTest() {
     const [finished, setFinished] = useState(false);
     const [timeLeft, setTimeLeft] = useState<number | null>(null);
     const [violations, setViolations] = useState(0);
+    const [violationLogs, setViolationLogs] = useState<any[]>([]);
+    const [codingAnswers, setCodingAnswers] = useState<Record<number, string>>({});
+    const [codingLanguages, setCodingLanguages] = useState<Record<number, string>>({});
+    const [testResults, setTestResults] = useState<Record<number, any[]>>({});
+    const [isRunningTest, setIsRunningTest] = useState(false);
     const [warningPopup, setWarningPopup] = useState<{ message: string; isTerminal: boolean; isWarning?: boolean } | null>(null);
     const [popup, setPopup] = useState<{ isOpen: boolean; type: PopupType; title?: string; message: string; onConfirm: () => void; onCancel?: () => void; confirmText?: string; } | null>(null);
     const [declared, setDeclared] = useState(false);
@@ -909,10 +929,18 @@ export default function TakeTest() {
     useEffect(() => { finishedRef.current = finished; }, [finished]);
 
     // FIX #6: Unified violation setter — keeps ref and state always in sync atomically
-    const addViolation = (): number => {
+    const addViolation = (type: string = "Security Alert"): number => {
         const next = violationsRef.current + 1;
         violationsRef.current = next;
         setViolations(next);
+
+        const log = { 
+            type, 
+            timestamp: new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+            unix: Date.now()
+        };
+        setViolationLogs(prev => [...prev, log]);
+
         return next;
     };
 
@@ -989,13 +1017,13 @@ export default function TakeTest() {
         const triggerGazeViolation = (message: string, type: 'away' | 'noface' | 'multiface', isSoft: boolean = false) => {
             const now = Date.now();
             if (now - lastGazeViolationRef.current < 8000) return;
-            
+
             if (isSoft) {
                 softWarnedRef.current = { type, timestamp: now };
-                setWarningPopup({ 
-                    message: `${message}. Please correct this immediately. You have 10 seconds before a violation is recorded.`, 
+                setWarningPopup({
+                    message: `${message}. Please correct this immediately. You have 10 seconds before a violation is recorded.`,
                     isTerminal: false,
-                    isWarning: true 
+                    isWarning: true
                 });
                 lastGazeViolationRef.current = now;
                 return;
@@ -1028,11 +1056,11 @@ export default function TakeTest() {
             if (detections.length > 1) {
                 setGazeStatus('multiface');
                 lookAwayCountRef.current += 1;
-                
+
                 if (lookAwayCountRef.current >= 3) {
                     const now = Date.now();
                     const isSoftWarned = softWarnedRef.current.type === 'multiface';
-                    
+
                     if (!isSoftWarned) {
                         triggerGazeViolation('Multiple people detected in the camera frame.', 'multiface', true);
                     } else if (now - softWarnedRef.current.timestamp >= 10000) {
@@ -1048,11 +1076,11 @@ export default function TakeTest() {
             if (!detection) {
                 lookAwayCountRef.current += 1;
                 setGazeStatus('noface');
-                
+
                 if (lookAwayCountRef.current >= 3) {
                     const now = Date.now();
                     const isSoftWarned = softWarnedRef.current.type === 'noface';
-                    
+
                     if (!isSoftWarned) {
                         triggerGazeViolation('No face detected. You must remain in camera view.', 'noface', true);
                     } else if (now - softWarnedRef.current.timestamp >= 10000) {
@@ -1097,11 +1125,11 @@ export default function TakeTest() {
             if (lookingAway) {
                 lookAwayCountRef.current += 1;
                 setGazeStatus('away');
-                
+
                 if (lookAwayCountRef.current >= 3) {
                     const now = Date.now();
                     const isSoftWarned = softWarnedRef.current.type === 'away';
-                    
+
                     if (!isSoftWarned) {
                         triggerGazeViolation('You appear to be looking away or showing a side-profile.', 'away', true);
                     } else if (now - softWarnedRef.current.timestamp >= 10000) {
@@ -1169,16 +1197,15 @@ export default function TakeTest() {
                     setTestData(data);
                     if (data.exam.duration) setTimeLeft(data.exam.duration * 60);
 
-                    // Stable shuffle once here based on token to ensure unique order per candidate
                     const qs = shuffleArrayWithSeed(
-                        data.exam.questions.map((q, i) => ({ ...q, originalIndex: i })), 
+                        data.exam.questions.map((q, i) => ({ ...q, originalIndex: i })),
                         token || ""
                     ).map(q => ({
                         ...q,
-                        options: shuffleArrayWithSeed(
-                            q.options.map((o, i) => ({ ...o, originalIndex: i })), 
+                        options: q.options ? shuffleArrayWithSeed(
+                            q.options.map((o, i) => ({ ...o, originalIndex: i })),
                             (token || "") + q.text
-                        )
+                        ) : []
                     }));
                     setShuffledQuestions(qs);
                     setLoading(false);
@@ -1218,7 +1245,7 @@ export default function TakeTest() {
             if (startedRef.current && !finishedRef.current) {
                 // Trap the user on the current page
                 window.history.pushState(null, "", window.location.href);
-                
+
                 const now = Date.now();
                 if (now - lastViolationTimeRef.current < 1000) return;
                 lastViolationTimeRef.current = now;
@@ -1397,22 +1424,22 @@ export default function TakeTest() {
                 if (ctx) {
                     // Draw video frame
                     ctx.drawImage(videoRef.current, 0, 0);
-                    
+
                     // Add Date/Time Overlay (Top-right)
                     const now = new Date();
                     const timestamp = now.toLocaleDateString('en-GB') + ' ' + now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                    
+
                     ctx.font = "bold 16px Inter, sans-serif";
                     const textWidth = ctx.measureText(timestamp).width;
-                    
+
                     // Draw semi-transparent background for text
                     ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
                     ctx.fillRect(canvas.width - textWidth - 30, 10, textWidth + 20, 25);
-                    
+
                     // Draw text
                     ctx.fillStyle = "white";
                     ctx.fillText(timestamp, canvas.width - textWidth - 20, 28);
-                    
+
                     return canvas.toDataURL("image/png");
                 }
             } catch (e) { console.error("Snapshot error:", e); }
@@ -1439,7 +1466,7 @@ export default function TakeTest() {
                 console.error("Fullscreen request failed:", err);
             });
         }
-        
+
         // Take START snapshot
         if (needsVideo) {
             const shot = takeSnapshot();
@@ -1466,7 +1493,7 @@ export default function TakeTest() {
         // 2. Take MID snapshot at (Total/2) + 2
         // Question (N/2)+2 corresponds to currentIdx = floor(N/2) + 1
         const targetMidIdx = Math.floor(shuffledQuestions.length / 2) + 1;
-        
+
         if (currentIdx === targetMidIdx && !midCapturedRef.current) {
             const shot = takeSnapshot();
             if (shot) {
@@ -1488,9 +1515,9 @@ export default function TakeTest() {
         const timer = setInterval(() => {
             setTimeLeft(prev => {
                 const next = (prev !== null && prev > 0) ? prev - 1 : 0;
-                
+
                 // (Old timer-based mid-snapshot logic removed)
-                
+
                 return next;
             });
         }, 1000);
@@ -1528,13 +1555,34 @@ export default function TakeTest() {
             shuffledQuestions.forEach((q, idx) => {
                 const qMarks = q.marks ?? 1;
                 totalMarks += qMarks;
-                const answerIdx = answers[idx];
-                answersArray.push({
-                    question_index: q.originalIndex ?? idx,
-                    selected_option_index: answerIdx !== undefined ? q.options[answerIdx].originalIndex : null
-                });
-                if (answerIdx !== undefined && q.options[answerIdx].is_correct) {
-                    score += qMarks;
+                
+                if (q.type === 'coding') {
+                    const code = codingAnswers[idx] !== undefined ? codingAnswers[idx] : (q.skeleton_code || "");
+                    const lang = codingLanguages[idx] || q.language || 'javascript';
+                    const rawResults = testResults[idx];
+                    const results = Array.isArray(rawResults) ? rawResults : [];
+                    const passedCount = results.filter((r: any) => r.passed).length;
+                    const passPct = results.length > 0 ? (passedCount / results.length) * 100 : 0;
+                    
+                    answersArray.push({
+                        question_index: q.originalIndex ?? idx,
+                        code: code,
+                        language: lang,
+                        test_results: results
+                    });
+                    
+                    if (passPct >= (q.threshold_pct || 100)) {
+                        score += qMarks;
+                    }
+                } else {
+                    const answerIdx = answers[idx];
+                    answersArray.push({
+                        question_index: q.originalIndex ?? idx,
+                        selected_option_index: answerIdx !== undefined ? q.options[answerIdx].originalIndex : null
+                    });
+                    if (answerIdx !== undefined && q.options[answerIdx].is_correct) {
+                        score += qMarks;
+                    }
                 }
             });
 
@@ -1551,6 +1599,7 @@ export default function TakeTest() {
                     total_questions: shuffledQuestions.length,
                     total_marks: totalMarks,
                     violations: violationsRef.current,
+                    violation_logs: violationLogs,
                     screenshot: base64Image, // backward compatibility
                     screenshot_start: snapshotStartRef.current,
                     screenshot_mid: snapshotMidRef.current,
@@ -1642,6 +1691,39 @@ export default function TakeTest() {
         }
     };
 
+    const handleCodeChange = (qIdx: number, code: string) => {
+        setCodingAnswers(prev => ({ ...prev, [qIdx]: code }));
+    };
+
+    const runTests = async (qIdx: number) => {
+        const q = shuffledQuestions[qIdx];
+        const lang = codingLanguages[qIdx] || q.language || 'javascript';
+        const code = codingAnswers[qIdx] || q.skeleton_code || "";
+        
+        if (!code) return;
+        
+        setIsRunningTest(true);
+        try {
+            const res = await fetch(`${API_BASE_URL}/candidates/test/${token}/run-test`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    code,
+                    language: lang,
+                    test_cases: q.test_cases || []
+                })
+            });
+            if (res.ok) {
+                const results = await res.json();
+                setTestResults(prev => ({ ...prev, [qIdx]: results }));
+            }
+        } catch (err) {
+            console.error("Test run error:", err);
+        } finally {
+            setIsRunningTest(false);
+        }
+    };
+
 
     // ── Render: Loading ───────────────────────────────────────────────────
     if (loading) return (
@@ -1726,8 +1808,8 @@ export default function TakeTest() {
                                 onClick={handleTabClose}
                                 className="test-btn"
                                 disabled={closeCountdown !== null && closeCountdown > 0}
-                                style={{ 
-                                    background: 'var(--text)', 
+                                style={{
+                                    background: 'var(--text)',
                                     padding: '12px 32px',
                                     opacity: (closeCountdown !== null && closeCountdown > 0) ? 0.5 : 1,
                                     cursor: (closeCountdown !== null && closeCountdown > 0) ? 'not-allowed' : 'pointer'
@@ -1789,14 +1871,14 @@ export default function TakeTest() {
                             <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', marginBottom: 12 }}>
                                 📷 Camera Check & Readiness
                             </div>
-                            <div style={{ 
-                                background: '#000', 
-                                border: stream ? '2px solid #22c55e' : '2px solid var(--border)', 
-                                borderRadius: '16px', 
-                                overflow: 'hidden', 
-                                width: '300px', 
-                                height: '180px', 
-                                margin: '0 auto', 
+                            <div style={{
+                                background: '#000',
+                                border: stream ? '2px solid #22c55e' : '2px solid var(--border)',
+                                borderRadius: '16px',
+                                overflow: 'hidden',
+                                width: '300px',
+                                height: '180px',
+                                margin: '0 auto',
                                 position: 'relative',
                                 boxShadow: 'var(--shadow)'
                             }}>
@@ -2004,8 +2086,8 @@ export default function TakeTest() {
                                         {Math.round((Object.keys(answers).length / shuffledQuestions.length) * 100)}% Complete
                                     </div>
                                     <div className="test-progress-bar">
-                                        <div 
-                                            className="test-progress-fill" 
+                                        <div
+                                            className="test-progress-fill"
                                             style={{ width: `${(Object.keys(answers).length / shuffledQuestions.length) * 100}%` }}
                                         />
                                     </div>
@@ -2019,25 +2101,76 @@ export default function TakeTest() {
                                     </div>
                                 )}
                             </div>
-                            <div className="test-opts">
-                                {currentQ.options.map((opt, idx) => (
-                                    <div
-                                        key={idx}
-                                        className={`test-opt ${answers[currentIdx] === idx ? 'selected' : ''}`}
-                                        onClick={() => handleSelect(currentIdx, idx)}
-                                    >
-                                        <div className="test-opt-circle">
-                                            {String.fromCharCode(65 + idx)}
+                            {currentQ.type === 'coding' ? (
+                                <div className="coding-wrap">
+                                    <div className="coding-header">
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                            <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Select Language:</span>
+                                            <select 
+                                                className="form-input" 
+                                                style={{ height: 28, fontSize: 11, padding: '0 8px', borderRadius: 6, minWidth: 100, border: '1.5px solid var(--border)' }}
+                                                value={codingLanguages[currentIdx] || currentQ.language || 'javascript'}
+                                                onChange={(e) => setCodingLanguages(prev => ({ ...prev, [currentIdx]: e.target.value }))}
+                                            >
+                                                <option value="javascript">JavaScript</option>
+                                                <option value="python">Python</option>
+                                                <option value="java">Java</option>
+                                            </select>
                                         </div>
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: 1 }}>
-                                            <span>{opt.text}</span>
-                                            {opt.image && (
-                                                <img src={opt.image} alt="Option Attachment" style={{ maxWidth: '200px', maxHeight: '150px', borderRadius: 8, border: '1px solid var(--border)' }} />
-                                            )}
-                                        </div>
+                                        <button 
+                                            className="test-btn" 
+                                            style={{ padding: '6px 14px', fontSize: 11, background: 'var(--primary)', height: 'auto' }}
+                                            onClick={() => runTests(currentIdx)}
+                                            disabled={isRunningTest}
+                                        >
+                                            {isRunningTest ? 'Running...' : '▶ Run Test Cases'}
+                                        </button>
                                     </div>
-                                ))}
-                            </div>
+                                    <textarea
+                                        className="coding-input"
+                                        value={codingAnswers[currentIdx] !== undefined ? codingAnswers[currentIdx] : (currentQ.skeleton_code || "")}
+                                        onChange={(e) => handleCodeChange(currentIdx, e.target.value)}
+                                        spellCheck={false}
+                                        placeholder="// Write your code here..."
+                                    />
+                                    {Array.isArray(testResults[currentIdx]) && (
+                                        <div className="test-cases-wrap">
+                                            <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-muted)', marginBottom: 16, textTransform: 'uppercase' }}>
+                                                Test Case Results
+                                            </div>
+                                            {(testResults[currentIdx] as any[]).map((res, i) => (
+                                                <div key={i} className="test-case-row">
+                                                    <div className={`tc-badge ${res.passed ? 'tc-passed' : 'tc-failed'}`}>
+                                                        {res.passed ? 'Passed' : 'Failed'}
+                                                    </div>
+                                                    <div style={{ opacity: 0.8 }}>Case {i + 1}: Input <code>{res.input}</code></div>
+                                                    {!res.passed && <div style={{ fontSize: 11, color: '#ef4444' }}>&nbsp; Expected: {res.expected}, Got: {res.actual}</div>}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
+                                <div className="test-opts">
+                                    {currentQ.options.map((opt, idx) => (
+                                        <div
+                                            key={idx}
+                                            className={`test-opt ${answers[currentIdx] === idx ? 'selected' : ''}`}
+                                            onClick={() => handleSelect(currentIdx, idx)}
+                                        >
+                                            <div className="test-opt-circle">
+                                                {String.fromCharCode(65 + idx)}
+                                            </div>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: 1 }}>
+                                                <span>{opt.text}</span>
+                                                {opt.image && (
+                                                    <img src={opt.image} alt="Option Attachment" style={{ maxWidth: '200px', maxHeight: '150px', borderRadius: 8, border: '1px solid var(--border)' }} />
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
 
                         <div className="test-nav">
@@ -2102,71 +2235,71 @@ export default function TakeTest() {
                     <aside className="q-palette">
                         {needsVideo && (
                             <div style={{ marginBottom: 24 }}>
-                            <div style={{ fontFamily: 'var(--font-heading)', fontSize: 14, fontWeight: 700, color: 'var(--text)', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
-                                📷 Live Proctoring
-                                {modelsLoaded
-                                    ? <span style={{ fontSize: 10, background: '#f0fdf4', color: '#166534', border: '1px solid #86efac', borderRadius: 100, padding: '2px 8px', fontWeight: 700 }}>AI Active</span>
-                                    : <span style={{ fontSize: 10, background: '#fef9c3', color: '#854d0e', border: '1px solid #fde047', borderRadius: 100, padding: '2px 8px', fontWeight: 700 }}>Loading…</span>
-                                }
-                            </div>
+                                <div style={{ fontFamily: 'var(--font-heading)', fontSize: 14, fontWeight: 700, color: 'var(--text)', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+                                    📷 Live Proctoring
+                                    {modelsLoaded
+                                        ? <span style={{ fontSize: 10, background: '#f0fdf4', color: '#166534', border: '1px solid #86efac', borderRadius: 100, padding: '2px 8px', fontWeight: 700 }}>AI Active</span>
+                                        : <span style={{ fontSize: 10, background: '#fef9c3', color: '#854d0e', border: '1px solid #fde047', borderRadius: 100, padding: '2px 8px', fontWeight: 700 }}>Loading…</span>
+                                    }
+                                </div>
 
-                            <div style={{ background: '#000', borderRadius: '12px', overflow: 'hidden', height: '160px', position: 'relative', border: (gazeStatus === 'away' || gazeStatus === 'noface' || gazeStatus === 'multiface') ? '2px solid #ef4444' : '1px solid var(--border)', transition: 'border 0.3s' }}>
-                                {stream ? (
-                                    <video
-                                        ref={videoRef}
-                                        autoPlay
-                                        playsInline
-                                        muted
-                                        style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scaleX(-1)' }}
-                                    />
-                                ) : (
-                                    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#64748b', textAlign: 'center', padding: '10px' }}>
-                                        <span style={{ fontSize: '20px', marginBottom: '8px' }}>🚫</span>
-                                        <span style={{ fontSize: '10px', fontWeight: 600 }}>Camera Disconnected</span>
+                                <div style={{ background: '#000', borderRadius: '12px', overflow: 'hidden', height: '160px', position: 'relative', border: (gazeStatus === 'away' || gazeStatus === 'noface' || gazeStatus === 'multiface') ? '2px solid #ef4444' : '1px solid var(--border)', transition: 'border 0.3s' }}>
+                                    {stream ? (
+                                        <video
+                                            ref={videoRef}
+                                            autoPlay
+                                            playsInline
+                                            muted
+                                            style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scaleX(-1)' }}
+                                        />
+                                    ) : (
+                                        <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#64748b', textAlign: 'center', padding: '10px' }}>
+                                            <span style={{ fontSize: '20px', marginBottom: '8px' }}>🚫</span>
+                                            <span style={{ fontSize: '10px', fontWeight: 600 }}>Camera Disconnected</span>
+                                        </div>
+                                    )}
+                                    <div style={{ position: 'absolute', top: 8, left: 8, display: 'flex', gap: 5, alignItems: 'center', background: 'rgba(0,0,0,0.65)', padding: '3px 8px', borderRadius: 100 }}>
+                                        <div style={{ width: 7, height: 7, background: stream ? '#ef4444' : '#64748b', borderRadius: '50%', animation: stream ? 'pulse 1.5s infinite' : 'none' }} />
+                                        <span style={{ fontSize: 10, fontWeight: 800, color: 'white', letterSpacing: '0.06em' }}>{stream ? 'REC' : 'OFF'}</span>
+                                    </div>
+                                    {(gazeStatus === 'away' || gazeStatus === 'noface' || gazeStatus === 'multiface') && (
+                                        <div style={{ position: 'absolute', inset: 0, background: 'rgba(239,68,68,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
+                                            <span style={{ fontSize: 26 }}>{gazeStatus === 'noface' ? '🚫' : (gazeStatus === 'multiface' ? '👥' : '👁️')}</span>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {gazeStatus === 'ok' && (
+                                    <div className="gaze-badge ok">
+                                        <div className="gaze-dot" style={{ background: '#22c55e' }} />
+                                        👁️ Gaze: On Screen
                                     </div>
                                 )}
-                                <div style={{ position: 'absolute', top: 8, left: 8, display: 'flex', gap: 5, alignItems: 'center', background: 'rgba(0,0,0,0.65)', padding: '3px 8px', borderRadius: 100 }}>
-                                    <div style={{ width: 7, height: 7, background: stream ? '#ef4444' : '#64748b', borderRadius: '50%', animation: stream ? 'pulse 1.5s infinite' : 'none' }} />
-                                    <span style={{ fontSize: 10, fontWeight: 800, color: 'white', letterSpacing: '0.06em' }}>{stream ? 'REC' : 'OFF'}</span>
-                                </div>
-                                {(gazeStatus === 'away' || gazeStatus === 'noface' || gazeStatus === 'multiface') && (
-                                    <div style={{ position: 'absolute', inset: 0, background: 'rgba(239,68,68,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
-                                        <span style={{ fontSize: 26 }}>{gazeStatus === 'noface' ? '🚫' : (gazeStatus === 'multiface' ? '👥' : '👁️')}</span>
+                                {gazeStatus === 'warning' && (
+                                    <div className="gaze-badge warning">
+                                        <div className="gaze-dot" style={{ background: '#f59e0b' }} />
+                                        ⚠️ Eyes drifting — look ahead
+                                    </div>
+                                )}
+                                {gazeStatus === 'away' && (
+                                    <div className="gaze-badge away">
+                                        <div className="gaze-dot" style={{ background: '#ef4444' }} />
+                                        🚨 Looking Away! Focus on screen
+                                    </div>
+                                )}
+                                {gazeStatus === 'noface' && (
+                                    <div className="gaze-badge noface">
+                                        <div className="gaze-dot" style={{ background: '#a855f7' }} />
+                                        🚫 No Face Detected!
+                                    </div>
+                                )}
+                                {gazeStatus === 'multiface' && (
+                                    <div className="gaze-badge away" style={{ background: '#fff1f2', color: '#9f1239', border: '1px solid #fda4af' }}>
+                                        <div className="gaze-dot" style={{ background: '#e11d48' }} />
+                                        🚨 Multiple Faces Detected!
                                     </div>
                                 )}
                             </div>
-
-                            {gazeStatus === 'ok' && (
-                                <div className="gaze-badge ok">
-                                    <div className="gaze-dot" style={{ background: '#22c55e' }} />
-                                    👁️ Gaze: On Screen
-                                </div>
-                            )}
-                            {gazeStatus === 'warning' && (
-                                <div className="gaze-badge warning">
-                                    <div className="gaze-dot" style={{ background: '#f59e0b' }} />
-                                    ⚠️ Eyes drifting — look ahead
-                                </div>
-                            )}
-                            {gazeStatus === 'away' && (
-                                <div className="gaze-badge away">
-                                    <div className="gaze-dot" style={{ background: '#ef4444' }} />
-                                    🚨 Looking Away! Focus on screen
-                                </div>
-                            )}
-                            {gazeStatus === 'noface' && (
-                                <div className="gaze-badge noface">
-                                    <div className="gaze-dot" style={{ background: '#a855f7' }} />
-                                    🚫 No Face Detected!
-                                </div>
-                            )}
-                            {gazeStatus === 'multiface' && (
-                                <div className="gaze-badge away" style={{ background: '#fff1f2', color: '#9f1239', border: '1px solid #fda4af' }}>
-                                    <div className="gaze-dot" style={{ background: '#e11d48' }} />
-                                    🚨 Multiple Faces Detected!
-                                </div>
-                            )}
-                        </div>
                         )}
 
                         <div className="q-palette-title">

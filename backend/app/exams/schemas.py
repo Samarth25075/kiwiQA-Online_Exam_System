@@ -9,7 +9,12 @@ class Option(BaseModel):
 
 class Question(BaseModel):
     text: str
-    options: List[Option]
+    options: Optional[List[Option]] = None  # Optional for coding questions
+    type: Optional[str] = "multiple-choice"  # "multiple-choice" or "coding"
+    skeleton_code: Optional[str] = None
+    language: Optional[str] = None
+    test_cases: Optional[List[dict]] = None
+    threshold_pct: Optional[int] = 100
     explanation: Optional[str] = None
     category: Optional[str] = "General"
     marks: float = 1.0

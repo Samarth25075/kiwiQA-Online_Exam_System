@@ -24,6 +24,12 @@ from datetime import datetime, timedelta
 
 router = APIRouter(tags=["candidate-testing"])
 
+@router.post("/test/{token}/run-test")
+async def run_code_test(token: str, req: dict):
+    """Run a candidate's code against specified test cases."""
+    from app.core.code_runner import run_test_cases
+    return run_test_cases(req.get("code"), req.get("language"), req.get("test_cases"))
+
 # Simple in-memory OTP store (Moved from original router)
 OTP_STORE: Dict[str, dict] = {}
 

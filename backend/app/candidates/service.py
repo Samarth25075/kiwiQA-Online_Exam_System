@@ -35,6 +35,7 @@ def _to_summary_dict(c: Candidate) -> Dict:
         "completed_at": c.completed_at or "",
         "admin_name": c.admin_name or "",
         "token": c.token or "",
+        "device_id": c.device_id or "",
         "assigned_exam_id": c.assigned_exam_id or "",
         "exam_title": c.exam.title if c.exam else "No Exam Assigned",
         "score": c.score,
@@ -55,6 +56,7 @@ def _to_full_dict(c: Candidate) -> Dict:
         "profile_photo": c.profile_photo or "",
         "cv_url": c.cv_url or "",
         "device_id": c.device_id or "",
+        "violation_logs": c.violation_logs or [],
         "answers": c.answers or [],
         "screenshot_start": c.screenshot_start or "",
         "screenshot_mid": c.screenshot_mid or "",
@@ -221,7 +223,7 @@ def update_candidate_details(db: Session, candidate_id: str, data: Dict) -> Dict
         return _to_full_dict(c)
     return None
 
-def update_candidate_result(db: Session, token: str, score: float, total: int, total_marks: float, violations: int = 0, answers: list = None, screenshots: dict = None) -> bool:
+def update_candidate_result(db: Session, token: str, score: float, total: int, total_marks: float, violations: int = 0, violation_logs: list = None, answers: list = None, screenshots: dict = None) -> bool:
     from app.core.redis import redis_client
     c = db.query(Candidate).filter(Candidate.token == token).first()
     if c:
@@ -229,6 +231,7 @@ def update_candidate_result(db: Session, token: str, score: float, total: int, t
         c.total_questions = total
         c.total_marks = total_marks
         c.violations = violations
+        c.violation_logs = violation_logs
         c.status = "Completed"
         c.completed_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         if answers is not None:
@@ -243,7 +246,6 @@ def update_candidate_result(db: Session, token: str, score: float, total: int, t
             redis_client.delete("all_candidates_list", "all_candidates_list_summary", "exams_with_counts")
         return True
     return False
-
 def cleanup_candidate_screenshots(db: Session, candidate_id: str) -> bool:
     from app.core.redis import redis_client
     import os

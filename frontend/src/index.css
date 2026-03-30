@@ -134,6 +134,18 @@
   --transition-base: 200ms cubic-bezier(0.16, 1, 0.3, 1);
   --transition-slow: 350ms cubic-bezier(0.16, 1, 0.3, 1);
   --transition-spring: 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ── Dynamic Design Tokens — Light ── */
+  --color-background-primary: #ffffff;
+  --color-background-secondary: #f4f7f6;
+  --color-background-tertiary: #edf2f0;
+
+  --color-text-primary: #0f1a1b;
+  --color-text-secondary: #5a7070;
+  --color-text-tertiary: #8ca5a5;
+
+  --color-border-secondary: rgba(220, 232, 230, 0.7);
+  --color-border-tertiary: rgba(220, 232, 230, 0.4);
 }
 
 
@@ -190,6 +202,18 @@
   --q-review-bg: #2e1065;
   --q-review-border: #8b5cf6;
   --q-review-text: #ddd6fe;
+
+  /* ── Dynamic Design Tokens — Dark ── */
+  --color-background-primary: #1e2330;
+  --color-background-secondary: #191e2c;
+  --color-background-tertiary: #141825;
+
+  --color-text-primary: #dce8ea;
+  --color-text-secondary: #7a9aaa;
+  --color-text-tertiary: #4d6878;
+
+  --color-border-secondary: rgba(42, 52, 69, 0.7);
+  --color-border-tertiary: rgba(42, 52, 69, 0.4);
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -551,11 +575,11 @@ button,
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--space-8);
-  padding: var(--space-10) var(--space-24);
+  gap: 10px;
+  padding: 9px 24px;
   font-family: var(--font-body);
-  font-size: var(--font-size-body);
-  font-weight: var(--font-weight-bold);
+  font-size: 13px;
+  font-weight: 700;
   line-height: 1;
   border-radius: var(--radius-full);
   border: 2px solid transparent;
@@ -569,8 +593,8 @@ button,
 
 button svg,
 .btn svg {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   flex-shrink: 0;
 }
 
