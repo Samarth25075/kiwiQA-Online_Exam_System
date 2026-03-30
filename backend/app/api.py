@@ -117,7 +117,9 @@ async def startup_event():
                     ("completed_at", "TEXT"),
                     ("admin_name", "TEXT"),
                     ("screenshot_start", "TEXT"), ("screenshot_mid", "TEXT"), ("screenshot_end", "TEXT"),
-                    ("total_marks", "FLOAT DEFAULT 0")
+                    ("total_marks", "FLOAT DEFAULT 0"),
+                    ("violation_logs", "JSONB" if "postgresql" in DATABASE_URL else "JSON"),
+                    ("device_id", "TEXT")
                 ]
                 for col_name, col_type in new_cols:
                     if col_name not in existing_cols:
