@@ -132,7 +132,11 @@ async def startup_event():
                 new_cols = [
                     ("link_expiry", "TEXT"), ("auto_delete", "TEXT"),
                     ("proctoring_enabled", "BOOLEAN DEFAULT FALSE" if "postgresql" in DATABASE_URL else "BOOLEAN DEFAULT 0"),
-                    ("proctoring_type", "TEXT"), ("passing_score", "INTEGER DEFAULT 50")
+                    ("proctoring_type", "TEXT"), ("passing_score", "INTEGER DEFAULT 50"),
+                    ("calculator_enabled", "BOOLEAN DEFAULT FALSE" if "postgresql" in DATABASE_URL else "BOOLEAN DEFAULT 0"),
+                    ("notes_enabled", "BOOLEAN DEFAULT FALSE" if "postgresql" in DATABASE_URL else "BOOLEAN DEFAULT 0"),
+                    ("proctoring_link", "TEXT"),
+                    ("supplement_flag", "BOOLEAN DEFAULT FALSE" if "postgresql" in DATABASE_URL else "BOOLEAN DEFAULT 0")
                 ]
                 for col_name, col_type in new_cols:
                     if col_name not in existing_cols:
