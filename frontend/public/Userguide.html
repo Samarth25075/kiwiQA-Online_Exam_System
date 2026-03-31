@@ -1,1489 +1,2162 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KiwiQA — User Guide</title>
-<link rel="icon" type="image/png" href="/logo.png">
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --teal: #0d9488;
-    --teal-light: #14b8a6;
-    --teal-dim: #0f766e;
-    --green: #22c55e;
-    --bg: #f8faf9;
-    --surface: #ffffff;
-    --surface2: #f0faf8;
-    --border: #d1fae5;
-    --border2: #a7f3d0;
-    --text: #0f2621;
-    --text2: #374151;
-    --text3: #6b7280;
-    --accent: #f59e0b;
-    --red: #ef4444;
-    --sidebar-w: 280px;
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  html { scroll-behavior: smooth; }
-
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    display: flex;
-    min-height: 100vh;
-  }
-
-  /* ── SIDEBAR ── */
-  #sidebar {
-    width: var(--sidebar-w);
-    min-height: 100vh;
-    background: var(--text);
-    position: fixed;
-    top: 0; left: 0; bottom: 0;
-    overflow-y: auto;
-    z-index: 100;
-    display: flex;
-    flex-direction: column;
-    transition: transform 0.3s ease;
-  }
-
-  .sidebar-logo {
-    padding: 28px 24px 20px;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-  }
-
-  .sidebar-logo .kiwi-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--teal);
-    color: #fff;
-    padding: 6px 14px 6px 10px;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 15px;
-    letter-spacing: 0.3px;
-  }
-
-  .kiwi-badge .emoji { font-size: 18px; }
-
-  .sidebar-subtitle {
-    margin-top: 8px;
-    color: rgba(255,255,255,0.35);
-    font-size: 11px;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    padding-left: 2px;
-  }
-
-  .sidebar-nav { padding: 16px 0; flex: 1; }
-
-  .nav-section-label {
-    padding: 12px 24px 6px;
-    font-size: 10px;
-    letter-spacing: 1.8px;
-    text-transform: uppercase;
-    color: rgba(255,255,255,0.25);
-    font-weight: 500;
-  }
-
-  .nav-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 9px 24px;
-    color: rgba(255,255,255,0.55);
-    text-decoration: none;
-    font-size: 13.5px;
-    font-weight: 400;
-    border-left: 3px solid transparent;
-    transition: all 0.18s;
-    cursor: pointer;
-  }
-
-  .nav-item:hover {
-    background: rgba(255,255,255,0.05);
-    color: rgba(255,255,255,0.9);
-    border-left-color: var(--teal-light);
-  }
-
-  .nav-item.active {
-    background: rgba(13,148,136,0.15);
-    color: var(--teal-light);
-    border-left-color: var(--teal-light);
-    font-weight: 500;
-  }
-
-  .nav-icon { font-size: 14px; width: 18px; text-align: center; }
-
-  .sidebar-footer {
-    padding: 16px 24px;
-    border-top: 1px solid rgba(255,255,255,0.08);
-    font-size: 11px;
-    color: rgba(255,255,255,0.2);
-  }
-
-  /* ── MAIN ── */
-  #main {
-    margin-left: var(--sidebar-w);
-    flex: 1;
-    min-height: 100vh;
-  }
-
-  /* ── HERO ── */
-  .hero {
-    background: linear-gradient(135deg, #0f2621 0%, #134e4a 50%, #0d9488 100%);
-    padding: 72px 64px 64px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .hero::before {
-    content: '';
-    position: absolute;
-    top: -60px; right: -60px;
-    width: 320px; height: 320px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(20,184,166,0.18) 0%, transparent 70%);
-  }
-
-  .hero::after {
-    content: '';
-    position: absolute;
-    bottom: -40px; left: 40%;
-    width: 200px; height: 200px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(34,197,94,0.12) 0%, transparent 70%);
-  }
-
-  .hero-tag {
-    display: inline-block;
-    background: rgba(20,184,166,0.2);
-    color: var(--teal-light);
-    border: 1px solid rgba(20,184,166,0.35);
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 11px;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    font-weight: 500;
-    margin-bottom: 20px;
-  }
-
-  .hero h1 {
-    font-family: 'DM Serif Display', serif;
-    font-size: 52px;
-    color: #fff;
-    line-height: 1.1;
-    margin-bottom: 16px;
-    max-width: 600px;
-  }
-
-  .hero h1 em {
-    color: var(--teal-light);
-    font-style: italic;
-  }
-
-  .hero p {
-    color: rgba(255,255,255,0.6);
-    font-size: 16px;
-    max-width: 520px;
-    line-height: 1.7;
-    margin-bottom: 36px;
-  }
-
-  .hero-meta {
-    display: flex;
-    gap: 24px;
-    flex-wrap: wrap;
-  }
-
-  .hero-pill {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.12);
-    color: rgba(255,255,255,0.7);
-    padding: 6px 14px;
-    border-radius: 6px;
-    font-size: 12.5px;
-  }
-
-  /* ── CONTENT ── */
-  .content-wrapper {
-    padding: 48px 64px;
-    max-width: 960px;
-  }
-
-  /* ── SECTION ── */
-  .section {
-    margin-bottom: 72px;
-    scroll-margin-top: 24px;
-  }
-
-  .section-header {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    margin-bottom: 28px;
-    padding-bottom: 16px;
-    border-bottom: 2px solid var(--border);
-  }
-
-  .section-num {
-    width: 36px; height: 36px;
-    background: var(--teal);
-    color: #fff;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 13px;
-    font-weight: 600;
-    font-family: 'JetBrains Mono', monospace;
-    flex-shrink: 0;
-  }
-
-  .section-title {
-    font-family: 'DM Serif Display', serif;
-    font-size: 28px;
-    color: var(--text);
-  }
-
-  .section-icon {
-    font-size: 22px;
-    margin-left: auto;
-  }
-
-  /* ── SUBSECTION ── */
-  .subsection { margin-bottom: 32px; }
-
-  .subsection-title {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--teal-dim);
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .subsection-title::before {
-    content: '';
-    width: 4px; height: 16px;
-    background: var(--teal-light);
-    border-radius: 2px;
-    display: inline-block;
-  }
-
-  p.body-text {
-    font-size: 14.5px;
-    color: var(--text2);
-    line-height: 1.75;
-    margin-bottom: 14px;
-  }
-
-  /* ── TABLE ── */
-  .tbl-wrap {
-    overflow-x: auto;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    margin-bottom: 20px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13.5px;
-  }
-
-  thead th {
-    background: var(--teal);
-    color: #fff;
-    padding: 11px 16px;
-    text-align: left;
-    font-weight: 500;
-    font-size: 12px;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-  }
-
-  thead th:first-child { border-radius: 9px 0 0 0; }
-  thead th:last-child { border-radius: 0 9px 0 0; }
-
-  tbody tr {
-    border-bottom: 1px solid var(--border);
-    transition: background 0.15s;
-  }
-
-  tbody tr:last-child { border-bottom: none; }
-  tbody tr:hover { background: var(--surface2); }
-
-  td {
-    padding: 10px 16px;
-    color: var(--text2);
-    vertical-align: top;
-    line-height: 1.6;
-  }
-
-  td:first-child { font-weight: 500; color: var(--text); }
-
-  /* ── CALLOUT ── */
-  .callout {
-    border-radius: 10px;
-    padding: 14px 18px;
-    margin-bottom: 18px;
-    display: flex;
-    gap: 12px;
-    align-items: flex-start;
-    font-size: 13.5px;
-    line-height: 1.6;
-  }
-
-  .callout-tip {
-    background: #f0fdf4;
-    border: 1px solid #bbf7d0;
-    color: #166534;
-  }
-
-  .callout-warn {
-    background: #fffbeb;
-    border: 1px solid #fde68a;
-    color: #92400e;
-  }
-
-  .callout-info {
-    background: #f0f9ff;
-    border: 1px solid #bae6fd;
-    color: #075985;
-  }
-
-  .callout-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
-
-  /* ── FEATURE GRID ── */
-  .feature-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 16px;
-    margin-bottom: 24px;
-  }
-
-  .feature-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 20px;
-    transition: box-shadow 0.2s, transform 0.2s;
-  }
-
-  .feature-card:hover {
-    box-shadow: 0 4px 20px rgba(13,148,136,0.12);
-    transform: translateY(-2px);
-  }
-
-  .feature-card .fc-icon {
-    font-size: 26px;
-    margin-bottom: 10px;
-    display: block;
-  }
-
-  .feature-card .fc-title {
-    font-weight: 600;
-    font-size: 14px;
-    margin-bottom: 6px;
-    color: var(--text);
-  }
-
-  .feature-card .fc-desc {
-    font-size: 12.5px;
-    color: var(--text3);
-    line-height: 1.5;
-  }
-
-  /* ── STEP LIST ── */
-  .step-list { list-style: none; }
-
-  .step-item {
-    display: flex;
-    gap: 16px;
-    margin-bottom: 16px;
-    align-items: flex-start;
-  }
-
-  .step-num {
-    width: 28px; height: 28px;
-    background: var(--teal);
-    color: #fff;
-    border-radius: 50%;
-    font-size: 13px;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    margin-top: 2px;
-  }
-
-  .step-body { flex: 1; }
-
-  .step-title {
-    font-weight: 600;
-    font-size: 14px;
-    margin-bottom: 4px;
-  }
-
-  .step-desc {
-    font-size: 13.5px;
-    color: var(--text2);
-    line-height: 1.6;
-  }
-
-  /* ── CODE ── */
-  code {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    padding: 2px 6px;
-    border-radius: 4px;
-    color: var(--teal-dim);
-  }
-
-  /* ── BADGE ── */
-  .badge {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 11px;
-    font-weight: 600;
-  }
-
-  .badge-green { background: #dcfce7; color: #15803d; }
-  .badge-yellow { background: #fef9c3; color: #a16207; }
-  .badge-red { background: #fee2e2; color: #b91c1c; }
-  .badge-blue { background: #dbeafe; color: #1d4ed8; }
-  .badge-teal { background: #ccfbf1; color: #0f766e; }
-  .badge-purple { background: #e0e7ff; color: #4f46e5; }
-
-  /* ── FLOW DIAGRAM ── */
-  .flow-diagram {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0;
-    margin: 20px 0;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 20px 24px;
-  }
-
-  .flow-step {
-    background: var(--teal);
-    color: #fff;
-    padding: 7px 14px;
-    border-radius: 6px;
-    font-size: 12px;
-    font-weight: 500;
-    white-space: nowrap;
-  }
-
-  .flow-arrow {
-    color: var(--text3);
-    font-size: 14px;
-    margin: 0 8px;
-  }
-
-  /* ── FAQ ── */
-  .faq-item {
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    margin-bottom: 10px;
-    overflow: hidden;
-    background: var(--surface);
-  }
-
-  .faq-q {
-    padding: 16px 20px;
-    font-weight: 600;
-    font-size: 14px;
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    transition: background 0.15s;
-    color: var(--text);
-    user-select: none;
-  }
-
-  .faq-q:hover { background: var(--surface2); }
-
-  .faq-q .faq-caret {
-    color: var(--teal);
-    font-size: 12px;
-    transition: transform 0.25s;
-  }
-
-  .faq-a {
-    display: none;
-    padding: 0 20px 16px;
-    font-size: 13.5px;
-    color: var(--text2);
-    line-height: 1.7;
-    border-top: 1px solid var(--border);
-    padding-top: 14px;
-  }
-
-  .faq-item.open .faq-caret { transform: rotate(180deg); }
-  .faq-item.open .faq-a { display: block; }
-
-  /* ── PROCTORING LAYERS ── */
-  .proctor-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 14px;
-    margin-bottom: 20px;
-  }
-
-  .proctor-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 18px;
-    text-align: center;
-  }
-
-  .proctor-card .p-icon { font-size: 28px; margin-bottom: 8px; }
-  .proctor-card .p-title { font-weight: 600; font-size: 13px; margin-bottom: 5px; }
-  .proctor-card .p-desc { font-size: 12px; color: var(--text3); line-height: 1.5; }
-
-  /* ── SCROLLBAR ── */
-  #sidebar::-webkit-scrollbar { width: 4px; }
-  #sidebar::-webkit-scrollbar-track { background: transparent; }
-  #sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
-
-  /* ── PROGRESS ── */
-  #progress-bar {
-    position: fixed;
-    top: 0; left: var(--sidebar-w); right: 0;
-    height: 3px;
-    background: var(--teal-light);
-    z-index: 200;
-    transform-origin: left;
-    transform: scaleX(0);
-    transition: transform 0.1s;
-  }
-
-
-  @media (max-width: 900px) {
-    #sidebar { transform: translateX(-100%); }
-    #sidebar.open { transform: translateX(0); }
-    #main { margin-left: 0; }
-    .hero { padding: 40px 28px 36px; }
-    .hero h1 { font-size: 36px; }
-    .content-wrapper { padding: 32px 28px; }
-    .proctor-grid { grid-template-columns: 1fr; }
-    #progress-bar { left: 0; }
-    #hamburger { display: flex; }
-  }
-
-  #hamburger {
-    display: none;
-    position: fixed;
-    top: 16px; left: 16px;
-    z-index: 300;
-    background: var(--teal);
-    border: none;
-    color: #fff;
-    width: 38px; height: 38px;
-    border-radius: 8px;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    cursor: pointer;
-  }
-
-  /* ── CHATBOT ── */
-  #chat-widget {
-    position: fixed;
-    bottom: 28px; right: 28px;
-    z-index: 200;
-  }
-
-  #chat-btn {
-    width: 42px; height: 42px;
-    background: var(--teal-light);
-    color: #fff;
-    border: none;
-    border-radius: 50%;
-    font-size: 20px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 16px rgba(20,184,166,0.35);
-    transition: transform 0.25s, background 0.25s;
-  }
-
-  #chat-btn:hover { transform: scale(1.1); background: var(--teal); }
-
-  #chat-box {
-    position: absolute;
-    bottom: 56px; right: 0;
-    width: 320px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.12);
-    display: none;
-    flex-direction: column;
-    overflow: hidden;
-    animation: slideUp 0.3s ease-out;
-  }
-
-  @keyframes slideUp {
-    from { transform: translateY(20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-  }
-
-  #chat-box.visible { display: flex; }
-
-  .chat-header {
-    background: var(--teal);
-    color: #fff;
-    padding: 14px 18px;
-    font-weight: 600;
-    font-size: 14px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .chat-body {
-    height: 360px;
-    overflow-y: auto;
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    background: #fdfdfd;
-  }
-
-  .message {
-    max-width: 85%;
-    padding: 10px 14px;
-    border-radius: 12px;
-    font-size: 13px;
-    line-height: 1.5;
-  }
-
-  .msg-ai {
-    align-self: flex-start;
-    background: #eee;
-    color: var(--text2);
-    border-bottom-left-radius: 2px;
-  }
-
-  .msg-user {
-    align-self: flex-end;
-    background: var(--teal);
-    color: #fff;
-    border-bottom-right-radius: 2px;
-  }
-
-  .chat-footer {
-    padding: 12px;
-    border-top: 1px solid var(--border);
-    background: var(--surface);
-  }
-
-  .quick-qs {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 8px;
-  }
-
-  .q-chip {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    color: var(--teal-dim);
-    font-size: 11.5px;
-    padding: 5px 10px;
-    border-radius: 16px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .q-chip:hover {
-    background: var(--teal-light);
-    color: #fff;
-    border-color: var(--teal-light);
-  }
-
-  .chat-input-wrap {
-    display: flex;
-    gap: 8px;
-  }
-
-  #chat-input {
-    flex: 1;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 8px 12px;
-    font-size: 13px;
-    outline: none;
-  }
-
-  #chat-input:focus { border-color: var(--teal-light); }
-
-  #chat-send {
-    background: var(--teal-light);
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    padding: 0 12px;
-    cursor: pointer;
-  }
-
-  /* Responsive Chatbot */
-  @media (max-width: 480px) {
-    #chat-box {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      width: 100%; height: 100%;
-      border-radius: 0;
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KiwiQA — User Guide</title>
+  <link rel="icon" type="image/png" href="/logo.png">
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --teal: #0d9488;
+      --teal-light: #14b8a6;
+      --teal-dim: #0f766e;
+      --green: #22c55e;
+      --bg: #f8faf9;
+      --surface: #ffffff;
+      --surface2: #f0faf8;
+      --border: #d1fae5;
+      --border2: #a7f3d0;
+      --text: #0f2621;
+      --text2: #374151;
+      --text3: #6b7280;
+      --accent: #f59e0b;
+      --red: #ef4444;
+      --sidebar-w: 280px;
     }
-    .chat-body { height: calc(100% - 120px); }
-  }
-</style>
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      -ms-overflow-style: none !important;
+      scrollbar-width: none !important;
+      overflow-y: overlay;
+      /* Allows scrolling but hides bar in some browsers */
+    }
+
+    html::-webkit-scrollbar,
+    body::-webkit-scrollbar {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ── SIDEBAR ── */
+    #sidebar {
+      width: var(--sidebar-w);
+      min-height: 100vh;
+      background: var(--text);
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      overflow-y: auto;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.3s ease;
+    }
+
+    .sidebar-logo {
+      padding: 28px 24px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .sidebar-logo .kiwi-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--teal);
+      color: #fff;
+      padding: 6px 14px 6px 10px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 15px;
+      letter-spacing: 0.3px;
+    }
+
+    .kiwi-badge .emoji {
+      font-size: 18px;
+    }
+
+    .sidebar-subtitle {
+      margin-top: 8px;
+      color: rgba(255, 255, 255, 0.35);
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding-left: 2px;
+    }
+
+    .sidebar-nav {
+      padding: 16px 0 60px;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .nav-section-label {
+      padding: 12px 24px 6px;
+      font-size: 10px;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.25);
+      font-weight: 500;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 24px;
+      color: rgba(255, 255, 255, 0.55);
+      text-decoration: none;
+      font-size: 13.5px;
+      font-weight: 400;
+      border-left: 3px solid transparent;
+      transition: all 0.18s;
+      cursor: pointer;
+    }
+
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: rgba(255, 255, 255, 0.9);
+      border-left-color: var(--teal-light);
+    }
+
+    .nav-item.active {
+      background: rgba(13, 148, 136, 0.15);
+      color: var(--teal-light);
+      border-left-color: var(--teal-light);
+      font-weight: 500;
+    }
+
+    .nav-icon {
+      font-size: 14px;
+      width: 18px;
+      text-align: center;
+    }
+
+    .sidebar-footer {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 16px 24px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.2);
+      background: var(--text);
+      z-index: 10;
+    }
+
+    /* ── MAIN ── */
+    #main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      min-height: 100vh;
+      padding-bottom: 50px;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(135deg, #0f2621 0%, #134e4a 50%, #0d9488 100%);
+      padding: 72px 64px 64px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -60px;
+      right: -60px;
+      width: 320px;
+      height: 320px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(20, 184, 166, 0.18) 0%, transparent 70%);
+    }
+
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: -40px;
+      left: 40%;
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(34, 197, 94, 0.12) 0%, transparent 70%);
+    }
+
+    .hero-tag {
+      display: inline-block;
+      background: rgba(20, 184, 166, 0.2);
+      color: var(--teal-light);
+      border: 1px solid rgba(20, 184, 166, 0.35);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      font-weight: 500;
+      margin-bottom: 20px;
+    }
+
+    .hero h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 52px;
+      color: #fff;
+      line-height: 1.1;
+      margin-bottom: 16px;
+      max-width: 600px;
+    }
+
+    .hero h1 em {
+      color: var(--teal-light);
+      font-style: italic;
+    }
+
+    .hero p {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 16px;
+      max-width: 520px;
+      line-height: 1.7;
+      margin-bottom: 36px;
+    }
+
+    .hero-meta {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .hero-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: rgba(255, 255, 255, 0.7);
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 12.5px;
+    }
+
+    /* ── CONTENT ── */
+    .content-wrapper {
+      padding: 48px 64px;
+      max-width: 960px;
+    }
+
+    /* ── SECTION ── */
+    .section {
+      margin-bottom: 72px;
+      scroll-margin-top: 24px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 28px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .section-num {
+      width: 36px;
+      height: 36px;
+      background: var(--teal);
+      color: #fff;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: 'JetBrains Mono', monospace;
+      flex-shrink: 0;
+    }
+
+    .section-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 28px;
+      color: var(--text);
+    }
+
+    .section-icon {
+      font-size: 22px;
+      margin-left: auto;
+    }
+
+    /* ── SUBSECTION ── */
+    .subsection {
+      margin-bottom: 32px;
+    }
+
+    .subsection-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--teal-dim);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .subsection-title::before {
+      content: '';
+      width: 4px;
+      height: 16px;
+      background: var(--teal-light);
+      border-radius: 2px;
+      display: inline-block;
+    }
+
+    p.body-text {
+      font-size: 14.5px;
+      color: var(--text2);
+      line-height: 1.75;
+      margin-bottom: 14px;
+    }
+
+    /* ── TABLE ── */
+    .tbl-wrap {
+      overflow-x: auto;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      margin-bottom: 20px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+    }
+
+    thead th {
+      background: var(--teal);
+      color: #fff;
+      padding: 11px 16px;
+      text-align: left;
+      font-weight: 500;
+      font-size: 12px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    thead th:first-child {
+      border-radius: 9px 0 0 0;
+    }
+
+    thead th:last-child {
+      border-radius: 0 9px 0 0;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+    }
+
+    tbody tr:last-child {
+      border-bottom: none;
+    }
+
+    tbody tr:hover {
+      background: var(--surface2);
+    }
+
+    td {
+      padding: 10px 16px;
+      color: var(--text2);
+      vertical-align: top;
+      line-height: 1.6;
+    }
+
+    td:first-child {
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    /* ── CALLOUT ── */
+    .callout {
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-bottom: 18px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      font-size: 13.5px;
+      line-height: 1.6;
+    }
+
+    .callout-tip {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      color: #166534;
+    }
+
+    .callout-warn {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      color: #92400e;
+    }
+
+    .callout-info {
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      color: #075985;
+    }
+
+    .callout-icon {
+      font-size: 16px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* ── FEATURE GRID ── */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+
+    .feature-card:hover {
+      box-shadow: 0 4px 20px rgba(13, 148, 136, 0.12);
+      transform: translateY(-2px);
+    }
+
+    .feature-card .fc-icon {
+      font-size: 26px;
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .feature-card .fc-title {
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 6px;
+      color: var(--text);
+    }
+
+    .feature-card .fc-desc {
+      font-size: 12.5px;
+      color: var(--text3);
+      line-height: 1.5;
+    }
+
+    /* ── STEP LIST ── */
+    .step-list {
+      list-style: none;
+    }
+
+    .step-item {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+      align-items: flex-start;
+    }
+
+    .step-num {
+      width: 28px;
+      height: 28px;
+      background: var(--teal);
+      color: #fff;
+      border-radius: 50%;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .step-body {
+      flex: 1;
+    }
+
+    .step-title {
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .step-desc {
+      font-size: 13.5px;
+      color: var(--text2);
+      line-height: 1.6;
+    }
+
+    /* ── CODE ── */
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: var(--teal-dim);
+    }
+
+    /* ── BADGE ── */
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .badge-green {
+      background: #dcfce7;
+      color: #15803d;
+    }
+
+    .badge-yellow {
+      background: #fef9c3;
+      color: #a16207;
+    }
+
+    .badge-red {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    .badge-blue {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    .badge-teal {
+      background: #ccfbf1;
+      color: #0f766e;
+    }
+
+    .badge-purple {
+      background: #e0e7ff;
+      color: #4f46e5;
+    }
+
+    /* ── FLOW DIAGRAM ── */
+    .flow-diagram {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0;
+      margin: 20px 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px 24px;
+    }
+
+    .flow-step {
+      background: var(--teal);
+      color: #fff;
+      padding: 7px 14px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .flow-arrow {
+      color: var(--text3);
+      font-size: 14px;
+      margin: 0 8px;
+    }
+
+    /* ── FAQ ── */
+    .faq-item {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-bottom: 10px;
+      overflow: hidden;
+      background: var(--surface);
+    }
+
+    .faq-q {
+      padding: 16px 20px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.15s;
+      color: var(--text);
+      user-select: none;
+    }
+
+    .faq-q:hover {
+      background: var(--surface2);
+    }
+
+    .faq-q .faq-caret {
+      color: var(--teal);
+      font-size: 12px;
+      transition: transform 0.25s;
+    }
+
+    .faq-a {
+      display: none;
+      padding: 0 20px 16px;
+      font-size: 13.5px;
+      color: var(--text2);
+      line-height: 1.7;
+      border-top: 1px solid var(--border);
+      padding-top: 14px;
+    }
+
+    .faq-item.open .faq-caret {
+      transform: rotate(180deg);
+    }
+
+    .faq-item.open .faq-a {
+      display: block;
+    }
+
+    /* ── PROCTORING LAYERS ── */
+    .proctor-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .proctor-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px;
+      text-align: center;
+    }
+
+    .proctor-card .p-icon {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+
+    .proctor-card .p-title {
+      font-weight: 600;
+      font-size: 13px;
+      margin-bottom: 5px;
+    }
+
+    .proctor-card .p-desc {
+      font-size: 12px;
+      color: var(--text3);
+      line-height: 1.5;
+    }
+
+    /* ── SCROLLBAR ── */
+    #sidebar,
+    .sidebar-nav {
+      -ms-overflow-style: none !important;
+      scrollbar-width: none !important;
+    }
+
+    #sidebar::-webkit-scrollbar,
+    .sidebar-nav::-webkit-scrollbar {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
+    }
+
+    /* ── PROGRESS ── */
+    #progress-bar {
+      position: fixed;
+      top: 0;
+      left: var(--sidebar-w);
+      right: 0;
+      height: 3px;
+      background: var(--teal-light);
+      z-index: 200;
+      transform-origin: left;
+      transform: scaleX(0);
+      transition: transform 0.1s;
+    }
+
+
+    @media (max-width: 900px) {
+      #sidebar {
+        transform: translateX(-100%);
+      }
+
+      #sidebar.open {
+        transform: translateX(0);
+      }
+
+      #main {
+        margin-left: 0;
+      }
+
+      .hero {
+        padding: 40px 28px 36px;
+      }
+
+      .hero h1 {
+        font-size: 36px;
+      }
+
+      .content-wrapper {
+        padding: 32px 28px;
+      }
+
+      .proctor-grid {
+        grid-template-columns: 1fr;
+      }
+
+      #progress-bar {
+        left: 0;
+      }
+
+      #hamburger {
+        display: flex;
+      }
+    }
+
+    #hamburger {
+      display: none;
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 300;
+      background: var(--teal);
+      border: none;
+      color: #fff;
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    /* ── CHATBOT ── */
+    #chat-widget {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      z-index: 200;
+    }
+
+    #chat-btn {
+      width: 42px;
+      height: 42px;
+      background: var(--teal-light);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 16px rgba(20, 184, 166, 0.35);
+      transition: transform 0.25s, background 0.25s;
+    }
+
+    #chat-btn:hover {
+      transform: scale(1.1);
+      background: var(--teal);
+    }
+
+    #chat-box {
+      position: absolute;
+      bottom: 56px;
+      right: 0;
+      width: 320px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      animation: slideUp 0.3s ease-out;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(20px);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    #chat-box.visible {
+      display: flex;
+    }
+
+    .chat-header {
+      background: var(--teal);
+      color: #fff;
+      padding: 14px 18px;
+      font-weight: 600;
+      font-size: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .chat-body {
+      height: 360px;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: #fdfdfd;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .chat-body::-webkit-scrollbar {
+      display: none;
+    }
+
+    .message {
+      max-width: 85%;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .msg-ai {
+      align-self: flex-start;
+      background: #eee;
+      color: var(--text2);
+      border-bottom-left-radius: 2px;
+    }
+
+    .msg-user {
+      align-self: flex-end;
+      background: var(--teal);
+      color: #fff;
+      border-bottom-right-radius: 2px;
+    }
+
+    .chat-footer {
+      padding: 12px;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .quick-qs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .q-chip {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--teal-dim);
+      font-size: 11.5px;
+      padding: 5px 10px;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .q-chip:hover {
+      background: var(--teal-light);
+      color: #fff;
+      border-color: var(--teal-light);
+    }
+
+    .chat-input-wrap {
+      display: flex;
+      gap: 8px;
+    }
+
+    #chat-input {
+      flex: 1;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 13px;
+      outline: none;
+    }
+
+    #chat-input:focus {
+      border-color: var(--teal-light);
+    }
+
+    #chat-send {
+      background: var(--teal-light);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 0 12px;
+      cursor: pointer;
+    }
+
+    /* Responsive Chatbot */
+    @media (max-width: 480px) {
+      #chat-box {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 0;
+      }
+
+      .chat-body {
+        height: calc(100% - 120px);
+      }
+    }
+
+    /* ── USER GUIDE FOOTER ── */
+    .user-guide-footer {
+      position: fixed;
+      bottom: 0;
+      left: var(--sidebar-w);
+      right: 0;
+      padding: 12px 64px;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      font-size: 11px;
+      color: var(--text3);
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(10px);
+      z-index: 50;
+      transition: left 0.3s ease;
+    }
+
+    @media (max-width: 900px) {
+      .user-guide-footer {
+        left: 0;
+      }
+    }
+  </style>
 </head>
+
 <body>
 
-<div id="progress-bar"></div>
-<button id="hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+  <div id="progress-bar"></div>
+  <button id="hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
 
-<!-- CHATBOT -->
-<div id="chat-widget">
-  <button id="chat-btn" onclick="toggleChat()">💬</button>
-  <div id="chat-box">
-    <div class="chat-header">
-      <span>KiwiAssistant 🥝</span>
-      <button onclick="toggleChat()" style="background:none; border:none; color:#fff; font-size:18px; cursor:pointer;">×</button>
-    </div>
-    <div class="chat-body" id="chat-content">
-      <div class="message msg-ai">Hi! I'm your Guide Assistant. How can I help you today?</div>
-      <div class="quick-qs" id="preset-questions">
-        <div class="q-chip" onclick="askPreset('How do I create a new exam?')">Create Exam</div>
-        <div class="q-chip" onclick="askPreset('How does proctoring work?')">Proctoring</div>
-        <div class="q-chip" onclick="askPreset('Can I import questions?')">Bulk Import</div>
-        <div class="q-chip" onclick="askPreset('How to manage candidates?')">Enrollment</div>
-        <div class="q-chip" onclick="askPreset('How do I see results?')">Reports</div>
-        <div class="q-chip" onclick="askPreset('What is the Master OTP?')">Master OTP</div>
+  <!-- CHATBOT -->
+  <div id="chat-widget">
+    <button id="chat-btn" onclick="toggleChat()">💬</button>
+    <div id="chat-box">
+      <div class="chat-header">
+        <span>KiwiAssistant 🥝</span>
+        <button onclick="toggleChat()"
+          style="background:none; border:none; color:#fff; font-size:18px; cursor:pointer;">×</button>
       </div>
-    </div>
-    <div class="chat-footer">
-      <div class="chat-input-wrap">
-        <input type="text" id="chat-input" placeholder="Type a question..." onkeypress="if(event.key==='Enter') sendMessage()">
-        <button id="chat-send" onclick="sendMessage()">➤</button>
+      <div class="chat-body" id="chat-content">
+        <div class="message msg-ai">Hi! I'm your Guide Assistant. How can I help you today?</div>
+        <div class="quick-qs" id="preset-questions">
+          <div class="q-chip" onclick="askPreset('How do I create a new exam?')">Create Exam</div>
+          <div class="q-chip" onclick="askPreset('How does proctoring work?')">Proctoring</div>
+          <div class="q-chip" onclick="askPreset('Can I import questions?')">Bulk Import</div>
+          <div class="q-chip" onclick="askPreset('How to manage candidates?')">Enrollment</div>
+          <div class="q-chip" onclick="askPreset('How do I see results?')">Reports</div>
+          <div class="q-chip" onclick="askPreset('What is the Master OTP?')">Master OTP</div>
+        </div>
+      </div>
+      <div class="chat-footer">
+        <div class="chat-input-wrap">
+          <input type="text" id="chat-input" placeholder="Type a question..."
+            onkeypress="if(event.key==='Enter') sendMessage()">
+          <button id="chat-send" onclick="sendMessage()">➤</button>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
-<!-- SIDEBAR -->
-<nav id="sidebar">
-  <div class="sidebar-logo">
-    <div style="padding: 10px 0; display: flex; align-items: center; gap: 10px;">
-      <img src="/logo.png" alt="KiwiQA Logo" style="height: 40px; width: auto;">
-      <span style="color: #fff; font-weight: 600; font-size: 18px; letter-spacing: 0.5px;">KiwiQA</span>
-    </div>
-    <div class="sidebar-subtitle">User Guide v1.0.0</div>
-  </div>
-  <div class="sidebar-nav">
-    <div class="nav-section-label">Introduction</div>
-    <a class="nav-item active" href="#sec1" onclick="setActive(this)"><span class="nav-icon">🏠</span> Platform Overview</a>
-    <a class="nav-item" href="#sec2" onclick="setActive(this)"><span class="nav-icon">🚀</span> Getting Started</a>
-    <div class="nav-section-label">Core Modules</div>
-    <a class="nav-item" href="#sec3" onclick="setActive(this)"><span class="nav-icon">📊</span> Admin Dashboard</a>
-    <a class="nav-item" href="#sec4" onclick="setActive(this)"><span class="nav-icon">✏️</span> Create Exam</a>
-    <a class="nav-item" href="#sec5" onclick="setActive(this)"><span class="nav-icon">📋</span> Manage Exams</a>
-    <a class="nav-item" href="#sec6" onclick="setActive(this)"><span class="nav-icon">📚</span> Question Bank</a>
-    <div class="nav-section-label">People & Results</div>
-    <a class="nav-item" href="#sec7" onclick="setActive(this)"><span class="nav-icon">👥</span> Candidate Management</a>
-    <a class="nav-item" href="#sec8" onclick="setActive(this)"><span class="nav-icon">✉️</span> Invitation Tracking</a>
-    <a class="nav-item" href="#sec9" onclick="setActive(this)"><span class="nav-icon">📈</span> Results & Reports</a>
-    <div class="nav-section-label">Configuration</div>
-    <a class="nav-item" href="#sec10" onclick="setActive(this)"><span class="nav-icon">⚙️</span> Settings</a>
-    <a class="nav-item" href="#sec11" onclick="setActive(this)"><span class="nav-icon">🖥️</span> Candidate Experience</a>
-    <a class="nav-item" href="#sec12" onclick="setActive(this)"><span class="nav-icon">🛡️</span> Security & Proctoring</a>
-    <a class="nav-item" href="#sec13" onclick="setActive(this)"><span class="nav-icon">❓</span> FAQ</a>
-  </div>
-  <div class="sidebar-footer">© 2026 KiwiQA · Powered by FastAPI + React</div>
-</nav>
-
-<!-- MAIN -->
-<main id="main">
-
-  <!-- HERO -->
-  <div class="hero">
-    <div class="hero-tag">📘 Complete User Guide</div>
-    <h1>Master <em>KiwiQA</em><br>Assessment Hub</h1>
-    <p>Everything you need to create, deploy, proctor, and analyze candidate assessments — from setup to detailed reports.</p>
-    <div class="hero-meta">
-      <div class="hero-pill">📅 Updated March 24, 2026</div>
-      <div class="hero-pill">🏷️ Version 1.0.0</div>
-    </div>
-  </div>
-
-  <div class="content-wrapper">
-
-    <!-- 1. OVERVIEW -->
-    <div class="section" id="sec1">
-      <div class="section-header">
-        <div class="section-num">01</div>
-        <h2 class="section-title">Platform Overview</h2>
-        <span class="section-icon">🏠</span>
+  <!-- SIDEBAR -->
+  <nav id="sidebar">
+    <div class="sidebar-logo">
+      <div style="padding: 10px 0; display: flex; align-items: center; gap: 10px;">
+        <img src="/logo.png" alt="KiwiQA Logo" style="height: 40px; width: auto;">
+        <span style="color: #fff; font-weight: 600; font-size: 18px; letter-spacing: 0.5px;">KiwiQA</span>
       </div>
-      <p class="body-text">KiwiQA is a full-stack online examination platform designed for enterprise-grade assessment management. It enables HR teams, educators, and organizations to create, deploy, proctor, and analyze candidate assessments at scale.</p>
+      <div class="sidebar-subtitle">User Guide v1.0.0</div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-section-label">Introduction</div>
+      <a class="nav-item active" href="#sec1" onclick="setActive(this)"><span class="nav-icon">🏠</span> Platform
+        Overview</a>
+      <a class="nav-item" href="#sec2" onclick="setActive(this)"><span class="nav-icon">🚀</span> Getting Started</a>
+      <div class="nav-section-label">Core Modules</div>
+      <a class="nav-item" href="#sec3" onclick="setActive(this)"><span class="nav-icon">📊</span> Admin Dashboard</a>
+      <a class="nav-item" href="#sec4" onclick="setActive(this)"><span class="nav-icon">✏️</span> Create Exam</a>
+      <a class="nav-item" href="#sec5" onclick="setActive(this)"><span class="nav-icon">📋</span> Manage Exams</a>
+      <a class="nav-item" href="#sec6" onclick="setActive(this)"><span class="nav-icon">📚</span> Question Bank</a>
+      <div class="nav-section-label">People & Results</div>
+      <a class="nav-item" href="#sec7" onclick="setActive(this)"><span class="nav-icon">👥</span> Candidate
+        Management</a>
+      <a class="nav-item" href="#sec8" onclick="setActive(this)"><span class="nav-icon">✉️</span> Invitation
+        Tracking</a>
+      <a class="nav-item" href="#sec9" onclick="setActive(this)"><span class="nav-icon">📈</span> Results & Reports</a>
+      <div class="nav-section-label">Configuration</div>
+      <a class="nav-item" href="#sec10" onclick="setActive(this)"><span class="nav-icon">⚙️</span> Settings</a>
+      <a class="nav-item" href="#sec11" onclick="setActive(this)"><span class="nav-icon">🖥️</span> Candidate
+        Experience</a>
+      <a class="nav-item" href="#sec12" onclick="setActive(this)"><span class="nav-icon">🛡️</span> Security &
+        Proctoring</a>
+      <a class="nav-item" href="#sec13" onclick="setActive(this)"><span class="nav-icon">❓</span> FAQ</a>
+    </div>
+    <div class="sidebar-footer">© 2026 KiwiQA. All rights reserved.</div>
+  </nav>
 
-      <div class="feature-grid">
-        <div class="feature-card"><span class="fc-icon">✨</span><div class="fc-title">Bulk Creation</div><div class="fc-desc">Import high-quality MCQ exams via JSON or CSV upload in seconds.</div></div>
-        <div class="feature-card"><span class="fc-icon">📚</span><div class="fc-title">Question Bank</div><div class="fc-desc">Maintain a categorized repository of reusable questions pullable into any new exam.</div></div>
-        <div class="feature-card"><span class="fc-icon">🛡️</span><div class="fc-title">Smart Proctoring</div><div class="fc-desc">Real-time webcam monitoring with face detection + tab-switch tracking for maximum integrity.</div></div>
-        <div class="feature-card"><span class="fc-icon">📊</span><div class="fc-title">Deep Analytics</div><div class="fc-desc">Per-candidate reports with category-wise performance breakdown, proctoring snapshots, and pass/fail analysis.</div></div>
-        <div class="feature-card"><span class="fc-icon">👥</span><div class="fc-title">Role-Based Access</div><div class="fc-desc">Admin, Member, and Viewer roles with granular permission controls for your team.</div></div>
-        <div class="feature-card"><span class="fc-icon">✉️</span><div class="fc-title">Email Invitations</div><div class="fc-desc">Send exam enrollment links directly to candidate emails with full tracking.</div></div>
+  <!-- MAIN -->
+  <main id="main">
+
+    <!-- HERO -->
+    <div class="hero">
+      <div class="hero-tag">📘 Complete User Guide</div>
+      <h1>Master <em>KiwiQA</em><br>Assessment Hub</h1>
+      <p>Everything you need to create, deploy, proctor, and analyze candidate assessments — from setup to detailed
+        reports.</p>
+      <div class="hero-meta">
+        <div class="hero-pill">📅 Updated March 24, 2026</div>
+        <div class="hero-pill">🏷️ Version 1.0.0</div>
+      </div>
+    </div>
+
+    <div class="content-wrapper">
+
+      <!-- 1. OVERVIEW -->
+      <div class="section" id="sec1">
+        <div class="section-header">
+          <div class="section-num">01</div>
+          <h2 class="section-title">Platform Overview</h2>
+          <span class="section-icon">🏠</span>
+        </div>
+        <p class="body-text">KiwiQA is a full-stack online examination platform designed for enterprise-grade assessment
+          management. It enables HR teams, educators, and organizations to create, deploy, proctor, and analyze
+          candidate assessments at scale.</p>
+
+        <div class="feature-grid">
+          <div class="feature-card"><span class="fc-icon">✨</span>
+            <div class="fc-title">Bulk Creation</div>
+            <div class="fc-desc">Import high-quality MCQ exams via JSON or CSV upload in seconds.</div>
+          </div>
+          <div class="feature-card"><span class="fc-icon">📚</span>
+            <div class="fc-title">Question Bank</div>
+            <div class="fc-desc">Maintain a categorized repository of reusable questions pullable into any new exam.
+            </div>
+          </div>
+          <div class="feature-card"><span class="fc-icon">🛡️</span>
+            <div class="fc-title">Smart Proctoring</div>
+            <div class="fc-desc">Real-time webcam monitoring with face detection + tab-switch tracking for maximum
+              integrity.</div>
+          </div>
+          <div class="feature-card"><span class="fc-icon">📊</span>
+            <div class="fc-title">Deep Analytics</div>
+            <div class="fc-desc">Per-candidate reports with category-wise performance breakdown, proctoring snapshots,
+              and pass/fail analysis.</div>
+          </div>
+          <div class="feature-card"><span class="fc-icon">👥</span>
+            <div class="fc-title">Role-Based Access</div>
+            <div class="fc-desc">Admin, Member, and Viewer roles with granular permission controls for your team.</div>
+          </div>
+          <div class="feature-card"><span class="fc-icon">✉️</span>
+            <div class="fc-title">Email Invitations</div>
+            <div class="fc-desc">Send exam enrollment links directly to candidate emails with full tracking.</div>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-title">Tech Stack</div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Layer</th>
+                  <th>Technology</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Frontend</td>
+                  <td>React + TypeScript (Vite)</td>
+                </tr>
+                <tr>
+                  <td>Backend</td>
+                  <td>Python FastAPI</td>
+                </tr>
+                <tr>
+                  <td>Database</td>
+                  <td>PostgreSQL (SQLAlchemy ORM)</td>
+                </tr>
+                <tr>
+                  <td>Caching</td>
+                  <td>Redis (FastAPICache)</td>
+                </tr>
+                <tr>
+                  <td>Auth</td>
+                  <td>JWT + Google OAuth 2.0</td>
+                </tr>
+                <tr>
+                  <td>Hosting</td>
+                  <td>Render.com</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
-      <div class="subsection">
-        <div class="subsection-title">Tech Stack</div>
+      <!-- 2. GETTING STARTED -->
+      <div class="section" id="sec2">
+        <div class="section-header">
+          <div class="section-num">02</div>
+          <h2 class="section-title">Getting Started</h2>
+          <span class="section-icon">🚀</span>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-title">Admin Login</div>
+          <p class="body-text">Navigate to the KiwiQA login page. Two authentication methods are available.</p>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Method</th>
+                  <th>Details</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Email / Password</td>
+                  <td>Default email: <code>admin@examportal.com</code> · Default password: <code>Admin@123</code></td>
+                </tr>
+                <tr>
+                  <td>Google SSO</td>
+                  <td>Click <strong>"Continue with Google"</strong> — requires authorized email configured via
+                    <code>AUTHORIZED_GOOGLE_EMAIL</code></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="callout callout-info">
+            <span class="callout-icon">ℹ️</span>
+            <div>After login, a JWT <code>access_token</code> is stored in <code>localStorage</code>. Your profile and
+              permissions are fetched from <code>/me</code> and cached in <code>sessionStorage</code>.</div>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-title">Sidebar Navigation</div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Module</th>
+                  <th>Description</th>
+                  <th>Permission</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Dashboard</td>
+                  <td>Real-time exam stats, OTP display, exam activation</td>
+                  <td><span class="badge badge-green">All</span></td>
+                </tr>
+                <tr>
+                  <td>Create Exam</td>
+                  <td>Generate new exams (Question Bank, Manual, Upload)</td>
+                  <td><span class="badge badge-teal">generate exam</span></td>
+                </tr>
+                <tr>
+                  <td>Manage Exams</td>
+                  <td>Edit, merge, duplicate, or delete existing exams</td>
+                  <td><span class="badge badge-teal">manage exam</span></td>
+                </tr>
+                <tr>
+                  <td>Question Bank</td>
+                  <td>Organize and curate reusable questions</td>
+                  <td><span class="badge badge-teal">manage exam</span></td>
+                </tr>
+                <tr>
+                  <td>Candidates</td>
+                  <td>View, edit, and manage enrolled candidates</td>
+                  <td><span class="badge badge-blue">manage candidates</span></td>
+                </tr>
+                <tr>
+                  <td>Results</td>
+                  <td>View pass/fail/eliminated outcomes, access reports</td>
+                  <td><span class="badge badge-blue">manage candidates</span></td>
+                </tr>
+                <tr>
+                  <td>Settings</td>
+                  <td>Profile, theme, password, team management</td>
+                  <td><span class="badge badge-green">All</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="callout callout-warn">
+            <span class="callout-icon">⚠️</span>
+            <div>If your role is <strong>Viewer</strong> or <strong>Member</strong> with limited permissions, locked
+              modules show a 🔒 icon and display an <em>"Authority Required"</em> popup.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. DASHBOARD -->
+      <div class="section" id="sec3">
+        <div class="section-header">
+          <div class="section-num">03</div>
+          <h2 class="section-title">Admin Dashboard</h2>
+          <span class="section-icon">📊</span>
+        </div>
+        <p class="body-text">The Dashboard is your command centre for monitoring all assessments. Data auto-refreshes
+          every <strong>15 seconds</strong>.</p>
+
+        <div class="subsection">
+          <div class="subsection-title">Stat Cards (Top Row)</div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Card</th>
+                  <th>Shows</th>
+                  <th>Click Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Total Candidates</td>
+                  <td>Count of all enrolled candidates</td>
+                  <td>Navigate to Candidates page</td>
+                </tr>
+                <tr>
+                  <td>Live Candidates</td>
+                  <td>Currently taking an exam (real-time)</td>
+                  <td>—</td>
+                </tr>
+                <tr>
+                  <td>Assessments</td>
+                  <td>Total exams created</td>
+                  <td>Opens the Create Exam popup</td>
+                </tr>
+                <tr>
+                  <td>HR / Master OTP</td>
+                  <td>Live OTP code (rotates ~30s)</td>
+                  <td>Shows countdown timer</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-title">Exam Card Actions</div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Action</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Copy Link</td>
+                  <td>Copies the public enrollment URL to clipboard</td>
+                </tr>
+                <tr>
+                  <td>Send Link</td>
+                  <td>Opens a modal to email the link to multiple recipients with a custom message</td>
+                </tr>
+                <tr>
+                  <td>Activate</td>
+                  <td>Set an expiry window (hours or minutes) and activate the enrollment link</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. CREATE EXAM -->
+      <div class="section" id="sec4">
+        <div class="section-header">
+          <div class="section-num">04</div>
+          <h2 class="section-title">Create Exam</h2>
+          <span class="section-icon">✏️</span>
+        </div>
+        <p class="body-text">Build assessments through a guided 5-step wizard.</p>
+
+        <ul class="step-list">
+          <li class="step-item">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <div class="step-title">Exam Configuration</div>
+              <div class="step-desc">Set the Exam Title, Subject / Topic, Number of Questions, Duration (minutes), and
+                Passing Score (%).</div>
+            </div>
+          </li>
+          <li class="step-item">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <div class="step-title">Difficulty Selection</div>
+              <div class="step-desc"><span class="badge badge-green">Beginner</span> · <span
+                  class="badge badge-yellow">Intermediate</span> · <span class="badge badge-red">Advanced</span> · <span
+                  class="badge badge-purple">Mixed</span> — choose the target difficulty level for the assessment.
+                (Selecting <em>Question Bank</em> defaults this to <strong>Mixed</strong>).</div>
+            </div>
+          </li>
+          <li class="step-item">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <div class="step-title">Proctoring Configuration</div>
+              <div class="step-desc">Select <strong>Video Only</strong>, <strong>Screen Only</strong>, or <strong>Video
+                  + Screen</strong> (recommended) for exam integrity monitoring.</div>
+            </div>
+          </li>
+          <li class="step-item">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <div class="step-title">Question Source</div>
+              <div class="step-desc">Choose from: 📚 <strong>Question Bank</strong>, ✏️ <strong>Manual entry</strong>,
+                or 📤 <strong>Upload</strong> (JSON / CSV).</div>
+            </div>
+          </li>
+          <li class="step-item">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <div class="step-title">Review & Publish</div>
+              <div class="step-desc">Preview all questions, edit options, or remove questions, then click
+                <strong>"Publish Exam"</strong> to deploy.</div>
+            </div>
+          </li>
+        </ul>
+
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <div>Upload large question sets in bulk using the <strong>JSON/CSV</strong> path to save time during exam
+            creation.</div>
+        </div>
+
+        <div class="subsection" style="margin-top:20px">
+          <div class="subsection-title">Question Sources</div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Source</th>
+                  <th>How It Works</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>📚 Question Bank</td>
+                  <td>Select from your curated question bank. Filter by category and marks (defaults to
+                    <strong>Mixed</strong> difficulty for balanced selection).</td>
+                </tr>
+                <tr>
+                  <td>✏️ Manual</td>
+                  <td>Write each question, 4 options, mark the correct answer, and add an optional explanation.</td>
+                </tr>
+                <tr>
+                  <td>📤 Upload</td>
+                  <td>Import from a <strong>JSON</strong> or <strong>CSV</strong> file for bulk creation.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. MANAGE EXAMS -->
+      <div class="section" id="sec5">
+        <div class="section-header">
+          <div class="section-num">05</div>
+          <h2 class="section-title">Manage Exams</h2>
+          <span class="section-icon">📋</span>
+        </div>
+
         <div class="tbl-wrap">
           <table>
-            <thead><tr><th>Layer</th><th>Technology</th></tr></thead>
+            <thead>
+              <tr>
+                <th>Action</th>
+                <th>Description</th>
+              </tr>
+            </thead>
             <tbody>
-              <tr><td>Frontend</td><td>React + TypeScript (Vite)</td></tr>
-              <tr><td>Backend</td><td>Python FastAPI</td></tr>
-              <tr><td>Database</td><td>PostgreSQL (SQLAlchemy ORM)</td></tr>
-              <tr><td>Caching</td><td>Redis (FastAPICache)</td></tr>
-              <tr><td>Auth</td><td>JWT + Google OAuth 2.0</td></tr>
-              <tr><td>Hosting</td><td>Render.com</td></tr>
+              <tr>
+                <td>View Questions</td>
+                <td>Expand any exam to see all questions with correct answers highlighted</td>
+              </tr>
+              <tr>
+                <td>Delete Exam</td>
+                <td>Permanently remove an exam. Assigned candidates get a NULL exam reference</td>
+              </tr>
+              <tr>
+                <td>Select & Merge</td>
+                <td>Select multiple exams → merge their questions into a single new exam</td>
+              </tr>
+              <tr>
+                <td>Duplicate</td>
+                <td>Copy questions into a new exam with a different title</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-title">Exam Lifecycle</div>
+          <div class="flow-diagram">
+            <div class="flow-step">Create Exam</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step">Inactive</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step">Activate Link</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step" style="background:var(--green);">LIVE</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step" style="background:#6b7280;">Expired</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step">Re-activate / Auto-Delete</div>
+          </div>
+          <div class="callout callout-info">
+            <span class="callout-icon">ℹ️</span>
+            <div>Exams with an <code>auto_delete</code> timestamp are automatically cleaned up by a background process
+              running every <strong>30 seconds</strong>.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. QUESTION BANK -->
+      <div class="section" id="sec6">
+        <div class="section-header">
+          <div class="section-num">06</div>
+          <h2 class="section-title">Question Bank</h2>
+          <span class="section-icon">📚</span>
+        </div>
+        <p class="body-text">A persistent, categorized repository of questions reusable across multiple exams. Category
+          cards show name, question count, and total marks.</p>
+
+        <div class="subsection">
+          <div class="subsection-title">Question Card Elements</div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Element</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Difficulty Badge</td>
+                  <td><span class="badge badge-green">Beginner</span> <span
+                      class="badge badge-yellow">Intermediate</span> <span class="badge badge-red">Advanced</span></td>
+                </tr>
+                <tr>
+                  <td>Marks</td>
+                  <td>Point value for the question</td>
+                </tr>
+                <tr>
+                  <td>Question Text</td>
+                  <td>Full question content</td>
+                </tr>
+                <tr>
+                  <td>Options</td>
+                  <td>All 4 options with the correct answer highlighted in green</td>
+                </tr>
+                <tr>
+                  <td>Edit</td>
+                  <td>Opens a modal to modify text, options, difficulty, and marks</td>
+                </tr>
+                <tr>
+                  <td>Delete</td>
+                  <td>Removes the question (with confirmation popup)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-title">Adding a Question — Steps</div>
+          <ul class="step-list">
+            <li class="step-item">
+              <div class="step-num">1</div>
+              <div class="step-body">
+                <div class="step-desc">Provide a <strong>Category Name</strong> (existing or new — new categories are
+                  auto-created)</div>
+              </div>
+            </li>
+            <li class="step-item">
+              <div class="step-num">2</div>
+              <div class="step-body">
+                <div class="step-desc">Enter <strong>Question Text</strong>, select <strong>Difficulty Level</strong>
+                  and <strong>Marks</strong></div>
+              </div>
+            </li>
+            <li class="step-item">
+              <div class="step-num">3</div>
+              <div class="step-body">
+                <div class="step-desc">Fill in <strong>4 answer options</strong> and select the correct answer via radio
+                  button</div>
+              </div>
+            </li>
+            <li class="step-item">
+              <div class="step-num">4</div>
+              <div class="step-body">
+                <div class="step-desc">Optionally add an <strong>Explanation</strong>, then click <strong>Save</strong>
+                </div>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 7. CANDIDATES -->
+      <div class="section" id="sec7">
+        <div class="section-header">
+          <div class="section-num">07</div>
+          <h2 class="section-title">Candidate Management</h2>
+          <span class="section-icon">👥</span>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-title">Candidate Table Columns</div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Column</th>
+                  <th>Data Shown</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Candidate</td>
+                  <td>Auto-generated ID (e.g., <code>KQA-0001</code>), name, join date, profile photo</td>
+                </tr>
+                <tr>
+                  <td>Profile Details</td>
+                  <td>Gender, DOB, address</td>
+                </tr>
+                <tr>
+                  <td>Contact & CV</td>
+                  <td>Email, phone, and CV download link</td>
+                </tr>
+                <tr>
+                  <td>Assigned Exams</td>
+                  <td>List of enrolled exam names</td>
+                </tr>
+                <tr>
+                  <td>Status</td>
+                  <td>PENDING / ACTIVE / COMPLETED / FAILED per enrollment</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-title">Available Actions</div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Action</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>✏️ Edit</td>
+                  <td>Update candidate profile (name, email, phone, DOB, gender, address)</td>
+                </tr>
+                <tr>
+                  <td>🗑️ Delete</td>
+                  <td>Permanently remove the candidate record (with confirmation)</td>
+                </tr>
+                <tr>
+                  <td>📋 Copy Link</td>
+                  <td>Copy the unique test URL; also offers to email it</td>
+                </tr>
+                <tr>
+                  <td>✉️ Send Link</td>
+                  <td>Email the test link directly to the candidate</td>
+                </tr>
+                <tr>
+                  <td>📄 View Report</td>
+                  <td>See the detailed exam report (completed exams only)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <div>Candidates with the <strong>same email</strong> are automatically grouped into a single table row,
+            showing all their exam enrollments together.</div>
+        </div>
+      </div>
+
+      <!-- 8. INVITES -->
+      <div class="section" id="sec8">
+        <div class="section-header">
+          <div class="section-num">08</div>
+          <h2 class="section-title">Invitation Tracking</h2>
+          <span class="section-icon">✉️</span>
+        </div>
+        <p class="body-text">Monitors all email invitations sent through the Dashboard. Each exam with sent invitations
+          is displayed as an expandable card.</p>
+
+        <div class="tbl-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Column</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Email Address</td>
+                <td>Recipient's email</td>
+              </tr>
+              <tr>
+                <td>Invited Date</td>
+                <td>Date and time the invitation was sent</td>
+              </tr>
+              <tr>
+                <td>Status</td>
+                <td><span class="badge badge-green">Sat</span> (completed) or <span class="badge badge-red">Not
+                    Sat</span> (pending)</td>
+              </tr>
             </tbody>
           </table>
         </div>
       </div>
-    </div>
 
-    <!-- 2. GETTING STARTED -->
-    <div class="section" id="sec2">
-      <div class="section-header">
-        <div class="section-num">02</div>
-        <h2 class="section-title">Getting Started</h2>
-        <span class="section-icon">🚀</span>
+      <!-- 9. RESULTS -->
+      <div class="section" id="sec9">
+        <div class="section-header">
+          <div class="section-num">09</div>
+          <h2 class="section-title">Results & Reports</h2>
+          <span class="section-icon">📈</span>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-title">Outcome Statuses</div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Status</th>
+                  <th>How Determined</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="badge badge-green">✅ Passed</span></td>
+                  <td>Score percentage ≥ exam's passing score</td>
+                </tr>
+                <tr>
+                  <td><span class="badge badge-red">❌ Failed</span></td>
+                  <td>Score percentage &lt; passing score</td>
+                </tr>
+                <tr>
+                  <td><span class="badge badge-yellow">⚠️ Eliminated</span></td>
+                  <td>3 or more proctoring violations</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-title">Candidate Report Contents</div>
+          <ul class="step-list">
+            <li class="step-item">
+              <div class="step-num">→</div>
+              <div class="step-body">
+                <div class="step-title">Statistics Overview</div>
+                <div class="step-desc">Total Score · Questions Attempted · Score Percentage · Security Violations count
+                </div>
+              </div>
+            </li>
+            <li class="step-item">
+              <div class="step-num">→</div>
+              <div class="step-body">
+                <div class="step-title">Category-wise Performance</div>
+                <div class="step-desc">Questions / Correct / Score / Accuracy broken down by category (e.g., "Logical
+                  Reasoning", "Data Structures")</div>
+              </div>
+            </li>
+            <li class="step-item">
+              <div class="step-num">→</div>
+              <div class="step-body">
+                <div class="step-title">Proctoring Snapshots</div>
+                <div class="step-desc">Three webcam screenshots: <strong>Start</strong>, <strong>Midpoint</strong>, and
+                  <strong>End</strong> of the exam</div>
+              </div>
+            </li>
+            <li class="step-item">
+              <div class="step-num">→</div>
+              <div class="step-body">
+                <div class="step-title">Question-by-Question Review</div>
+                <div class="step-desc">Every question with correct (green) / wrong (red) answer highlighted and
+                  explanation where available</div>
+              </div>
+            </li>
+          </ul>
+        </div>
       </div>
 
-      <div class="subsection">
-        <div class="subsection-title">Admin Login</div>
-        <p class="body-text">Navigate to the KiwiQA login page. Two authentication methods are available.</p>
-        <div class="tbl-wrap">
-          <table>
-            <thead><tr><th>Method</th><th>Details</th></tr></thead>
-            <tbody>
-              <tr><td>Email / Password</td><td>Default email: <code>admin@examportal.com</code> · Default password: <code>Admin@123</code></td></tr>
-              <tr><td>Google SSO</td><td>Click <strong>"Continue with Google"</strong> — requires authorized email configured via <code>AUTHORIZED_GOOGLE_EMAIL</code></td></tr>
-            </tbody>
-          </table>
+      <!-- 10. SETTINGS -->
+      <div class="section" id="sec10">
+        <div class="section-header">
+          <div class="section-num">10</div>
+          <h2 class="section-title">Settings & Personalization</h2>
+          <span class="section-icon">⚙️</span>
         </div>
-        <div class="callout callout-info">
-          <span class="callout-icon">ℹ️</span>
-          <div>After login, a JWT <code>access_token</code> is stored in <code>localStorage</code>. Your profile and permissions are fetched from <code>/me</code> and cached in <code>sessionStorage</code>.</div>
+
+        <div class="subsection">
+          <div class="subsection-title">Available Themes</div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Theme</th>
+                  <th>Style</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>KiwiQA (Default)</td>
+                  <td>Teal & green on white</td>
+                </tr>
+                <tr>
+                  <td>Dark</td>
+                  <td>Dark navy with cyan accents</td>
+                </tr>
+                <tr>
+                  <td>Purple</td>
+                  <td>Bold violet on white</td>
+                </tr>
+                <tr>
+                  <td>Rose</td>
+                  <td>Warm red & orange on white</td>
+                </tr>
+                <tr>
+                  <td>Ocean</td>
+                  <td>Cool sky blue on white</td>
+                </tr>
+                <tr>
+                  <td>Midnight</td>
+                  <td>Dark purple with violet/pink accents</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="callout callout-info">
+            <span class="callout-icon">ℹ️</span>
+            <div>Theme selection is <strong>per-user</strong> — each admin has their own preference that persists across
+              sessions.</div>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-title">Team Permissions (Admin Only)</div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Permission</th>
+                  <th>Grants Access To</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>manage exam</code></td>
+                  <td>Create, edit, delete, and activate exams</td>
+                </tr>
+                <tr>
+                  <td><code>generate exam</code></td>
+                  <td>Create and publish assessment exams</td>
+                </tr>
+                <tr>
+                  <td><code>manage candidates</code></td>
+                  <td>View, edit, manage candidates and results</td>
+                </tr>
+                <tr>
+                  <td><code>manage users</code></td>
+                  <td>Add, edit, remove team members</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
-      <div class="subsection">
-        <div class="subsection-title">Sidebar Navigation</div>
-        <div class="tbl-wrap">
-          <table>
-            <thead><tr><th>Module</th><th>Description</th><th>Permission</th></tr></thead>
-            <tbody>
-              <tr><td>Dashboard</td><td>Real-time exam stats, OTP display, exam activation</td><td><span class="badge badge-green">All</span></td></tr>
-              <tr><td>Create Exam</td><td>Generate new exams (Question Bank, Manual, Upload)</td><td><span class="badge badge-teal">generate exam</span></td></tr>
-              <tr><td>Manage Exams</td><td>Edit, merge, duplicate, or delete existing exams</td><td><span class="badge badge-teal">manage exam</span></td></tr>
-              <tr><td>Question Bank</td><td>Organize and curate reusable questions</td><td><span class="badge badge-teal">manage exam</span></td></tr>
-              <tr><td>Candidates</td><td>View, edit, and manage enrolled candidates</td><td><span class="badge badge-blue">manage candidates</span></td></tr>
-              <tr><td>Results</td><td>View pass/fail/eliminated outcomes, access reports</td><td><span class="badge badge-blue">manage candidates</span></td></tr>
-              <tr><td>Settings</td><td>Profile, theme, password, team management</td><td><span class="badge badge-green">All</span></td></tr>
-            </tbody>
-          </table>
+      <!-- 11. CANDIDATE EXPERIENCE -->
+      <div class="section" id="sec11">
+        <div class="section-header">
+          <div class="section-num">11</div>
+          <h2 class="section-title">Candidate Experience</h2>
+          <span class="section-icon">🖥️</span>
         </div>
+
+        <div class="subsection">
+          <div class="subsection-title">Enrollment Flow</div>
+          <ul class="step-list">
+            <li class="step-item">
+              <div class="step-num">1</div>
+              <div class="step-body">
+                <div class="step-desc">Candidate receives an enrollment link (e.g.,
+                  <code>https://yoursite.com/#/enroll/{examId}</code>)</div>
+              </div>
+            </li>
+            <li class="step-item">
+              <div class="step-num">2</div>
+              <div class="step-body">
+                <div class="step-desc">Fills out enrollment form: Full Name, Email, Phone, DOB, Gender, Address, and
+                  Profile Photo</div>
+              </div>
+            </li>
+            <li class="step-item">
+              <div class="step-num">3</div>
+              <div class="step-body">
+                <div class="step-desc">Admin shares the <strong>Master OTP</strong> (displayed on Dashboard, rotates
+                  every ~30s)</div>
+              </div>
+            </li>
+            <li class="step-item">
+              <div class="step-num">4</div>
+              <div class="step-body">
+                <div class="step-desc">Candidate enters OTP → receives a <strong>unique personal test link</strong>
+                </div>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-title">Question Palette Color Coding</div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Color</th>
+                  <th>Meaning</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="badge badge-green">🟢 Green</span></td>
+                  <td>Answered</td>
+                </tr>
+                <tr>
+                  <td><span style="background:#fff3e0;color:#e65100;" class="badge">🟠 Orange</span></td>
+                  <td>Visited but not answered</td>
+                </tr>
+                <tr>
+                  <td><span class="badge" style="background:#f3f4f6;color:#374151;">⬜ Grey</span></td>
+                  <td>Not visited</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         <div class="callout callout-warn">
           <span class="callout-icon">⚠️</span>
-          <div>If your role is <strong>Viewer</strong> or <strong>Member</strong> with limited permissions, locked modules show a 🔒 icon and display an <em>"Authority Required"</em> popup.</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 3. DASHBOARD -->
-    <div class="section" id="sec3">
-      <div class="section-header">
-        <div class="section-num">03</div>
-        <h2 class="section-title">Admin Dashboard</h2>
-        <span class="section-icon">📊</span>
-      </div>
-      <p class="body-text">The Dashboard is your command centre for monitoring all assessments. Data auto-refreshes every <strong>15 seconds</strong>.</p>
-
-      <div class="subsection">
-        <div class="subsection-title">Stat Cards (Top Row)</div>
-        <div class="tbl-wrap">
-          <table>
-            <thead><tr><th>Card</th><th>Shows</th><th>Click Action</th></tr></thead>
-            <tbody>
-              <tr><td>Total Candidates</td><td>Count of all enrolled candidates</td><td>Navigate to Candidates page</td></tr>
-              <tr><td>Live Candidates</td><td>Currently taking an exam (real-time)</td><td>—</td></tr>
-              <tr><td>Assessments</td><td>Total exams created</td><td>Opens the Create Exam popup</td></tr>
-              <tr><td>HR / Master OTP</td><td>Live OTP code (rotates ~30s)</td><td>Shows countdown timer</td></tr>
-            </tbody>
-          </table>
+          <div>If the candidate accumulates <strong>3 or more violations</strong> (tab switches, face not detected), the
+            exam is automatically terminated and the candidate is marked as <strong>ELIMINATED</strong>. This cannot be
+            undone.</div>
         </div>
       </div>
 
-      <div class="subsection">
-        <div class="subsection-title">Exam Card Actions</div>
-        <div class="tbl-wrap">
-          <table>
-            <thead><tr><th>Action</th><th>Description</th></tr></thead>
-            <tbody>
-              <tr><td>Copy Link</td><td>Copies the public enrollment URL to clipboard</td></tr>
-              <tr><td>Send Link</td><td>Opens a modal to email the link to multiple recipients with a custom message</td></tr>
-              <tr><td>Activate</td><td>Set an expiry window (hours or minutes) and activate the enrollment link</td></tr>
-            </tbody>
-          </table>
+      <!-- 12. SECURITY -->
+      <div class="section" id="sec12">
+        <div class="section-header">
+          <div class="section-num">12</div>
+          <h2 class="section-title">Security & Proctoring</h2>
+          <span class="section-icon">🛡️</span>
         </div>
-      </div>
-    </div>
 
-    <!-- 4. CREATE EXAM -->
-    <div class="section" id="sec4">
-      <div class="section-header">
-        <div class="section-num">04</div>
-        <h2 class="section-title">Create Exam</h2>
-        <span class="section-icon">✏️</span>
-      </div>
-      <p class="body-text">Build assessments through a guided 5-step wizard.</p>
-
-      <ul class="step-list">
-        <li class="step-item">
-          <div class="step-num">1</div>
-          <div class="step-body">
-            <div class="step-title">Exam Configuration</div>
-            <div class="step-desc">Set the Exam Title, Subject / Topic, Number of Questions, Duration (minutes), and Passing Score (%).</div>
+        <div class="proctor-grid">
+          <div class="proctor-card">
+            <div class="p-icon">📹</div>
+            <div class="p-title">Face Detection</div>
+            <div class="p-desc">face-api.js TinyFaceDetector monitors webcam in real-time</div>
           </div>
-        </li>
-        <li class="step-item">
-          <div class="step-num">2</div>
-          <div class="step-body">
-            <div class="step-title">Difficulty Selection</div>
-            <div class="step-desc"><span class="badge badge-green">Beginner</span> · <span class="badge badge-yellow">Intermediate</span> · <span class="badge badge-red">Advanced</span> · <span class="badge badge-purple">Mixed</span> — choose the target difficulty level for the assessment. (Selecting <em>Question Bank</em> defaults this to <strong>Mixed</strong>).</div>
+          <div class="proctor-card">
+            <div class="p-icon">🖥️</div>
+            <div class="p-title">Tab Monitoring</div>
+            <div class="p-desc">visibilitychange event detects tab switches or browser minimization</div>
           </div>
-        </li>
-        <li class="step-item">
-          <div class="step-num">3</div>
-          <div class="step-body">
-            <div class="step-title">Proctoring Configuration</div>
-            <div class="step-desc">Select <strong>Video Only</strong>, <strong>Screen Only</strong>, or <strong>Video + Screen</strong> (recommended) for exam integrity monitoring.</div>
+          <div class="proctor-card">
+            <div class="p-icon">📸</div>
+            <div class="p-title">Screenshot Capture</div>
+            <div class="p-desc">html2canvas captures 3 snapshots — start, midpoint, end — stored as base64</div>
           </div>
-        </li>
-        <li class="step-item">
-          <div class="step-num">4</div>
-          <div class="step-body">
-            <div class="step-title">Question Source</div>
-            <div class="step-desc">Choose from: 📚 <strong>Question Bank</strong>, ✏️ <strong>Manual entry</strong>, or 📤 <strong>Upload</strong> (JSON / CSV).</div>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-title">Additional Security Features</div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Feature</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>JWT Tokens</td>
+                  <td>Short-lived access tokens stored in <code>localStorage</code>; 401 auto-redirects to login</td>
+                </tr>
+                <tr>
+                  <td>Device Fingerprinting</td>
+                  <td>Unique device UUID stored in <code>localStorage</code> prevents concurrent multi-device sessions
+                  </td>
+                </tr>
+                <tr>
+                  <td>Question Randomization</td>
+                  <td>Seeded PRNG (Mulberry32) shuffles questions and options per-candidate — deterministic for auditing
+                  </td>
+                </tr>
+                <tr>
+                  <td>Password Hashing</td>
+                  <td>Passwords hashed before storage — never stored in plaintext</td>
+                </tr>
+                <tr>
+                  <td>Session Management</td>
+                  <td>Single active session enforced via <code>session_id</code> on the User model</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
-        </li>
-        <li class="step-item">
-          <div class="step-num">5</div>
-          <div class="step-body">
-            <div class="step-title">Review & Publish</div>
-            <div class="step-desc">Preview all questions, edit options, or remove questions, then click <strong>"Publish Exam"</strong> to deploy.</div>
+        </div>
+      </div>
+
+      <!-- 13. FAQ -->
+      <div class="section" id="sec13">
+        <div class="section-header">
+          <div class="section-num">13</div>
+          <h2 class="section-title">FAQ</h2>
+          <span class="section-icon">❓</span>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">Can a candidate retake an exam? <span class="faq-caret">▼</span>
           </div>
-        </li>
-      </ul>
-
-      <div class="callout callout-tip">
-        <span class="callout-icon">💡</span>
-        <div>Upload large question sets in bulk using the <strong>JSON/CSV</strong> path to save time during exam creation.</div>
-      </div>
-
-      <div class="subsection" style="margin-top:20px">
-        <div class="subsection-title">Question Sources</div>
-        <div class="tbl-wrap">
-          <table>
-            <thead><tr><th>Source</th><th>How It Works</th></tr></thead>
-            <tbody>
-              <tr><td>📚 Question Bank</td><td>Select from your curated question bank. Filter by category and marks (defaults to <strong>Mixed</strong> difficulty for balanced selection).</td></tr>
-              <tr><td>✏️ Manual</td><td>Write each question, 4 options, mark the correct answer, and add an optional explanation.</td></tr>
-              <tr><td>📤 Upload</td><td>Import from a <strong>JSON</strong> or <strong>CSV</strong> file for bulk creation.</td></tr>
-            </tbody>
-          </table>
+          <div class="faq-a">Controlled by the Administrator. A new enrollment must be created for the candidate,
+            generating a fresh unique test link.</div>
         </div>
-      </div>
-    </div>
 
-    <!-- 5. MANAGE EXAMS -->
-    <div class="section" id="sec5">
-      <div class="section-header">
-        <div class="section-num">05</div>
-        <h2 class="section-title">Manage Exams</h2>
-        <span class="section-icon">📋</span>
-      </div>
-
-      <div class="tbl-wrap">
-        <table>
-          <thead><tr><th>Action</th><th>Description</th></tr></thead>
-          <tbody>
-            <tr><td>View Questions</td><td>Expand any exam to see all questions with correct answers highlighted</td></tr>
-            <tr><td>Delete Exam</td><td>Permanently remove an exam. Assigned candidates get a NULL exam reference</td></tr>
-            <tr><td>Select & Merge</td><td>Select multiple exams → merge their questions into a single new exam</td></tr>
-            <tr><td>Duplicate</td><td>Copy questions into a new exam with a different title</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="subsection">
-        <div class="subsection-title">Exam Lifecycle</div>
-        <div class="flow-diagram">
-          <div class="flow-step">Create Exam</div>
-          <div class="flow-arrow">→</div>
-          <div class="flow-step">Inactive</div>
-          <div class="flow-arrow">→</div>
-          <div class="flow-step">Activate Link</div>
-          <div class="flow-arrow">→</div>
-          <div class="flow-step" style="background:var(--green);">LIVE</div>
-          <div class="flow-arrow">→</div>
-          <div class="flow-step" style="background:#6b7280;">Expired</div>
-          <div class="flow-arrow">→</div>
-          <div class="flow-step">Re-activate / Auto-Delete</div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">How is grading done? <span class="faq-caret">▼</span></div>
+          <div class="faq-a">All questions are MCQ. The candidate's selected option is compared against the
+            <code>is_correct</code> flag — grading is fully automatic with instant results.</div>
         </div>
-        <div class="callout callout-info">
-          <span class="callout-icon">ℹ️</span>
-          <div>Exams with an <code>auto_delete</code> timestamp are automatically cleaned up by a background process running every <strong>30 seconds</strong>.</div>
+
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">What happens when an exam link expires? <span
+              class="faq-caret">▼</span></div>
+          <div class="faq-a">The enrollment link becomes inactive. New candidates can no longer enroll. Candidates
+            already in-progress can still submit. The admin can re-activate the link with a new time window.</div>
         </div>
-      </div>
-    </div>
 
-    <!-- 6. QUESTION BANK -->
-    <div class="section" id="sec6">
-      <div class="section-header">
-        <div class="section-num">06</div>
-        <h2 class="section-title">Question Bank</h2>
-        <span class="section-icon">📚</span>
-      </div>
-      <p class="body-text">A persistent, categorized repository of questions reusable across multiple exams. Category cards show name, question count, and total marks.</p>
-
-      <div class="subsection">
-        <div class="subsection-title">Question Card Elements</div>
-        <div class="tbl-wrap">
-          <table>
-            <thead><tr><th>Element</th><th>Description</th></tr></thead>
-            <tbody>
-              <tr><td>Difficulty Badge</td><td><span class="badge badge-green">Beginner</span> <span class="badge badge-yellow">Intermediate</span> <span class="badge badge-red">Advanced</span></td></tr>
-              <tr><td>Marks</td><td>Point value for the question</td></tr>
-              <tr><td>Question Text</td><td>Full question content</td></tr>
-              <tr><td>Options</td><td>All 4 options with the correct answer highlighted in green</td></tr>
-              <tr><td>Edit</td><td>Opens a modal to modify text, options, difficulty, and marks</td></tr>
-              <tr><td>Delete</td><td>Removes the question (with confirmation popup)</td></tr>
-            </tbody>
-          </table>
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">Can I combine questions from different sources? <span
+              class="faq-caret">▼</span></div>
+          <div class="faq-a">Yes. Each exam uses one source at creation time (Manual, Bank, or Upload), but you can
+            merge multiple exams using the <strong>Merge</strong> feature in Manage Exams.</div>
         </div>
-      </div>
 
-      <div class="subsection">
-        <div class="subsection-title">Adding a Question — Steps</div>
-        <ul class="step-list">
-          <li class="step-item"><div class="step-num">1</div><div class="step-body"><div class="step-desc">Provide a <strong>Category Name</strong> (existing or new — new categories are auto-created)</div></div></li>
-          <li class="step-item"><div class="step-num">2</div><div class="step-body"><div class="step-desc">Enter <strong>Question Text</strong>, select <strong>Difficulty Level</strong> and <strong>Marks</strong></div></div></li>
-          <li class="step-item"><div class="step-num">3</div><div class="step-body"><div class="step-desc">Fill in <strong>4 answer options</strong> and select the correct answer via radio button</div></div></li>
-          <li class="step-item"><div class="step-num">4</div><div class="step-body"><div class="step-desc">Optionally add an <strong>Explanation</strong>, then click <strong>Save</strong></div></div></li>
-        </ul>
-      </div>
-    </div>
-
-    <!-- 7. CANDIDATES -->
-    <div class="section" id="sec7">
-      <div class="section-header">
-        <div class="section-num">07</div>
-        <h2 class="section-title">Candidate Management</h2>
-        <span class="section-icon">👥</span>
-      </div>
-
-      <div class="subsection">
-        <div class="subsection-title">Candidate Table Columns</div>
-        <div class="tbl-wrap">
-          <table>
-            <thead><tr><th>Column</th><th>Data Shown</th></tr></thead>
-            <tbody>
-              <tr><td>Candidate</td><td>Auto-generated ID (e.g., <code>KQA-0001</code>), name, join date, profile photo</td></tr>
-              <tr><td>Profile Details</td><td>Gender, DOB, address</td></tr>
-              <tr><td>Contact & CV</td><td>Email, phone, and CV download link</td></tr>
-              <tr><td>Assigned Exams</td><td>List of enrolled exam names</td></tr>
-              <tr><td>Status</td><td>PENDING / ACTIVE / COMPLETED / FAILED per enrollment</td></tr>
-            </tbody>
-          </table>
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">How do I add multiple admins? <span class="faq-caret">▼</span>
+          </div>
+          <div class="faq-a">Go to <strong>Settings → Team Management</strong>. Click <strong>"Add Member"</strong>,
+            assign a role (Admin / Member / Viewer), and select their specific permissions.</div>
         </div>
-      </div>
 
-      <div class="subsection">
-        <div class="subsection-title">Available Actions</div>
-        <div class="tbl-wrap">
-          <table>
-            <thead><tr><th>Action</th><th>Description</th></tr></thead>
-            <tbody>
-              <tr><td>✏️ Edit</td><td>Update candidate profile (name, email, phone, DOB, gender, address)</td></tr>
-              <tr><td>🗑️ Delete</td><td>Permanently remove the candidate record (with confirmation)</td></tr>
-              <tr><td>📋 Copy Link</td><td>Copy the unique test URL; also offers to email it</td></tr>
-              <tr><td>✉️ Send Link</td><td>Email the test link directly to the candidate</td></tr>
-              <tr><td>📄 View Report</td><td>See the detailed exam report (completed exams only)</td></tr>
-            </tbody>
-          </table>
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">Is there a candidate or exam limit? <span
+              class="faq-caret">▼</span></div>
+          <div class="faq-a">No hard limit is enforced by the platform. Scalability depends on your hosting
+            infrastructure (database size, server resources).</div>
         </div>
-      </div>
 
-      <div class="callout callout-tip">
-        <span class="callout-icon">💡</span>
-        <div>Candidates with the <strong>same email</strong> are automatically grouped into a single table row, showing all their exam enrollments together.</div>
-      </div>
-    </div>
-
-    <!-- 8. INVITES -->
-    <div class="section" id="sec8">
-      <div class="section-header">
-        <div class="section-num">08</div>
-        <h2 class="section-title">Invitation Tracking</h2>
-        <span class="section-icon">✉️</span>
-      </div>
-      <p class="body-text">Monitors all email invitations sent through the Dashboard. Each exam with sent invitations is displayed as an expandable card.</p>
-
-      <div class="tbl-wrap">
-        <table>
-          <thead><tr><th>Column</th><th>Description</th></tr></thead>
-          <tbody>
-            <tr><td>Email Address</td><td>Recipient's email</td></tr>
-            <tr><td>Invited Date</td><td>Date and time the invitation was sent</td></tr>
-            <tr><td>Status</td><td><span class="badge badge-green">Sat</span> (completed) or <span class="badge badge-red">Not Sat</span> (pending)</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- 9. RESULTS -->
-    <div class="section" id="sec9">
-      <div class="section-header">
-        <div class="section-num">09</div>
-        <h2 class="section-title">Results & Reports</h2>
-        <span class="section-icon">📈</span>
-      </div>
-
-      <div class="subsection">
-        <div class="subsection-title">Outcome Statuses</div>
-        <div class="tbl-wrap">
-          <table>
-            <thead><tr><th>Status</th><th>How Determined</th></tr></thead>
-            <tbody>
-              <tr><td><span class="badge badge-green">✅ Passed</span></td><td>Score percentage ≥ exam's passing score</td></tr>
-              <tr><td><span class="badge badge-red">❌ Failed</span></td><td>Score percentage &lt; passing score</td></tr>
-              <tr><td><span class="badge badge-yellow">⚠️ Eliminated</span></td><td>3 or more proctoring violations</td></tr>
-            </tbody>
-          </table>
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">Can candidates see their own results? <span
+              class="faq-caret">▼</span></div>
+          <div class="faq-a">Currently, results are only visible to admins through the Results page and Candidate
+            Report. Candidates see a submission confirmation on the test page.</div>
         </div>
-      </div>
 
-      <div class="subsection">
-        <div class="subsection-title">Candidate Report Contents</div>
-        <ul class="step-list">
-          <li class="step-item"><div class="step-num">→</div><div class="step-body"><div class="step-title">Statistics Overview</div><div class="step-desc">Total Score · Questions Attempted · Score Percentage · Security Violations count</div></div></li>
-          <li class="step-item"><div class="step-num">→</div><div class="step-body"><div class="step-title">Category-wise Performance</div><div class="step-desc">Questions / Correct / Score / Accuracy broken down by category (e.g., "Logical Reasoning", "Data Structures")</div></div></li>
-          <li class="step-item"><div class="step-num">→</div><div class="step-body"><div class="step-title">Proctoring Snapshots</div><div class="step-desc">Three webcam screenshots: <strong>Start</strong>, <strong>Midpoint</strong>, and <strong>End</strong> of the exam</div></div></li>
-          <li class="step-item"><div class="step-num">→</div><div class="step-body"><div class="step-title">Question-by-Question Review</div><div class="step-desc">Every question with correct (green) / wrong (red) answer highlighted and explanation where available</div></div></li>
-        </ul>
-      </div>
-    </div>
-
-    <!-- 10. SETTINGS -->
-    <div class="section" id="sec10">
-      <div class="section-header">
-        <div class="section-num">10</div>
-        <h2 class="section-title">Settings & Personalization</h2>
-        <span class="section-icon">⚙️</span>
-      </div>
-
-      <div class="subsection">
-        <div class="subsection-title">Available Themes</div>
-        <div class="tbl-wrap">
-          <table>
-            <thead><tr><th>Theme</th><th>Style</th></tr></thead>
-            <tbody>
-              <tr><td>KiwiQA (Default)</td><td>Teal & green on white</td></tr>
-              <tr><td>Dark</td><td>Dark navy with cyan accents</td></tr>
-              <tr><td>Purple</td><td>Bold violet on white</td></tr>
-              <tr><td>Rose</td><td>Warm red & orange on white</td></tr>
-              <tr><td>Ocean</td><td>Cool sky blue on white</td></tr>
-              <tr><td>Midnight</td><td>Dark purple with violet/pink accents</td></tr>
-            </tbody>
-          </table>
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">What happens if the internet disconnects during an exam? <span
+              class="faq-caret">▼</span></div>
+          <div class="faq-a">The candidate's answers are tracked in state. They should reconnect and refresh the page.
+            The timer continues server-side, and any previously saved progress persists.</div>
         </div>
-        <div class="callout callout-info">
-          <span class="callout-icon">ℹ️</span>
-          <div>Theme selection is <strong>per-user</strong> — each admin has their own preference that persists across sessions.</div>
+
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">How does the OTP system work? <span class="faq-caret">▼</span>
+          </div>
+          <div class="faq-a">The admin dashboard displays a rotating Master OTP (changes every ~30 seconds). The admin
+            shares this OTP verbally or via message with the candidate during enrollment — ensuring only authorized
+            candidates can complete enrollment.</div>
         </div>
-      </div>
 
-      <div class="subsection">
-        <div class="subsection-title">Team Permissions (Admin Only)</div>
-        <div class="tbl-wrap">
-          <table>
-            <thead><tr><th>Permission</th><th>Grants Access To</th></tr></thead>
-            <tbody>
-              <tr><td><code>manage exam</code></td><td>Create, edit, delete, and activate exams</td></tr>
-              <tr><td><code>generate exam</code></td><td>Create and publish assessment exams</td></tr>
-              <tr><td><code>manage candidates</code></td><td>View, edit, manage candidates and results</td></tr>
-              <tr><td><code>manage users</code></td><td>Add, edit, remove team members</td></tr>
-            </tbody>
-          </table>
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">What if the candidate's camera fails? <span
+              class="faq-caret">▼</span></div>
+          <div class="faq-a">If proctoring is enabled with video, camera access is required. Check browser permissions
+            and ensure no other application is using the camera.</div>
         </div>
-      </div>
-    </div>
 
-    <!-- 11. CANDIDATE EXPERIENCE -->
-    <div class="section" id="sec11">
-      <div class="section-header">
-        <div class="section-num">11</div>
-        <h2 class="section-title">Candidate Experience</h2>
-        <span class="section-icon">🖥️</span>
       </div>
 
-      <div class="subsection">
-        <div class="subsection-title">Enrollment Flow</div>
-        <ul class="step-list">
-          <li class="step-item"><div class="step-num">1</div><div class="step-body"><div class="step-desc">Candidate receives an enrollment link (e.g., <code>https://yoursite.com/#/enroll/{examId}</code>)</div></div></li>
-          <li class="step-item"><div class="step-num">2</div><div class="step-body"><div class="step-desc">Fills out enrollment form: Full Name, Email, Phone, DOB, Gender, Address, and Profile Photo</div></div></li>
-          <li class="step-item"><div class="step-num">3</div><div class="step-body"><div class="step-desc">Admin shares the <strong>Master OTP</strong> (displayed on Dashboard, rotates every ~30s)</div></div></li>
-          <li class="step-item"><div class="step-num">4</div><div class="step-body"><div class="step-desc">Candidate enters OTP → receives a <strong>unique personal test link</strong></div></div></li>
-        </ul>
-      </div>
+    </div><!-- end content-wrapper -->
 
-      <div class="subsection">
-        <div class="subsection-title">Question Palette Color Coding</div>
-        <div class="tbl-wrap">
-          <table>
-            <thead><tr><th>Color</th><th>Meaning</th></tr></thead>
-            <tbody>
-              <tr><td><span class="badge badge-green">🟢 Green</span></td><td>Answered</td></tr>
-              <tr><td><span style="background:#fff3e0;color:#e65100;" class="badge">🟠 Orange</span></td><td>Visited but not answered</td></tr>
-              <tr><td><span class="badge" style="background:#f3f4f6;color:#374151;">⬜ Grey</span></td><td>Not visited</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+    <footer class="user-guide-footer">
+      &copy; 2026 KiwiQA. All rights reserved.
+    </footer>
+  </main>
 
-      <div class="callout callout-warn">
-        <span class="callout-icon">⚠️</span>
-        <div>If the candidate accumulates <strong>3 or more violations</strong> (tab switches, face not detected), the exam is automatically terminated and the candidate is marked as <strong>ELIMINATED</strong>. This cannot be undone.</div>
-      </div>
-    </div>
+  <script>
+    function toggleFaq(el) {
+      const item = el.parentElement;
+      item.classList.toggle('open');
+    }
 
-    <!-- 12. SECURITY -->
-    <div class="section" id="sec12">
-      <div class="section-header">
-        <div class="section-num">12</div>
-        <h2 class="section-title">Security & Proctoring</h2>
-        <span class="section-icon">🛡️</span>
-      </div>
+    function setActive(el) {
+      document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+      el.classList.add('active');
+      // close mobile menu
+      document.getElementById('sidebar').classList.remove('open');
+    }
 
-      <div class="proctor-grid">
-        <div class="proctor-card"><div class="p-icon">📹</div><div class="p-title">Face Detection</div><div class="p-desc">face-api.js TinyFaceDetector monitors webcam in real-time</div></div>
-        <div class="proctor-card"><div class="p-icon">🖥️</div><div class="p-title">Tab Monitoring</div><div class="p-desc">visibilitychange event detects tab switches or browser minimization</div></div>
-        <div class="proctor-card"><div class="p-icon">📸</div><div class="p-title">Screenshot Capture</div><div class="p-desc">html2canvas captures 3 snapshots — start, midpoint, end — stored as base64</div></div>
-      </div>
-
-      <div class="subsection">
-        <div class="subsection-title">Additional Security Features</div>
-        <div class="tbl-wrap">
-          <table>
-            <thead><tr><th>Feature</th><th>Description</th></tr></thead>
-            <tbody>
-              <tr><td>JWT Tokens</td><td>Short-lived access tokens stored in <code>localStorage</code>; 401 auto-redirects to login</td></tr>
-              <tr><td>Device Fingerprinting</td><td>Unique device UUID stored in <code>localStorage</code> prevents concurrent multi-device sessions</td></tr>
-              <tr><td>Question Randomization</td><td>Seeded PRNG (Mulberry32) shuffles questions and options per-candidate — deterministic for auditing</td></tr>
-              <tr><td>Password Hashing</td><td>Passwords hashed before storage — never stored in plaintext</td></tr>
-              <tr><td>Session Management</td><td>Single active session enforced via <code>session_id</code> on the User model</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- 13. FAQ -->
-    <div class="section" id="sec13">
-      <div class="section-header">
-        <div class="section-num">13</div>
-        <h2 class="section-title">FAQ</h2>
-        <span class="section-icon">❓</span>
-      </div>
-
-      <div class="faq-item">
-        <div class="faq-q" onclick="toggleFaq(this)">Can a candidate retake an exam? <span class="faq-caret">▼</span></div>
-        <div class="faq-a">Controlled by the Administrator. A new enrollment must be created for the candidate, generating a fresh unique test link.</div>
-      </div>
-
-      <div class="faq-item">
-        <div class="faq-q" onclick="toggleFaq(this)">How is grading done? <span class="faq-caret">▼</span></div>
-        <div class="faq-a">All questions are MCQ. The candidate's selected option is compared against the <code>is_correct</code> flag — grading is fully automatic with instant results.</div>
-      </div>
-
-      <div class="faq-item">
-        <div class="faq-q" onclick="toggleFaq(this)">What happens when an exam link expires? <span class="faq-caret">▼</span></div>
-        <div class="faq-a">The enrollment link becomes inactive. New candidates can no longer enroll. Candidates already in-progress can still submit. The admin can re-activate the link with a new time window.</div>
-      </div>
-
-      <div class="faq-item">
-        <div class="faq-q" onclick="toggleFaq(this)">Can I combine questions from different sources? <span class="faq-caret">▼</span></div>
-        <div class="faq-a">Yes. Each exam uses one source at creation time (Manual, Bank, or Upload), but you can merge multiple exams using the <strong>Merge</strong> feature in Manage Exams.</div>
-      </div>
-
-      <div class="faq-item">
-        <div class="faq-q" onclick="toggleFaq(this)">How do I add multiple admins? <span class="faq-caret">▼</span></div>
-        <div class="faq-a">Go to <strong>Settings → Team Management</strong>. Click <strong>"Add Member"</strong>, assign a role (Admin / Member / Viewer), and select their specific permissions.</div>
-      </div>
-
-      <div class="faq-item">
-        <div class="faq-q" onclick="toggleFaq(this)">Is there a candidate or exam limit? <span class="faq-caret">▼</span></div>
-        <div class="faq-a">No hard limit is enforced by the platform. Scalability depends on your hosting infrastructure (database size, server resources).</div>
-      </div>
-
-      <div class="faq-item">
-        <div class="faq-q" onclick="toggleFaq(this)">Can candidates see their own results? <span class="faq-caret">▼</span></div>
-        <div class="faq-a">Currently, results are only visible to admins through the Results page and Candidate Report. Candidates see a submission confirmation on the test page.</div>
-      </div>
-
-      <div class="faq-item">
-        <div class="faq-q" onclick="toggleFaq(this)">What happens if the internet disconnects during an exam? <span class="faq-caret">▼</span></div>
-        <div class="faq-a">The candidate's answers are tracked in state. They should reconnect and refresh the page. The timer continues server-side, and any previously saved progress persists.</div>
-      </div>
-
-      <div class="faq-item">
-        <div class="faq-q" onclick="toggleFaq(this)">How does the OTP system work? <span class="faq-caret">▼</span></div>
-        <div class="faq-a">The admin dashboard displays a rotating Master OTP (changes every ~30 seconds). The admin shares this OTP verbally or via message with the candidate during enrollment — ensuring only authorized candidates can complete enrollment.</div>
-      </div>
-
-      <div class="faq-item">
-        <div class="faq-q" onclick="toggleFaq(this)">What if the candidate's camera fails? <span class="faq-caret">▼</span></div>
-        <div class="faq-a">If proctoring is enabled with video, camera access is required. Check browser permissions and ensure no other application is using the camera.</div>
-      </div>
-
-    </div>
-
-  </div><!-- end content-wrapper -->
-</main>
-
-<script>
-  function toggleFaq(el) {
-    const item = el.parentElement;
-    item.classList.toggle('open');
-  }
-
-  function setActive(el) {
-    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-    el.classList.add('active');
-    // close mobile menu
-    document.getElementById('sidebar').classList.remove('open');
-  }
-
-  // Progress bar
-  window.addEventListener('scroll', () => {
-    const doc = document.documentElement;
-    const scrollTop = doc.scrollTop || document.body.scrollTop;
-    const scrollHeight = doc.scrollHeight - doc.clientHeight;
-    const pct = scrollTop / scrollHeight;
-    document.getElementById('progress-bar').style.transform = `scaleX(${pct})`;
-  });
-
-  // Intersection observer for active nav
-  const sections = document.querySelectorAll('.section');
-  const navItems = document.querySelectorAll('.nav-item');
-
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const id = entry.target.id;
-        navItems.forEach(item => {
-          item.classList.remove('active');
-          if (item.getAttribute('href') === '#' + id) item.classList.add('active');
-        });
-      }
+    // Progress bar
+    window.addEventListener('scroll', () => {
+      const doc = document.documentElement;
+      const scrollTop = doc.scrollTop || document.body.scrollTop;
+      const scrollHeight = doc.scrollHeight - doc.clientHeight;
+      const pct = scrollTop / scrollHeight;
+      document.getElementById('progress-bar').style.transform = `scaleX(${pct})`;
     });
-  }, { threshold: 0.3 });
 
-  sections.forEach(s => observer.observe(s));
+    // Intersection observer for active nav
+    const sections = document.querySelectorAll('.section');
+    const navItems = document.querySelectorAll('.nav-item');
 
-  // CHATBOT LOGIC
-  const knowledgeBase = {
-    "create exam": "To create an exam, go to the <b>Create Exam</b> module. You can pick questions from the Question Bank, add them manually, or use the <b>Bulk Upload</b> feature (JSON/CSV).",
-    "proctoring": "Our smart proctoring includes <b>Webcam monitoring</b>, <b>Face detection</b>, and <b>Tab-switch tracking</b>. If a candidate switches tabs, it's logged and they may be cautioned or eliminated.",
-    "bulk import": "You can import questions using the <b>JSON/CSV Upload</b> tool in the 'Create Exam' module. Ensure your file follows the required schema as shown in the documentation.",
-    "enrollment": "Candidates are managed in the <b>Candidate Management</b> section. You can enroll them individually, send email invites, and track their status in real-time.",
-    "reports": "Detailed results are available in the <b>Results & Reports</b> section. You can view category-wise performance, proctoring logs, and pass/fail analysis for every candidate.",
-    "master otp": "The <b>Master OTP</b> is a rotating code displayed on your Admin Dashboard. Share this with candidates during enrollment to verify their identity.",
-    "default": "I'm sorry, I don't have a specific answer for that yet. Please check the relevant section in this User Guide! 🥝"
-  };
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const id = entry.target.id;
+          navItems.forEach(item => {
+            item.classList.remove('active');
+            if (item.getAttribute('href') === '#' + id) item.classList.add('active');
+          });
+        }
+      });
+    }, { threshold: 0.3 });
 
-  function toggleChat() {
-    document.getElementById('chat-box').classList.toggle('visible');
-  }
+    sections.forEach(s => observer.observe(s));
 
-  function askPreset(question) {
-    appendMessage(question, 'user');
-    processQuestion(question);
-  }
+    // CHATBOT LOGIC
+    const knowledgeBase = {
+      "create exam": "To create an exam, go to the <b>Create Exam</b> module. You can pick questions from the Question Bank, add them manually, or use the <b>Bulk Upload</b> feature (JSON/CSV).",
+      "proctoring": "Our smart proctoring includes <b>Webcam monitoring</b>, <b>Face detection</b>, and <b>Tab-switch tracking</b>. If a candidate switches tabs, it's logged and they may be cautioned or eliminated.",
+      "bulk import": "You can import questions using the <b>JSON/CSV Upload</b> tool in the 'Create Exam' module. Ensure your file follows the required schema as shown in the documentation.",
+      "enrollment": "Candidates are managed in the <b>Candidate Management</b> section. You can enroll them individually, send email invites, and track their status in real-time.",
+      "reports": "Detailed results are available in the <b>Results & Reports</b> section. You can view category-wise performance, proctoring logs, and pass/fail analysis for every candidate.",
+      "master otp": "The <b>Master OTP</b> is a rotating code displayed on your Admin Dashboard. Share this with candidates during enrollment to verify their identity.",
+      "default": "I'm sorry, I don't have a specific answer for that yet. Please check the relevant section in this User Guide! 🥝"
+    };
 
-  function sendMessage() {
-    const input = document.getElementById('chat-input');
-    const msg = input.value.trim();
-    if (!msg) return;
-    input.value = '';
-    appendMessage(msg, 'user');
-    processQuestion(msg);
-  }
+    function toggleChat() {
+      document.getElementById('chat-box').classList.toggle('visible');
+    }
 
-  function appendMessage(text, sender) {
-    const content = document.getElementById('chat-content');
-    const msgDiv = document.createElement('div');
-    msgDiv.className = `message msg-${sender}`;
-    msgDiv.innerHTML = text;
-    content.appendChild(msgDiv);
-    content.scrollTop = content.scrollHeight;
-  }
+    function askPreset(question) {
+      appendMessage(question, 'user');
+      processQuestion(question);
+    }
 
-  function processQuestion(query) {
-    const q = query.toLowerCase();
-    let answer = knowledgeBase["default"];
-    
-    if (q.includes("create") || q.includes("exam")) answer = knowledgeBase["create exam"];
-    else if (q.includes("proctor") || q.includes("cheat") || q.includes("webcam")) answer = knowledgeBase["proctoring"];
-    else if (q.includes("import") || q.includes("upload") || q.includes("bulk")) answer = knowledgeBase["bulk import"];
-    else if (q.includes("candidate") || q.includes("enroll") || q.includes("manage")) answer = knowledgeBase["enrollment"];
-    else if (q.includes("result") || q.includes("report") || q.includes("score")) answer = knowledgeBase["reports"];
-    else if (q.includes("otp") || q.includes("code")) answer = knowledgeBase["master otp"];
+    function sendMessage() {
+      const input = document.getElementById('chat-input');
+      const msg = input.value.trim();
+      if (!msg) return;
+      input.value = '';
+      appendMessage(msg, 'user');
+      processQuestion(msg);
+    }
 
-    setTimeout(() => {
-      appendMessage(answer, 'ai');
-    }, 600);
-  }
-</script>
+    function appendMessage(text, sender) {
+      const content = document.getElementById('chat-content');
+      const msgDiv = document.createElement('div');
+      msgDiv.className = `message msg-${sender}`;
+      msgDiv.innerHTML = text;
+      content.appendChild(msgDiv);
+      content.scrollTop = content.scrollHeight;
+    }
+
+    function processQuestion(query) {
+      const q = query.toLowerCase();
+      let answer = knowledgeBase["default"];
+
+      if (q.includes("create") || q.includes("exam")) answer = knowledgeBase["create exam"];
+      else if (q.includes("proctor") || q.includes("cheat") || q.includes("webcam")) answer = knowledgeBase["proctoring"];
+      else if (q.includes("import") || q.includes("upload") || q.includes("bulk")) answer = knowledgeBase["bulk import"];
+      else if (q.includes("candidate") || q.includes("enroll") || q.includes("manage")) answer = knowledgeBase["enrollment"];
+      else if (q.includes("result") || q.includes("report") || q.includes("score")) answer = knowledgeBase["reports"];
+      else if (q.includes("otp") || q.includes("code")) answer = knowledgeBase["master otp"];
+
+      setTimeout(() => {
+        appendMessage(answer, 'ai');
+      }, 600);
+    }
+  </script>
 </body>
+
 </html>

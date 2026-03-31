@@ -31,6 +31,12 @@ class Exam(Base):
     passing_score = Column(Float)
     questions = deferred(Column(JSON))  # Defer large JSON questions block
 
+    # Exam Supplement fields
+    calculator_enabled = Column(Boolean, default=False)
+    notes_enabled = Column(Boolean, default=False)
+    proctoring_link = Column(String, nullable=True)
+    supplement_flag = Column(Boolean, default=False)
+
     # Relationship to candidates assigned to this exam
     candidates = relationship("Candidate", back_populates="exam")
 

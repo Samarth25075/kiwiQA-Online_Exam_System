@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import API_BASE_URL from "../config";
 import logo from "../assets/logo.png";
@@ -13,6 +13,43 @@ function getOrCreateDeviceId(): string {
     }
     return id;
 }
+
+// ─── Country Data ─────────────────────────────────────────────────────────────
+const COUNTRIES = [
+    { name: "India", code: "+91", flag: "🇮🇳" },
+    { name: "United States", code: "+1", flag: "🇺🇸" },
+    { name: "United Kingdom", code: "+44", flag: "🇬🇧" },
+    { name: "Australia", code: "+61", flag: "🇦🇺" },
+    { name: "Canada", code: "+1", flag: "🇨🇦" },
+    { name: "Germany", code: "+49", flag: "🇩🇪" },
+    { name: "France", code: "+33", flag: "🇫🇷" },
+    { name: "United Arab Emirates", code: "+971", flag: "🇦🇪" },
+    { name: "Singapore", code: "+65", flag: "🇸🇬" },
+    { name: "Japan", code: "+81", flag: "🇯🇵" },
+    { name: "South Korea", code: "+82", flag: "🇰🇷" },
+    { name: "Brazil", code: "+55", flag: "🇧🇷" },
+    { name: "Mexico", code: "+52", flag: "🇲🇽" },
+    { name: "Italy", code: "+39", flag: "🇮🇹" },
+    { name: "Spain", code: "+34", flag: "🇪🇸" },
+    { name: "Netherlands", code: "+31", flag: "🇳🇱" },
+    { name: "Switzerland", code: "+41", flag: "🇨🇭" },
+    { name: "Sweden", code: "+46", flag: "🇸🇪" },
+    { name: "Norway", code: "+47", flag: "🇳🇴" },
+    { name: "Denmark", code: "+45", flag: "🇩🇰" },
+    { name: "Ireland", code: "+353", flag: "🇮🇪" },
+    { name: "Russia", code: "+7", flag: "🇷🇺" },
+    { name: "South Africa", code: "+27", flag: "🇿🇦" },
+    { name: "New Zealand", code: "+64", flag: "🇳🇿" },
+    { name: "Saudi Arabia", code: "+966", flag: "🇸🇦" },
+    { name: "Israel", code: "+972", flag: "🇮🇱" },
+    { name: "Turkey", code: "+90", flag: "🇹🇷" },
+    { name: "Egypt", code: "+20", flag: "🇪🇬" },
+    { name: "Malaysia", code: "+60", flag: "🇲🇾" },
+    { name: "Thailand", code: "+66", flag: "🇹🇭" },
+    { name: "Indonesia", code: "+62", flag: "🇮🇩" },
+    { name: "Vietnam", code: "+84", flag: "🇻🇳" },
+    { name: "Philippines", code: "+63", flag: "🇵🇭" },
+];
 
 // ─── Icons ─────────────────────────────────────────────────────────────────────
 const Icons = {
@@ -35,9 +72,15 @@ const Icons = {
             <line x1="12" y1="16" x2="12.01" y2="16" />
         </svg>
     ),
-    ChevronLeft: () => (
+    ChevronDown: () => (
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="15 18 9 12 15 6" />
+            <polyline points="6 9 12 15 18 9" />
+        </svg>
+    ),
+    Search: () => (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
         </svg>
     ),
     Send: () => (
@@ -75,32 +118,6 @@ const Icons = {
             <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l2.27-2.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
         </svg>
     ),
-    Calendar: () => (
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-            <line x1="16" y1="2" x2="16" y2="6" />
-            <line x1="8" y1="2" x2="8" y2="6" />
-            <line x1="3" y1="10" x2="21" y2="10" />
-        </svg>
-    ),
-    MapPin: () => (
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-            <circle cx="12" cy="10" r="3" />
-        </svg>
-    ),
-    Camera: () => (
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
-            <circle cx="12" cy="13" r="4" />
-        </svg>
-    ),
-    X: () => (
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18" />
-            <line x1="6" y1="6" x2="18" y2="18" />
-        </svg>
-    ),
 };
 
 // ─── Component ─────────────────────────────────────────────────────────────────
@@ -122,8 +139,28 @@ export default function EnrollCandidate() {
     const [resendTimer, setResendTimer] = useState(0);
     const [theme, setTheme] = useState(localStorage.getItem("kiwi-theme") || "default");
 
+    // Searchable dropdown state
+    const [isCountryMenuOpen, setIsCountryMenuOpen] = useState(false);
+    const [countrySearch, setCountrySearch] = useState("");
+    const countryMenuRef = useRef<HTMLDivElement>(null);
+
+    const selectedCountry = COUNTRIES.find(c => c.code === countryCode) || COUNTRIES[0];
+    const filteredCountries = COUNTRIES.filter(c => 
+        c.name.toLowerCase().includes(countrySearch.toLowerCase()) || 
+        c.code.includes(countrySearch)
+    );
+
     useEffect(() => {
         document.title = "Enroll | KiwiQA";
+        
+        // Handle clicks outside dropdown to close it
+        const handleClickOutside = (e: MouseEvent) => {
+            if (countryMenuRef.current && !countryMenuRef.current.contains(e.target as Node)) {
+                setIsCountryMenuOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
     useEffect(() => {
@@ -141,8 +178,6 @@ export default function EnrollCandidate() {
         const id = setInterval(() => setResendTimer(t => t - 1), 1000);
         return () => clearInterval(id);
     }, [resendTimer]);
-
-
 
     const handleRequestOtp = async (e?: React.FormEvent) => {
         e?.preventDefault();
@@ -255,7 +290,7 @@ export default function EnrollCandidate() {
           --radius:     10px;
           --radius-sm:  6px;
           --shadow-sm:  var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.05));
-          --shadow-md:  var(--shadow, 0 8px 24px rgba(0,0,0,0.1));
+          --shadow-md:  var(--shadow, 0 8px 24px rgba(0,0,0,0.11));
           --transition: 0.2s cubic-bezier(0.4,0,0.2,1);
         }
 
@@ -383,18 +418,19 @@ export default function EnrollCandidate() {
 
         .form-input-icon {
           position: absolute;
-          left: 13px;
+          left: 14px;
           color: var(--ink-3);
           pointer-events: none;
           display: flex;
           align-items: center;
+          z-index: 10;
         }
 
         .form-input {
           width: 100%;
-          height: 42px;
-          padding: 0 14px 0 40px;
-          border: 1px solid var(--line);
+          height: 44px;
+          padding: 0 14px;
+          border: 1.5px solid var(--line);
           border-radius: var(--radius-sm);
           background: var(--bg);
           color: var(--ink);
@@ -402,10 +438,16 @@ export default function EnrollCandidate() {
           font-size: 14px;
           font-weight: 500;
           outline: none;
+          display: block;
+          vertical-align: middle;
           transition: border-color var(--transition), background var(--transition), box-shadow var(--transition);
         }
 
-        .form-input::placeholder { color: #b0bec5; }
+        .form-input.form-input--iconic {
+          padding-left: 48px !important;
+        }
+
+        .form-input::placeholder { color: #b0bec5; font-weight: 400; opacity: 0.8; }
 
         .form-input:focus {
           background: var(--white);
@@ -413,124 +455,153 @@ export default function EnrollCandidate() {
           box-shadow: 0 0 0 3px rgba(15,113,115,0.1);
         }
 
-        /* OTP input — centered mono */
-        .form-input--otp {
-          font-family: var(--font-mono);
-          font-size: 22px;
-          font-weight: 700;
-          letter-spacing: 0.35em;
-          text-align: center;
-          padding: 0 14px;
-          height: 56px;
-        }
-
-        /* ── Info Notice ──────────────────────────────── */
-        .enroll-notice {
-          padding: 12px 14px;
-          background: var(--teal-light);
-          border: 1px solid var(--teal-mid);
-          border-radius: var(--radius-sm);
-          font-size: 13px;
-          color: var(--ink-2);
-          line-height: 1.55;
-        }
-
-        .enroll-notice strong { font-weight: 600; color: var(--teal); }
-
-        .enroll-notice-hint {
-          margin-top: 8px;
-          font-size: 12px;
-          color: var(--ink-3);
-        }
-
-        /* ── Resend Row ───────────────────────────────── */
-        .resend-row {
-          text-align: center;
-        }
-
-        .resend-btn {
-          background: none;
-          border: none;
-          font-family: var(--font-sans);
-          font-size: 13px;
-          font-weight: 600;
+        /* Searchable Country Selector */
+        .country-selector {
+          position: relative;
           cursor: pointer;
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          padding: 4px;
-          border-radius: 4px;
-          transition: color var(--transition);
-          outline: none;
-          color: var(--teal);
-        }
-
-        .resend-btn:hover:not(:disabled) { color: var(--teal-hover); }
-        .resend-btn:disabled { color: var(--ink-3); cursor: default; }
-
-        .resend-timer {
-          display: inline-flex;
-          align-items: center;
-          gap: 5px;
-          font-size: 12.5px;
-          font-weight: 600;
-          color: var(--ink-3);
-        }
-
-        /* ── Buttons ──────────────────────────────────── */
-        .btn {
+          user-select: none;
+          background: var(--bg);
+          border: 1.5px solid var(--line);
+          border-radius: var(--radius-sm);
+          height: 44px;
           display: flex;
           align-items: center;
-          justify-content: center;
-          gap: 7px;
-          width: 100%;
-          height: 44px;
-          border-radius: var(--radius-sm);
-          font-family: var(--font-sans);
-          font-size: 14px;
-          font-weight: 600;
-          cursor: pointer;
-          border: 1px solid transparent;
-          outline: none;
+          justify-content: space-between;
+          padding: 0 12px;
+          gap: 6px;
           transition: all var(--transition);
         }
-
-        .btn-primary {
-          background: var(--teal);
-          color: var(--white);
-          box-shadow: 0 2px 8px rgba(15,113,115,0.25);
-        }
-
-        .btn-primary:hover:not(:disabled) {
-          background: var(--teal-hover);
-          box-shadow: 0 4px 16px rgba(15,113,115,0.35);
-          transform: translateY(-1px);
-        }
-
-        .btn-primary:active:not(:disabled) { transform: translateY(0); }
-        .btn-primary:disabled { opacity: 0.55; cursor: not-allowed; }
-
-        .btn-ghost {
-          background: var(--white);
-          color: var(--ink-3);
-          border-color: var(--line);
-        }
-
-        .btn-ghost:hover:not(:disabled) {
+        .country-selector:hover {
           border-color: var(--ink-3);
-          color: var(--ink);
+        }
+        .country-selector.is-active {
+          border-color: var(--teal);
+          background: var(--white);
+          box-shadow: 0 0 0 3px rgba(15,113,115,0.1);
+        }
+        .country-selected-flag { font-size: 18px; line-height: 1; display: flex; align-items: center; }
+        .country-selected-code { font-weight: 700; color: var(--ink); font-size: 14px; line-height: 1; display: flex; align-items: center; flex: 1; justify-content: center; }
+        .country-chevron { color: var(--ink-3); transition: transform 0.2s; display: flex; align-items: center; }
+        .country-selector.is-active .country-chevron { transform: rotate(180deg); }
+
+        .country-menu {
+          position: absolute;
+          top: calc(100% + 8px);
+          left: 0;
+          width: 280px;
+          min-height: 320px;
+          background: var(--white);
+          border: 1px solid var(--line);
+          border-radius: 12px;
+          box-shadow: var(--shadow-md);
+          z-index: 1000;
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
+          animation: menuIn 0.2s cubic-bezier(0,0,0.2,1);
+        }
+        @keyframes menuIn {
+          from { opacity: 0; transform: translateY(-8px) scale(0.98); }
+          to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        .btn-ghost:disabled { opacity: 0.55; cursor: not-allowed; }
+        .country-search-wrap {
+          padding: 10px;
+          background: var(--bg);
+          border-bottom: 1px solid var(--line);
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+        .country-search-input {
+          background: transparent;
+          border: none;
+          outline: none;
+          width: 100%;
+          font-family: var(--font-sans);
+          font-size: 13px;
+          color: var(--ink);
+          font-weight: 500;
+        }
+        .country-search-input::placeholder { color: var(--ink-3); }
+
+        .country-list {
+          flex: 1;
+          max-height: 260px;
+          overflow-y: auto;
+          padding: 6px;
+          background: var(--white);
+        }
+        .country-item {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 9px 12px;
+          border-radius: 6px;
+          cursor: pointer;
+          transition: background 0.1s;
+        }
+        .country-item:hover { background: var(--bg); }
+        .country-item.is-selected { background: var(--teal-light); }
+        .country-item-flag { font-size: 18px; }
+        .country-item-info { flex: 1; min-width: 0; }
+        .country-item-name { 
+          display: block; 
+          font-size: 13px; 
+          font-weight: 600; 
+          color: var(--ink); 
+          white-space: nowrap; 
+          overflow: hidden; 
+          text-overflow: ellipsis; 
+        }
+        .country-item-code { font-size: 11px; color: var(--ink-3); font-weight: 500; }
+
+        /* ── Round Checkbox ───────────────────────────── */
+        .enroll-checkbox {
+          appearance: none;
+          -webkit-appearance: none;
+          -moz-appearance: none;
+          width: 20px;
+          height: 20px;
+          border: 1.5px solid var(--line);
+          border-radius: 50%;
+          cursor: pointer;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          transition: all var(--transition);
+          position: relative;
+          flex-shrink: 0;
+          background: var(--bg);
+          margin-top: 2px;
+          outline: none;
+        }
+        .enroll-checkbox:checked {
+          border-color: var(--teal);
+          background-color: var(--teal);
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+          background-size: 12px;
+          background-position: center;
+          background-repeat: no-repeat;
+        }
+        .enroll-checkbox:focus {
+          box-shadow: 0 0 0 3px rgba(15,113,115,0.1);
+        }
 
         /* ── Footer ───────────────────────────────────── */
         .enroll-footer {
-          margin-top: 24px;
-          padding-top: 16px;
-          border-top: 1px solid var(--line);
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          padding: 12px 24px;
           text-align: center;
-          font-size: 12px;
+          font-size: 11px;
           color: var(--ink-3);
+          border-top: 1px solid var(--line);
+          background: rgba(var(--bg-rgb), 0.8);
+          backdrop-filter: blur(8px);
+          z-index: 100;
         }
       `}</style>
 
@@ -563,7 +634,7 @@ export default function EnrollCandidate() {
                                 <div className="form-input-wrap">
                                     <span className="form-input-icon"><Icons.User /></span>
                                     <input
-                                        className="form-input"
+                                        className="form-input form-input--iconic"
                                         type="text"
                                         placeholder="Jane Smith"
                                         value={name}
@@ -578,7 +649,7 @@ export default function EnrollCandidate() {
                                 <div className="form-input-wrap">
                                     <span className="form-input-icon"><Icons.Mail /></span>
                                     <input
-                                        className="form-input"
+                                        className="form-input form-input--iconic"
                                         type="email"
                                         placeholder="jane@example.com"
                                         value={email}
@@ -592,26 +663,67 @@ export default function EnrollCandidate() {
 
                             <div className="form-field">
                                 <label className="form-label">Mobile Number</label>
-                                <div style={{ display: 'flex', gap: 10 }}>
-                                    <div className="form-input-wrap" style={{ width: 100 }}>
-                                        <select 
-                                            className="form-input" 
-                                            style={{ paddingLeft: 12, paddingRight: 8, textAlign: 'center' }}
-                                            value={countryCode}
-                                            onChange={e => setCountryCode(e.target.value)}
+                                <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                                    
+                                    {/* Custom Searchable Country Selector */}
+                                    <div className="form-input-wrap" style={{ width: 135 }} ref={countryMenuRef}>
+                                        <div 
+                                            className={`country-selector ${isCountryMenuOpen ? 'is-active' : ''}`}
+                                            onClick={() => setIsCountryMenuOpen(!isCountryMenuOpen)}
                                         >
-                                            <option value="+91">+91 (IN)</option>
-                                            <option value="+1">+1 (US)</option>
-                                            <option value="+44">+44 (UK)</option>
-                                            <option value="+61">+61 (AU)</option>
-                                            <option value="+971">+971 (UAE)</option>
-                                            <option value="+65">+65 (SG)</option>
-                                        </select>
+                                            <span className="country-selected-flag">{selectedCountry.flag}</span>
+                                            <span className="country-selected-code">{selectedCountry.code}</span>
+                                            <span className="country-chevron"><Icons.ChevronDown /></span>
+                                        </div>
+
+                                        {isCountryMenuOpen && (
+                                            <div className="country-menu">
+                                                <div className="country-search-wrap">
+                                                    <span style={{ color: 'var(--ink-3)' }}><Icons.Search /></span>
+                                                    <input 
+                                                        className="country-search-input"
+                                                        placeholder="Search country or code..."
+                                                        autoFocus
+                                                        value={countrySearch}
+                                                        onChange={e => setCountrySearch(e.target.value)}
+                                                        onClick={e => e.stopPropagation()}
+                                                    />
+                                                </div>
+                                                <div className="country-list">
+                                                    {filteredCountries.length > 0 ? (
+                                                        filteredCountries.map((c, idx) => (
+                                                            <div 
+                                                                key={`${c.code}-${idx}`}
+                                                                className={`country-item ${countryCode === c.code ? 'is-selected' : ''}`}
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    setCountryCode(c.code);
+                                                                    setIsCountryMenuOpen(false);
+                                                                    setCountrySearch("");
+                                                                }}
+                                                            >
+                                                                <span className="country-item-flag">{c.flag}</span>
+                                                                <div className="country-item-info">
+                                                                    <span className="country-item-name">{c.name}</span>
+                                                                    <span className="country-item-code">{c.code}</span>
+                                                                </div>
+                                                            </div>
+                                                        ))
+                                                    ) : (
+                                                        <div style={{ padding: '20px', textAlign: 'center', fontSize: '13px', color: 'var(--ink-3)' }}>
+                                                            No countries found
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
+
                                     <div className="form-input-wrap" style={{ flex: 1 }}>
                                         <span className="form-input-icon"><Icons.Phone /></span>
                                         <input
-                                            className="form-input"
+                                            className="form-input form-input--iconic"
+                                            style={{ height: 44 }}
                                             type="tel"
                                             placeholder="9876543210"
                                             value={phone}
@@ -628,13 +740,13 @@ export default function EnrollCandidate() {
 
                             <div className="form-field" style={{ marginTop: 8 }}>
                                 <label className="decl-check-row" style={{ display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer' }}>
-                                    <input 
-                                        type="checkbox" 
-                                        checked={agreedToConsent} 
+                                    <input
+                                        type="checkbox"
+                                        className="enroll-checkbox"
+                                        checked={agreedToConsent}
                                         onChange={e => setAgreedToConsent(e.target.checked)}
-                                        style={{ width: 17, height: 17, accentColor: 'var(--teal)', cursor: 'pointer', marginTop: 3 }}
                                     />
-                                    <span style={{ fontSize: 13, color: 'var(--ink-2)', lineHeight: 1.5 }}>
+                                    <span style={{ fontSize: 11.5, color: 'var(--ink-2)', lineHeight: 1.55, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.02em' }}>
                                         I consent to securely store my data for assessment purposes. We ensure your data privacy and security.
                                     </span>
                                 </label>
@@ -708,10 +820,10 @@ export default function EnrollCandidate() {
                     </>
                 )}
 
-                <div className="enroll-footer">
-                    Secure assessment platform · Powered by KiwiQA
-                </div>
             </div>
+            <footer className="enroll-footer">
+                &copy; 2026 KiwiQA. All rights reserved.
+            </footer>
         </div>
     );
 }

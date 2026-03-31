@@ -35,6 +35,12 @@ class ExamBase(BaseModel):
     source: Optional[str] = "Bank" # "AI" or "Bank"
     bank_categories: Optional[List[str]] = []
     category_configs: Optional[dict] = {}
+    
+    # Exam Supplement
+    calculator_enabled: bool = False
+    notes_enabled: bool = False
+    proctoring_link: Optional[str] = None
+    supplement_flag: bool = False
 
 class ExamCreate(ExamBase):
     pass
@@ -46,6 +52,12 @@ class ExamResponse(ExamBase):
     id: str
     created_at: str
     questions: Optional[List[Question]] = None
+    
+    # Supplement
+    calculator_enabled: bool = False
+    notes_enabled: bool = False
+    proctoring_link: Optional[str] = None
+    supplement_flag: bool = False
 
 class ExamStatsResponse(BaseModel):
     id: str

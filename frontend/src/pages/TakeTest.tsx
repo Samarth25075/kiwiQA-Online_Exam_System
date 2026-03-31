@@ -35,6 +35,10 @@ interface Exam {
     duration?: number;
     proctoring_enabled?: boolean;
     proctoring_type?: string;
+    calculator_enabled?: boolean;
+    notes_enabled?: boolean;
+    proctoring_link?: string;
+    supplement_flag?: boolean;
 }
 
 interface TestData {
@@ -773,6 +777,27 @@ const STYLES = `
 .tc-failed { background: #ef4444; box-shadow: 0 0 10px rgba(239, 68, 68, 0.2); }
 .tc-running { background: var(--primary); animation: pulse 1.5s infinite; }
 @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+/* Supplement Styles */
+.sup-bar { display: flex; gap: 10px; margin-bottom: 16px; }
+.sup-btn { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; font-size: 12.5px; font-weight: 600; cursor: pointer; transition: all 0.2s; color: var(--text); }
+.sup-btn:hover { background: var(--bg-neutral); border-color: var(--primary); color: var(--primary); }
+.sup-btn.active { background: var(--primary-light); color: var(--primary); border-color: var(--primary); }
+.sup-panel { position: fixed; bottom: 80px; right: 340px; width: 320px; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1); z-index: 1000; display: flex; flex-direction: column; overflow: hidden; animation: supPop 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+@keyframes supPop { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+.sup-head { padding: 12px 16px; background: var(--bg-neutral); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.sup-title { font-size: 13px; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 8px; }
+.sup-close { background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 18px; padding: 0; line-height: 1; }
+.sup-close:hover { color: var(--primary); }
+.sup-body { padding: 12px; }
+.sup-calc-display { width: 100%; background: #000; color: #0f0; font-family: 'Fira Code', monospace; font-size: 20px; padding: 12px; text-align: right; border-radius: 6px; margin-bottom: 10px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.3); border: 1px solid #333; overflow: hidden; }
+.sup-calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.sup-calc-btn { height: 40px; display: flex; align-items: center; justify-content: center; background: var(--bg-neutral); border: 1px solid var(--border); border-radius: 6px; font-weight: 700; font-size: 14px; cursor: pointer; transition: all 0.1s; }
+.sup-calc-btn:hover { background: var(--border); }
+.sup-calc-btn.op { background: var(--primary-light); color: var(--primary); border-color: color-mix(in srgb, var(--primary) 20%, transparent); }
+.sup-calc-btn.eq { background: var(--primary); color: white; border-color: var(--primary); grid-column: span 2; }
+.sup-calc-btn.clr { color: #ef4444; }
+.sup-note { width: 100%; height: 240px; background: transparent; border: none; outline: none; font-family: inherit; font-size: 14px; line-height: 1.6; resize: none; color: var(--text); padding: 4px; }
 `;
 
 
@@ -827,7 +852,8 @@ export default function TakeTest() {
     const [shuffledQuestions, setShuffledQuestions] = useState<Question[]>([]);
 
     const needsVideo = !!(testData?.exam.proctoring_enabled && (testData.exam.proctoring_type === 'video' || testData.exam.proctoring_type === 'both'));
-    const needsScreen = !!(testData?.exam.proctoring_enabled && (testData.exam.proctoring_type === 'screen' || testData.exam.proctoring_type === 'both'));
+    // Screen monitoring (tab/window/fullscreen) is now active whenever any proctoring is enabled
+    const needsScreen = !!testData?.exam.proctoring_enabled;
 
     // ─── Theme ─────────────────────────────────────────────────────────────
     useEffect(() => {
@@ -843,11 +869,15 @@ export default function TakeTest() {
 
     // ─── Block Inspect / Developer Tools ────────────────────────────────────
     useEffect(() => {
+        if (!testData) return;
+
         const handleContextMenu = (e: MouseEvent) => {
+            if (!testData?.exam?.proctoring_enabled) return;
             e.preventDefault();
         };
 
         const handleKeyDown = (e: KeyboardEvent) => {
+            if (!testData?.exam?.proctoring_enabled) return;
             // Block F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C, Ctrl+U
             if (
                 e.key === "F12" ||
@@ -866,7 +896,7 @@ export default function TakeTest() {
             document.removeEventListener("contextmenu", handleContextMenu);
             document.removeEventListener("keydown", handleKeyDown);
         };
-    }, []);
+    }, [testData]);
 
     const [currentIdx, setCurrentIdx] = useState(0);
     const [answers, setAnswers] = useState<Record<number, number>>({});
@@ -885,6 +915,13 @@ export default function TakeTest() {
     const [isRunningTest, setIsRunningTest] = useState(false);
     const [warningPopup, setWarningPopup] = useState<{ message: string; isTerminal: boolean; isWarning?: boolean } | null>(null);
     const [popup, setPopup] = useState<{ isOpen: boolean; type: PopupType; title?: string; message: string; onConfirm: () => void; onCancel?: () => void; confirmText?: string; } | null>(null);
+
+    // Supplement State
+    const [showCalc, setShowCalc] = useState(false);
+    const [showNote, setShowNote] = useState(false);
+    const [noteContent, setNoteContent] = useState("");
+    const [calcDisplay, setCalcDisplay] = useState("0");
+
     const [declared, setDeclared] = useState(false);
     const [checks, setChecks] = useState({ c1: false, c2: false, c3: false, c4: false });
     const [stream, setStream] = useState<MediaStream | null>(null);
@@ -934,8 +971,8 @@ export default function TakeTest() {
         violationsRef.current = next;
         setViolations(next);
 
-        const log = { 
-            type, 
+        const log = {
+            type,
             timestamp: new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
             unix: Date.now()
         };
@@ -1008,7 +1045,7 @@ export default function TakeTest() {
 
     // ── Eye/Gaze Tracking Loop ────────────────────────────────────────────────
     useEffect(() => {
-        if (!started || finished || !modelsLoaded) return;
+        if (!started || finished || !modelsLoaded || !testData) return;
 
         const needsVideo = testData?.exam.proctoring_enabled &&
             (testData.exam.proctoring_type === 'video' || testData.exam.proctoring_type === 'both');
@@ -1242,6 +1279,7 @@ export default function TakeTest() {
         const handleExit = () => updateStatus('Completed');
 
         const handlePopState = (_e: PopStateEvent) => {
+            if (!testData?.exam?.proctoring_enabled || !needsScreen) return;
             if (startedRef.current && !finishedRef.current) {
                 // Trap the user on the current page
                 window.history.pushState(null, "", window.location.href);
@@ -1266,7 +1304,7 @@ export default function TakeTest() {
 
         // FIX #4 & #5: Check started/finished via refs; check proctoring_type from testData ref
         const handleVisible = () => {
-            if (!needsScreen) return;
+            if (!testData?.exam?.proctoring_enabled || !needsScreen) return;
 
             if (document.visibilityState === 'hidden' && startedRef.current && !finishedRef.current) {
                 window.focus();
@@ -1300,6 +1338,7 @@ export default function TakeTest() {
         };
 
         const handleBlur = () => {
+            if (!testData?.exam?.proctoring_enabled || !needsScreen) return;
             if (startedRef.current && !finishedRef.current) {
                 window.focus();
 
@@ -1327,6 +1366,7 @@ export default function TakeTest() {
         };
 
         const handleKeyDown = (e: KeyboardEvent) => {
+            if (!testData?.exam?.proctoring_enabled || !needsScreen) return;
             if (
                 e.altKey ||
                 e.metaKey ||
@@ -1359,11 +1399,23 @@ export default function TakeTest() {
         };
 
         const handleContextMenu = (e: MouseEvent) => {
+            if (!testData?.exam?.proctoring_enabled || !needsScreen) return;
             e.preventDefault();
             return false;
         };
 
+        const handleCopyPaste = (e: ClipboardEvent) => {
+            if (!testData?.exam?.proctoring_enabled || !needsScreen) return;
+            e.preventDefault();
+            setWarningPopup({
+                message: 'Copying, pasting, and cutting are strictly prohibited during the exam.',
+                isTerminal: false,
+            });
+            return false;
+        };
+
         const handleFullscreenChange = () => {
+            if (!testData?.exam?.proctoring_enabled || !needsScreen) return;
             if (!document.fullscreenElement && startedRef.current && !finishedRef.current) {
                 // FIX #6: Use addViolation for atomic update
                 const next = addViolation();
@@ -1391,22 +1443,28 @@ export default function TakeTest() {
             window.addEventListener('blur', handleBlur);
             window.addEventListener('beforeunload', handleBeforeUnload);
             window.addEventListener('popstate', handlePopState);
+            window.addEventListener('copy', handleCopyPaste);
+            window.addEventListener('paste', handleCopyPaste);
+            window.addEventListener('cut', handleCopyPaste);
             window.history.pushState(null, "", window.location.href);
             document.addEventListener('fullscreenchange', handleFullscreenChange);
         }
 
-        // visibilitychange is always attached but internally guards on startedRef
+        // visibilitychange is on document for best reliability; pagehide is on window
         window.addEventListener('pagehide', handleExit);
-        window.addEventListener('visibilitychange', handleVisible);
+        document.addEventListener('visibilitychange', handleVisible);
 
         return () => {
             window.removeEventListener('pagehide', handleExit);
-            window.removeEventListener('visibilitychange', handleVisible);
+            document.removeEventListener('visibilitychange', handleVisible);
             window.removeEventListener('keydown', handleKeyDown);
             window.removeEventListener('contextmenu', handleContextMenu);
             window.removeEventListener('blur', handleBlur);
             window.removeEventListener('beforeunload', handleBeforeUnload);
             window.removeEventListener('popstate', handlePopState);
+            window.removeEventListener('copy', handleCopyPaste);
+            window.removeEventListener('paste', handleCopyPaste);
+            window.removeEventListener('cut', handleCopyPaste);
             document.removeEventListener('fullscreenchange', handleFullscreenChange);
         };
         // FIX #5: Include testData so handlers see the correct proctoring config
@@ -1555,7 +1613,7 @@ export default function TakeTest() {
             shuffledQuestions.forEach((q, idx) => {
                 const qMarks = q.marks ?? 1;
                 totalMarks += qMarks;
-                
+
                 if (q.type === 'coding') {
                     const code = codingAnswers[idx] !== undefined ? codingAnswers[idx] : (q.skeleton_code || "");
                     const lang = codingLanguages[idx] || q.language || 'javascript';
@@ -1563,14 +1621,14 @@ export default function TakeTest() {
                     const results = Array.isArray(rawResults) ? rawResults : [];
                     const passedCount = results.filter((r: any) => r.passed).length;
                     const passPct = results.length > 0 ? (passedCount / results.length) * 100 : 0;
-                    
+
                     answersArray.push({
                         question_index: q.originalIndex ?? idx,
                         code: code,
                         language: lang,
                         test_results: results
                     });
-                    
+
                     if (passPct >= (q.threshold_pct || 100)) {
                         score += qMarks;
                     }
@@ -1695,13 +1753,29 @@ export default function TakeTest() {
         setCodingAnswers(prev => ({ ...prev, [qIdx]: code }));
     };
 
+    const handleCalc = (val: string) => {
+        if (val === "=") {
+            try {
+                // eslint-disable-next-line no-eval
+                const result = eval(calcDisplay.replace(/×/g, "*").replace(/÷/g, "/"));
+                setCalcDisplay(String(result));
+            } catch {
+                setCalcDisplay("Error");
+            }
+        } else if (val === "C") {
+            setCalcDisplay("0");
+        } else {
+            setCalcDisplay(prev => (prev === "0" || prev === "Error") ? val : prev + val);
+        }
+    };
+
     const runTests = async (qIdx: number) => {
         const q = shuffledQuestions[qIdx];
         const lang = codingLanguages[qIdx] || q.language || 'javascript';
         const code = codingAnswers[qIdx] || q.skeleton_code || "";
-        
+
         if (!code) return;
-        
+
         setIsRunningTest(true);
         try {
             const res = await fetch(`${API_BASE_URL}/candidates/test/${token}/run-test`, {
@@ -2078,6 +2152,27 @@ export default function TakeTest() {
 
                 <div className="main-layout">
                     <main className="main-content">
+                        {/* Supplement Bar */}
+                        {(testData.exam.calculator_enabled || testData.exam.notes_enabled || testData.exam.supplement_flag) && (
+                            <div className="sup-bar">
+                                {testData.exam.calculator_enabled && (
+                                    <button className={`sup-btn ${showCalc ? 'active' : ''}`} onClick={() => setShowCalc(!showCalc)}>
+                                        🧮 Calculator
+                                    </button>
+                                )}
+                                {testData.exam.notes_enabled && (
+                                    <button className={`sup-btn ${showNote ? 'active' : ''}`} onClick={() => setShowNote(!showNote)}>
+                                        📝 Scratchpad
+                                    </button>
+                                )}
+                                {testData.exam.supplement_flag && testData.exam.proctoring_link && (
+                                    <button className="sup-btn" onClick={() => window.open(testData.exam.proctoring_link, '_blank', 'width=800,height=600')}>
+                                        🔗 Proctoring Link
+                                    </button>
+                                )}
+                            </div>
+                        )}
+
                         <div className="test-q-card" key={currentIdx}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
                                 <div className="test-q-num">Question {currentIdx + 1} of {shuffledQuestions.length}</div>
@@ -2106,8 +2201,8 @@ export default function TakeTest() {
                                     <div className="coding-header">
                                         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                                             <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Select Language:</span>
-                                            <select 
-                                                className="form-input" 
+                                            <select
+                                                className="form-input"
                                                 style={{ height: 28, fontSize: 11, padding: '0 8px', borderRadius: 6, minWidth: 100, border: '1.5px solid var(--border)' }}
                                                 value={codingLanguages[currentIdx] || currentQ.language || 'javascript'}
                                                 onChange={(e) => setCodingLanguages(prev => ({ ...prev, [currentIdx]: e.target.value }))}
@@ -2117,8 +2212,8 @@ export default function TakeTest() {
                                                 <option value="java">Java</option>
                                             </select>
                                         </div>
-                                        <button 
-                                            className="test-btn" 
+                                        <button
+                                            className="test-btn"
                                             style={{ padding: '6px 14px', fontSize: 11, background: 'var(--primary)', height: 'auto' }}
                                             onClick={() => runTests(currentIdx)}
                                             disabled={isRunningTest}
@@ -2302,6 +2397,21 @@ export default function TakeTest() {
                             </div>
                         )}
 
+                        <div className="q-palette-title" style={{ marginTop: 24, borderTop: '1px solid var(--line)', paddingTop: 20 }}>
+                            <span>Security Status</span>
+                        </div>
+                        <div className="gaze-status-box" style={{ marginBottom: 20 }}>
+                            <div className={`gaze-badge ${violations >= 2 ? 'away' : violations >= 1 ? 'warning' : 'ok'}`} style={{ width: '100%', justifyContent: 'space-between', padding: '12px 14px' }}>
+                                <span style={{ fontWeight: 700 }}> Violations</span>
+                                <span style={{ fontWeight: 800, fontSize: 14 }}>{violations} / 3</span>
+                            </div>
+                            {violations > 0 && (
+                                <p style={{ fontSize: 10, color: 'var(--text-muted)', margin: '8px 4px 0', lineHeight: 1.4 }}>
+                                    Multiple violations will result in automatic exam submission.
+                                </p>
+                            )}
+                        </div>
+
                         <div className="q-palette-title">
                             <span>Question Palette</span>
                             <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-muted)' }}>
@@ -2376,6 +2486,9 @@ export default function TakeTest() {
                         >
                             Submit Assessment
                         </button>
+                        <div style={{ marginTop: 'auto', paddingTop: 24, textAlign: 'center', fontSize: 10, color: 'var(--ink-3)', opacity: 0.6 }}>
+                            &copy; 2026 KiwiQA. All rights reserved.
+                        </div>
                     </aside>
                 </div>
             </div>
@@ -2390,6 +2503,47 @@ export default function TakeTest() {
                     onCancel={popup.onCancel || (() => setPopup(null))}
                     confirmText={popup.confirmText}
                 />
+            )}
+
+            {/* Supplement Panels */}
+            {showCalc && (
+                <div className="sup-panel">
+                    <div className="sup-head">
+                        <div className="sup-title">🧮 Scientific Calculator</div>
+                        <button className="sup-close" onClick={() => setShowCalc(false)}>&times;</button>
+                    </div>
+                    <div className="sup-body">
+                        <div className="sup-calc-display">{calcDisplay}</div>
+                        <div className="sup-calc-grid">
+                            {['C', '(', ')', '÷', '7', '8', '9', '×', '4', '5', '6', '-', '1', '2', '3', '+', '0', '.', '='].map(btn => (
+                                <button
+                                    key={btn}
+                                    className={`sup-calc-btn ${['÷', '×', '-', '+'].includes(btn) ? 'op' : ''} ${btn === '=' ? 'eq' : ''} ${btn === 'C' ? 'clr' : ''}`}
+                                    onClick={() => handleCalc(btn)}
+                                >
+                                    {btn}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {showNote && (
+                <div className="sup-panel" style={{ right: showCalc ? '680px' : '340px' }}>
+                    <div className="sup-head">
+                        <div className="sup-title">📝 Scratchpad (Auto-saves)</div>
+                        <button className="sup-close" onClick={() => setShowNote(false)}>&times;</button>
+                    </div>
+                    <div className="sup-body">
+                        <textarea
+                            className="sup-note"
+                            placeholder="Type your notes here..."
+                            value={noteContent}
+                            onChange={(e) => setNoteContent(e.target.value)}
+                        />
+                    </div>
+                </div>
             )}
         </div>
     );

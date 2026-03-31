@@ -231,6 +231,13 @@ export default function CreateExam() {
   const [showAllBankCats, setShowAllBankCats] = useState(false);
   const [bankStats, setBankStats] = useState<Record<string, { count: number; total_marks: number }>>({});
   const [catConfigs, setCatConfigs] = useState<Record<string, { count: number; marks: number; showBreakdown?: boolean; breakdown?: Record<number, number> }>>({});
+  
+  // Exam Supplement State
+  const [calculatorEnabled, setCalculatorEnabled] = useState(false);
+  const [notesEnabled, setNotesEnabled] = useState(false);
+  const [proctoringLink, setProctoringLink] = useState("");
+  const [supplementFlag, setSupplementFlag] = useState(false);
+
   const [popup, setPopup] = useState<{
     isOpen: boolean;
     type: PopupType;
@@ -417,6 +424,10 @@ export default function CreateExam() {
     source: creationMode === "bank" ? "Bank" : "AI",
     bank_categories: selectedBankCats,
     category_configs: catConfigs,
+    calculator_enabled: calculatorEnabled,
+    notes_enabled: notesEnabled,
+    proctoring_link: proctoringLink,
+    supplement_flag: supplementFlag,
   });
 
   const handleGenerate = async (e?: React.FormEvent) => {
@@ -1824,8 +1835,6 @@ export default function CreateExam() {
                             return;
                           }
 
-                          const totalAvailable = selectedBankCats.reduce((sum, c) => sum + (bankStats[c]?.count || 0), 0);
-                          if (n > totalAvailable) n = totalAvailable;
                           setNumQuestions(n);
                         }}
                         required
@@ -1905,6 +1914,70 @@ export default function CreateExam() {
                     ))}
                   </div>
                 )}
+              </SectionCard>
+
+              {/* Exam Supplement */}
+              <SectionCard title="Exam Supplement" desc="Provide additional tool and resources to candidate.">
+                  <div className="proctor-toggle-row" style={{ marginBottom: '12px' }}>
+                    <div>
+                      <div className="proctor-toggle-label">Virtual Calculator</div>
+                      <div className="proctor-toggle-sub">Enable a floating scientific calculator for candidates</div>
+                    </div>
+                    <label className="toggle-switch">
+                      <input
+                        type="checkbox"
+                        checked={calculatorEnabled}
+                        onChange={e => setCalculatorEnabled(e.target.checked)}
+                      />
+                      <div className="toggle-track" />
+                      <div className="toggle-thumb" />
+                    </label>
+                  </div>
+
+                  <div className="proctor-toggle-row" style={{ marginBottom: '12px' }}>
+                    <div>
+                      <div className="proctor-toggle-label">Notepad (Scratchpad)</div>
+                      <div className="proctor-toggle-sub">Allow candidates to take notes during the exam</div>
+                    </div>
+                    <label className="toggle-switch">
+                      <input
+                        type="checkbox"
+                        checked={notesEnabled}
+                        onChange={e => setNotesEnabled(e.target.checked)}
+                      />
+                      <div className="toggle-track" />
+                      <div className="toggle-thumb" />
+                    </label>
+                  </div>
+
+                  <div className="proctor-toggle-row" style={{ marginBottom: '16px' }}>
+                    <div>
+                      <div className="proctor-toggle-label">Exam Link Visibility Flag</div>
+                      <div className="proctor-toggle-sub">Link will only be visible in the exam when this flag is selected</div>
+                    </div>
+                    <label className="toggle-switch">
+                      <input
+                        type="checkbox"
+                        checked={supplementFlag}
+                        onChange={e => setSupplementFlag(e.target.checked)}
+                      />
+                      <div className="toggle-track" />
+                      <div className="toggle-thumb" />
+                    </label>
+                  </div>
+
+                  {supplementFlag && (
+                    <div className="form-field">
+                      <label className="form-label">Proctoring / External Resource Link</label>
+                      <input
+                        className="form-input"
+                        placeholder="https://proctorexam.com/session/..."
+                        value={proctoringLink}
+                        onChange={e => setProctoringLink(e.target.value)}
+                      />
+                      <p className="proctor-toggle-sub" style={{ marginTop: '4px' }}>This specific link will be visible to candidates during the session.</p>
+                    </div>
+                  )}
               </SectionCard>
 
               <div className="btn-row">

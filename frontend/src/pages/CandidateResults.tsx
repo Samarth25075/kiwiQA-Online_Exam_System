@@ -25,9 +25,9 @@ interface Exam {
 }
 
 interface AdminProfile {
-    email: string;
-    role: string;
-    permissions: string[];
+  email: string;
+  role: string;
+  permissions: string[];
 }
 
 // â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -39,20 +39,20 @@ function calcScore(c: Candidate) {
 }
 
 function formatDate(dateStr: string): string {
-    if (!dateStr) return "";
-    try {
-        const date = new Date(dateStr);
-        return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-    } catch { return dateStr; }
+  if (!dateStr) return "";
+  try {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  } catch { return dateStr; }
 }
 
 // â”€â”€â”€ Icons â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const Icons = {
-  Search: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>,
-  Filter: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>,
-  Download: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>,
-  User: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
-  ArrowRight: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>,
+  Search: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>,
+  Filter: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" /></svg>,
+  Download: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>,
+  User: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>,
+  ArrowRight: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>,
 };
 
 // â”€â”€â”€ Main Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -62,7 +62,7 @@ export default function CandidateResults() {
   const [exams, setExams] = useState<Record<string, Exam>>({});
   const [profile, setProfile] = useState<AdminProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  
+
   // States for filter
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"All" | "Passed" | "Failed" | "Eliminated">("All");
@@ -104,14 +104,14 @@ export default function CandidateResults() {
       const { pct } = calcScore(c);
       const exam = exams[c.assigned_exam_id || ""] || { passing_score: 50 };
       const violations = parseInt(c.violations || "0");
-      
+
       let status: "Passed" | "Failed" | "Eliminated";
       if (violations >= 3) status = "Eliminated";
       else if (pct >= exam.passing_score) status = "Passed";
       else status = "Failed";
 
-      const matchesSearch = c.name.toLowerCase().includes(search.toLowerCase()) || 
-                           c.email.toLowerCase().includes(search.toLowerCase());
+      const matchesSearch = c.name.toLowerCase().includes(search.toLowerCase()) ||
+        c.email.toLowerCase().includes(search.toLowerCase());
       const matchesStatus = statusFilter === "All" || status === statusFilter;
 
       return matchesSearch && matchesStatus;
@@ -139,23 +139,23 @@ export default function CandidateResults() {
     }
     // Collect data from filtered candidates
     const headers = [
-      "Candidate Name", 
-      "Email Address", 
-      "Candidate ID", 
-      "Assessment Domain", 
-      "Attempt Date", 
-      "Violations", 
-      "Score Obtained", 
-      "Total Questions", 
-      "Percentage", 
+      "Candidate Name",
+      "Email Address",
+      "Candidate ID",
+      "Assessment Domain",
+      "Attempt Date",
+      "Violations",
+      "Score Obtained",
+      "Total Questions",
+      "Percentage",
       "Status"
     ];
-    
+
     const rows = filteredCandidates.map(c => {
       const { score, total, pct } = calcScore(c);
       const exam = exams[c.assigned_exam_id || ""] || { title: "Archived Exam", passing_score: 50 };
       const violations = parseInt(c.violations || "0");
-      
+
       let status: "Passed" | "Failed" | "Eliminated";
       if (violations >= 3) status = "Eliminated";
       else if (pct >= exam.passing_score) status = "Passed";
@@ -178,7 +178,7 @@ export default function CandidateResults() {
     // Generate CSV content
     const csvContent = [
       headers.join(","),
-      ...rows.map(row => 
+      ...rows.map(row =>
         row.map(val => `"${String(val).replace(/"/g, '""')}"`).join(",")
       )
     ].join("\r\n");
@@ -189,7 +189,7 @@ export default function CandidateResults() {
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       const filename = `Assessment_Results_${new Date().toISOString().split('T')[0]}.csv`;
-      
+
       link.setAttribute("href", url);
       link.setAttribute("download", filename);
       link.style.visibility = 'hidden';
@@ -336,7 +336,7 @@ export default function CandidateResults() {
           background: var(--bg-neutral);
           border: 1.5px solid var(--border);
           border-radius: 12px;
-          padding: 0 16px 0 44px;
+          padding: 0 16px 0 48px !important;
           font-family: inherit;
           font-size: 14px;
           font-weight: 500;
@@ -544,18 +544,18 @@ export default function CandidateResults() {
             <p>Comprehensive performance monitoring and candidate analytics.</p>
           </div>
           {profile?.permissions?.includes("download report") && (
-            <button 
-              className="cr-tab active cr-export-btn" 
+            <button
+              className="cr-tab active cr-export-btn"
               onClick={exportToCSV}
-              style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  gap: 8, 
-                  height: 40, 
-                  border: '1.5px solid var(--border)', 
-                  background: 'var(--bg)',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                height: 40,
+                border: '1.5px solid var(--border)',
+                background: 'var(--bg)',
+                cursor: 'pointer',
+                transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
               }}
             >
               <Icons.Download /> Export Data
@@ -571,12 +571,12 @@ export default function CandidateResults() {
           <div className="cr-stat-card">
             <span className="stat-label">Completion Threshold Met</span>
             <div className="stat-val" style={{ color: 'var(--color-success)' }}>{stats.passed}</div>
-            <span className="stat-pct pos">+{Math.round((stats.passed/stats.total || 0)*100)}%</span>
+            <span className="stat-pct pos">+{Math.round((stats.passed / stats.total || 0) * 100)}%</span>
           </div>
           <div className="cr-stat-card">
             <span className="stat-label">Below Threshold</span>
             <div className="stat-val" style={{ color: 'var(--color-danger)' }}>{stats.failed}</div>
-            <span className="stat-pct neg">-{Math.round((stats.failed/stats.total || 0)*100)}%</span>
+            <span className="stat-pct neg">-{Math.round((stats.failed / stats.total || 0) * 100)}%</span>
           </div>
           <div className="cr-stat-card">
             <span className="stat-label">Integrity Flags</span>
@@ -587,17 +587,17 @@ export default function CandidateResults() {
         <div className="cr-controls">
           <div className="cr-search-wrap">
             <i><Icons.Search /></i>
-            <input 
-              className="cr-search-input" 
-              placeholder="Search by name or email..." 
+            <input
+              className="cr-search-input"
+              placeholder="Search by name or email..."
               value={search}
               onChange={e => setSearch(e.target.value)}
             />
           </div>
-          
+
           <div className="cr-tabs">
             {(["All", "Passed", "Failed", "Eliminated"] as const).map(t => (
-              <div 
+              <div
                 key={t}
                 className={`cr-tab ${statusFilter === t ? 'active' : ''}`}
                 onClick={() => setStatusFilter(t)}
@@ -637,7 +637,7 @@ export default function CandidateResults() {
                   const { score, total, pct } = calcScore(c);
                   const exam = exams[c.assigned_exam_id || ""] || { title: "Archived Exam", passing_score: 50 };
                   const violations = parseInt(c.violations || "0");
-                  
+
                   let status: "Passed" | "Failed" | "Eliminated";
                   if (violations >= 3) status = "Eliminated";
                   else if (pct >= exam.passing_score) status = "Passed";
@@ -675,9 +675,9 @@ export default function CandidateResults() {
                       </td>
                       <td>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                          <span style={{ 
-                            width: 8, height: 8, borderRadius: '50%', 
-                            background: violations > 0 ? 'var(--color-danger)' : 'var(--color-success)' 
+                          <span style={{
+                            width: 8, height: 8, borderRadius: '50%',
+                            background: violations > 0 ? 'var(--color-danger)' : 'var(--color-success)'
                           }} />
                           <span style={{ fontWeight: 700, fontSize: 13 }}>{violations}</span>
                         </div>
@@ -689,9 +689,9 @@ export default function CandidateResults() {
                             <span className="score-pct">{pct}%</span>
                           </div>
                           <div className="score-bar-bg">
-                            <div className="score-bar-fill" style={{ 
-                                width: `${pct}%`, 
-                                background: pct < 40 ? 'var(--color-danger)' : pct < 70 ? 'var(--color-warning)' : 'var(--color-success)' 
+                            <div className="score-bar-fill" style={{
+                              width: `${pct}%`,
+                              background: pct < 40 ? 'var(--color-danger)' : pct < 70 ? 'var(--color-warning)' : 'var(--color-success)'
                             }} />
                           </div>
                         </div>

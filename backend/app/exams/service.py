@@ -548,9 +548,13 @@ def _to_summary_dict(exam: Exam) -> Dict:
         "created_at": exam.created_at,
         "link_expiry": exam.link_expiry,
         "auto_delete": exam.auto_delete,
-        "proctoring_enabled": exam.proctoring_enabled,
         "proctoring_type": exam.proctoring_type,
-        "passing_score": exam.passing_score
+        "proctoring_enabled": exam.proctoring_enabled,
+        "passing_score": exam.passing_score,
+        "calculator_enabled": exam.calculator_enabled,
+        "notes_enabled": exam.notes_enabled,
+        "proctoring_link": exam.proctoring_link,
+        "supplement_flag": exam.supplement_flag,
     }
 
 def _to_full_dict(exam: Exam) -> Dict:
@@ -575,6 +579,10 @@ def save_exam(db: Session, exam_in: ExamFinalize) -> Dict:
         proctoring_enabled=exam_in.proctoring_enabled,
         proctoring_type=exam_in.proctoring_type,
         passing_score=exam_in.passing_score,
+        calculator_enabled=exam_in.calculator_enabled,
+        notes_enabled=exam_in.notes_enabled,
+        proctoring_link=exam_in.proctoring_link,
+        supplement_flag=exam_in.supplement_flag,
         questions=[q.dict() for q in exam_in.questions]
     )
     db.add(new_exam)
@@ -602,6 +610,10 @@ def create_exam(db: Session, exam_in: ExamCreate) -> Dict:
         proctoring_enabled=getattr(exam_in, 'proctoring_enabled', True),
         proctoring_type=getattr(exam_in, 'proctoring_type', 'video'),
         passing_score=getattr(exam_in, 'passing_score', 50),
+        calculator_enabled=getattr(exam_in, 'calculator_enabled', False),
+        notes_enabled=getattr(exam_in, 'notes_enabled', False),
+        proctoring_link=getattr(exam_in, 'proctoring_link', None),
+        supplement_flag=getattr(exam_in, 'supplement_flag', False),
         questions=questions
     )
     db.add(new_exam)
@@ -651,6 +663,10 @@ def duplicate_exam(db: Session, exam_id: str) -> Dict | None:
         proctoring_enabled=exam.proctoring_enabled,
         proctoring_type=exam.proctoring_type,
         passing_score=exam.passing_score,
+        calculator_enabled=exam.calculator_enabled,
+        notes_enabled=exam.notes_enabled,
+        proctoring_link=exam.proctoring_link,
+        supplement_flag=exam.supplement_flag,
         questions=exam.questions # JSON is safe to copy
     )
     db.add(new_exam)

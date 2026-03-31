@@ -305,10 +305,14 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, plain = false }) =>
                 }
 
                 /* â”€â”€ Nav â”€â”€ */
-                .al-nav { flex: 1; padding: 4px 10px; overflow-y: auto; }
-                .al-nav::-webkit-scrollbar { width: 3px; }
-                .al-nav::-webkit-scrollbar-track { background: transparent; }
-                .al-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+                .al-nav {
+                    flex: 1;
+                    padding: 4px 10px;
+                    overflow-y: auto;
+                    -ms-overflow-style: none; /* IE/Edge */
+                    scrollbar-width: none;    /* Firefox */
+                }
+                .al-nav::-webkit-scrollbar { display: none; } /* Chrome/Safari */
 
                 .al-nav-label {
                     font-size: 8px;
@@ -473,6 +477,28 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, plain = false }) =>
                     margin: 0;
                     max-width: none;
                 }
+                .al-footer {
+                    position: fixed;
+                    bottom: 0;
+                    right: 0;
+                    left: 240px;
+                    padding: 10px 24px;
+                    text-align: center;
+                    font-size: 11px;
+                    color: var(--ink-3);
+                    border-top: 1px solid var(--border);
+                    background: var(--bg);
+                    backdrop-filter: blur(8px);
+                    z-index: 100;
+                    transition: left 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+                }
+                @media (max-width: 1024px) {
+                    .al-footer { left: 0; }
+                }
+                .al-content-inner {
+                    flex: 1;
+                    padding: 16px 24px 64px; /* Bottom padding for footer */
+                }
             `}</style>
 
             {/* â”€â”€ Skip to content (keyboard accessibility) â”€â”€ */}
@@ -607,6 +633,10 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, plain = false }) =>
                 <div className="al-content-inner" id="main-content" tabIndex={-1}>
                     {children}
                 </div>
+
+                <footer className="al-footer">
+                    &copy; 2026 KiwiQA. All rights reserved.
+                </footer>
 
                 {popup && (
                     <CustomPopup

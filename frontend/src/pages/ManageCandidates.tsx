@@ -532,7 +532,8 @@ export default function ManageCandidates() {
                 {candidates.length === 0 ? (
                     <div className="mc-table-wrap">
                         <div className="mc-empty">
-                            <div className="mc-empty-icon">{"\u1F465"}</div>
+                            <div className="mc-empty-icon">{"\uD83D\uDC65"}</div>
+
                             <div className="mc-empty-title">No Candidates Yet</div>
                             <div className="mc-empty-sub">Enroll candidates via the dashboard or add them manually to get started.</div>
                         </div>
