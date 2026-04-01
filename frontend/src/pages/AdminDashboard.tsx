@@ -1674,23 +1674,31 @@ export default function AdminDashboard() {
                                                                 )}
                                                             </div>
                                                         ) : (
-                                                            <div className="activate-row" style={{ background: 'var(--slate-50)', padding: '6px', borderRadius: '12px', border: '1px solid var(--slate-100)' }}>
+                                                            <div className="activate-row" style={{ 
+                                                                background: 'var(--slate-50)', 
+                                                                padding: '4px 6px', 
+                                                                borderRadius: '12px', 
+                                                                border: '1px solid var(--slate-100)',
+                                                                display: 'inline-flex',
+                                                                width: 'fit-content',
+                                                                gap: '4px'
+                                                            }}>
                                                                 <input
                                                                     id={`time-${exam.id}`}
                                                                     type="text"
                                                                     className="field-input"
                                                                     defaultValue={24}
                                                                     onInput={(e: any) => e.target.value = e.target.value.replace(/\D/g, '')}
-                                                                    style={{ width: "38px", height: '32px', border: 'none', background: 'transparent' }}
+                                                                    style={{ width: "32px", height: '28px', border: 'none', background: 'transparent', textAlign: 'right', padding: '0 4px 0 0' }}
                                                                 />
-                                                                <select id={`mode-${exam.id}`} className="field-select" defaultValue="hrs" style={{ border: 'none', background: 'transparent', fontSize: '11px', fontWeight: 700 }}>
+                                                                <select id={`mode-${exam.id}`} className="field-select" defaultValue="hrs" style={{ border: 'none', background: 'transparent', fontSize: '11px', fontWeight: 700, padding: '0 4px', width: 'auto' }}>
                                                                     <option value="hrs">hrs</option>
                                                                     <option value="mins">mins</option>
                                                                 </select>
                                                                 <button
                                                                     className="action-icon-btn primary"
                                                                     onClick={() => runIfPermitted("manage exam", "Manage Exams", () => handleActivateLink(exam.id))}
-                                                                    style={{ width: 32, height: 32, borderRadius: '8px' }}
+                                                                    style={{ width: 28, height: 28, borderRadius: '8px', minWidth: '28px' }}
                                                                 >
                                                                     <Icons.Check size={14} />
                                                                 </button>
