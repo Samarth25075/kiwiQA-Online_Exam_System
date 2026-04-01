@@ -26,6 +26,8 @@
       --accent: #f59e0b;
       --red: #ef4444;
       --sidebar-w: 280px;
+      --chat-msg-ai: #f1f5f9;
+      --chat-msg-user: var(--teal);
     }
 
     [data-theme="dark"] {
@@ -38,6 +40,8 @@
       --text2: #99f6e4;
       --text3: #5eead4;
       --sidebar-bg: #0b1211;
+      --chat-msg-ai: #212d2b;
+      --chat-msg-user: var(--teal);
     }
 
     [data-theme="dark"] .user-guide-footer {
@@ -928,7 +932,7 @@
       display: flex;
       flex-direction: column;
       gap: 12px;
-      background: #fdfdfd;
+      background: var(--surface);
       -ms-overflow-style: none;
       scrollbar-width: none;
     }
@@ -943,20 +947,23 @@
       border-radius: 12px;
       font-size: 13px;
       line-height: 1.5;
+      transition: all 0.2s ease;
     }
 
     .msg-ai {
       align-self: flex-start;
-      background: #eee;
-      color: var(--text2);
+      background: var(--chat-msg-ai);
+      color: var(--text);
       border-bottom-left-radius: 2px;
+      border: 1px solid var(--border);
     }
 
     .msg-user {
       align-self: flex-end;
-      background: var(--teal);
+      background: var(--chat-msg-user);
       color: #fff;
       border-bottom-right-radius: 2px;
+      box-shadow: 0 2px 8px rgba(13, 148, 136, 0.25);
     }
 
     .chat-footer {
@@ -975,18 +982,19 @@
     .q-chip {
       background: var(--surface2);
       border: 1px solid var(--border);
-      color: var(--teal-dim);
+      color: var(--teal-light);
       font-size: 11.5px;
-      padding: 5px 10px;
+      padding: 5px 12px;
       border-radius: 16px;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .q-chip:hover {
-      background: var(--teal-light);
+      background: var(--teal);
       color: #fff;
-      border-color: var(--teal-light);
+      border-color: var(--teal);
+      transform: translateY(-1px);
     }
 
     .chat-input-wrap {
@@ -996,11 +1004,14 @@
 
     #chat-input {
       flex: 1;
+      background: var(--surface2);
       border: 1px solid var(--border);
+      color: var(--text);
       border-radius: 8px;
       padding: 8px 12px;
       font-size: 13px;
       outline: none;
+      transition: border-color 0.2s;
     }
 
     #chat-input:focus {
