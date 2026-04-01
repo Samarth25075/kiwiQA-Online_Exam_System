@@ -12,12 +12,14 @@ def _to_summary_dict(c: Candidate) -> Dict:
     incorrect_nums = []
     if c.status == "Completed" and c.answers and c.exam and c.exam.questions:
         try:
-            questions = c.exam.questions
-            ans_lookup = {a.get("question_index"): a.get("selected_index") for a in c.answers if "question_index" in a}
+            questions = c.exam.questions or []
+            ans_lookup = {a.get("question_index"): a.get("selected_index") for a in (c.answers or []) if a and "question_index" in a}
             for idx, q in enumerate(questions):
+                if not q: continue
                 selected = ans_lookup.get(idx)
                 # If no choice made or choice is different from correct one
-                correct_idx = next((i for i, opt in enumerate(q.get("options", [])) if opt.get("is_correct")), None)
+                options = q.get("options") or []
+                correct_idx = next((i for i, opt in enumerate(options) if opt and opt.get("is_correct")), None)
                 if selected is None or selected != correct_idx:
                     incorrect_nums.append(idx + 1)
         except Exception as e:
@@ -318,7 +320,8 @@ def get_report_data(db: Session, candidate_obj: Candidate) -> Dict | None:
                 ans_lookup[str(a["question_index"])] = a
 
     report_questions = []
-    for idx, q in enumerate(questions):
+    for idx, q in enumerate(questions or []):
+        if not q: continue
         cat = q.get("category", "General")
         marks = q.get("marks", 1.0)
         q_type = str(q.get("type", "multiple-choice")).lower()
@@ -335,8 +338,8 @@ def get_report_data(db: Session, candidate_obj: Candidate) -> Dict | None:
         if curr_ans:
              stats[cat]["attempted"] += 1
              if q_type == 'coding':
-                 results = curr_ans.get("test_results", [])
-                 passed_count = len([r for r in results if r.get("passed")])
+                 results = curr_ans.get("test_results") or []
+                 passed_count = len([r for r in results if r and r.get("passed")])
                  total_test_cases = len(results)
                  pass_pct = (passed_count / total_test_cases * 100) if total_test_cases > 0 else 0
                  
@@ -346,16 +349,17 @@ def get_report_data(db: Session, candidate_obj: Candidate) -> Dict | None:
                      stats[cat]["correct"] += marks
              else:
                  selected = curr_ans.get("selected_option_index")
-                 options = q.get("options", [])
+                 options = q.get("options") or []
                  if selected is not None and 0 <= selected < len(options):
-                     if options[selected].get("is_correct"):
+                     opt = options[selected]
+                     if opt and opt.get("is_correct"):
                          is_correct = True
                          stats[cat]["correct"] += marks
 
         report_questions.append({
             "text": q["text"],
             "type": q_type,
-            "options": q.get("options", []),
+            "options": q.get("options") or [],
             "selected_index": curr_ans.get("selected_option_index") if curr_ans else None,
             "code": curr_ans.get("code") if curr_ans else None,
             "language": curr_ans.get("language", q.get("language", "javascript")) if curr_ans else q.get("language", "javascript"),
