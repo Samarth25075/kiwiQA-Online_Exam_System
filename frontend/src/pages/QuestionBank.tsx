@@ -971,7 +971,7 @@ const QuestionBank: React.FC = () => {
                                         </div>
 
                                         <div className="card-actions">
-                                            {s.category.toLowerCase() !== 'programming (advanced)' && (
+                                            {!(s.category.toLowerCase().startsWith('programming (coding') || s.category.toLowerCase() === 'programming (advanced)') && (
                                                 <button
                                                     className="btn-delete-bank"
                                                     onClick={(e) => { e.stopPropagation(); handleDeleteCategory(s.category); }}
@@ -1029,7 +1029,7 @@ const QuestionBank: React.FC = () => {
                                             </td>
                                             <td>
                                                 <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                                                    {s.category.toLowerCase() !== 'programming (advanced)' && (
+                                                    {!(s.category.toLowerCase().startsWith('programming (coding') || s.category.toLowerCase() === 'programming (advanced)') && (
                                                         <button
                                                             onClick={(e) => { e.stopPropagation(); handleDeleteCategory(s.category); }}
                                                             style={{ width: 32, height: 32, borderRadius: '8px', background: 'rgba(239, 68, 68, 0.05)', border: 'none', color: '#ef4444', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: '0.2s' }}
@@ -1088,7 +1088,7 @@ const QuestionBank: React.FC = () => {
                                         <button className="btn-action btn-edit" onClick={() => setEditingQuestion(q)}>
                                             <Icons.Edit /> Edit
                                         </button>
-                                        {selectedCategory?.trim().toLowerCase() !== 'programming (advanced)' && (
+                                        {!(selectedCategory?.trim().toLowerCase().startsWith('programming (coding') || selectedCategory?.trim().toLowerCase() === 'programming (advanced)') && (
                                             <button className="btn-action btn-delete" onClick={() => handleDelete(q.q_id)}>
                                                 <Icons.Delete /> Delete
                                             </button>
@@ -1151,7 +1151,7 @@ const QuestionBank: React.FC = () => {
                                                     >
                                                         <Icons.Edit />
                                                     </button>
-                                                    {selectedCategory?.trim().toLowerCase() !== 'programming (advanced)' && (
+                                                        {!(selectedCategory?.trim().toLowerCase().startsWith('programming (coding') || selectedCategory?.trim().toLowerCase() === 'programming (advanced)') && (
                                                         <button
                                                             onClick={() => handleDelete(q.q_id)}
                                                             style={{ width: 32, height: 32, borderRadius: '8px', background: 'rgba(239, 68, 68, 0.05)', border: 'none', color: '#ef4444', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: '0.2s' }}

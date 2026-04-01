@@ -1,7 +1,7 @@
 [
     {
-        "category": "Programming (Advanced)",
-        "difficulty": "Advanced",
+        "category": "Programming (Coding-Hard)",
+        "difficulty": "Hard",
         "type": "coding",
         "text": "Write a function 'filterEvens' that takes an array of integers and returns a new array containing only the even numbers. If there are no even numbers, return an empty array.",
         "skeleton_code": "function filterEvens(nums) {\n  // Your code here\n}",
@@ -29,8 +29,8 @@
         "q_id": "code_fe_501"
     },
     {
-        "category": "Programming (Advanced)",
-        "difficulty": "Intermediate",
+        "category": "Programming (Coding-Medium)",
+        "difficulty": "Medium",
         "type": "coding",
         "text": "Write a function 'findMax' that takes an array of integers and returns the largest number. If the array is empty, return null.",
         "skeleton_code": "function findMax(nums) {\n  // Your code here\n}",
@@ -52,5 +52,1875 @@
         "threshold_pct": 100,
         "marks": 5,
         "q_id": "code_fm_101"
+    },
+    {
+        "category": "Programming (Coding-Easy)",
+        "difficulty": "Easy",
+        "type": "coding",
+        "text": "Write a function 'addTwo' that takes two numbers and returns their sum.",
+        "skeleton_code": "function addTwo(a, b) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "2, 3",
+                "expected": "5"
+            },
+            {
+                "input": "0, 0",
+                "expected": "0"
+            },
+            {
+                "input": "-1, 1",
+                "expected": "0"
+            },
+            {
+                "input": "100, 200",
+                "expected": "300"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 5,
+        "q_id": "code_easy_001"
+    },
+    {
+        "category": "Programming (Coding-Easy)",
+        "difficulty": "Easy",
+        "type": "coding",
+        "text": "Write a function 'isEven' that takes a number and returns true if it is even, false otherwise.",
+        "skeleton_code": "function isEven(n) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "4",
+                "expected": "true"
+            },
+            {
+                "input": "7",
+                "expected": "false"
+            },
+            {
+                "input": "0",
+                "expected": "true"
+            },
+            {
+                "input": "-2",
+                "expected": "true"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 5,
+        "q_id": "code_easy_002"
+    },
+    {
+        "category": "Programming (Coding-Easy)",
+        "difficulty": "Easy",
+        "type": "coding",
+        "text": "Write a function 'reverseString' that takes a string and returns it reversed.",
+        "skeleton_code": "function reverseString(str) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "\"hello\"",
+                "expected": "\"olleh\""
+            },
+            {
+                "input": "\"abc\"",
+                "expected": "\"cba\""
+            },
+            {
+                "input": "\"\"",
+                "expected": "\"\""
+            },
+            {
+                "input": "\"a\"",
+                "expected": "\"a\""
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 5,
+        "q_id": "code_easy_003"
+    },
+    {
+        "category": "Programming (Coding-Easy)",
+        "difficulty": "Easy",
+        "type": "coding",
+        "text": "Write a function 'arrayLength' that takes an array and returns its length.",
+        "skeleton_code": "function arrayLength(arr) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "[1, 2, 3]",
+                "expected": "3"
+            },
+            {
+                "input": "[]",
+                "expected": "0"
+            },
+            {
+                "input": "[\"a\", \"b\"]",
+                "expected": "2"
+            },
+            {
+                "input": "[true, false, true, true]",
+                "expected": "4"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 5,
+        "q_id": "code_easy_004"
+    },
+    {
+        "category": "Programming (Coding-Easy)",
+        "difficulty": "Easy",
+        "type": "coding",
+        "text": "Write a function 'greet' that takes a name (string) and returns 'Hello, {name}!'.",
+        "skeleton_code": "function greet(name) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "\"Alice\"",
+                "expected": "\"Hello, Alice!\""
+            },
+            {
+                "input": "\"Bob\"",
+                "expected": "\"Hello, Bob!\""
+            },
+            {
+                "input": "\"World\"",
+                "expected": "\"Hello, World!\""
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 5,
+        "q_id": "code_easy_005"
+    },
+    {
+        "category": "Programming (Coding-Easy)",
+        "difficulty": "Easy",
+        "type": "coding",
+        "text": "Write a function 'square' that takes a number and returns its square.",
+        "skeleton_code": "function square(n) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "3",
+                "expected": "9"
+            },
+            {
+                "input": "5",
+                "expected": "25"
+            },
+            {
+                "input": "0",
+                "expected": "0"
+            },
+            {
+                "input": "-4",
+                "expected": "16"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 5,
+        "q_id": "code_easy_006"
+    },
+    {
+        "category": "Programming (Coding-Easy)",
+        "difficulty": "Easy",
+        "type": "coding",
+        "text": "Write a function 'firstElement' that takes an array and returns its first element. If the array is empty, return null.",
+        "skeleton_code": "function firstElement(arr) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "[1, 2, 3]",
+                "expected": "1"
+            },
+            {
+                "input": "[\"a\", \"b\"]",
+                "expected": "\"a\""
+            },
+            {
+                "input": "[]",
+                "expected": "null"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 5,
+        "q_id": "code_easy_007"
+    },
+    {
+        "category": "Programming (Coding-Easy)",
+        "difficulty": "Easy",
+        "type": "coding",
+        "text": "Write a function 'lastElement' that takes an array and returns its last element. If the array is empty, return null.",
+        "skeleton_code": "function lastElement(arr) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "[1, 2, 3]",
+                "expected": "3"
+            },
+            {
+                "input": "[\"x\"]",
+                "expected": "\"x\""
+            },
+            {
+                "input": "[]",
+                "expected": "null"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 5,
+        "q_id": "code_easy_008"
+    },
+    {
+        "category": "Programming (Coding-Easy)",
+        "difficulty": "Easy",
+        "type": "coding",
+        "text": "Write a function 'sumArray' that takes an array of numbers and returns their sum. Return 0 for an empty array.",
+        "skeleton_code": "function sumArray(nums) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "[1, 2, 3, 4]",
+                "expected": "10"
+            },
+            {
+                "input": "[10, -10]",
+                "expected": "0"
+            },
+            {
+                "input": "[]",
+                "expected": "0"
+            },
+            {
+                "input": "[5]",
+                "expected": "5"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 5,
+        "q_id": "code_easy_009"
+    },
+    {
+        "category": "Programming (Coding-Easy)",
+        "difficulty": "Easy",
+        "type": "coding",
+        "text": "Write a function 'toUpperCase' that takes a string and returns it in uppercase.",
+        "skeleton_code": "function toUpperCase(str) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "\"hello\"",
+                "expected": "\"HELLO\""
+            },
+            {
+                "input": "\"World\"",
+                "expected": "\"WORLD\""
+            },
+            {
+                "input": "\"\"",
+                "expected": "\"\""
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 5,
+        "q_id": "code_easy_010"
+    },
+    {
+        "category": "Programming (Coding-Easy)",
+        "difficulty": "Easy",
+        "type": "coding",
+        "text": "Write a function 'isPositive' that takes a number and returns true if it is positive (greater than 0), false otherwise.",
+        "skeleton_code": "function isPositive(n) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "5",
+                "expected": "true"
+            },
+            {
+                "input": "-3",
+                "expected": "false"
+            },
+            {
+                "input": "0",
+                "expected": "false"
+            },
+            {
+                "input": "0.1",
+                "expected": "true"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 5,
+        "q_id": "code_easy_011"
+    },
+    {
+        "category": "Programming (Coding-Easy)",
+        "difficulty": "Easy",
+        "type": "coding",
+        "text": "Write a function 'multiply' that takes two numbers and returns their product.",
+        "skeleton_code": "function multiply(a, b) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "3, 4",
+                "expected": "12"
+            },
+            {
+                "input": "0, 100",
+                "expected": "0"
+            },
+            {
+                "input": "-2, 5",
+                "expected": "-10"
+            },
+            {
+                "input": "7, 7",
+                "expected": "49"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 5,
+        "q_id": "code_easy_012"
+    },
+    {
+        "category": "Programming (Coding-Easy)",
+        "difficulty": "Easy",
+        "type": "coding",
+        "text": "Write a function 'countVowels' that takes a string and returns the number of vowels (a, e, i, o, u) in it (case-insensitive).",
+        "skeleton_code": "function countVowels(str) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "\"hello\"",
+                "expected": "2"
+            },
+            {
+                "input": "\"AEIOU\"",
+                "expected": "5"
+            },
+            {
+                "input": "\"bcdf\"",
+                "expected": "0"
+            },
+            {
+                "input": "\"\"",
+                "expected": "0"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 5,
+        "q_id": "code_easy_013"
+    },
+    {
+        "category": "Programming (Coding-Easy)",
+        "difficulty": "Easy",
+        "type": "coding",
+        "text": "Write a function 'removeFirst' that takes an array and returns a new array with the first element removed. Return empty array if input is empty.",
+        "skeleton_code": "function removeFirst(arr) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "[1, 2, 3]",
+                "expected": "[2, 3]"
+            },
+            {
+                "input": "[\"a\"]",
+                "expected": "[]"
+            },
+            {
+                "input": "[]",
+                "expected": "[]"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 5,
+        "q_id": "code_easy_014"
+    },
+    {
+        "category": "Programming (Coding-Easy)",
+        "difficulty": "Easy",
+        "type": "coding",
+        "text": "Write a function 'isPalindrome' that takes a string and returns true if it reads the same forwards and backwards, false otherwise (case-sensitive).",
+        "skeleton_code": "function isPalindrome(str) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "\"racecar\"",
+                "expected": "true"
+            },
+            {
+                "input": "\"hello\"",
+                "expected": "false"
+            },
+            {
+                "input": "\"madam\"",
+                "expected": "true"
+            },
+            {
+                "input": "\"a\"",
+                "expected": "true"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 5,
+        "q_id": "code_easy_015"
+    },
+    {
+        "category": "Programming (Coding-Easy)",
+        "difficulty": "Easy",
+        "type": "coding",
+        "text": "Write a function 'absolute' that takes a number and returns its absolute value.",
+        "skeleton_code": "function absolute(n) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "-5",
+                "expected": "5"
+            },
+            {
+                "input": "3",
+                "expected": "3"
+            },
+            {
+                "input": "0",
+                "expected": "0"
+            },
+            {
+                "input": "-100",
+                "expected": "100"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 5,
+        "q_id": "code_easy_016"
+    },
+    {
+        "category": "Programming (Coding-Easy)",
+        "difficulty": "Easy",
+        "type": "coding",
+        "text": "Write a function 'repeatString' that takes a string and a number n, and returns the string repeated n times.",
+        "skeleton_code": "function repeatString(str, n) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "\"ab\", 3",
+                "expected": "\"ababab\""
+            },
+            {
+                "input": "\"x\", 1",
+                "expected": "\"x\""
+            },
+            {
+                "input": "\"hi\", 0",
+                "expected": "\"\""
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 5,
+        "q_id": "code_easy_017"
+    },
+    {
+        "category": "Programming (Coding-Easy)",
+        "difficulty": "Easy",
+        "type": "coding",
+        "text": "Write a function 'minOfTwo' that takes two numbers and returns the smaller one.",
+        "skeleton_code": "function minOfTwo(a, b) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "3, 7",
+                "expected": "3"
+            },
+            {
+                "input": "10, -2",
+                "expected": "-2"
+            },
+            {
+                "input": "5, 5",
+                "expected": "5"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 5,
+        "q_id": "code_easy_018"
+    },
+    {
+        "category": "Programming (Coding-Easy)",
+        "difficulty": "Easy",
+        "type": "coding",
+        "text": "Write a function 'containsValue' that takes an array and a value, and returns true if the array contains the value, false otherwise.",
+        "skeleton_code": "function containsValue(arr, val) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "[1, 2, 3], 2",
+                "expected": "true"
+            },
+            {
+                "input": "[1, 2, 3], 5",
+                "expected": "false"
+            },
+            {
+                "input": "[], 1",
+                "expected": "false"
+            },
+            {
+                "input": "[\"a\", \"b\"], \"a\"",
+                "expected": "true"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 5,
+        "q_id": "code_easy_019"
+    },
+    {
+        "category": "Programming (Coding-Easy)",
+        "difficulty": "Easy",
+        "type": "coding",
+        "text": "Write a function 'countOccurrences' that takes an array and a value, and returns how many times the value appears in the array.",
+        "skeleton_code": "function countOccurrences(arr, val) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "[1, 2, 2, 3, 2], 2",
+                "expected": "3"
+            },
+            {
+                "input": "[\"a\", \"b\", \"a\"], \"a\"",
+                "expected": "2"
+            },
+            {
+                "input": "[1, 2, 3], 5",
+                "expected": "0"
+            },
+            {
+                "input": "[], 1",
+                "expected": "0"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 5,
+        "q_id": "code_easy_020"
+    },
+    {
+        "category": "Programming (Coding-Easy)",
+        "difficulty": "Easy",
+        "type": "coding",
+        "text": "Write a function 'isString' that takes a value and returns true if it is of type string, false otherwise.",
+        "skeleton_code": "function isString(val) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "\"hello\"",
+                "expected": "true"
+            },
+            {
+                "input": "42",
+                "expected": "false"
+            },
+            {
+                "input": "true",
+                "expected": "false"
+            },
+            {
+                "input": "\"\"",
+                "expected": "true"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 5,
+        "q_id": "code_easy_021"
+    },
+    {
+        "category": "Programming (Coding-Easy)",
+        "difficulty": "Easy",
+        "type": "coding",
+        "text": "Write a function 'numberToString' that takes a number and returns it as a string.",
+        "skeleton_code": "function numberToString(n) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "42",
+                "expected": "\"42\""
+            },
+            {
+                "input": "0",
+                "expected": "\"0\""
+            },
+            {
+                "input": "-7",
+                "expected": "\"-7\""
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 5,
+        "q_id": "code_easy_022"
+    },
+    {
+        "category": "Programming (Coding-Easy)",
+        "difficulty": "Easy",
+        "type": "coding",
+        "text": "Write a function 'getKeys' that takes an object and returns an array of its keys.",
+        "skeleton_code": "function getKeys(obj) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "{\"a\": 1, \"b\": 2}",
+                "expected": "[\"a\", \"b\"]"
+            },
+            {
+                "input": "{}",
+                "expected": "[]"
+            },
+            {
+                "input": "{\"x\": 10}",
+                "expected": "[\"x\"]"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 5,
+        "q_id": "code_easy_023"
+    },
+    {
+        "category": "Programming (Coding-Easy)",
+        "difficulty": "Easy",
+        "type": "coding",
+        "text": "Write a function 'getValues' that takes an object and returns an array of its values.",
+        "skeleton_code": "function getValues(obj) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "{\"a\": 1, \"b\": 2}",
+                "expected": "[1, 2]"
+            },
+            {
+                "input": "{}",
+                "expected": "[]"
+            },
+            {
+                "input": "{\"x\": \"hello\"}",
+                "expected": "[\"hello\"]"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 5,
+        "q_id": "code_easy_024"
+    },
+    {
+        "category": "Programming (Coding-Easy)",
+        "difficulty": "Easy",
+        "type": "coding",
+        "text": "Write a function 'concatenateArrays' that takes two arrays and returns a new array that is the concatenation of both.",
+        "skeleton_code": "function concatenateArrays(arr1, arr2) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "[1, 2], [3, 4]",
+                "expected": "[1, 2, 3, 4]"
+            },
+            {
+                "input": "[], [1]",
+                "expected": "[1]"
+            },
+            {
+                "input": "[\"a\"], [\"b\", \"c\"]",
+                "expected": "[\"a\", \"b\", \"c\"]"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 5,
+        "q_id": "code_easy_025"
+    },
+    {
+        "category": "Programming (Coding-Easy)",
+        "difficulty": "Easy",
+        "type": "coding",
+        "text": "Write a function 'trimString' that takes a string and returns it with leading and trailing whitespace removed.",
+        "skeleton_code": "function trimString(str) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "\"  hello  \"",
+                "expected": "\"hello\""
+            },
+            {
+                "input": "\"no space\"",
+                "expected": "\"no space\""
+            },
+            {
+                "input": "\"   \"",
+                "expected": "\"\""
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 5,
+        "q_id": "code_easy_026"
+    },
+    {
+        "category": "Programming (Coding-Easy)",
+        "difficulty": "Easy",
+        "type": "coding",
+        "text": "Write a function 'maxOfTwo' that takes two numbers and returns the larger one.",
+        "skeleton_code": "function maxOfTwo(a, b) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "3, 7",
+                "expected": "7"
+            },
+            {
+                "input": "-1, -5",
+                "expected": "-1"
+            },
+            {
+                "input": "4, 4",
+                "expected": "4"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 5,
+        "q_id": "code_easy_027"
+    },
+    {
+        "category": "Programming (Coding-Easy)",
+        "difficulty": "Easy",
+        "type": "coding",
+        "text": "Write a function 'filterOdds' that takes an array of integers and returns a new array containing only the odd numbers.",
+        "skeleton_code": "function filterOdds(nums) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "[1, 2, 3, 4, 5]",
+                "expected": "[1, 3, 5]"
+            },
+            {
+                "input": "[2, 4, 6]",
+                "expected": "[]"
+            },
+            {
+                "input": "[]",
+                "expected": "[]"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 5,
+        "q_id": "code_easy_028"
+    },
+    {
+        "category": "Programming (Coding-Easy)",
+        "difficulty": "Easy",
+        "type": "coding",
+        "text": "Write a function 'stringLength' that takes a string and returns its length.",
+        "skeleton_code": "function stringLength(str) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "\"hello\"",
+                "expected": "5"
+            },
+            {
+                "input": "\"\"",
+                "expected": "0"
+            },
+            {
+                "input": "\"ab\"",
+                "expected": "2"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 5,
+        "q_id": "code_easy_029"
+    },
+    {
+        "category": "Programming (Coding-Easy)",
+        "difficulty": "Easy",
+        "type": "coding",
+        "text": "Write a function 'power' that takes a base and an exponent and returns base raised to the power of exponent.",
+        "skeleton_code": "function power(base, exp) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "2, 3",
+                "expected": "8"
+            },
+            {
+                "input": "5, 0",
+                "expected": "1"
+            },
+            {
+                "input": "3, 2",
+                "expected": "9"
+            },
+            {
+                "input": "10, 1",
+                "expected": "10"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 5,
+        "q_id": "code_easy_030"
+    },
+    {
+        "category": "Programming (Coding-Easy)",
+        "difficulty": "Easy",
+        "type": "coding",
+        "text": "Write a function 'splitString' that takes a string and a delimiter, and returns an array of substrings split by the delimiter.",
+        "skeleton_code": "function splitString(str, delimiter) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "\"a,b,c\", \",\"",
+                "expected": "[\"a\", \"b\", \"c\"]"
+            },
+            {
+                "input": "\"hello world\", \" \"",
+                "expected": "[\"hello\", \"world\"]"
+            },
+            {
+                "input": "\"abc\", \"-\"",
+                "expected": "[\"abc\"]"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 5,
+        "q_id": "code_easy_031"
+    },
+    {
+        "category": "Programming (Coding-Easy)",
+        "difficulty": "Easy",
+        "type": "coding",
+        "text": "Write a function 'joinArray' that takes an array of strings and a separator, and returns a single string joined by the separator.",
+        "skeleton_code": "function joinArray(arr, sep) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "[\"a\", \"b\", \"c\"], \",\"",
+                "expected": "\"a,b,c\""
+            },
+            {
+                "input": "[\"hello\", \"world\"], \" \"",
+                "expected": "\"hello world\""
+            },
+            {
+                "input": "[\"x\"], \"-\"",
+                "expected": "\"x\""
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 5,
+        "q_id": "code_easy_032"
+    },
+    {
+        "category": "Programming (Coding-Easy)",
+        "difficulty": "Easy",
+        "type": "coding",
+        "text": "Write a function 'isArray' that takes a value and returns true if it is an array, false otherwise.",
+        "skeleton_code": "function isArray(val) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "[1, 2]",
+                "expected": "true"
+            },
+            {
+                "input": "\"hello\"",
+                "expected": "false"
+            },
+            {
+                "input": "42",
+                "expected": "false"
+            },
+            {
+                "input": "[]",
+                "expected": "true"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 5,
+        "q_id": "code_easy_033"
+    },
+    {
+        "category": "Programming (Coding-Easy)",
+        "difficulty": "Easy",
+        "type": "coding",
+        "text": "Write a function 'clampNumber' that takes a number, a min, and a max value, and returns the number clamped within [min, max].",
+        "skeleton_code": "function clampNumber(num, min, max) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "5, 1, 10",
+                "expected": "5"
+            },
+            {
+                "input": "0, 1, 10",
+                "expected": "1"
+            },
+            {
+                "input": "15, 1, 10",
+                "expected": "10"
+            },
+            {
+                "input": "-5, -10, 10",
+                "expected": "-5"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 5,
+        "q_id": "code_easy_034"
+    },
+    {
+        "category": "Programming (Coding-Easy)",
+        "difficulty": "Easy",
+        "type": "coding",
+        "text": "Write a function 'removeLastElement' that takes an array and returns a new array with the last element removed. Return empty array if input is empty.",
+        "skeleton_code": "function removeLastElement(arr) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "[1, 2, 3]",
+                "expected": "[1, 2]"
+            },
+            {
+                "input": "[5]",
+                "expected": "[]"
+            },
+            {
+                "input": "[]",
+                "expected": "[]"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 5,
+        "q_id": "code_easy_035"
+    },
+    {
+        "category": "Programming (Coding-Easy)",
+        "difficulty": "Easy",
+        "type": "coding",
+        "text": "Write a function 'startsWithCapital' that takes a string and returns true if the first character is an uppercase letter, false otherwise.",
+        "skeleton_code": "function startsWithCapital(str) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "\"Hello\"",
+                "expected": "true"
+            },
+            {
+                "input": "\"world\"",
+                "expected": "false"
+            },
+            {
+                "input": "\"ABC\"",
+                "expected": "true"
+            },
+            {
+                "input": "\"\"",
+                "expected": "false"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 5,
+        "q_id": "code_easy_036"
+    },
+    {
+        "category": "Programming (Coding-Easy)",
+        "difficulty": "Easy",
+        "type": "coding",
+        "text": "Write a function 'objectHasKey' that takes an object and a key string, and returns true if the object has that key, false otherwise.",
+        "skeleton_code": "function objectHasKey(obj, key) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "{\"a\": 1, \"b\": 2}, \"a\"",
+                "expected": "true"
+            },
+            {
+                "input": "{\"a\": 1}, \"c\"",
+                "expected": "false"
+            },
+            {
+                "input": "{}, \"x\"",
+                "expected": "false"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 5,
+        "q_id": "code_easy_037"
+    },
+    {
+        "category": "Programming (Coding-Easy)",
+        "difficulty": "Easy",
+        "type": "coding",
+        "text": "Write a function 'sortAscending' that takes an array of numbers and returns a new array sorted in ascending order.",
+        "skeleton_code": "function sortAscending(nums) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "[3, 1, 4, 1, 5]",
+                "expected": "[1, 1, 3, 4, 5]"
+            },
+            {
+                "input": "[10, -1, 0]",
+                "expected": "[-1, 0, 10]"
+            },
+            {
+                "input": "[]",
+                "expected": "[]"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 5,
+        "q_id": "code_easy_038"
+    },
+    {
+        "category": "Programming (Coding-Easy)",
+        "difficulty": "Easy",
+        "type": "coding",
+        "text": "Write a function 'capitalize' that takes a string and returns it with the first character converted to uppercase.",
+        "skeleton_code": "function capitalize(str) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "\"hello\"",
+                "expected": "\"Hello\""
+            },
+            {
+                "input": "\"world\"",
+                "expected": "\"World\""
+            },
+            {
+                "input": "\"\"",
+                "expected": "\"\""
+            },
+            {
+                "input": "\"A\"",
+                "expected": "\"A\""
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 5,
+        "q_id": "code_easy_039"
+    },
+    {
+        "category": "Programming (Coding-Easy)",
+        "difficulty": "Easy",
+        "type": "coding",
+        "text": "Write a function 'subtractTwo' that takes two numbers a and b and returns a minus b.",
+        "skeleton_code": "function subtractTwo(a, b) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "10, 3",
+                "expected": "7"
+            },
+            {
+                "input": "0, 5",
+                "expected": "-5"
+            },
+            {
+                "input": "-2, -2",
+                "expected": "0"
+            },
+            {
+                "input": "100, 50",
+                "expected": "50"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 5,
+        "q_id": "code_easy_040"
+    },
+    {
+        "category": "Programming (Coding-Medium)",
+        "difficulty": "Medium",
+        "type": "coding",
+        "text": "Write a function 'groupByParity' that takes an array of integers and returns an object with two keys: 'even' (array of even numbers) and 'odd' (array of odd numbers).",
+        "skeleton_code": "function groupByParity(nums) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "[1, 2, 3, 4, 5]",
+                "expected": "{\"even\": [2, 4], \"odd\": [1, 3, 5]}"
+            },
+            {
+                "input": "[2, 4, 6]",
+                "expected": "{\"even\": [2, 4, 6], \"odd\": []}"
+            },
+            {
+                "input": "[]",
+                "expected": "{\"even\": [], \"odd\": []}"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 7,
+        "q_id": "code_med_001"
+    },
+    {
+        "category": "Programming (Coding-Medium)",
+        "difficulty": "Medium",
+        "type": "coding",
+        "text": "Write a function 'uniqueValues' that takes an array and returns a new array with duplicate values removed, preserving the original order.",
+        "skeleton_code": "function uniqueValues(arr) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "[1, 2, 2, 3, 3, 3]",
+                "expected": "[1, 2, 3]"
+            },
+            {
+                "input": "[\"a\", \"b\", \"a\"]",
+                "expected": "[\"a\", \"b\"]"
+            },
+            {
+                "input": "[]",
+                "expected": "[]"
+            },
+            {
+                "input": "[1]",
+                "expected": "[1]"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 7,
+        "q_id": "code_med_002"
+    },
+    {
+        "category": "Programming (Coding-Medium)",
+        "difficulty": "Medium",
+        "type": "coding",
+        "text": "Write a function 'flattenOnce' that takes a nested array (one level deep) and returns a single flattened array.",
+        "skeleton_code": "function flattenOnce(arr) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "[[1, 2], [3, 4]]",
+                "expected": "[1, 2, 3, 4]"
+            },
+            {
+                "input": "[[1], [2], [3]]",
+                "expected": "[1, 2, 3]"
+            },
+            {
+                "input": "[]",
+                "expected": "[]"
+            },
+            {
+                "input": "[[1, 2, 3]]",
+                "expected": "[1, 2, 3]"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 7,
+        "q_id": "code_med_003"
+    },
+    {
+        "category": "Programming (Coding-Medium)",
+        "difficulty": "Medium",
+        "type": "coding",
+        "text": "Write a function 'wordFrequency' that takes a string of space-separated words and returns an object mapping each word to its count.",
+        "skeleton_code": "function wordFrequency(str) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "\"hello world hello\"",
+                "expected": "{\"hello\": 2, \"world\": 1}"
+            },
+            {
+                "input": "\"a a a\"",
+                "expected": "{\"a\": 3}"
+            },
+            {
+                "input": "\"\"",
+                "expected": "{}"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 7,
+        "q_id": "code_med_004"
+    },
+    {
+        "category": "Programming (Coding-Medium)",
+        "difficulty": "Medium",
+        "type": "coding",
+        "text": "Write a function 'chunkArray' that takes an array and a chunk size n, and returns a new array of arrays each of length n (the last chunk may be smaller).",
+        "skeleton_code": "function chunkArray(arr, n) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "[1, 2, 3, 4, 5], 2",
+                "expected": "[[1, 2], [3, 4], [5]]"
+            },
+            {
+                "input": "[1, 2, 3], 3",
+                "expected": "[[1, 2, 3]]"
+            },
+            {
+                "input": "[], 2",
+                "expected": "[]"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 7,
+        "q_id": "code_med_005"
+    },
+    {
+        "category": "Programming (Coding-Medium)",
+        "difficulty": "Medium",
+        "type": "coding",
+        "text": "Write a function 'zipArrays' that takes two arrays and returns a new array of pairs [a, b] where each pair contains elements at the same index. Stop at the shorter array's length.",
+        "skeleton_code": "function zipArrays(arr1, arr2) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "[1, 2, 3], [\"a\", \"b\", \"c\"]",
+                "expected": "[[1, \"a\"], [2, \"b\"], [3, \"c\"]]"
+            },
+            {
+                "input": "[1, 2], [\"a\", \"b\", \"c\"]",
+                "expected": "[[1, \"a\"], [2, \"b\"]]"
+            },
+            {
+                "input": "[], [1, 2]",
+                "expected": "[]"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 7,
+        "q_id": "code_med_006"
+    },
+    {
+        "category": "Programming (Coding-Medium)",
+        "difficulty": "Medium",
+        "type": "coding",
+        "text": "Write a function 'deepEqual' that takes two values and returns true if they are deeply equal (same structure and values for objects/arrays), false otherwise.",
+        "skeleton_code": "function deepEqual(a, b) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "{\"a\": 1}, {\"a\": 1}",
+                "expected": "true"
+            },
+            {
+                "input": "{\"a\": 1}, {\"a\": 2}",
+                "expected": "false"
+            },
+            {
+                "input": "[1, 2, 3], [1, 2, 3]",
+                "expected": "true"
+            },
+            {
+                "input": "[1, 2], [1, 2, 3]",
+                "expected": "false"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 7,
+        "q_id": "code_med_007"
+    },
+    {
+        "category": "Programming (Coding-Medium)",
+        "difficulty": "Medium",
+        "type": "coding",
+        "text": "Write a function 'sortByProperty' that takes an array of objects and a property name, and returns the array sorted in ascending order by that property's value.",
+        "skeleton_code": "function sortByProperty(arr, prop) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "[{\"name\": \"Zara\", \"age\": 25}, {\"name\": \"Alice\", \"age\": 20}], \"age\"",
+                "expected": "[{\"name\": \"Alice\", \"age\": 20}, {\"name\": \"Zara\", \"age\": 25}]"
+            },
+            {
+                "input": "[{\"score\": 90}, {\"score\": 70}, {\"score\": 80}], \"score\"",
+                "expected": "[{\"score\": 70}, {\"score\": 80}, {\"score\": 90}]"
+            },
+            {
+                "input": "[], \"age\"",
+                "expected": "[]"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 7,
+        "q_id": "code_med_008"
+    },
+    {
+        "category": "Programming (Coding-Medium)",
+        "difficulty": "Medium",
+        "type": "coding",
+        "text": "Write a function 'invertObject' that takes an object and returns a new object where the keys and values are swapped.",
+        "skeleton_code": "function invertObject(obj) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "{\"a\": 1, \"b\": 2}",
+                "expected": "{\"1\": \"a\", \"2\": \"b\"}"
+            },
+            {
+                "input": "{\"x\": \"y\"}",
+                "expected": "{\"y\": \"x\"}"
+            },
+            {
+                "input": "{}",
+                "expected": "{}"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 7,
+        "q_id": "code_med_009"
+    },
+    {
+        "category": "Programming (Coding-Medium)",
+        "difficulty": "Medium",
+        "type": "coding",
+        "text": "Write a function 'fibonacci' that takes a number n and returns the nth Fibonacci number (0-indexed, where fib(0) = 0, fib(1) = 1).",
+        "skeleton_code": "function fibonacci(n) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "0",
+                "expected": "0"
+            },
+            {
+                "input": "1",
+                "expected": "1"
+            },
+            {
+                "input": "6",
+                "expected": "8"
+            },
+            {
+                "input": "10",
+                "expected": "55"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 7,
+        "q_id": "code_med_010"
+    },
+    {
+        "category": "Programming (Coding-Medium)",
+        "difficulty": "Medium",
+        "type": "coding",
+        "text": "Write a function 'mergeObjects' that takes two objects and returns a new object with all key-value pairs from both (second object's values overwrite the first on conflict).",
+        "skeleton_code": "function mergeObjects(obj1, obj2) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "{\"a\": 1, \"b\": 2}, {\"b\": 3, \"c\": 4}",
+                "expected": "{\"a\": 1, \"b\": 3, \"c\": 4}"
+            },
+            {
+                "input": "{}, {\"x\": 1}",
+                "expected": "{\"x\": 1}"
+            },
+            {
+                "input": "{\"a\": 1}, {}",
+                "expected": "{\"a\": 1}"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 7,
+        "q_id": "code_med_011"
+    },
+    {
+        "category": "Programming (Coding-Medium)",
+        "difficulty": "Medium",
+        "type": "coding",
+        "text": "Write a function 'longestWord' that takes a sentence (string) and returns the longest word. If there are ties, return the first one.",
+        "skeleton_code": "function longestWord(sentence) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "\"the quick brown fox\"",
+                "expected": "\"quick\""
+            },
+            {
+                "input": "\"hello world\"",
+                "expected": "\"hello\""
+            },
+            {
+                "input": "\"I am a student\"",
+                "expected": "\"student\""
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 7,
+        "q_id": "code_med_012"
+    },
+    {
+        "category": "Programming (Coding-Medium)",
+        "difficulty": "Medium",
+        "type": "coding",
+        "text": "Write a function 'rotateArray' that takes an array and a number k, and returns a new array rotated to the right by k positions.",
+        "skeleton_code": "function rotateArray(arr, k) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "[1, 2, 3, 4, 5], 2",
+                "expected": "[4, 5, 1, 2, 3]"
+            },
+            {
+                "input": "[1, 2, 3], 0",
+                "expected": "[1, 2, 3]"
+            },
+            {
+                "input": "[1, 2, 3], 3",
+                "expected": "[1, 2, 3]"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 7,
+        "q_id": "code_med_013"
+    },
+    {
+        "category": "Programming (Coding-Medium)",
+        "difficulty": "Medium",
+        "type": "coding",
+        "text": "Write a function 'countWords' that takes a string and returns the number of words in it. Words are separated by spaces.",
+        "skeleton_code": "function countWords(str) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "\"hello world\"",
+                "expected": "2"
+            },
+            {
+                "input": "\"one\"",
+                "expected": "1"
+            },
+            {
+                "input": "\"\"",
+                "expected": "0"
+            },
+            {
+                "input": "\"the quick brown fox\"",
+                "expected": "4"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 7,
+        "q_id": "code_med_014"
+    },
+    {
+        "category": "Programming (Coding-Medium)",
+        "difficulty": "Medium",
+        "type": "coding",
+        "text": "Write a function 'intersection' that takes two arrays and returns a new array of elements that appear in both (no duplicates).",
+        "skeleton_code": "function intersection(arr1, arr2) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "[1, 2, 3], [2, 3, 4]",
+                "expected": "[2, 3]"
+            },
+            {
+                "input": "[1, 2], [3, 4]",
+                "expected": "[]"
+            },
+            {
+                "input": "[1, 1, 2], [1, 2, 2]",
+                "expected": "[1, 2]"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 7,
+        "q_id": "code_med_015"
+    },
+    {
+        "category": "Programming (Coding-Medium)",
+        "difficulty": "Medium",
+        "type": "coding",
+        "text": "Write a function 'differenceArray' that takes two arrays and returns elements that are in the first array but NOT in the second.",
+        "skeleton_code": "function differenceArray(arr1, arr2) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "[1, 2, 3, 4], [2, 4]",
+                "expected": "[1, 3]"
+            },
+            {
+                "input": "[1, 2, 3], [1, 2, 3]",
+                "expected": "[]"
+            },
+            {
+                "input": "[1, 2], []",
+                "expected": "[1, 2]"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 7,
+        "q_id": "code_med_016"
+    },
+    {
+        "category": "Programming (Coding-Medium)",
+        "difficulty": "Medium",
+        "type": "coding",
+        "text": "Write a function 'factorial' that takes a non-negative integer n and returns n! (n factorial). Return 1 for n = 0.",
+        "skeleton_code": "function factorial(n) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "0",
+                "expected": "1"
+            },
+            {
+                "input": "1",
+                "expected": "1"
+            },
+            {
+                "input": "5",
+                "expected": "120"
+            },
+            {
+                "input": "7",
+                "expected": "5040"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 7,
+        "q_id": "code_med_017"
+    },
+    {
+        "category": "Programming (Coding-Medium)",
+        "difficulty": "Medium",
+        "type": "coding",
+        "text": "Write a function 'mapValues' that takes an object and a function, and returns a new object with the same keys but values transformed by the function.",
+        "skeleton_code": "function mapValues(obj, fn) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "{\"a\": 1, \"b\": 2}, n => n * 2",
+                "expected": "{\"a\": 2, \"b\": 4}"
+            },
+            {
+                "input": "{\"x\": \"hello\"}, s => s.toUpperCase()",
+                "expected": "{\"x\": \"HELLO\"}"
+            },
+            {
+                "input": "{}, n => n + 1",
+                "expected": "{}"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 7,
+        "q_id": "code_med_018"
+    },
+    {
+        "category": "Programming (Coding-Medium)",
+        "difficulty": "Medium",
+        "type": "coding",
+        "text": "Write a function 'anagramCheck' that takes two strings and returns true if they are anagrams of each other (same characters, different order, case-insensitive), false otherwise.",
+        "skeleton_code": "function anagramCheck(str1, str2) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "\"listen\", \"silent\"",
+                "expected": "true"
+            },
+            {
+                "input": "\"hello\", \"world\"",
+                "expected": "false"
+            },
+            {
+                "input": "\"Triangle\", \"Integral\"",
+                "expected": "true"
+            },
+            {
+                "input": "\"abc\", \"abcd\"",
+                "expected": "false"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 7,
+        "q_id": "code_med_019"
+    },
+    {
+        "category": "Programming (Coding-Medium)",
+        "difficulty": "Medium",
+        "type": "coding",
+        "text": "Write a function 'binarySearch' that takes a sorted array of numbers and a target, and returns the index of the target, or -1 if not found.",
+        "skeleton_code": "function binarySearch(arr, target) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "[1, 3, 5, 7, 9], 5",
+                "expected": "2"
+            },
+            {
+                "input": "[1, 3, 5, 7, 9], 6",
+                "expected": "-1"
+            },
+            {
+                "input": "[2], 2",
+                "expected": "0"
+            },
+            {
+                "input": "[], 1",
+                "expected": "-1"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 7,
+        "q_id": "code_med_020"
+    },
+    {
+        "category": "Programming (Coding-Hard)",
+        "difficulty": "Hard",
+        "type": "coding",
+        "text": "Write a function 'deepFlatten' that takes a deeply nested array and returns a completely flattened array.",
+        "skeleton_code": "function deepFlatten(arr) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "[1, [2, [3, [4]]]]",
+                "expected": "[1, 2, 3, 4]"
+            },
+            {
+                "input": "[[1, 2], [3, [4, 5]]]",
+                "expected": "[1, 2, 3, 4, 5]"
+            },
+            {
+                "input": "[]",
+                "expected": "[]"
+            },
+            {
+                "input": "[1, 2, 3]",
+                "expected": "[1, 2, 3]"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 10,
+        "q_id": "code_hard_001"
+    },
+    {
+        "category": "Programming (Coding-Hard)",
+        "difficulty": "Hard",
+        "type": "coding",
+        "text": "Write a function 'memoize' that takes a function and returns a memoized version that caches results for repeated calls with the same arguments (assume single-argument functions).",
+        "skeleton_code": "function memoize(fn) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "memoize(x => x * 2)(5)",
+                "expected": "10"
+            },
+            {
+                "input": "const m = memoize(x => x + 1); m(3); m(3)",
+                "expected": "4"
+            },
+            {
+                "input": "memoize(x => x * x)(7)",
+                "expected": "49"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 10,
+        "q_id": "code_hard_002"
+    },
+    {
+        "category": "Programming (Coding-Hard)",
+        "difficulty": "Hard",
+        "type": "coding",
+        "text": "Write a function 'debounce' that takes a function fn and a delay in ms, and returns a debounced version that only calls fn after delay ms have passed since the last invocation.",
+        "skeleton_code": "function debounce(fn, delay) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "debounce called once after delay",
+                "expected": "fn called once"
+            },
+            {
+                "input": "debounce called multiple times within delay",
+                "expected": "fn called once"
+            },
+            {
+                "input": "debounce called twice with gap > delay",
+                "expected": "fn called twice"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 10,
+        "q_id": "code_hard_003"
+    },
+    {
+        "category": "Programming (Coding-Hard)",
+        "difficulty": "Hard",
+        "type": "coding",
+        "text": "Write a function 'treeSum' that takes a binary tree node (object with 'val', 'left', 'right' properties; leaves have null left/right) and returns the sum of all node values.",
+        "skeleton_code": "function treeSum(node) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "{val: 1, left: {val: 2, left: null, right: null}, right: {val: 3, left: null, right: null}}",
+                "expected": "6"
+            },
+            {
+                "input": "{val: 5, left: null, right: null}",
+                "expected": "5"
+            },
+            {
+                "input": "null",
+                "expected": "0"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 10,
+        "q_id": "code_hard_004"
+    },
+    {
+        "category": "Programming (Coding-Hard)",
+        "difficulty": "Hard",
+        "type": "coding",
+        "text": "Write a function 'longestIncreasingSubsequence' that takes an array of integers and returns the length of the longest strictly increasing subsequence.",
+        "skeleton_code": "function longestIncreasingSubsequence(nums) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "[10, 9, 2, 5, 3, 7, 101, 18]",
+                "expected": "4"
+            },
+            {
+                "input": "[0, 1, 0, 3, 2, 3]",
+                "expected": "4"
+            },
+            {
+                "input": "[7, 7, 7, 7]",
+                "expected": "1"
+            },
+            {
+                "input": "[]",
+                "expected": "0"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 10,
+        "q_id": "code_hard_005"
+    },
+    {
+        "category": "Programming (Coding-Hard)",
+        "difficulty": "Hard",
+        "type": "coding",
+        "text": "Write a function 'curry' that takes a function of arity n and returns a curried version that can be called one argument at a time until all arguments are provided, then returns the result.",
+        "skeleton_code": "function curry(fn) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "curry((a, b) => a + b)(1)(2)",
+                "expected": "3"
+            },
+            {
+                "input": "curry((a, b, c) => a * b * c)(2)(3)(4)",
+                "expected": "24"
+            },
+            {
+                "input": "curry(x => x * 2)(5)",
+                "expected": "10"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 10,
+        "q_id": "code_hard_006"
+    },
+    {
+        "category": "Programming (Coding-Hard)",
+        "difficulty": "Hard",
+        "type": "coding",
+        "text": "Write a function 'groupBy' that takes an array and a key function, and returns an object grouping array items by the key returned by the function for each item.",
+        "skeleton_code": "function groupBy(arr, keyFn) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "[1, 2, 3, 4, 5], x => x % 2 === 0 ? 'even' : 'odd'",
+                "expected": "{\"odd\": [1, 3, 5], \"even\": [2, 4]}"
+            },
+            {
+                "input": "[{type: 'a'}, {type: 'b'}, {type: 'a'}], x => x.type",
+                "expected": "{\"a\": [{\"type\": \"a\"}, {\"type\": \"a\"}], \"b\": [{\"type\": \"b\"}]}"
+            },
+            {
+                "input": "[], x => x",
+                "expected": "{}"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 10,
+        "q_id": "code_hard_007"
+    },
+    {
+        "category": "Programming (Coding-Hard)",
+        "difficulty": "Hard",
+        "type": "coding",
+        "text": "Write a function 'permutations' that takes an array and returns all possible permutations as an array of arrays.",
+        "skeleton_code": "function permutations(arr) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "[1, 2, 3]",
+                "expected": "[[1,2,3],[1,3,2],[2,1,3],[2,3,1],[3,1,2],[3,2,1]]"
+            },
+            {
+                "input": "[1]",
+                "expected": "[[1]]"
+            },
+            {
+                "input": "[]",
+                "expected": "[[]]"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 10,
+        "q_id": "code_hard_008"
+    },
+    {
+        "category": "Programming (Coding-Hard)",
+        "difficulty": "Hard",
+        "type": "coding",
+        "text": "Write a function 'pipe' that takes any number of functions as arguments and returns a new function that applies them left-to-right (output of each becomes input of the next).",
+        "skeleton_code": "function pipe(...fns) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "pipe(x => x + 1, x => x * 2)(3)",
+                "expected": "8"
+            },
+            {
+                "input": "pipe(x => x.toUpperCase(), x => x + '!')(\"hello\")",
+                "expected": "\"HELLO!\""
+            },
+            {
+                "input": "pipe(x => x)(5)",
+                "expected": "5"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 10,
+        "q_id": "code_hard_009"
+    },
+    {
+        "category": "Programming (Coding-Hard)",
+        "difficulty": "Hard",
+        "type": "coding",
+        "text": "Write a function 'topKFrequent' that takes an array of integers and a number k, and returns the k most frequently occurring elements (in any order).",
+        "skeleton_code": "function topKFrequent(nums, k) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "[1, 1, 1, 2, 2, 3], 2",
+                "expected": "[1, 2]"
+            },
+            {
+                "input": "[1], 1",
+                "expected": "[1]"
+            },
+            {
+                "input": "[4, 4, 5, 5, 6], 2",
+                "expected": "[4, 5]"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 10,
+        "q_id": "code_hard_010"
     }
 ]

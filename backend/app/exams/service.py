@@ -42,8 +42,8 @@ def _read_bank() -> List[Dict]:
 
 def _write_bank(combined_bank: List[Dict]) -> bool:
     """Split and save questions back into their respective files with robust category matching."""
-    prog_qs = [q for q in combined_bank if (q.get("category") or "").strip().lower() == 'programming (advanced)']
-    std_qs = [q for q in combined_bank if (q.get("category") or "").strip().lower() != 'programming (advanced)']
+    prog_qs = [q for q in combined_bank if (q.get("category") or "").strip().lower().startswith('programming (coding') or (q.get("category") or "").strip().lower() == 'programming (advanced)']
+    std_qs = [q for q in combined_bank if not ((q.get("category") or "").strip().lower().startswith('programming (coding') or (q.get("category") or "").strip().lower() == 'programming (advanced)')]
     
     success = True
     # Save standard bank
@@ -236,7 +236,7 @@ def delete_bank_question(q_id: str) -> bool:
     target_q = next((q for q in bank if q.get('q_id') == q_id), None)
     if target_q:
         cat = (target_q.get('category') or "").strip().lower()
-        if cat == 'programming (advanced)':
+        if cat.startswith('programming (coding') or cat == 'programming (advanced)':
             print(f"DEBUG: Prevented deletion of protected programming question: {q_id}")
             return False
         
@@ -264,7 +264,8 @@ def upload_to_bank(questions: List[Dict]) -> bool:
 
 def delete_bank_category(category_name: str) -> bool:
     """Delete a category and all its questions from the bank."""
-    if category_name.lower() == "programming (advanced)":
+    low_cat = category_name.lower()
+    if low_cat.startswith('programming (coding') or low_cat == "programming (advanced)":
         return False # This category is protected
         
     bank = _read_bank()

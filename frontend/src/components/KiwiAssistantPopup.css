@@ -9,16 +9,16 @@
     bottom: 24px;
     right: 24px;
     width: 380px;
-    height: 600px; /* Balanced height for the 380px width */
-    background: #0d1117;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 20px;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+    height: 600px;
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
     display: flex;
     flex-direction: column;
     overflow: hidden;
     z-index: 2500;
-    font-family: 'Inter', 'Plus Jakarta Sans', sans-serif;
+    font-family: var(--font-body);
     animation: kapFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -31,7 +31,8 @@
    HEADER: DEEP TEAL #0F6E56 (72px)
    ───────────────────────────────────────────────────────────── */
 .custom-kap-header {
-    background: #0F6E56;
+    background: var(--primary);
+    color: var(--text-on-primary, #ffffff);
     height: 72px;
     padding: 0 16px;
     display: flex;
@@ -65,10 +66,10 @@
 }
 
 .custom-kap-bot-name {
-    color: #ffffff;
-    font-size: 15px;
-    font-weight: 500;
-    letter-spacing: -0.01em;
+    color: var(--text-on-primary, #ffffff);
+    font-size: var(--font-size-emph);
+    font-weight: var(--font-weight-semibold);
+    font-family: var(--font-heading);
 }
 
 .custom-kap-status {
@@ -79,9 +80,8 @@
 }
 
 .custom-kap-status span {
-    font-size: 11px;
-    color: rgba(255, 255, 255, 0.7);
-    font-weight: 400;
+    font-size: var(--font-size-xs);
+    color: rgba(255, 255, 255, 0.8);
 }
 
 .custom-kap-dot {
@@ -121,7 +121,7 @@
    ───────────────────────────────────────────────────────────── */
 .custom-kap-chat-body {
     flex: 1;
-    background: #111a17;
+    background: var(--bg-neutral);
     padding: 20px 16px;
     overflow-y: auto;
     display: flex;
@@ -141,7 +141,7 @@
 .custom-kap-bot-pfp {
     width: 30px;
     height: 30px;
-    background: #1a2a24;
+    background: var(--bg-sunken);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -159,28 +159,30 @@
 
 .custom-kap-bubble {
     padding: 12px 14px;
-    font-size: 13px;
-    line-height: 1.5;
+    font-family: var(--font-body);
+    font-size: var(--font-size-body);
+    line-height: var(--line-height-normal);
     position: relative;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    box-shadow: var(--shadow-sm);
 }
 
 .custom-kap-bubble.ai {
-    background: #1a2a24;
-    color: #ffffff;
-    border-radius: 4px 14px 14px 14px; /* SHARP TOP-LEFT */
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 4px var(--radius-md) var(--radius-md) var(--radius-md);
 }
 
 .custom-kap-bubble.user {
-    background: #0F6E56;
-    color: #ffffff;
-    border-radius: 14px 4px 14px 14px; /* SHARP TOP-RIGHT */
-    font-weight: 500;
+    background: var(--primary);
+    color: var(--text-on-primary, #ffffff);
+    border-radius: var(--radius-md) 4px var(--radius-md) var(--radius-md);
+    font-weight: var(--font-weight-medium);
 }
 
 .custom-kap-timestamp {
     font-size: 10px;
-    color: #4a7a6a; /* MUTED TEAL */
+    color: var(--text-subtle);
     padding-left: 2px;
 }
 
@@ -190,21 +192,22 @@
    TOPICS SECTION: #0d1117
    ───────────────────────────────────────────────────────────── */
 .custom-kap-topics-section {
-    padding: 12px 16px 14px; /* Reduced padding */
-    background: #0d1117;
-    border-top: 0.5px solid #1e3a2f;
-    max-height: 45%; /* Ensure space for chat */
+    padding: 12px 16px 14px;
+    background: var(--bg-raised);
+    border-top: 1px solid var(--border);
+    max-height: 45%;
     display: flex;
     flex-direction: column;
 }
 
 .custom-kap-section-lbl {
-    font-size: 10px;
-    font-weight: 700;
-    color: rgba(255, 255, 255, 0.4);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-bold);
+    color: var(--text-subtle);
     letter-spacing: 0.1em;
     margin-bottom: 10px;
     padding-left: 4px;
+    text-transform: uppercase;
 }
 
 .custom-kap-topics-list {
@@ -216,45 +219,45 @@
 }
 
 .custom-kap-topics-list::-webkit-scrollbar { width: 3px; }
-.custom-kap-topics-list::-webkit-scrollbar-thumb { background: #1e3a2f; border-radius: 10px; }
+.custom-kap-topics-list::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 10px; }
 
 .custom-kap-topic-btn {
     width: 100%;
-    padding: 10px 14px; /* More compact */
-    background: #111a17;
-    border: 0.5px solid #1e3a2f;
-    border-radius: 12px;
+    padding: 10px 14px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
     display: flex;
     align-items: center;
     gap: 12px;
     cursor: pointer;
-    transition: all 150ms ease;
+    transition: all var(--transition-fast);
     text-align: left;
     position: relative;
     flex-shrink: 0;
 }
 
 .custom-kap-topic-btn.dimmed {
-    opacity: 0.4;
+    opacity: 0.5;
 }
 
 .custom-kap-topic-btn.highlighted {
     opacity: 1;
-    border-color: #1D9E75;
-    background: #0e2820;
+    border-color: var(--primary);
+    background: var(--primary-lighter);
 }
 
 .custom-kap-opt-badge {
     width: 32px;
     height: 32px;
-    background: #1a2a24;
-    border-radius: 8px;
+    background: var(--bg-sunken);
+    border-radius: var(--radius-sm);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 15px;
     flex-shrink: 0;
-    transition: all 150ms ease;
+    transition: all var(--transition-fast);
 }
 
 .custom-kap-opt-info {
@@ -266,21 +269,21 @@
 }
 
 .custom-kap-opt-q {
-    color: #ffffff;
-    font-size: 13px;
-    font-weight: 600;
+    color: var(--text);
+    font-size: var(--font-size-body);
+    font-weight: var(--font-weight-semibold);
 }
 
 .custom-kap-opt-sub {
-    color: #4a7a6a; /* MUTED TEAL */
-    font-size: 11px;
+    color: var(--text-muted);
+    font-size: var(--font-size-label);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 .custom-kap-chevron {
-    color: #4a7a6a;
+    color: var(--text-subtle);
     font-size: 18px;
     line-height: 1;
 }
@@ -289,13 +292,14 @@
    INTERACTIONS: SLIDE & COLOR SHIFTS (150ms)
    ───────────────────────────────────────────────────────────── */
 .custom-kap-topic-btn:hover {
-    border-color: #1D9E75;
-    background: #0e2820;
+    border-color: var(--primary);
+    background: var(--primary-lighter);
     transform: translateX(2px);
 }
 
 .custom-kap-topic-btn:hover .custom-kap-opt-badge {
-    background: #1D9E75;
+    background: var(--primary);
+    color: #ffffff;
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -303,20 +307,20 @@
    ───────────────────────────────────────────────────────────── */
 .custom-kap-footer {
     padding: 14px 16px 20px;
-    background: #0d1117;
-    border-top: 0.5px solid #1e3a2f;
+    background: var(--bg-raised);
+    border-top: 1px solid var(--border);
     text-align: center;
 }
 
 .custom-kap-footer span {
-    font-size: 11px;
-    color: rgba(255, 255, 255, 0.4); /* MUTED */
-    font-weight: 500;
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    font-weight: var(--font-weight-medium);
 }
 
 /* CUSTOM SCROLLBAR FOR BODY */
 .custom-kap-chat-body::-webkit-scrollbar { width: 4px; }
 .custom-kap-chat-body::-webkit-scrollbar-thumb {
-    background: #1e3a2f;
+    background: var(--border-strong);
     border-radius: 10px;
 }
