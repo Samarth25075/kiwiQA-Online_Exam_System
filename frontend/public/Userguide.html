@@ -28,6 +28,23 @@
       --sidebar-w: 280px;
     }
 
+    [data-theme="dark"] {
+      --bg: #0f1715;
+      --surface: #1a2422;
+      --surface2: #212d2b;
+      --border: #2d3b38;
+      --border2: #3f514e;
+      --text: #ecfdfa;
+      --text2: #99f6e4;
+      --text3: #5eead4;
+      --sidebar-bg: #0b1211;
+    }
+
+    [data-theme="dark"] .user-guide-footer {
+      background: rgba(15, 23, 21, 0.85);
+      border-top-color: var(--border);
+    }
+
     * {
       margin: 0;
       padding: 0;
@@ -39,7 +56,41 @@
       -ms-overflow-style: none !important;
       scrollbar-width: none !important;
       overflow-y: overlay;
-      /* Allows scrolling but hides bar in some browsers */
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    .theme-toggle {
+      position: fixed;
+      top: 18px;
+      right: 28px;
+      z-index: 1000;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #fff;
+      font-size: 20px;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .theme-toggle:hover {
+      background: rgba(255, 255, 255, 0.25);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    [data-theme="dark"] .theme-toggle {
+      background: rgba(13, 148, 136, 0.2);
+      color: var(--teal-light);
+      border-color: rgba(20, 184, 166, 0.3);
     }
 
     html::-webkit-scrollbar,
@@ -161,24 +212,63 @@
       border-top: 1px solid rgba(255, 255, 255, 0.08);
       font-size: 11px;
       color: rgba(255, 255, 255, 0.2);
-      background: var(--text);
+      background: var(--sidebar-bg, var(--text));
       z-index: 10;
     }
 
-    /* ── MAIN ── */
+    #sidebar {
+      background: var(--sidebar-bg, var(--text));
+    }
+
     #main {
       margin-left: var(--sidebar-w);
       flex: 1;
       min-height: 100vh;
       padding-bottom: 50px;
+      position: relative;
     }
 
-    /* ── HERO ── */
+    button#theme-btn {
+      position: absolute;
+      top: 24px;
+      right: 32px;
+      z-index: 1000;
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(12px);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    button#theme-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: scale(1.08) rotate(12deg);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    }
+
+    [data-theme="dark"] button#theme-btn {
+      color: var(--accent);
+      background: rgba(0, 0, 0, 0.3);
+      border-color: var(--accent);
+    }
+
     .hero {
       background: linear-gradient(135deg, #0f2621 0%, #134e4a 50%, #0d9488 100%);
       padding: 72px 64px 64px;
       position: relative;
       overflow: hidden;
+    }
+    
+    #main-wrapper {
+      position: relative;
     }
 
     .hero::before {
@@ -950,7 +1040,7 @@
       bottom: 0;
       left: var(--sidebar-w);
       right: 0;
-      padding: 12px 64px;
+      padding: 16px 64px;
       border-top: 1px solid var(--border);
       text-align: center;
       font-size: 11px;
@@ -1042,6 +1132,7 @@
 
   <!-- MAIN -->
   <main id="main">
+    <button id="theme-btn" title="Toggle Light/Dark Mode"></button>
 
     <!-- HERO -->
     <div class="hero">
@@ -2155,6 +2246,27 @@
       setTimeout(() => {
         appendMessage(answer, 'ai');
       }, 600);
+    }
+
+    // THEME TOGGLE SCRIPT
+    const themeBtn = document.getElementById('theme-btn');
+    const htmlEl = document.documentElement;
+
+    // Load saved theme
+    const savedTheme = localStorage.getItem('kiwi-docs-theme') || 'light';
+    htmlEl.setAttribute('data-theme', savedTheme);
+    updateThemeIcon(savedTheme);
+
+    themeBtn.addEventListener('click', () => {
+      const current = htmlEl.getAttribute('data-theme');
+      const next = current === 'light' ? 'dark' : 'light';
+      htmlEl.setAttribute('data-theme', next);
+      localStorage.setItem('kiwi-docs-theme', next);
+      updateThemeIcon(next);
+    });
+
+    function updateThemeIcon(theme) {
+      themeBtn.innerHTML = theme === 'light' ? '🌙' : '☀️';
     }
   </script>
 </body>

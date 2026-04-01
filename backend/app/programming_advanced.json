@@ -1,0 +1,56 @@
+[
+    {
+        "category": "Programming (Advanced)",
+        "difficulty": "Advanced",
+        "type": "coding",
+        "text": "Write a function 'filterEvens' that takes an array of integers and returns a new array containing only the even numbers. If there are no even numbers, return an empty array.",
+        "skeleton_code": "function filterEvens(nums) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "[1, 2, 3, 4, 5, 6]",
+                "expected": "[2, 4, 6]"
+            },
+            {
+                "input": "[1, 3, 5]",
+                "expected": "[]"
+            },
+            {
+                "input": "[]",
+                "expected": "[]"
+            },
+            {
+                "input": "[10, 20, 30]",
+                "expected": "[10, 20, 30]"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 10,
+        "q_id": "code_fe_501"
+    },
+    {
+        "category": "Programming (Advanced)",
+        "difficulty": "Intermediate",
+        "type": "coding",
+        "text": "Write a function 'findMax' that takes an array of integers and returns the largest number. If the array is empty, return null.",
+        "skeleton_code": "function findMax(nums) {\n  // Your code here\n}",
+        "language": "javascript",
+        "test_cases": [
+            {
+                "input": "[1, 5, 3, 9, 2]",
+                "expected": "9"
+            },
+            {
+                "input": "[10, -5, 20, 8]",
+                "expected": "20"
+            },
+            {
+                "input": "[]",
+                "expected": "null"
+            }
+        ],
+        "threshold_pct": 100,
+        "marks": 5,
+        "q_id": "code_fm_101"
+    }
+]

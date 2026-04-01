@@ -49,7 +49,11 @@ interface BankQuestion {
     category: string;
     difficulty: string;
     text: string;
-    options: QuestionOption[];
+    type?: 'multiple-choice' | 'coding';
+    options?: QuestionOption[];
+    skeleton_code?: string;
+    language?: string;
+    test_cases?: any[];
     explanation?: string;
     marks: number;
 }
@@ -967,12 +971,14 @@ const QuestionBank: React.FC = () => {
                                         </div>
 
                                         <div className="card-actions">
-                                            <button
-                                                className="btn-delete-bank"
-                                                onClick={(e) => { e.stopPropagation(); handleDeleteCategory(s.category); }}
-                                            >
-                                                <Icons.Delete /> Delete
-                                            </button>
+                                            {s.category.toLowerCase() !== 'programming (advanced)' && (
+                                                <button
+                                                    className="btn-delete-bank"
+                                                    onClick={(e) => { e.stopPropagation(); handleDeleteCategory(s.category); }}
+                                                >
+                                                    <Icons.Delete /> Delete
+                                                </button>
+                                            )}
                                             <button
                                                 className="btn-edit-bank"
                                                 onClick={() => fetchQuestions(s.category)}
@@ -1023,14 +1029,16 @@ const QuestionBank: React.FC = () => {
                                             </td>
                                             <td>
                                                 <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                                                    <button
-                                                        onClick={(e) => { e.stopPropagation(); handleDeleteCategory(s.category); }}
-                                                        style={{ width: 32, height: 32, borderRadius: '8px', background: 'rgba(239, 68, 68, 0.05)', border: 'none', color: '#ef4444', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: '0.2s' }}
-                                                        onMouseOver={e => { (e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'); }}
-                                                        onMouseOut={e => { (e.currentTarget.style.background = 'rgba(239, 68, 68, 0.05)'); }}
-                                                    >
-                                                        <Icons.Delete />
-                                                    </button>
+                                                    {s.category.toLowerCase() !== 'programming (advanced)' && (
+                                                        <button
+                                                            onClick={(e) => { e.stopPropagation(); handleDeleteCategory(s.category); }}
+                                                            style={{ width: 32, height: 32, borderRadius: '8px', background: 'rgba(239, 68, 68, 0.05)', border: 'none', color: '#ef4444', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: '0.2s' }}
+                                                            onMouseOver={e => { (e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'); }}
+                                                            onMouseOut={e => { (e.currentTarget.style.background = 'rgba(239, 68, 68, 0.05)'); }}
+                                                        >
+                                                            <Icons.Delete />
+                                                        </button>
+                                                    )}
                                                 </div>
                                             </td>
                                         </tr>
@@ -1059,23 +1067,32 @@ const QuestionBank: React.FC = () => {
                                     </div>
                                     <p className="q-text">{q.text}</p>
                                     <div className="q-options">
-                                        {q.options.map((opt, idx) => (
-                                            <div key={idx} className={`opt-item ${opt.is_correct ? 'correct' : ''}`}>
-                                                <div
-                                                    className="opt-dot"
-                                                    style={{ background: opt.is_correct ? 'var(--color-success)' : 'var(--border)' }}
-                                                />
-                                                {opt.text}
+                                        {q.type === 'coding' ? (
+                                            <div className="opt-item" style={{ background: 'var(--bg-sunken)', border: '1px solid var(--border)', color: 'var(--primary)', gridColumn: 'span 2' }}>
+                                                <div className="opt-dot" style={{ background: 'var(--primary)' }} />
+                                                💻 HANDS-ON CODING CHALLENGE ({q.language || 'Any Language'})
                                             </div>
-                                        ))}
+                                        ) : (
+                                            (q.options || []).map((opt, idx) => (
+                                                <div key={idx} className={`opt-item ${opt.is_correct ? 'correct' : ''}`}>
+                                                    <div
+                                                        className="opt-dot"
+                                                        style={{ background: opt.is_correct ? 'var(--color-success)' : 'var(--border)' }}
+                                                    />
+                                                    {opt.text}
+                                                </div>
+                                            ))
+                                        )}
                                     </div>
                                     <div className="q-actions">
                                         <button className="btn-action btn-edit" onClick={() => setEditingQuestion(q)}>
                                             <Icons.Edit /> Edit
                                         </button>
-                                        <button className="btn-action btn-delete" onClick={() => handleDelete(q.q_id)}>
-                                            <Icons.Delete /> Delete
-                                        </button>
+                                        {selectedCategory?.trim().toLowerCase() !== 'programming (advanced)' && (
+                                            <button className="btn-action btn-delete" onClick={() => handleDelete(q.q_id)}>
+                                                <Icons.Delete /> Delete
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             ))}
@@ -1105,10 +1122,16 @@ const QuestionBank: React.FC = () => {
                                         <tr key={q.q_id}>
                                             <td style={{ verticalAlign: 'middle' }}>
                                                 <div className="q-text-cell" title={q.text}>{q.text}</div>
-                                                {q.options.length} Options •
-                                                <span style={{ color: 'var(--color-success)' }}>
-                                                    ✅ {q.options.find(o => o.is_correct)?.text.slice(0, 30)}...
-                                                </span>
+                                                {q.type === 'coding' ? (
+                                                    <span style={{ color: 'var(--primary)', fontWeight: 600 }}>💻 Coding Task ({q.language})</span>
+                                                ) : (
+                                                    <>
+                                                        {(q.options || []).length} Options •
+                                                        <span style={{ color: 'var(--color-success)' }}>
+                                                            ✅ {(q.options || []).find(o => o.is_correct)?.text.slice(0, 30)}...
+                                                        </span>
+                                                    </>
+                                                )}
                                             </td>
                                             <td>
                                                 <span className={`q-badge q-badge-${q.difficulty.toLowerCase()}`}>
@@ -1128,14 +1151,16 @@ const QuestionBank: React.FC = () => {
                                                     >
                                                         <Icons.Edit />
                                                     </button>
-                                                    <button
-                                                        onClick={() => handleDelete(q.q_id)}
-                                                        style={{ width: 32, height: 32, borderRadius: '8px', background: 'rgba(239, 68, 68, 0.05)', border: 'none', color: '#ef4444', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: '0.2s' }}
-                                                        onMouseOver={e => { (e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'); }}
-                                                        onMouseOut={e => { (e.currentTarget.style.background = 'rgba(239, 68, 68, 0.05)'); }}
-                                                    >
-                                                        <Icons.Delete />
-                                                    </button>
+                                                    {selectedCategory?.trim().toLowerCase() !== 'programming (advanced)' && (
+                                                        <button
+                                                            onClick={() => handleDelete(q.q_id)}
+                                                            style={{ width: 32, height: 32, borderRadius: '8px', background: 'rgba(239, 68, 68, 0.05)', border: 'none', color: '#ef4444', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: '0.2s' }}
+                                                            onMouseOver={e => { (e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'); }}
+                                                            onMouseOut={e => { (e.currentTarget.style.background = 'rgba(239, 68, 68, 0.05)'); }}
+                                                        >
+                                                            <Icons.Delete />
+                                                        </button>
+                                                    )}
                                                 </div>
                                             </td>
                                         </tr>
@@ -1230,39 +1255,124 @@ const QuestionBank: React.FC = () => {
                                     </div>
 
                                     <div className="form-section-title" style={{ color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '12px', letterSpacing: '0.05em', marginBottom: '12px', fontWeight: 800, borderBottom: '1px solid var(--border)', paddingBottom: '12px', marginTop: '32px' }}>
-                                        ANSWER OPTIONS (Select one correct answer)
+                                        ANSWER OPTIONS / HANDS-ON CODE
                                     </div>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                        {editingQuestion.options.map((opt, idx) => (
-                                            <div key={idx} className="option-input-group" style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--bg-sunken)', border: '1px solid var(--border)', borderRadius: '12px', padding: '8px 16px' }}>
-                                                <div style={{ padding: '0 8px' }}>
-                                                    <input
-                                                        type="radio"
-                                                        className="radio-custom"
-                                                        name="is_correct"
-                                                        checked={opt.is_correct}
-                                                        onChange={() => {
-                                                            const newOpts = editingQuestion.options.map((o, i) => ({
-                                                                ...o, is_correct: i === idx
-                                                            }));
-                                                            setEditingQuestion({ ...editingQuestion, options: newOpts });
-                                                        }}
+                                        {editingQuestion.type === 'coding' ? (
+                                            <div style={{ background: 'var(--bg-sunken)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                                                <p style={{ margin: '0 0 12px', fontSize: '13px', color: 'var(--text-muted)' }}>
+                                                    This is a hands-on coding question. Update the skeleton code or test cases.
+                                                </p>
+                                                <div className="form-group">
+                                                    <label className="form-label">Skeleton Code</label>
+                                                    <textarea 
+                                                        className="form-textarea" 
+                                                        rows={6}
+                                                        value={editingQuestion.skeleton_code || ''}
+                                                        onChange={e => setEditingQuestion({...editingQuestion, skeleton_code: e.target.value})}
+                                                        style={{ fontFamily: 'monospace', fontSize: '12px', background: '#1e1e1e', color: '#d4d4d4' }}
                                                     />
                                                 </div>
-                                                <input
-                                                    className="form-input"
-                                                    style={{ border: 'none', background: 'transparent', padding: '10px 0', flexGrow: 1, color: 'var(--text)' }}
-                                                    placeholder={`Option ${idx + 1}`}
-                                                    value={opt.text}
-                                                    onChange={e => {
-                                                        const newOpts = [...editingQuestion.options];
-                                                        newOpts[idx].text = e.target.value;
-                                                        setEditingQuestion({ ...editingQuestion, options: newOpts });
-                                                    }}
-                                                    required
-                                                />
+                                                <div className="form-group">
+                                                    <label className="form-label">Language</label>
+                                                    <input 
+                                                        className="form-input"
+                                                        value={editingQuestion.language || ''}
+                                                        onChange={e => setEditingQuestion({...editingQuestion, language: e.target.value})}
+                                                        placeholder="e.g. javascript, python"
+                                                    />
+                                                </div>
+
+                                                <div style={{ marginTop: '24px', borderTop: '1px solid var(--border)', paddingTop: '20px' }}>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                                                        <label className="form-label" style={{ margin: 0 }}>Test Cases</label>
+                                                        <button 
+                                                            type="button"
+                                                            onClick={() => {
+                                                                const tc = [...(editingQuestion.test_cases || [])];
+                                                                tc.push({ input: '', expected: '' });
+                                                                setEditingQuestion({...editingQuestion, test_cases: tc});
+                                                            }}
+                                                            style={{ padding: '4px 12px', fontSize: '11px', borderRadius: '6px', background: 'var(--primary)', color: 'white', border: 'none', cursor: 'pointer', fontWeight: 700 }}
+                                                        >
+                                                            + Add Case
+                                                        </button>
+                                                    </div>
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                                        {(editingQuestion.test_cases || []).map((tc, tidx) => (
+                                                            <div key={tidx} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 40px', gap: '10px', alignItems: 'center' }}>
+                                                                <input 
+                                                                    className="form-input" 
+                                                                    placeholder="Input (e.g. [1,2])" 
+                                                                    value={tc.input} 
+                                                                    onChange={e => {
+                                                                        const newTc = [...(editingQuestion.test_cases || [])];
+                                                                        newTc[tidx].input = e.target.value;
+                                                                        setEditingQuestion({...editingQuestion, test_cases: newTc});
+                                                                    }}
+                                                                    style={{ fontSize: '12px', height: '36px' }}
+                                                                />
+                                                                <input 
+                                                                    className="form-input" 
+                                                                    placeholder="Expected (e.g. 3)" 
+                                                                    value={tc.expected} 
+                                                                    onChange={e => {
+                                                                        const newTc = [...(editingQuestion.test_cases || [])];
+                                                                        newTc[tidx].expected = e.target.value;
+                                                                        setEditingQuestion({...editingQuestion, test_cases: newTc});
+                                                                    }}
+                                                                    style={{ fontSize: '12px', height: '36px' }}
+                                                                />
+                                                                <button 
+                                                                    type="button" 
+                                                                    onClick={() => {
+                                                                        const newTc = (editingQuestion.test_cases || []).filter((_, i) => i !== tidx);
+                                                                        setEditingQuestion({...editingQuestion, test_cases: newTc});
+                                                                    }}
+                                                                    style={{ background: '#fee2e2', color: '#ef4444', border: 'none', borderRadius: '6px', height: '36px', cursor: 'pointer' }}
+                                                                >
+                                                                    ×
+                                                                </button>
+                                                            </div>
+                                                        ))}
+                                                        {(editingQuestion.test_cases || []).length === 0 && (
+                                                            <p style={{ fontSize: '12px', color: 'var(--text-muted)', textAlign: 'center', margin: '10px 0' }}>No test cases added yet.</p>
+                                                        )}
+                                                    </div>
+                                                </div>
                                             </div>
-                                        ))}
+                                        ) : (
+                                            (editingQuestion.options || []).map((opt, idx) => (
+                                                <div key={idx} className="option-input-group" style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--bg-sunken)', border: '1px solid var(--border)', borderRadius: '12px', padding: '8px 16px' }}>
+                                                    <div style={{ padding: '0 8px' }}>
+                                                        <input
+                                                            type="radio"
+                                                            className="radio-custom"
+                                                            name="is_correct"
+                                                            checked={opt.is_correct}
+                                                            onChange={() => {
+                                                                const newOpts = (editingQuestion.options || []).map((o, i) => ({
+                                                                    ...o, is_correct: i === idx
+                                                                }));
+                                                                setEditingQuestion({ ...editingQuestion, options: newOpts });
+                                                            }}
+                                                        />
+                                                    </div>
+                                                    <input
+                                                        className="form-input"
+                                                        style={{ border: 'none', background: 'transparent', padding: '10px 0', flexGrow: 1, color: 'var(--text)' }}
+                                                        placeholder={`Option ${idx + 1}`}
+                                                        value={opt.text}
+                                                        onChange={e => {
+                                                            const newOpts = [...(editingQuestion.options || [])];
+                                                            newOpts[idx].text = e.target.value;
+                                                            setEditingQuestion({ ...editingQuestion, options: newOpts });
+                                                        }}
+                                                        required
+                                                    />
+                                                </div>
+                                            ))
+                                        )}
                                     </div>
 
                                     <div className="form-section-title" style={{ color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '12px', letterSpacing: '0.05em', marginBottom: '12px', fontWeight: 800, borderBottom: '1px solid var(--border)', paddingBottom: '12px', marginTop: '32px' }}>
@@ -1391,39 +1501,118 @@ const QuestionBank: React.FC = () => {
                                     </div>
 
                                     <div className="form-section-title" style={{ color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '12px', letterSpacing: '0.05em', marginBottom: '12px', fontWeight: 800, borderBottom: '1px solid var(--border)', paddingBottom: '12px', marginTop: '32px' }}>
-                                        ANSWER OPTIONS (Select one correct answer)
+                                        ANSWER CONTENT
                                     </div>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                        {newQuestion.options?.map((opt, idx) => (
-                                            <div key={idx} className="option-input-group" style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--bg-sunken)', border: '1px solid var(--border)', borderRadius: '12px', padding: '8px 16px' }}>
-                                                <div style={{ padding: '0 8px' }}>
-                                                    <input
-                                                        type="radio"
-                                                        className="radio-custom"
-                                                        name="is_correct_new"
-                                                        checked={opt.is_correct}
-                                                        onChange={() => {
-                                                            const newOpts = newQuestion.options?.map((o, i) => ({
-                                                                ...o, is_correct: i === idx
-                                                            }));
-                                                            setNewQuestion({ ...newQuestion, options: newOpts });
-                                                        }}
+                                        {newQuestion.category?.includes('Programming') || newQuestion.category?.includes('Coding') ? (
+                                             <div style={{ background: 'var(--bg-sunken)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                                                <div className="form-group">
+                                                    <label className="form-label">Skeleton Code</label>
+                                                    <textarea 
+                                                        className="form-textarea" 
+                                                        rows={4}
+                                                        value={newQuestion.skeleton_code || ''}
+                                                        onChange={e => setNewQuestion({...newQuestion, skeleton_code: e.target.value, type: 'coding'})}
+                                                        style={{ fontFamily: 'monospace', fontSize: '12px', background: '#1e1e1e', color: '#d4d4d4' }}
+                                                        placeholder="function solution() {\n  \n}"
                                                     />
                                                 </div>
-                                                <input
-                                                    className="form-input"
-                                                    style={{ border: 'none', background: 'transparent', padding: '10px 0', flexGrow: 1, color: 'var(--text)' }}
-                                                    placeholder={`Option ${idx + 1}`}
-                                                    value={opt.text}
-                                                    onChange={e => {
-                                                        const newOpts = [...(newQuestion.options || [])];
-                                                        newOpts[idx].text = e.target.value;
-                                                        setNewQuestion({ ...newQuestion, options: newOpts });
-                                                    }}
-                                                    required
-                                                />
-                                            </div>
-                                        ))}
+                                                <div className="form-group">
+                                                    <label className="form-label">Language</label>
+                                                    <input 
+                                                        className="form-input"
+                                                        value={newQuestion.language || ''}
+                                                        onChange={e => setNewQuestion({...newQuestion, language: e.target.value})}
+                                                        placeholder="e.g. javascript"
+                                                    />
+                                                </div>
+                                                <div style={{ marginTop: '24px', borderTop: '1px solid var(--border)', paddingTop: '20px' }}>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                                                        <label className="form-label" style={{ margin: 0 }}>Test Cases</label>
+                                                        <button 
+                                                            type="button"
+                                                            onClick={() => {
+                                                                const tc = [...(newQuestion.test_cases || [])];
+                                                                tc.push({ input: '', expected: '' });
+                                                                setNewQuestion({...newQuestion, test_cases: tc});
+                                                            }}
+                                                            style={{ padding: '4px 12px', fontSize: '11px', borderRadius: '6px', background: 'var(--primary)', color: 'white', border: 'none', cursor: 'pointer', fontWeight: 700 }}
+                                                        >
+                                                            + Add Case
+                                                        </button>
+                                                    </div>
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                                        {(newQuestion.test_cases || []).map((tc, tidx) => (
+                                                            <div key={tidx} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 40px', gap: '10px', alignItems: 'center' }}>
+                                                                <input 
+                                                                    className="form-input" 
+                                                                    placeholder="Input" 
+                                                                    value={tc.input} 
+                                                                    onChange={e => {
+                                                                        const newTc = [...(newQuestion.test_cases || [])];
+                                                                        newTc[tidx].input = e.target.value;
+                                                                        setNewQuestion({...newQuestion, test_cases: newTc});
+                                                                    }}
+                                                                    style={{ fontSize: '12px', height: '36px' }}
+                                                                />
+                                                                <input 
+                                                                    className="form-input" 
+                                                                    placeholder="Expected" 
+                                                                    value={tc.expected} 
+                                                                    onChange={e => {
+                                                                        const newTc = [...(newQuestion.test_cases || [])];
+                                                                        newTc[tidx].expected = e.target.value;
+                                                                        setNewQuestion({...newQuestion, test_cases: newTc});
+                                                                    }}
+                                                                    style={{ fontSize: '12px', height: '36px' }}
+                                                                />
+                                                                <button 
+                                                                    type="button" 
+                                                                    onClick={() => {
+                                                                        const newTc = (newQuestion.test_cases || []).filter((_, i) => i !== tidx);
+                                                                        setNewQuestion({...newQuestion, test_cases: newTc});
+                                                                    }}
+                                                                    style={{ background: '#fee2e2', color: '#ef4444', border: 'none', borderRadius: '6px', height: '36px', cursor: 'pointer' }}
+                                                                >
+                                                                    ×
+                                                                </button>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                             </div>
+                                        ) : (
+                                            (newQuestion.options || []).map((opt, idx) => (
+                                                <div key={idx} className="option-input-group" style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--bg-sunken)', border: '1px solid var(--border)', borderRadius: '12px', padding: '8px 16px' }}>
+                                                    <div style={{ padding: '0 8px' }}>
+                                                        <input
+                                                            type="radio"
+                                                            className="radio-custom"
+                                                            name="is_correct_new"
+                                                            checked={opt.is_correct}
+                                                            onChange={() => {
+                                                                const newOpts = newQuestion.options?.map((o, i) => ({
+                                                                    ...o, is_correct: i === idx
+                                                                }));
+                                                                setNewQuestion({ ...newQuestion, options: newOpts });
+                                                            }}
+                                                        />
+                                                    </div>
+                                                    <input
+                                                        className="form-input"
+                                                        style={{ border: 'none', background: 'transparent', padding: '10px 0', flexGrow: 1, color: 'var(--text)' }}
+                                                        placeholder={`Option ${idx + 1}`}
+                                                        value={opt.text}
+                                                        onChange={e => {
+                                                            const newOpts = [...(newQuestion.options || [])];
+                                                            newOpts[idx].text = e.target.value;
+                                                            setNewQuestion({ ...newQuestion, options: newOpts });
+                                                        }}
+                                                        required
+                                                    />
+                                                </div>
+                                            ))
+                                        )}
                                     </div>
 
                                     <div className="form-section-title" style={{ color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '12px', letterSpacing: '0.05em', marginBottom: '12px', fontWeight: 800, borderBottom: '1px solid var(--border)', paddingBottom: '12px', marginTop: '32px' }}>

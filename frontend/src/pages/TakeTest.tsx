@@ -560,19 +560,128 @@ const STYLES = `
   box-shadow: none;
 }
 
-.decl-agreed-badge {
+.calc-overlay {
+  position: fixed;
+  top: 100px;
+  right: 340px; 
+  width: 320px;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+  z-index: 1000;
+  overflow: hidden;
+  animation: calcIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+@keyframes calcIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.calc-header {
+  padding: 12px 16px;
+  background: var(--text);
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: move;
+}
+
+.calc-close {
+  background: none;
+  border: none;
+  color: white;
+  opacity: 0.7;
+  cursor: pointer;
+  padding: 4px;
+}
+.calc-close:hover { opacity: 1; }
+
+.calc-display-wrap {
+  background: #1e293b;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+.calc-prev {
+  font-size: 14px;
+  color: rgba(255,255,255,0.4);
+  font-weight: 500;
+  min-height: 20px;
+}
+.calc-main {
+  font-size: 32px;
+  color: #f8fafc;
+  font-weight: 700;
+  font-family: 'DM Sans', sans-serif;
+  letter-spacing: -1px;
+}
+
+.calc-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.calc-btn {
+  background: var(--bg);
+  border: none;
+  height: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  background: var(--q-answered-bg);
-  border: 1px solid var(--q-answered-border);
-  color: var(--q-answered-text);
-  border-radius: var(--radius-sm);
-  padding: 10px 16px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.calc-btn:hover { background: var(--bg-neutral); }
+.calc-btn.op { color: var(--primary); font-size: 20px; background: var(--bg-raised); }
+.calc-btn.sci { font-size: 14px; font-weight: 700; color: var(--text-subtle); background: var(--bg-sunken); }
+.calc-btn.eq { background: var(--primary); color: white; grid-column: span 2; }
+.calc-btn.eq:hover { background: var(--primary-hover); }
+.calc-btn.clear { color: #f43f5e; }
+
+.calc-toggle-btn {
+  width: 100%;
+  margin-top: 12px;
+  padding: 12px;
+  background: var(--bg-neutral);
+  border: 1.5px dashed var(--border);
+  border-radius: 12px;
+  color: var(--text-muted);
   font-size: 13px;
   font-weight: 600;
-  margin-bottom: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.2s;
+}
+.calc-toggle-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 5%, transparent);
+}
+.calc-toggle-btn.active {
+  background: var(--primary);
+  color: white;
+  border-style: solid;
+  border-color: var(--primary);
 }
 
 /* ── Security Warning Popup ─────────────────────────────────────────── */
@@ -921,6 +1030,43 @@ export default function TakeTest() {
     const [showNote, setShowNote] = useState(false);
     const [noteContent, setNoteContent] = useState("");
     const [calcDisplay, setCalcDisplay] = useState("0");
+    const [calcPrev, setCalcPrev] = useState("");
+
+    const handleCalcClick = (val: string) => {
+        if (val === 'C') {
+            setCalcDisplay("0");
+            setCalcPrev("");
+            return;
+        }
+        if (val === '=') {
+            try {
+                // We use a safe-ish approach for eval by replacing common symbols
+                let expression = calcDisplay.replace(/Ã—/g, '*').replace(/Ã·/g, '/');
+                // Handle basic scientific functions
+                expression = expression.replace(/sin\(/g, "Math.sin(");
+                expression = expression.replace(/cos\(/g, "Math.cos(");
+                expression = expression.replace(/tan\(/g, "Math.tan(");
+                expression = expression.replace(/log\(/g, "Math.log10(");
+                expression = expression.replace(/ln\(/g, "Math.log(");
+                expression = expression.replace(/âˆš\(/g, "Math.sqrt(");
+                
+                // Solve
+                const result = eval(expression);
+                setCalcPrev(calcDisplay + " =");
+                setCalcDisplay(result.toString());
+            } catch (err) {
+                setCalcDisplay("Error");
+            }
+            return;
+        }
+        if (calcDisplay === "0" || calcDisplay === "Error") setCalcDisplay(val);
+        else setCalcDisplay(prev => prev + val);
+    };
+
+    const handleSciFunc = (func: string) => {
+        if (calcDisplay === "Error") return;
+        setCalcDisplay(prev => `${func}(${prev === "0" ? "" : prev}`);
+    };
 
     const [declared, setDeclared] = useState(false);
     const [checks, setChecks] = useState({ c1: false, c2: false, c3: false, c4: false });
@@ -1753,21 +1899,6 @@ export default function TakeTest() {
         setCodingAnswers(prev => ({ ...prev, [qIdx]: code }));
     };
 
-    const handleCalc = (val: string) => {
-        if (val === "=") {
-            try {
-                // eslint-disable-next-line no-eval
-                const result = eval(calcDisplay.replace(/×/g, "*").replace(/÷/g, "/"));
-                setCalcDisplay(String(result));
-            } catch {
-                setCalcDisplay("Error");
-            }
-        } else if (val === "C") {
-            setCalcDisplay("0");
-        } else {
-            setCalcDisplay(prev => (prev === "0" || prev === "Error") ? val : prev + val);
-        }
-    };
 
     const runTests = async (qIdx: number) => {
         const q = shuffledQuestions[qIdx];
@@ -2443,7 +2574,19 @@ export default function TakeTest() {
                             })}
                         </div>
 
-                        <div className="q-legend">
+                        {/* ── Scientific Calculator Toggle ── */}
+                        {testData?.exam?.calculator_enabled && (
+                            <button 
+                                className={`calc-toggle-btn ${showCalc ? 'active' : ''}`}
+                                onClick={() => setShowCalc(!showCalc)}
+                                style={{ marginTop: '24px' }}
+                            >
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="16" y1="14" x2="16" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg>
+                                {showCalc ? "Hide Calculator" : "Show Scientific Calc"}
+                            </button>
+                        )}
+
+                        <div className="q-legend" style={{ marginTop: '24px' }}>
                             <div className="q-legend-item">
                                 <div className="q-legend-box" style={{ background: '#db2777', borderColor: '#be185d' }} />
                                 Answered & Marked Review
@@ -2512,19 +2655,39 @@ export default function TakeTest() {
                         <div className="sup-title">🧮 Scientific Calculator</div>
                         <button className="sup-close" onClick={() => setShowCalc(false)}>&times;</button>
                     </div>
-                    <div className="sup-body">
-                        <div className="sup-calc-display">{calcDisplay}</div>
-                        <div className="sup-calc-grid">
-                            {['C', '(', ')', '÷', '7', '8', '9', '×', '4', '5', '6', '-', '1', '2', '3', '+', '0', '.', '='].map(btn => (
-                                <button
-                                    key={btn}
-                                    className={`sup-calc-btn ${['÷', '×', '-', '+'].includes(btn) ? 'op' : ''} ${btn === '=' ? 'eq' : ''} ${btn === 'C' ? 'clr' : ''}`}
-                                    onClick={() => handleCalc(btn)}
-                                >
-                                    {btn}
-                                </button>
-                            ))}
-                        </div>
+                    <div className="calc-display-wrap" style={{ background: '#1e293b', padding: '16px', color: 'white' }}>
+                        <div className="calc-prev" style={{ fontSize: '12px', opacity: 0.5, minHeight: '18px', textAlign: 'right' }}>{calcPrev}</div>
+                        <div className="calc-main" style={{ fontSize: '28px', fontWeight: 700, textAlign: 'right' }}>{calcDisplay}</div>
+                    </div>
+                    <div className="calc-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1px', background: 'var(--border)' }}>
+                        <button className="calc-btn sci" onClick={() => handleSciFunc('sin')}>sin</button>
+                        <button className="calc-btn sci" onClick={() => handleSciFunc('cos')}>cos</button>
+                        <button className="calc-btn sci" onClick={() => handleSciFunc('tan')}>tan</button>
+                        <button className="calc-btn sci clear" style={{ color: '#f43f5e' }} onClick={() => handleCalcClick('C')}>C</button>
+                        
+                        <button className="calc-btn sci" onClick={() => handleSciFunc('log')}>log</button>
+                        <button className="calc-btn sci" onClick={() => handleSciFunc('ln')}>ln</button>
+                        <button className="calc-btn sci" onClick={() => handleSciFunc('âˆš')}>âˆš</button>
+                        <button className="calc-btn op" style={{ color: 'var(--primary)' }} onClick={() => handleCalcClick('Ã·')}>Ã·</button>
+                        
+                        <button className="calc-btn" onClick={() => handleCalcClick('7')}>7</button>
+                        <button className="calc-btn" onClick={() => handleCalcClick('8')}>8</button>
+                        <button className="calc-btn" onClick={() => handleCalcClick('9')}>9</button>
+                        <button className="calc-btn op" style={{ color: 'var(--primary)' }} onClick={() => handleCalcClick('Ã—')}>Ã—</button>
+                        
+                        <button className="calc-btn" onClick={() => handleCalcClick('4')}>4</button>
+                        <button className="calc-btn" onClick={() => handleCalcClick('5')}>5</button>
+                        <button className="calc-btn" onClick={() => handleCalcClick('6')}>6</button>
+                        <button className="calc-btn op" style={{ color: 'var(--primary)' }} onClick={() => handleCalcClick('-')}>-</button>
+                        
+                        <button className="calc-btn" onClick={() => handleCalcClick('1')}>1</button>
+                        <button className="calc-btn" onClick={() => handleCalcClick('2')}>2</button>
+                        <button className="calc-btn" onClick={() => handleCalcClick('3')}>3</button>
+                        <button className="calc-btn op" style={{ color: 'var(--primary)' }} onClick={() => handleCalcClick('+')}>+</button>
+                        
+                        <button className="calc-btn" onClick={() => handleCalcClick('0')}>0</button>
+                        <button className="calc-btn" onClick={() => handleCalcClick('.')}>.</button>
+                        <button className="calc-btn eq" style={{ background: 'var(--primary)', color: 'white', gridColumn: 'span 2' }} onClick={() => handleCalcClick('=')}>=</button>
                     </div>
                 </div>
             )}

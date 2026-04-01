@@ -137,14 +137,23 @@ def execute_command(command_args, suffix, script_content, input_val, expected):
         )
         stdout, stderr = process.communicate(timeout=2)
         
-        actual = stdout.strip()
-        # Normalizing JSON quotes if expected is string and actual is string
-        passed = actual == expected
+        actual_raw = stdout.strip()
+        expected_raw = str(expected).strip()
+        
+        # Try to compare as JSON objects first (for arrays, bools, etc)
+        passed = False
+        try:
+            actual_json = json.loads(actual_raw)
+            expected_json = json.loads(expected_raw)
+            passed = actual_json == expected_json
+        except:
+            # Fallback to string comparison
+            passed = actual_raw == expected_raw or actual_raw.lower() == expected_raw.lower()
         
         return {
             "input": input_val,
-            "expected": expected,
-            "actual": actual,
+            "expected": expected_raw,
+            "actual": actual_raw,
             "passed": passed,
             "error": stderr.strip() if stderr else None
         }

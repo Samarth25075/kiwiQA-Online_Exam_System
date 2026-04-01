@@ -9,4 +9,4 @@ __pycache__/
 .env.local
 *.db
 *.log
-static/uploads/
+backend/static/uploads/

@@ -12,29 +12,53 @@ import random
 from sqlalchemy.orm import Session
 from app.models import Exam, Candidate, ExamInvitation
 
-def _read_bank() -> List[Dict]:
-    """Read questions from local question_bank.json with improved path resolution."""
-    # Use absolute path based on the location of this file (app/exams/service.py)
-    # Location: backend/app/exams/service.py -> backend/app/question_bank.json
+def _get_path(filename: str) -> str:
+    """Helper to get absolute path for a bank file."""
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    bank_path = os.path.join(base_dir, "question_bank.json")
-
-    if not os.path.exists(bank_path):
-        print(f"ERROR: Question bank not found at {bank_path}", flush=True)
-        # Fallback to current working directory based structure
-        cwd_fallback = os.path.join(os.getcwd(), "backend", "app", "question_bank.json")
+    path = os.path.join(base_dir, filename)
+    if not os.path.exists(path):
+        cwd_fallback = os.path.join(os.getcwd(), "backend", "app", filename)
         if os.path.exists(cwd_fallback):
-            bank_path = cwd_fallback
-        else:
-            return []
+             return cwd_fallback
+    return path
 
+def _read_bank() -> List[Dict]:
+    """Read questions from both standard and programming advanced banks."""
+    bank_files = ["question_bank.json", "programming_advanced.json"]
+    combined_bank = []
+    
+    for filename in bank_files:
+        path = _get_path(filename)
+        if os.path.exists(path):
+            try:
+                with open(path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                    if isinstance(data, list):
+                        combined_bank.extend(data)
+            except Exception as e:
+                print(f"ERROR: Failed to read {filename}: {e}", flush=True)
+    
+    return combined_bank
+
+def _write_bank(combined_bank: List[Dict]) -> bool:
+    """Split and save questions back into their respective files with robust category matching."""
+    prog_qs = [q for q in combined_bank if (q.get("category") or "").strip().lower() == 'programming (advanced)']
+    std_qs = [q for q in combined_bank if (q.get("category") or "").strip().lower() != 'programming (advanced)']
+    
+    success = True
+    # Save standard bank
     try:
-        with open(bank_path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-            return data if isinstance(data, list) else []
-    except Exception as e:
-        print(f"ERROR: Failed to read question bank: {e}", flush=True)
-        return []
+        with open(_get_path("question_bank.json"), "w", encoding="utf-8") as f:
+            json.dump(std_qs, f, indent=2)
+    except: success = False
+    
+    # Save programming bank
+    try:
+        with open(_get_path("programming_advanced.json"), "w", encoding="utf-8") as f:
+            json.dump(prog_qs, f, indent=2)
+    except: success = False
+    
+    return success
 
 def get_bank_categories(db: Session = None) -> List[str]:
     """Get unique categories from the inbuilt question bank and database."""
@@ -202,29 +226,26 @@ def update_bank_question(q_id: str, updated_q: Dict) -> bool:
     if not found:
         return False
         
-    bank_path = os.path.join(os.path.dirname(__file__), "..", "question_bank.json")
-    try:
-        with open(bank_path, "w", encoding="utf-8") as f:
-            json.dump(bank, f, indent=2)
-        return True
-    except:
-        return False
+    return _write_bank(bank)
 
 def delete_bank_question(q_id: str) -> bool:
-    """Delete a specific question from the bank by its q_id."""
+    """Delete a specific question from the bank by its q_id, unless it's protected."""
     bank = _read_bank()
+    
+    # Safety Check: Robust case-insensitive and trimmed check
+    target_q = next((q for q in bank if q.get('q_id') == q_id), None)
+    if target_q:
+        cat = (target_q.get('category') or "").strip().lower()
+        if cat == 'programming (advanced)':
+            print(f"DEBUG: Prevented deletion of protected programming question: {q_id}")
+            return False
+        
     new_bank = [q for q in bank if q.get('q_id') != q_id]
     
     if len(new_bank) == len(bank):
         return False # No question was removed
         
-    bank_path = os.path.join(os.path.dirname(__file__), "..", "question_bank.json")
-    try:
-        with open(bank_path, "w", encoding="utf-8") as f:
-            json.dump(new_bank, f, indent=2)
-        return True
-    except:
-        return False
+    return _write_bank(new_bank)
 
 def add_to_bank(question: Dict) -> bool:
     """Add a single question to the bank."""
@@ -233,37 +254,22 @@ def add_to_bank(question: Dict) -> bool:
         question['q_id'] = str(uuid.uuid4())[:8]
     bank = _read_bank()
     bank.append(question)
-    bank_path = os.path.join(os.path.dirname(__file__), "..", "question_bank.json")
-    try:
-        with open(bank_path, "w", encoding="utf-8") as f:
-            json.dump(bank, f, indent=2)
-        return True
-    except:
-        return False
+    return _write_bank(bank)
 
 def upload_to_bank(questions: List[Dict]) -> bool:
     """Bulk upload questions to the bank."""
     bank = _read_bank()
     bank.extend(questions)
-    bank_path = os.path.join(os.path.dirname(__file__), "..", "question_bank.json")
-    try:
-        with open(bank_path, "w", encoding="utf-8") as f:
-            json.dump(bank, f, indent=2)
-        return True
-    except:
-        return False
+    return _write_bank(bank)
 
 def delete_bank_category(category_name: str) -> bool:
     """Delete a category and all its questions from the bank."""
+    if category_name.lower() == "programming (advanced)":
+        return False # This category is protected
+        
     bank = _read_bank()
     new_bank = [q for q in bank if q.get('category', '').lower() != category_name.lower()]
-    bank_path = os.path.join(os.path.dirname(__file__), "..", "question_bank.json")
-    try:
-        with open(bank_path, "w", encoding="utf-8") as f:
-            json.dump(new_bank, f, indent=2)
-        return True
-    except:
-        return False
+    return _write_bank(new_bank)
 
 def _generate_with_quiz_api(topic: str, difficulty: str, count: int) -> Optional[List[Dict]]:
     """Generate questions using QuizAPI.io."""
