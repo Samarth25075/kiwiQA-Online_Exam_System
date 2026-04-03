@@ -5,15 +5,17 @@ from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from app.auth.router import get_current_admin, check_permission, check_permission_any
 from app.auth.schemas import AdminUser
 from app.exams.schemas import ExamCreate, ExamResponse, ExamFinalize, Question, ExamStatsResponse, SendExamLinkRequest
-from app.exams.service import save_exam, generate_questions, get_all_exams, delete_exam, get_exams_with_candidate_counts, get_bank_categories, get_bank_stats, get_exam_by_id, add_to_bank, upload_to_bank, get_bank_questions_by_category, update_bank_question, delete_bank_question, rename_bank_category
+from app.exams.service import (
+    save_exam, generate_questions, get_all_exams, delete_exam, 
+    get_exams_with_candidate_counts, get_bank_categories, get_bank_stats, 
+    get_exam_by_id, add_to_bank, upload_to_bank, get_bank_questions_by_category, 
+    update_bank_question, delete_bank_question, rename_bank_category,
+    check_and_delete_expired_exams, get_invitation_tracking, duplicate_exam, update_exam
+)
 from app.core.email import send_email
-from sqlalchemy.orm import Session
 from app.database import get_db
-# Remove redundant FastAPICache, using service-level caching instead
 
 router = APIRouter(tags=["exams"])
-
-
 
 @router.post("/preview", response_model=List[Question])
 async def preview_exam(
@@ -21,51 +23,52 @@ async def preview_exam(
     current_admin: Annotated[AdminUser, Depends(check_permission("generate exam"))]
 ):
     """Generate questions without saving."""
+    # generate_questions is not async as it uses AI/JSON only
     return generate_questions(exam_in)
 
 @router.post("", response_model=ExamResponse)
 async def add_exam(
     exam_in: ExamFinalize,
     current_admin: Annotated[AdminUser, Depends(check_permission("generate exam"))],
-    db: Session = Depends(get_db)
+    db = Depends(get_db)
 ):
     """Finalize and save the exam."""
-    res = save_exam(db, exam_in)
+    res = await save_exam(db, exam_in)
     return res
 
 @router.get("", response_model=List[ExamResponse])
 async def read_exams(
     current_admin: Annotated[AdminUser, Depends(check_permission("manage exam"))], 
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     bypass_cache: bool = False
 ):
     """List all generated exams."""
-    return get_all_exams(db, bypass_cache=bypass_cache)
+    return await get_all_exams(db, bypass_cache=bypass_cache)
 
 @router.get("/stats", response_model=List[ExamStatsResponse])
 async def read_exam_stats(
     current_admin: Annotated[AdminUser, Depends(check_permission("manage exam"))], 
-    db: Session = Depends(get_db),
+    db = Depends(get_db),
     bypass_cache: bool = False
 ):
     """Returns each exam along with the count of candidates assigned to it."""
-    return get_exams_with_candidate_counts(db, bypass_cache=bypass_cache)
+    return await get_exams_with_candidate_counts(db, bypass_cache=bypass_cache)
 
 @router.get("/bank/categories", response_model=List[str])
 async def read_bank_categories(
     current_admin: Annotated[AdminUser, Depends(check_permission_any(["manage bank", "generate exam"]))],
-    db: Session = Depends(get_db)
+    db = Depends(get_db)
 ):
     """Get unique categories from the inbuilt question bank."""
-    return get_bank_categories(db)
+    return await get_bank_categories(db)
 
 @router.get("/bank/stats", response_model=List[Dict])
 async def read_bank_stats(
     current_admin: Annotated[AdminUser, Depends(check_permission_any(["manage bank", "generate exam"]))],
-    db: Session = Depends(get_db)
+    db = Depends(get_db)
 ):
     """Get category-wise stats (count, marks) from the question bank."""
-    return get_bank_stats(db)
+    return await get_bank_stats(db)
 
 @router.get("/bank/questions", response_model=List[Dict])
 async def read_bank_questions(
@@ -73,7 +76,6 @@ async def read_bank_questions(
     category: Optional[str] = None
 ):
     """Get all questions in a category from the bank."""
-    from app.exams.service import get_bank_questions_by_category
     return get_bank_questions_by_category(category)
 
 @router.put("/bank/questions/{q_id}")
@@ -83,7 +85,6 @@ async def update_bank_question_route(
     current_admin: Annotated[AdminUser, Depends(check_permission("manage bank"))]
 ):
     """Update a specific question in the bank."""
-    from app.exams.service import update_bank_question
     if update_bank_question(q_id, question):
         return {"message": "Question updated"}
     raise HTTPException(status_code=404, detail="Question not found")
@@ -94,7 +95,6 @@ async def delete_bank_question_route(
     current_admin: Annotated[AdminUser, Depends(check_permission("manage bank"))]
 ):
     """Delete a specific question from the bank."""
-    from app.exams.service import delete_bank_question
     if delete_bank_question(q_id):
         return {"message": "Question deleted"}
     raise HTTPException(status_code=404, detail="Question not found")
@@ -118,27 +118,27 @@ async def upload_bulk_questions_to_bank(
     if upload_to_bank(questions):
         return {"message": f"{len(questions)} questions uploaded to bank"}
     raise HTTPException(status_code=500, detail="Failed to update bank")
+
 @router.get("/invitations/tracking")
 async def read_invitation_tracking(
     current_admin: Annotated[AdminUser, Depends(check_permission("send invitation"))],
-    db: Session = Depends(get_db)
+    db = Depends(get_db)
 ):
     """Get detailed tracking of exam invitations vs candidate attempts."""
-    from app.exams.service import get_invitation_tracking
-    return get_invitation_tracking(db)
+    return await get_invitation_tracking(db)
 
 @router.get("/{exam_id}", response_model=ExamResponse)
 async def read_exam(
     exam_id: str,
     current_admin: Annotated[AdminUser, Depends(check_permission("manage exam"))],
-    db: Session = Depends(get_db)
+    db = Depends(get_db)
 ):
     """Fetch a single exam with all questions."""
-    from app.exams.service import get_exam_by_id
-    exam = get_exam_by_id(db, exam_id)
+    exam = await get_exam_by_id(db, exam_id)
     if not exam:
         raise HTTPException(status_code=404, detail="Exam not found")
     return exam
+
 class DuplicateExamRequest(BaseModel):
     new_title: Optional[str] = None
 
@@ -147,11 +147,10 @@ async def copy_exam(
     exam_id: str,
     payload: DuplicateExamRequest,
     current_admin: Annotated[AdminUser, Depends(check_permission("manage exam"))],
-    db: Session = Depends(get_db)
+    db = Depends(get_db)
 ):
     """Create a duplicate of an existing exam."""
-    from app.exams.service import duplicate_exam
-    res = duplicate_exam(db, exam_id, new_title=payload.new_title)
+    res = await duplicate_exam(db, exam_id, new_title=payload.new_title)
     if not res:
         raise HTTPException(status_code=404, detail="Exam not found")
     return res
@@ -160,10 +159,10 @@ async def copy_exam(
 async def remove_exam(
     exam_id: str,
     current_admin: Annotated[AdminUser, Depends(check_permission("manage exam"))],
-    db: Session = Depends(get_db)
+    db = Depends(get_db)
 ):
     """Delete an exam."""
-    success = delete_exam(db, exam_id)
+    success = await delete_exam(db, exam_id)
     if not success:
         raise HTTPException(status_code=404, detail="Exam not found")
     return {"message": "Exam deleted"}
@@ -173,7 +172,7 @@ async def update_exam_route(
     exam_id: str,
     exam_in: ExamFinalize,
     current_admin: Annotated[AdminUser, Depends(check_permission("manage exam"))],
-    db: Session = Depends(get_db)
+    db = Depends(get_db)
 ):
     """Update an existing exam."""
     updates = exam_in.dict()
@@ -184,12 +183,11 @@ async def update_exam_route(
         ]
         updates["num_questions"] = len(updates["questions"])
         
-    from app.exams.service import update_exam, get_exam_by_id
-    success = update_exam(db, exam_id, updates)
+    success = await update_exam(db, exam_id, updates)
     if not success:
         raise HTTPException(status_code=404, detail="Exam not found")
     
-    updated = get_exam_by_id(db, exam_id)
+    updated = await get_exam_by_id(db, exam_id)
     return updated
 
 @router.post("/{exam_id}/send-link")
@@ -198,32 +196,25 @@ async def send_exam_link_custom(
     payload: SendExamLinkRequest,
     background_tasks: BackgroundTasks,
     current_admin: Annotated[AdminUser, Depends(check_permission("send invitation"))],
-    db: Session = Depends(get_db)
+    db = Depends(get_db)
 ):
     """Send an exam link to multiple emails manually via custom message."""
-    exam = get_exam_by_id(db, exam_id)
+    exam = await get_exam_by_id(db, exam_id)
     if not exam:
         raise HTTPException(status_code=404, detail="Exam not found")
         
     subject = f"Invitation: {exam['title']}"
     content = payload.message if payload.message else f"You have been invited to take the exam: {exam['title']}.\n\nPlease access it here: {payload.link}"
     
-    from app.models import ExamInvitation
     from datetime import datetime
-    from sqlalchemy import and_, func
     
     saved_count = 0
-    already_sent_emails = []
+    admin_display = current_admin.username if current_admin.username else (current_admin.full_name or current_admin.email)
     
-    # We allow re-sending invitations. If a duplicate exists, we will update its sent_at timestamp.
     for email in payload.emails:
         safe_email = email.strip()
         if safe_email:
-            existing = db.query(ExamInvitation).filter(
-                and_(ExamInvitation.exam_id == exam_id, func.lower(ExamInvitation.email) == safe_email.lower())
-            ).first()
-            
-            # Personalize the link in the message for auto-fill
+            # We allow re-sending invitations using MongoDB upsert
             personalized_content = content
             if payload.link:
                 delimiter = "&" if "?" in payload.link else "?"
@@ -233,28 +224,19 @@ async def send_exam_link_custom(
             # Send email
             background_tasks.add_task(send_email, safe_email, subject, personalized_content)
             
-            admin_display = current_admin.username if current_admin.username else (current_admin.full_name or current_admin.email)
-            if existing:
-                # Update existing invitation
-                existing.sent_at = datetime.now().isoformat()
-                existing.admin_name = admin_display
-            else:
-                # Save new invitation to DB
-                new_invite = ExamInvitation(
-                    exam_id=exam_id,
-                    email=safe_email,
-                    sent_at=datetime.now().isoformat(),
-                    admin_name=admin_display
-                )
-                db.add(new_invite)
-            
+            # Upsert into MongoDB
+            await db.exam_invitations.update_one(
+                {"exam_id": exam_id, "email": safe_email.lower()},
+                {"$set": {
+                    "sent_at": datetime.now().isoformat(),
+                    "admin_name": admin_display,
+                    "email": safe_email # Ensure correct casing is saved
+                }},
+                upsert=True
+            )
             saved_count += 1
             
-    if saved_count > 0:
-        db.commit()
-            
     return {"message": f"Emails queued for {saved_count} recipient(s)."}
-
 
 class ExpiryUpdate(BaseModel):
     link_expiry: Optional[str] = None
@@ -266,22 +248,19 @@ async def update_exam_expiry(
     payload: ExpiryUpdate,
     background_tasks: BackgroundTasks,
     current_admin: Annotated[AdminUser, Depends(check_permission("manage exam"))],
-    db: Session = Depends(get_db)
+    db = Depends(get_db)
 ):
     """Set the public link expiry for an exam."""
-    # Only update fields that were actually provided in the JSON body
     update_data = payload.dict(exclude_unset=True)
     
-    from app.exams.service import update_exam, check_and_delete_expired_exams
-    success = update_exam(db, exam_id, update_data)
+    success = await update_exam(db, exam_id, update_data)
     if not success:
         raise HTTPException(status_code=404, detail="Exam not found")
     
     # Run cleanup immediately
-    check_and_delete_expired_exams(db)
+    await check_and_delete_expired_exams(db)
     
     return {"message": "Expiry and/or deletion schedule updated"}
-
 
 @router.delete("/bank/categories/{name}")
 async def remove_bank_category(
@@ -301,10 +280,9 @@ async def rename_bank_category_route(
     name: str,
     payload: CategoryRenameRequest,
     current_admin: Annotated[AdminUser, Depends(check_permission("manage bank"))],
-    db: Session = Depends(get_db)
+    db = Depends(get_db)
 ):
     """Rename a category in both JSON bank and database."""
-    from app.exams.service import rename_bank_category
-    if rename_bank_category(name, payload.new_name, db):
+    if await rename_bank_category(name, payload.new_name, db):
         return {"message": f"Category '{name}' renamed to '{payload.new_name}'"}
     raise HTTPException(status_code=400, detail="Cannot rename bank category (might be protected)")

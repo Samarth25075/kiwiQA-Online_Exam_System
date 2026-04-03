@@ -27,7 +27,6 @@ from app.auth.service import (
 from app.core.config import ACCESS_TOKEN_EXPIRE_MINUTES, GOOGLE_CLIENT_ID, AUTHORIZED_GOOGLE_EMAIL
 from app.core.security import create_access_token, decode_access_token
 from app.database import get_db
-from sqlalchemy.orm import Session
 
 router = APIRouter(tags=["auth"])
 
@@ -39,8 +38,8 @@ AUTH_OTP_STORE = {}
 
 # ── POST /login ───────────────────────────────
 @router.post("/login", response_model=Token)
-async def login(form: Annotated[OAuth2PasswordRequestForm, Depends()], db: Session = Depends(get_db)):
-    user = authenticate(db, form.username, form.password)
+async def login(form: Annotated[OAuth2PasswordRequestForm, Depends()], db = Depends(get_db)):
+    user = await authenticate(db, form.username, form.password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -50,13 +49,13 @@ async def login(form: Annotated[OAuth2PasswordRequestForm, Depends()], db: Sessi
     
     # Single Session logic: Generate a unique session ID
     session_id = str(uuid.uuid4())
-    update_user_session(db, user["email"], session_id)
+    await update_user_session(db, user["email"], session_id)
 
     # Multi-module cache invalidation on login for fresh start
     try:
         from app.core.redis import redis_client
         if redis_client:
-            redis_client.delete("all_candidates_list", "all_exams_list", "exams_with_counts")
+            await redis_client.delete("all_candidates_list", "all_exams_list", "exams_with_counts")
     except: pass
 
     token = create_access_token(
@@ -68,7 +67,7 @@ async def login(form: Annotated[OAuth2PasswordRequestForm, Depends()], db: Sessi
 
 
 # ── Dependency ────────────────────────────────
-async def get_current_admin(token: Annotated[str, Depends(oauth2_scheme)], db: Session = Depends(get_db)) -> AdminUser:
+async def get_current_admin(token: Annotated[str, Depends(oauth2_scheme)], db = Depends(get_db)) -> AdminUser:
     try:
         payload = decode_access_token(token)
         token_data = TokenPayload(sub=payload.get("sub"), sid=payload.get("sid"))
@@ -80,14 +79,14 @@ async def get_current_admin(token: Annotated[str, Depends(oauth2_scheme)], db: S
         )
     
     # Single Session logic: Verify session ID
-    if not verify_session(db, token_data.sub, token_data.sid):
+    if not await verify_session(db, token_data.sub, token_data.sid):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Session has been invalidated. Please log in again.",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    user = get_user(db, token_data.sub)
+    user = await get_user(db, token_data.sub)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -153,10 +152,10 @@ class UpdateProfileRequest(BaseModel):
 async def update_me(
     body: UpdateProfileRequest,
     current_admin: Annotated[AdminUser, Depends(get_current_admin)],
-    db: Session = Depends(get_db)
+    db = Depends(get_db)
 ):
     """Update the currently authenticated admin's profile."""
-    success = update_user_profile(db, current_admin.email, body.full_name, body.username)
+    success = await update_user_profile(db, current_admin.email, body.full_name, body.username)
     if not success:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Failed to update profile")
     return {"message": "Profile updated successfully", "full_name": body.full_name, "username": body.username}
@@ -171,10 +170,10 @@ class ChangePasswordRequest(BaseModel):
 async def change_password_route(
     body: ChangePasswordRequest,
     current_admin: Annotated[AdminUser, Depends(get_current_admin)],
-    db: Session = Depends(get_db)
+    db = Depends(get_db)
 ):
     """Change the password for the currently logged-in admin."""
-    success = change_password(db, current_admin.email, body.current_password, body.new_password)
+    success = await change_password(db, current_admin.email, body.current_password, body.new_password)
     if not success:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -184,18 +183,18 @@ async def change_password_route(
 
 
 @router.post("/logout")
-async def logout(current_admin: Annotated[AdminUser, Depends(get_current_admin)], db: Session = Depends(get_db)):
+async def logout(current_admin: Annotated[AdminUser, Depends(get_current_admin)], db = Depends(get_db)):
     """Invalidate the current session."""
-    update_user_session(db, current_admin.email, None)
+    await update_user_session(db, current_admin.email, None)
     return {"message": "Logged out successfully"}
 
 
 # ── Password Reset Flow ───────────────────────
 
 @router.post("/forgot-password")
-async def forgot_password(body: ForgotPasswordRequest, db: Session = Depends(get_db)):
+async def forgot_password(body: ForgotPasswordRequest, db = Depends(get_db)):
     """Generate and email an OTP for password reset."""
-    user = get_user(db, body.email)
+    user = await get_user(db, body.email)
     if not user:
         # Don't reveal if user exists for security, but we'll return success anyway
         return {"message": "If an account exists with that email, an OTP has been sent."}
@@ -228,7 +227,7 @@ async def forgot_password(body: ForgotPasswordRequest, db: Session = Depends(get
 
 
 @router.post("/reset-password")
-async def reset_password(body: ResetPasswordRequest, db: Session = Depends(get_db)):
+async def reset_password(body: ResetPasswordRequest, db = Depends(get_db)):
     """Verify OTP and update the user's password."""
     from datetime import datetime
     
@@ -244,12 +243,12 @@ async def reset_password(body: ResetPasswordRequest, db: Session = Depends(get_d
         raise HTTPException(status_code=400, detail="Invalid OTP.")
     
     # Update password and clear session
-    success = reset_password_in_db(db, body.email, body.new_password)
+    success = await reset_password_in_db(db, body.email, body.new_password)
     if not success:
         raise HTTPException(status_code=404, detail="User not found.")
     
     # Invalidate all current sessions for security
-    update_user_session(db, body.email, None)
+    await update_user_session(db, body.email, None)
     
     # Cleanup OTP
     AUTH_OTP_STORE.pop(body.email, None)
@@ -263,7 +262,7 @@ class GoogleTokenRequest(BaseModel):
 
 
 @router.post("/auth/google", response_model=Token)
-async def google_login(body: GoogleTokenRequest, db: Session = Depends(get_db)):
+async def google_login(body: GoogleTokenRequest, db = Depends(get_db)):
     if not GOOGLE_CLIENT_ID:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -274,7 +273,7 @@ async def google_login(body: GoogleTokenRequest, db: Session = Depends(get_db)):
             body.id_token,
             google_requests.Request(),
             GOOGLE_CLIENT_ID,
-            clock_skew_in_seconds=30,  # Corrected parameter name
+            clock_skew_in_seconds=30,
         )
     except ValueError as exc:
         raise HTTPException(
@@ -290,9 +289,6 @@ async def google_login(body: GoogleTokenRequest, db: Session = Depends(get_db)):
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Google account has no email",
         )
-
-    # DEBUG
-    print(f"GOOGLE LOGIN ATTEMPT: {email}, AUTHORIZED: {AUTHORIZED_GOOGLE_EMAIL}")
 
     # Normalize and split authorized emails
     authorized_list = [e.strip().lower() for e in AUTHORIZED_GOOGLE_EMAIL.split(",") if e.strip()]
@@ -310,7 +306,7 @@ async def google_login(body: GoogleTokenRequest, db: Session = Depends(get_db)):
             detail=f"Access denied. Only Authorized persons are allowed to login.",
         )
 
-    user = get_user(db, email)
+    user = await get_user(db, email)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -319,13 +315,13 @@ async def google_login(body: GoogleTokenRequest, db: Session = Depends(get_db)):
 
     # Single Session logic for Google Login
     session_id = str(uuid.uuid4())
-    update_user_session(db, email, session_id)
+    await update_user_session(db, email, session_id)
 
     # Multi-module cache invalidation on login for fresh start
     try:
         from app.core.redis import redis_client
         if redis_client:
-            redis_client.delete("all_candidates_list", "all_exams_list", "exams_with_counts")
+            await redis_client.delete("all_candidates_list", "all_exams_list", "exams_with_counts")
     except: pass
 
     token = create_access_token(
@@ -339,11 +335,11 @@ async def google_login(body: GoogleTokenRequest, db: Session = Depends(get_db)):
 # ── Member Management ─────────────────────────
 
 @router.get("/members", response_model=List[Member])
-async def get_members(current_admin: Annotated[AdminUser, Depends(get_current_admin)], db: Session = Depends(get_db)):
+async def get_members(current_admin: Annotated[AdminUser, Depends(get_current_admin)], db = Depends(get_db)):
     """List all registered members (Admin only)."""
     if current_admin.role != "admin":
         raise HTTPException(status_code=403, detail="Only admins can manage members")
-    users = get_all_users(db)
+    users = await get_all_users(db)
     return [
         Member(
             email=u["email"],
@@ -359,16 +355,16 @@ async def get_members(current_admin: Annotated[AdminUser, Depends(get_current_ad
 async def create_member(
     body: MemberCreate,
     current_admin: Annotated[AdminUser, Depends(get_current_admin)],
-    db: Session = Depends(get_db)
+    db = Depends(get_db)
 ):
     """Add a new member (Admin only)."""
     if current_admin.role != "admin":
         raise HTTPException(status_code=403, detail="Only admins can manage members")
     
-    if get_user(db, body.email):
+    if await get_user(db, body.email):
         raise HTTPException(status_code=400, detail="User with this email already exists")
     
-    if get_user(db, body.username):
+    if await get_user(db, body.username):
         raise HTTPException(status_code=400, detail="User with this username already exists")
     
     new_user = {
@@ -379,7 +375,7 @@ async def create_member(
         "role": body.role,
         "permissions": body.permissions
     }
-    add_user(db, new_user)
+    await add_user(db, new_user)
     return Member(
         email=new_user["email"],
         username=new_user.get("username"),
@@ -393,7 +389,7 @@ async def create_member(
 async def remove_member(
     email: str,
     current_admin: Annotated[AdminUser, Depends(get_current_admin)],
-    db: Session = Depends(get_db)
+    db = Depends(get_db)
 ):
     """Remove a member (Admin only)."""
     if current_admin.role != "admin":
@@ -402,7 +398,7 @@ async def remove_member(
     if email == current_admin.email:
         raise HTTPException(status_code=400, detail="Cannot delete yourself")
     
-    success = delete_user(db, email)
+    success = await delete_user(db, email)
     if not success:
         raise HTTPException(status_code=404, detail="User not found")
     
@@ -413,13 +409,13 @@ async def update_member_route(
     email: str,
     body: MemberUpdate,
     current_admin: Annotated[AdminUser, Depends(get_current_admin)],
-    db: Session = Depends(get_db)
+    db = Depends(get_db)
 ):
     """Update a member's info, role or permissions (Admin only)."""
     if current_admin.role != "admin":
         raise HTTPException(status_code=403, detail="Only admins can manage members")
     
-    success = update_member(db, email, body.dict(exclude_unset=True))
+    success = await update_member(db, email, body.dict(exclude_unset=True))
     if not success:
         raise HTTPException(status_code=404, detail="Member not found")
     

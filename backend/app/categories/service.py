@@ -1,33 +1,28 @@
-from sqlalchemy.orm import Session
-from app.models import QuestionCategory
-from app.categories.schemas import CategoryCreate
+from motor.motor_asyncio import AsyncIOMotorDatabase
+import re
 
-def get_all_categories(db: Session):
-    return db.query(QuestionCategory).order_by(QuestionCategory.name).all()
+async def get_all_categories(db):
+    """Fetch all categories from MongoDB, sorted by name."""
+    categories = await db.categories.find({}).sort("name", 1).to_list(length=1000)
+    return categories
 
-def create_category(db: Session, category_in: CategoryCreate):
+async def create_category(db, category_name: str):
     # Check if exists (case insensitive)
-    existing = db.query(QuestionCategory).filter(
-        QuestionCategory.name.ilike(category_in.name)
-    ).first()
+    pattern = re.compile(f"^{re.escape(category_name)}$", re.IGNORECASE)
+    existing = await db.categories.find_one({"name": pattern})
     if existing:
         return existing
         
-    db_category = QuestionCategory(name=category_in.name)
-    db.add(db_category)
-    db.commit()
-    db.refresh(db_category)
+    db_category = {"name": category_name}
+    await db.categories.insert_one(db_category)
     return db_category
 
 from app.exams.service import delete_category_questions
 
-def delete_category(db: Session, category_name: str):
-    # First delete questions from JSON
-    delete_category_questions(category_name)
+async def delete_category(db, category_name: str):
+    # First delete questions from JSON (this is still sync if not refactored yet, but service says async now)
+    await delete_category_questions(category_name)
     
     # Then delete the category from DB
-    cat = db.query(QuestionCategory).filter(QuestionCategory.name == category_name).first()
-    if cat:
-        db.delete(cat)
-        db.commit()
+    await db.categories.delete_one({"name": category_name})
     return True

@@ -3,13 +3,11 @@ from typing import Annotated, List
 from fastapi import APIRouter, Depends, HTTPException, File, UploadFile, BackgroundTasks
 import os
 import shutil
-from sqlalchemy.orm import Session
 from app.database import get_db
 from app.core.config import BACKEND_URL, FRONTEND_URL
 from app.auth.router import get_current_admin, check_permission
 from app.auth.schemas import AdminUser
 from app.candidates.schemas import CandidateCreate, CandidateResponse, CandidateAssign
-from app.models import Candidate
 from app.candidates.service import (
     get_all_candidates, create_candidate, assign_exam_to_candidate, 
     delete_candidate, update_candidate_details,
@@ -28,7 +26,7 @@ def check_any_authority(required_perms: list):
         if any(p in current_admin.permissions for p in required_perms):
             return current_admin
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
+            status_code=403,
             detail=f"Access denied. You need one of these authorities: {', '.join(required_perms)}"
         )
     return authority_dependency
@@ -36,20 +34,20 @@ def check_any_authority(required_perms: list):
 @router.get("", response_model=List[CandidateResponse])
 async def read_candidates(
     current_admin: Annotated[AdminUser, Depends(check_any_authority(["manage candidates", "send invitation", "view results"]))], 
-    db: Session = Depends(get_db)
+    db = Depends(get_db)
 ):
     """Fetch list of all candidates (Admin only)."""
-    candidates = get_all_candidates(db)
+    candidates = await get_all_candidates(db)
     return [_format_candidate(c) for c in candidates]
 
 @router.post("", response_model=CandidateResponse)
 async def admin_create_candidate(
     candidate_in: CandidateCreate,
     current_admin: Annotated[AdminUser, Depends(check_permission("manage candidates"))],
-    db: Session = Depends(get_db)
+    db = Depends(get_db)
 ):
     """Admin-only: Manually create a candidate."""
-    new_cand = create_candidate(
+    new_cand = await create_candidate(
         db=db,
         name=candidate_in.name,
         email=candidate_in.email,
@@ -68,10 +66,10 @@ async def update_candidate(
     candidate_id: str,
     candidate_in: CandidateCreate,
     current_admin: Annotated[AdminUser, Depends(check_permission("manage candidates"))],
-    db: Session = Depends(get_db)
+    db = Depends(get_db)
 ):
     """Update candidate details."""
-    updated = update_candidate_details(db, candidate_id, candidate_in.dict())
+    updated = await update_candidate_details(db, candidate_id, candidate_in.dict())
     if not updated:
         raise HTTPException(status_code=404, detail="Candidate not found")
     return _format_candidate(updated)
@@ -80,10 +78,10 @@ async def update_candidate(
 async def remove_candidate(
     candidate_id: str,
     current_admin: Annotated[AdminUser, Depends(check_permission("manage candidates"))],
-    db: Session = Depends(get_db)
+    db = Depends(get_db)
 ):
     """Delete a candidate."""
-    success = delete_candidate(db, candidate_id)
+    success = await delete_candidate(db, candidate_id)
     if not success:
         raise HTTPException(status_code=404, detail="Candidate not found")
     return {"message": "Candidate deleted"}
@@ -93,7 +91,7 @@ async def upload_cv(
     candidate_id: str,
     current_admin: Annotated[AdminUser, Depends(check_permission("manage candidates"))],
     file: UploadFile = File(...),
-    db: Session = Depends(get_db)
+    db = Depends(get_db)
 ):
     """Upload a CV file for a candidate."""
     file_ext = os.path.splitext(file.filename)[1]
@@ -104,7 +102,7 @@ async def upload_cv(
         shutil.copyfileobj(file.file, buffer)
     
     cv_url = f"{BACKEND_URL}/static/uploads/cvs/{file_name}"
-    update_candidate_details(db, candidate_id, {"cv_url": cv_url})
+    await update_candidate_details(db, candidate_id, {"cv_url": cv_url})
     
     return {"message": "File uploaded", "cv_url": cv_url}
 
@@ -112,10 +110,10 @@ async def upload_cv(
 async def cleanup_screenshots(
     candidate_id: str,
     current_admin: Annotated[AdminUser, Depends(check_permission("manage candidates"))],
-    db: Session = Depends(get_db)
+    db = Depends(get_db)
 ):
     """Delete proctoring images from disk and clear DB references search for the candidate."""
-    success = cleanup_candidate_screenshots(db, candidate_id)
+    success = await cleanup_candidate_screenshots(db, candidate_id)
     if not success:
         raise HTTPException(status_code=404, detail="Candidate not found")
     return {"message": "Proctoring data cleaned up"}
@@ -124,33 +122,39 @@ async def cleanup_screenshots(
 async def get_candidate_report(
     candidate_id: str,
     current_admin: Annotated[AdminUser, Depends(check_permission("view results"))],
-    db: Session = Depends(get_db)
+    db = Depends(get_db)
 ):
     """Generate a detailed report for a candidate including proctoring and performance stats."""
-    candidate_obj = db.query(Candidate).filter(Candidate.id == int(candidate_id)).first()
+    try:
+        cand_id_int = int(candidate_id)
+    except:
+        raise HTTPException(status_code=400, detail="Invalid candidate id")
+        
+    candidate_obj = await db.candidates.find_one({"id": cand_id_int})
     if not candidate_obj:
         raise HTTPException(status_code=404, detail="Candidate not found")
         
     from app.candidates.service import get_report_data
-    report = get_report_data(db, candidate_obj)
+    report = await get_report_data(db, candidate_obj)
     if not report:
         raise HTTPException(status_code=400, detail="Could not generate report. Check candidate status or exam data.")
         
     return report
+
 @router.post("/{candidate_id}/assign-exam", response_model=CandidateResponse)
 async def assign_exam(
     candidate_id: str, 
     assignment: CandidateAssign,
     current_admin: Annotated[AdminUser, Depends(check_permission("manage candidates"))],
-    db: Session = Depends(get_db)
+    db = Depends(get_db)
 ):
     """Assign an exam to a candidate."""
     if assignment.exam_id:
-        exam = get_exam_by_id(db, assignment.exam_id)
+        exam = await get_exam_by_id(db, assignment.exam_id)
         if not exam:
             raise HTTPException(status_code=404, detail="Exam not found")
         
-    updated = assign_exam_to_candidate(db, candidate_id, assignment.exam_id)
+    updated = await assign_exam_to_candidate(db, candidate_id, assignment.exam_id)
     if not updated:
         raise HTTPException(status_code=404, detail="Candidate not found")
     return _format_candidate(updated)
@@ -160,13 +164,18 @@ async def send_candidate_link(
     candidate_id: str,
     background_tasks: BackgroundTasks,
     current_admin: Annotated[AdminUser, Depends(check_permission("send invitation"))],
-    db: Session = Depends(get_db)
+    db = Depends(get_db)
 ):
     """Send (or resend) the unique exam link to the candidate's email."""
-    # Optimized direct fetch from DB
-    candidate_obj = db.query(Candidate).filter(Candidate.id == int(candidate_id)).first()
+    try:
+        cand_id_int = int(candidate_id)
+    except:
+        raise HTTPException(status_code=400, detail="Invalid candidate id")
+        
+    candidate_obj = await db.candidates.find_one({"id": cand_id_int})
     if not candidate_obj:
         raise HTTPException(status_code=404, detail="Candidate not found")
+        
     candidate = _to_summary_dict(candidate_obj)
     if not candidate.get("assigned_exam_id"):
         raise HTTPException(status_code=400, detail="No exam assigned to this candidate yet.")
@@ -174,17 +183,15 @@ async def send_candidate_link(
     test_link = f"{FRONTEND_URL}/#/test/{candidate['token']}"
     
     # Record the invitation for tracking
-    from app.models import ExamInvitation
     from datetime import datetime
-    inv = ExamInvitation(
-        exam_id=candidate['assigned_exam_id'],
-        email=candidate['email'],
-        sent_at=datetime.now().isoformat()
-    )
-    db.add(inv)
-    db.commit()
+    inv = {
+        "exam_id": candidate['assigned_exam_id'],
+        "email": candidate['email'],
+        "sent_at": datetime.now().isoformat()
+    }
+    await db.exam_invitations.insert_one(inv)
 
-    if candidate_obj.status.lower() == "completed":
+    if candidate_obj.get("status", "").lower() == "completed":
         # Report Link only
         report_link = f"{FRONTEND_URL}/#/test-results/{candidate['token']}"
         background_tasks.add_task(send_report_email, candidate['email'], candidate['name'], report_link)
@@ -197,10 +204,10 @@ async def send_candidate_link(
 async def retest_candidate(
     candidate_id: str,
     current_admin: Annotated[AdminUser, Depends(check_permission("manage candidates"))],
-    db: Session = Depends(get_db)
+    db = Depends(get_db)
 ):
     """Reset a completed candidate back to 'Not Started' so they can retake the exam."""
-    updated = reset_candidate_for_retest(db, candidate_id)
+    updated = await reset_candidate_for_retest(db, candidate_id)
     if not updated:
         raise HTTPException(status_code=404, detail="Candidate not found")
     return _format_candidate(updated)

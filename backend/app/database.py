@@ -1,34 +1,20 @@
 import os
-from sqlalchemy import create_engine
-from sqlalchemy.orm import declarative_base, sessionmaker
 from motor.motor_asyncio import AsyncIOMotorClient
+from app.core.config import MONGODB_URL
 
-# ── Current SQL (SQLite Local) ────────────
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./kiwiqa.db")
-if DATABASE_URL.startswith("postgres://"):
-    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
-
-if DATABASE_URL.startswith("sqlite"):
-    engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
-else:
-    engine = create_engine(DATABASE_URL)
-
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-# ── New MongoDB (Live/Atlas Migration) ────
-# This will use the Atlas URI on Render and local MongoDB during dev
-MONGODB_URL = os.getenv("MONGODB_URL", "mongodb://localhost:27017/exam_portal_db")
+# ── Pure MongoDB Implementation ─────────────────────────
+# We connect once and reuse this client/db across the app
 mongo_client = AsyncIOMotorClient(MONGODB_URL)
 mongo_db = mongo_client.get_database("exam_portal_db")
 
+# Collection Helpers
 exams_collection = mongo_db.get_collection("exams")
 candidates_collection = mongo_db.get_collection("candidates")
 users_collection = mongo_db.get_collection("users")
+categories_collection = mongo_db.get_collection("question_categories")
+invitations_collection = mongo_db.get_collection("exam_invitations")
+
+# Mock dependency for legacy support during transition
+def get_db():
+    """Returns the MongoDB database instance."""
+    return mongo_db

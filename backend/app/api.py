@@ -12,7 +12,6 @@ import os
 import traceback
 import asyncio
 import uuid
-from sqlalchemy import text, inspect
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 from fastapi_cache.decorator import cache
@@ -95,128 +94,61 @@ app.include_router(chat_router, prefix="/chat")
 async def startup_event():
     # Run heavy DB work in a separate thread so health check passes immediately
     async def db_initialization():
-        from app.database import engine, Base, SessionLocal, DATABASE_URL
-        import app.models # Import models to register them with Base
+        from app.database import mongo_db, users_collection
+        from app.auth.service import hash_password
+        from app.core.config import AUTHORIZED_GOOGLE_EMAIL
+        import uuid
+        import json
         
-        # 1. Ensure tables exist
+        # 1. Ensure Indexes
         try:
-            Base.metadata.create_all(bind=engine)
-            print("INFO: Database tables verified.")
+            await users_collection.create_index("email", unique=True)
+            await users_collection.create_index("username", unique=True)
+            print("INFO: MongoDB indexes verified.")
         except Exception as e:
-            print(f"ERROR: Base.metadata.create_all: {e}")
+            print(f"ERROR: MongoDB index creation: {e}")
 
-        # 2. Add missing columns (Manual Auto-Migration)
+        # 2. Create Default Admins
         try:
-            inspector = inspect(engine)
-            with engine.connect() as conn:
-                # ── Candidates Table ─────
-                existing_cols = [c['name'] for c in inspector.get_columns('candidates')]
-                new_cols = [
-                    ("answers", "JSONB" if "postgresql" in DATABASE_URL else "JSON"),
-                    ("country_code", "TEXT"),
-                    ("completed_at", "TEXT"),
-                    ("admin_name", "TEXT"),
-                    ("screenshot_start", "TEXT"), ("screenshot_mid", "TEXT"), ("screenshot_end", "TEXT"),
-                    ("total_marks", "FLOAT DEFAULT 0"),
-                    ("violation_logs", "JSONB" if "postgresql" in DATABASE_URL else "JSON"),
-                    ("device_id", "TEXT")
-                ]
-                for col_name, col_type in new_cols:
-                    if col_name not in existing_cols:
-                        print(f"INFO: Adding column {col_name} to candidates...")
-                        conn.execute(text(f"ALTER TABLE candidates ADD COLUMN {col_name} {col_type}"))
-                        conn.commit()
-
-                # ── Exams Table ─────
-                existing_cols = [c['name'] for c in inspector.get_columns('exams')]
-                new_cols = [
-                    ("link_expiry", "TEXT"), ("auto_delete", "TEXT"),
-                    ("proctoring_enabled", "BOOLEAN DEFAULT FALSE" if "postgresql" in DATABASE_URL else "BOOLEAN DEFAULT 0"),
-                    ("proctoring_type", "TEXT"), ("passing_score", "INTEGER DEFAULT 50"),
-                    ("calculator_enabled", "BOOLEAN DEFAULT FALSE" if "postgresql" in DATABASE_URL else "BOOLEAN DEFAULT 0"),
-                    ("notes_enabled", "BOOLEAN DEFAULT FALSE" if "postgresql" in DATABASE_URL else "BOOLEAN DEFAULT 0"),
-                    ("proctoring_link", "TEXT"),
-                    ("supplement_flag", "BOOLEAN DEFAULT FALSE" if "postgresql" in DATABASE_URL else "BOOLEAN DEFAULT 0")
-                ]
-                for col_name, col_type in new_cols:
-                    if col_name not in existing_cols:
-                        print(f"INFO: Adding column {col_name} to exams...")
-                        conn.execute(text(f"ALTER TABLE exams ADD COLUMN {col_name} {col_type}"))
-                        conn.commit()
-                        
-                # ── Exam Invitations Table ─────
-                if 'exam_invitations' in inspector.get_table_names():
-                    existing_cols = [c['name'] for c in inspector.get_columns('exam_invitations')]
-                    if "admin_name" not in existing_cols:
-                        print(f"INFO: Adding column admin_name to exam_invitations...")
-                        conn.execute(text("ALTER TABLE exam_invitations ADD COLUMN admin_name TEXT"))
-                        conn.commit()
-
-            print("INFO: Auto-migration checks complete.")
-
-            with engine.connect() as conn:
-                # ── Users Table ─────
-                existing_user_cols = [c['name'] for c in inspector.get_columns('users')]
-                if "username" not in existing_user_cols:
-                    print(f"INFO: Adding column username to users...")
-                    conn.execute(text("ALTER TABLE users ADD COLUMN username TEXT"))
-                    # Notice: creating UNIQUE constraint on postgres via raw ALTER TABLE
-                    conn.execute(text("ALTER TABLE users ADD CONSTRAINT ix_users_username UNIQUE (username)"))
-                    conn.commit()
-
-        except Exception as e:
-            print(f"WARNING: Auto-migration skipped: {e}")
-
-        # 3. Create Default Admins
-        db = SessionLocal()
-        try:
-            from app.models import User
-            from app.auth.service import hash_password
-            from app.core.config import AUTHORIZED_GOOGLE_EMAIL
-            import json
-            
             # Default credential check
-            if db.query(User).count() == 0:
-                admin_user = User(
-                    email="admin@examportal.com",
-                    username="admin",
-                    hashed_password=hash_password("Admin@123"),
-                    role="admin",
-                    full_name="System Admin",
-                    permissions=json.dumps(["manage exam", "generate exam", "manage candidates", "manage users"])
-                )
-                db.add(admin_user)
-                db.commit()
-                print("INFO: Default admin created.")
+            user_count = await users_collection.count_documents({})
+            if user_count == 0:
+                admin_user = {
+                    "email": "admin@examportal.com",
+                    "username": "admin",
+                    "hashed_password": hash_password("Admin@123"),
+                    "role": "admin",
+                    "full_name": "System Admin",
+                    "permissions": ["manage exam", "generate exam", "manage candidates", "manage users"]
+                }
+                await users_collection.insert_one(admin_user)
+                print("INFO: Default admin created in MongoDB.")
 
             # Authorized Google Email check (Multiple support)
             if AUTHORIZED_GOOGLE_EMAIL and AUTHORIZED_GOOGLE_EMAIL != "NOT_SET":
                 authorized_emails = [e.strip().lower() for e in AUTHORIZED_GOOGLE_EMAIL.split(",") if e.strip()]
                 
                 for idx, email_addr in enumerate(authorized_emails):
-                    google_user = db.query(User).filter(User.email == email_addr).first()
+                    google_user = await users_collection.find_one({"email": email_addr})
                     if not google_user:
                         uname = "google_admin" if idx == 0 else f"google_admin_{idx+1}"
-                        new_google_user = User(
-                            email=email_addr,
-                            username=uname,
-                            hashed_password=hash_password(str(uuid.uuid4())),
-                            role="admin",
-                            full_name=f"Google Admin ({email_addr.split('@')[0]})",
-                            permissions=json.dumps(["manage exam", "generate exam", "manage candidates", "manage users"])
-                        )
-                        db.add(new_google_user)
-                        db.commit()
-                        print(f"INFO: Google admin {email_addr} created with username {uname}.")
+                        new_google_user = {
+                            "email": email_addr,
+                            "username": uname,
+                            "hashed_password": hash_password(str(uuid.uuid4())),
+                            "role": "admin",
+                            "full_name": f"Google Admin ({email_addr.split('@')[0]})",
+                            "permissions": ["manage exam", "generate exam", "manage candidates", "manage users"]
+                        }
+                        await users_collection.insert_one(new_google_user)
+                        print(f"INFO: Google admin {email_addr} created in MongoDB.")
         except Exception as e:
             print(f"ERROR admin setup: {e}")
-        finally:
-            db.close()
 
     # Fire off DB tasks WITHOUT awaiting them immediately
     asyncio.create_task(db_initialization())
 
-    # 4. Initialize FastAPICache with Redis
+    # 2. Initialize FastAPICache with Redis
     try:
         from app.core.config import REDIS_URL
         redis_cache = redis.from_url(REDIS_URL, encoding="utf8", decode_responses=True, socket_connect_timeout=1, socket_timeout=1)
@@ -227,18 +159,17 @@ async def startup_event():
 
     # 3. Start background cleanup loop
     async def cleanup_loop():
-        from app.database import SessionLocal
+        from app.database import exams_collection
         from app.core.redis import redis_client
         while True:
             try:
-                db = SessionLocal()
-                deleted_any = check_and_delete_expired_exams(db)
-                db.close()
+                # We will update the service function to handle MongoDB later
+                deleted_any = await check_and_delete_expired_exams()
                 if deleted_any and redis_client:
-                    redis_client.delete("all_exams_list", "exams_with_counts")
+                    await redis_client.delete("all_exams_list", "exams_with_counts")
             except Exception as e:
                 print(f"ERROR in background cleanup: {e}")
-            await asyncio.sleep(30)
+            await asyncio.sleep(60) # Run every minute
     asyncio.create_task(cleanup_loop())
 
     # 4. Demo Keep-Alive for Render Free Tier

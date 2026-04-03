@@ -1,7 +1,5 @@
 import json
 import bcrypt
-from sqlalchemy.orm import Session
-from app.models import User
 
 def hash_password(password: str) -> str:
     pwd_bytes = password.encode('utf-8')
@@ -19,126 +17,114 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
         print(f"VERIFY ERROR: {e}")
         return False
 
-def get_user(db: Session, identifier: str):
-    user = db.query(User).filter((User.email == identifier) | (User.username == identifier)).first()
+async def get_user(db, identifier: str):
+    user = await db.users.find_one({"$or": [{"email": identifier}, {"username": identifier}]})
     if user:
-        perms = user.permissions
-        if isinstance(perms, str):
-            try:
-                perms = json.loads(perms)
-            except:
-                perms = []
+        # MongoDB stores lists/dicts natively, no need for json.loads
         return {
-            "email": user.email,
-            "username": user.username,
-            "hashed_password": user.hashed_password,
-            "role": user.role,
-            "full_name": user.full_name,
-            "permissions": perms,
-            "session_id": user.session_id
+            "email": user["email"],
+            "username": user.get("username"),
+            "hashed_password": user["hashed_password"],
+            "role": user["role"],
+            "full_name": user["full_name"],
+            "permissions": user.get("permissions", []),
+            "session_id": user.get("session_id", "")
         }
     return None
 
-def add_user(db: Session, user_data: dict):
-    new_user = User(
-        email=user_data["email"],
-        username=user_data.get("username"),
-        hashed_password=user_data["hashed_password"],
-        role=user_data["role"],
-        full_name=user_data["full_name"],
-        permissions=json.dumps(user_data.get("permissions", [])),
-        session_id=user_data.get("session_id", "")
-    )
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
+async def add_user(db, user_data: dict):
+    new_user = {
+        "email": user_data["email"],
+        "username": user_data.get("username"),
+        "hashed_password": user_data["hashed_password"],
+        "role": user_data["role"],
+        "full_name": user_data["full_name"],
+        "permissions": user_data.get("permissions", []),
+        "session_id": user_data.get("session_id", "")
+    }
+    await db.users.insert_one(new_user)
     return new_user
 
-def update_user_session(db: Session, email: str, session_id: str):
-    user = db.query(User).filter(User.email == email).first()
-    if user:
-        user.session_id = session_id
-        db.commit()
+async def update_user_session(db, email: str, session_id: str):
+    await db.users.update_one(
+        {"email": email},
+        {"$set": {"session_id": session_id}}
+    )
 
-def update_user_profile(db: Session, email: str, full_name: str, username: str) -> bool:
-    user = db.query(User).filter(User.email == email).first()
-    if user:
-        user.full_name = full_name
-        user.username = username.strip() if username.strip() else None
-        db.commit()
-        return True
-    return False
+async def update_user_profile(db, email: str, full_name: str, username: str) -> bool:
+    res = await db.users.update_one(
+        {"email": email},
+        {"$set": {
+            "full_name": full_name,
+            "username": username.strip() if username.strip() else None
+        }}
+    )
+    return res.modified_count > 0
 
-def verify_session(db: Session, email: str, session_id: str):
-    user = db.query(User).filter(User.email == email).first()
-    return user.session_id == session_id if user else False
+async def verify_session(db, email: str, session_id: str):
+    user = await db.users.find_one({"email": email})
+    return user.get("session_id") == session_id if user else False
 
-def authenticate(db: Session, identifier: str, password: str):
-    user = get_user(db, identifier)
+async def authenticate(db, identifier: str, password: str):
+    user = await get_user(db, identifier)
     if not user or not user.get("hashed_password"):
         return None
     if verify_password(password, user["hashed_password"]):
         return user
     return None
 
-def change_password(db: Session, email: str, current_password: str, new_password: str):
-    user = db.query(User).filter(User.email == email).first()
-    if user and authenticate(db, email, current_password):
-        user.hashed_password = hash_password(new_password)
-        db.commit()
+async def change_password(db, email: str, current_password: str, new_password: str):
+    user = await authenticate(db, email, current_password)
+    if user:
+        await db.users.update_one(
+            {"email": email},
+            {"$set": {"hashed_password": hash_password(new_password)}}
+        )
         return True
     return False
 
-def get_all_users(db: Session):
-    users = db.query(User).all()
+async def get_all_users(db):
+    users = await db.users.find({}).to_list(length=1000)
     res = []
     for user in users:
-        perms = user.permissions
-        if isinstance(perms, str):
-            try:
-                perms = json.loads(perms)
-            except:
-                perms = []
         res.append({
-            "email": user.email,
-            "username": user.username,
-            "hashed_password": user.hashed_password,
-            "role": user.role,
-            "full_name": user.full_name,
-            "permissions": perms,
-            "session_id": user.session_id
+            "email": user["email"],
+            "username": user.get("username"),
+            "hashed_password": user["hashed_password"],
+            "role": user["role"],
+            "full_name": user["full_name"],
+            "permissions": user.get("permissions", []),
+            "session_id": user.get("session_id", "")
         })
     return res
 
-def delete_user(db: Session, email: str):
-    user = db.query(User).filter(User.email == email).first()
-    if user:
-        db.delete(user)
-        db.commit()
-        return True
-    return False
+async def delete_user(db, email: str):
+    res = await db.users.delete_one({"email": email})
+    return res.deleted_count > 0
 
-def update_member(db: Session, email: str, update_data: dict) -> bool:
-    user = db.query(User).filter(User.email == email).first()
-    if not user:
-        return False
-    
+async def update_member(db, email: str, update_data: dict) -> bool:
+    update_fields = {}
     if "full_name" in update_data and update_data["full_name"]:
-        user.full_name = update_data["full_name"]
+        update_fields["full_name"] = update_data["full_name"]
     if "username" in update_data and update_data["username"]:
-        user.username = update_data["username"]
+        update_fields["username"] = update_data["username"]
     if "role" in update_data and update_data["role"]:
-        user.role = update_data["role"]
+        update_fields["role"] = update_data["role"]
     if "permissions" in update_data and update_data["permissions"] is not None:
-        user.permissions = json.dumps(update_data["permissions"])
+        update_fields["permissions"] = update_data["permissions"]
     
-    db.commit()
-    return True
+    if not update_fields:
+        return False
+        
+    res = await db.users.update_one(
+        {"email": email},
+        {"$set": update_fields}
+    )
+    return res.modified_count > 0
 
-def reset_password_in_db(db: Session, email: str, new_password: str) -> bool:
-    user = db.query(User).filter(User.email == email).first()
-    if user:
-        user.hashed_password = hash_password(new_password)
-        db.commit()
-        return True
-    return False
+async def reset_password_in_db(db, email: str, new_password: str) -> bool:
+    res = await db.users.update_one(
+        {"email": email},
+        {"$set": {"hashed_password": hash_password(new_password)}}
+    )
+    return res.modified_count > 0

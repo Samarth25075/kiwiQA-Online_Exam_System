@@ -9,8 +9,7 @@ from google.genai import types as genai_types
 from app.core.config import GOOGLE_API_KEY, QUIZ_API_KEY
 import requests
 import random
-from sqlalchemy.orm import Session
-from app.models import Exam, Candidate, ExamInvitation
+# Removed SQLAlchemy imports
 
 def _get_path(filename: str) -> str:
     """Helper to get absolute path for a bank file."""
@@ -60,29 +59,29 @@ def _write_bank(combined_bank: List[Dict]) -> bool:
     
     return success
 
-def get_bank_categories(db: Session = None) -> List[str]:
+async def get_bank_categories(db=None) -> List[str]:
     """Get unique categories from the inbuilt question bank and database."""
     bank = _read_bank()
     bank_cats = set(q.get("category", "General") for q in bank if q.get("category"))
     
     if db:
-        from app.models import QuestionCategory
-        db_cats = [c.name for c in db.query(QuestionCategory).all()]
-        bank_cats.update(db_cats)
+        # Use MongoDB collection
+        db_cats = await db.question_categories.find({}).to_list(length=1000)
+        for c in db_cats:
+            bank_cats.add(c["name"])
         
     return sorted(list(bank_cats))
 
-def get_bank_stats(db: Session = None) -> List[Dict]:
+async def get_bank_stats(db=None) -> List[Dict]:
     """Get category-wise stats (count, marks) from the question bank including empty ones from DB."""
     bank = _read_bank()
     stats_map = {}
     
     # Pre-populate with all known categories from DB if session provided
     if db:
-        from app.models import QuestionCategory
-        all_cats = db.query(QuestionCategory).all()
+        all_cats = await db.question_categories.find({}).to_list(length=1000)
         for c in all_cats:
-            stats_map[c.name] = {"count": 0, "total_marks": 0.0}
+            stats_map[c["name"]] = {"count": 0, "total_marks": 0.0}
     
     # Feed from bank
     for q in bank:
@@ -542,196 +541,170 @@ def generate_questions(exam_in: ExamCreate) -> List[Dict]:
         )
     return _generate_mock_questions(exam_in.topic, exam_in.difficulty, exam_in.num_questions, 'ai')
 
-def _to_summary_dict(exam: Exam) -> Dict:
+def _to_summary_dict(exam: Dict) -> Dict:
     """Lightweight mapping for list views (excludes heavy JSON questions)."""
     if not exam: return None
     return {
-        "id": exam.id,
-        "title": exam.title,
-        "topic": exam.topic,
-        "difficulty": exam.difficulty,
-        "duration": exam.duration,
-        "num_questions": exam.num_questions,
-        "created_at": exam.created_at,
-        "link_expiry": exam.link_expiry,
-        "auto_delete": exam.auto_delete,
-        "proctoring_type": exam.proctoring_type,
-        "proctoring_enabled": exam.proctoring_enabled,
-        "passing_score": exam.passing_score,
-        "calculator_enabled": exam.calculator_enabled,
-        "notes_enabled": exam.notes_enabled,
-        "proctoring_link": exam.proctoring_link,
-        "supplement_flag": exam.supplement_flag,
+        "id": exam.get("id"),
+        "title": exam.get("title"),
+        "topic": exam.get("topic"),
+        "difficulty": exam.get("difficulty"),
+        "duration": exam.get("duration"),
+        "num_questions": exam.get("num_questions"),
+        "created_at": exam.get("created_at"),
+        "link_expiry": exam.get("link_expiry"),
+        "auto_delete": exam.get("auto_delete"),
+        "proctoring_type": exam.get("proctoring_type"),
+        "proctoring_enabled": exam.get("proctoring_enabled"),
+        "passing_score": exam.get("passing_score"),
+        "calculator_enabled": exam.get("calculator_enabled"),
+        "notes_enabled": exam.get("notes_enabled"),
+        "proctoring_link": exam.get("proctoring_link"),
+        "supplement_flag": exam.get("supplement_flag"),
     }
 
-def _to_full_dict(exam: Exam) -> Dict:
+def _to_full_dict(exam: Dict) -> Dict:
     """Full mapping including all questions."""
     if not exam: return None
     data = _to_summary_dict(exam)
-    data["questions"] = exam.questions or []
+    data["questions"] = exam.get("questions") or []
     return data
 
-def save_exam(db: Session, exam_in: ExamFinalize) -> Dict:
+async def save_exam(db, exam_in: ExamFinalize) -> Dict:
     from app.core.redis import redis_client
-    new_exam = Exam(
-        id=str(uuid.uuid4()),
-        title=exam_in.title,
-        topic=exam_in.topic,
-        difficulty=exam_in.difficulty,
-        duration=exam_in.duration,
-        num_questions=len(exam_in.questions),
-        created_at=datetime.now().isoformat(),
-        link_expiry=exam_in.link_expiry,
-        auto_delete=exam_in.auto_delete,
-        proctoring_enabled=exam_in.proctoring_enabled,
-        proctoring_type=exam_in.proctoring_type,
-        passing_score=exam_in.passing_score,
-        calculator_enabled=exam_in.calculator_enabled,
-        notes_enabled=exam_in.notes_enabled,
-        proctoring_link=exam_in.proctoring_link,
-        supplement_flag=exam_in.supplement_flag,
-        questions=[q.dict() for q in exam_in.questions]
-    )
-    db.add(new_exam)
-    db.commit()
-    db.refresh(new_exam)
+    new_exam = {
+        "id": str(uuid.uuid4()),
+        "title": exam_in.title,
+        "topic": exam_in.topic,
+        "difficulty": exam_in.difficulty,
+        "duration": exam_in.duration,
+        "num_questions": len(exam_in.questions),
+        "created_at": datetime.now().isoformat(),
+        "link_expiry": exam_in.link_expiry,
+        "auto_delete": exam_in.auto_delete,
+        "proctoring_enabled": exam_in.proctoring_enabled,
+        "proctoring_type": exam_in.proctoring_type,
+        "passing_score": exam_in.passing_score,
+        "calculator_enabled": exam_in.calculator_enabled,
+        "notes_enabled": exam_in.notes_enabled,
+        "proctoring_link": exam_in.proctoring_link,
+        "supplement_flag": exam_in.supplement_flag,
+        "questions": [q.dict() for q in exam_in.questions]
+    }
+    await db.exams.insert_one(new_exam)
     
     # Invalidate cache
     if redis_client:
-        redis_client.delete("all_exams_list", "exams_with_counts", "all_candidates_list_summary")
+        await redis_client.delete("all_exams_list", "exams_with_counts", "all_candidates_list_summary")
         
     return _to_full_dict(new_exam)
 
-def create_exam(db: Session, exam_in: ExamCreate) -> Dict:
+async def create_exam(db, exam_in: ExamCreate) -> Dict:
     from app.core.redis import redis_client
     questions = _generate_mock_questions(exam_in.topic, exam_in.difficulty, exam_in.num_questions)
     
-    new_exam = Exam(
-        id=str(uuid.uuid4()),
-        title=exam_in.title,
-        topic=exam_in.topic,
-        difficulty=exam_in.difficulty,
-        duration=exam_in.duration,
-        num_questions=len(questions),
-        created_at=datetime.now().isoformat(),
-        proctoring_enabled=getattr(exam_in, 'proctoring_enabled', True),
-        proctoring_type=getattr(exam_in, 'proctoring_type', 'video'),
-        passing_score=getattr(exam_in, 'passing_score', 50),
-        calculator_enabled=getattr(exam_in, 'calculator_enabled', False),
-        notes_enabled=getattr(exam_in, 'notes_enabled', False),
-        proctoring_link=getattr(exam_in, 'proctoring_link', None),
-        supplement_flag=getattr(exam_in, 'supplement_flag', False),
-        questions=questions
-    )
-    db.add(new_exam)
-    db.commit()
-    db.refresh(new_exam)
+    new_exam = {
+        "id": str(uuid.uuid4()),
+        "title": exam_in.title,
+        "topic": exam_in.topic,
+        "difficulty": exam_in.difficulty,
+        "duration": exam_in.duration,
+        "num_questions": len(questions),
+        "created_at": datetime.now().isoformat(),
+        "proctoring_enabled": getattr(exam_in, 'proctoring_enabled', True),
+        "proctoring_type": getattr(exam_in, 'proctoring_type', 'video'),
+        "passing_score": getattr(exam_in, 'passing_score', 50),
+        "calculator_enabled": getattr(exam_in, 'calculator_enabled', False),
+        "notes_enabled": getattr(exam_in, 'notes_enabled', False),
+        "proctoring_link": getattr(exam_in, 'proctoring_link', None),
+        "supplement_flag": getattr(exam_in, 'supplement_flag', False),
+        "questions": questions
+    }
+    await db.exams.insert_one(new_exam)
     
     if redis_client:
-        redis_client.delete("all_exams_list", "exams_with_counts", "all_candidates_list_summary")
+        await redis_client.delete("all_exams_list", "exams_with_counts", "all_candidates_list_summary")
         
     return _to_full_dict(new_exam)
 
-def get_all_exams(db: Session, bypass_cache: bool = False) -> List[Dict]:
+async def get_all_exams(db, bypass_cache: bool = False) -> List[Dict]:
     from app.core.redis import get_cached_data, set_cached_data
     
     if not bypass_cache:
-        cached = get_cached_data("all_exams_list")
+        cached = await get_cached_data("all_exams_list")
         if cached:
             return cached
 
-    from sqlalchemy.orm import defer
-    exams = db.query(Exam).options(defer(Exam.questions)).order_by(Exam.created_at.desc()).all()
+    # Exclude heavy questions for summary view
+    exams = await db.exams.find({}, {"questions": 0}).sort("created_at", -1).to_list(length=1000)
     res = [_to_summary_dict(e) for e in exams]
     
-    set_cached_data("all_exams_list", res, expire=300)
+    await set_cached_data("all_exams_list", res, expire=300)
     return res
 
-def get_exam_by_id(db: Session, exam_id: str) -> Dict | None:
-    exam = db.query(Exam).filter(Exam.id == exam_id).first()
+async def get_exam_by_id(db, exam_id: str) -> Dict | None:
+    exam = await db.exams.find_one({"id": exam_id})
     return _to_full_dict(exam)
 
-def duplicate_exam(db: Session, exam_id: str, new_title: Optional[str] = None) -> Dict | None:
+async def duplicate_exam(db, exam_id: str, new_title: Optional[str] = None) -> Dict | None:
     from app.core.redis import redis_client
-    exam = db.query(Exam).filter(Exam.id == exam_id).first()
+    exam = await db.exams.find_one({"id": exam_id})
     if not exam:
         return None
         
-    new_exam = Exam(
-        id=str(uuid.uuid4()),
-        title=new_title or f"Copy of {exam.title}",
-        topic=exam.topic,
-        difficulty=exam.difficulty,
-        duration=exam.duration,
-        num_questions=exam.num_questions,
-        created_at=datetime.now().isoformat(),
-        link_expiry=exam.link_expiry,
-        auto_delete=exam.auto_delete,
-        proctoring_enabled=exam.proctoring_enabled,
-        proctoring_type=exam.proctoring_type,
-        passing_score=exam.passing_score,
-        calculator_enabled=exam.calculator_enabled,
-        notes_enabled=exam.notes_enabled,
-        proctoring_link=exam.proctoring_link,
-        supplement_flag=exam.supplement_flag,
-        questions=exam.questions # JSON is safe to copy
-    )
-    db.add(new_exam)
-    db.commit()
-    db.refresh(new_exam)
+    new_exam = exam.copy()
+    if "_id" in new_exam: del new_exam["_id"]
+    new_exam["id"] = str(uuid.uuid4())
+    new_exam["title"] = new_title or f"Copy of {exam['title']}"
+    new_exam["created_at"] = datetime.now().isoformat()
+    
+    await db.exams.insert_one(new_exam)
     
     if redis_client:
-        redis_client.delete("all_exams_list", "exams_with_counts", "all_candidates_list_summary")
+        await redis_client.delete("all_exams_list", "exams_with_counts", "all_candidates_list_summary")
         
     return _to_full_dict(new_exam)
 
-def delete_exam(db: Session, exam_id: str) -> bool:
+async def delete_exam(db, exam_id: str) -> bool:
     from app.core.redis import redis_client
-    exam = db.query(Exam).filter(Exam.id == exam_id).first()
-    if exam:
-        db.delete(exam)
-        db.commit()
+    res = await db.exams.delete_one({"id": exam_id})
+    if res.deleted_count > 0:
         if redis_client:
-            redis_client.delete("all_exams_list", "exams_with_counts", "all_candidates_list", "all_candidates_list_summary")
+            await redis_client.delete("all_exams_list", "exams_with_counts", "all_candidates_list", "all_candidates_list_summary")
         return True
     return False
 
-def update_exam(db: Session, exam_id: str, updates: dict) -> bool:
+async def update_exam(db, exam_id: str, updates: dict) -> bool:
     from app.core.redis import redis_client
-    exam = db.query(Exam).filter(Exam.id == exam_id).first()
-    if exam:
-        for k, v in updates.items():
-            if hasattr(exam, k):
-                setattr(exam, k, v)
-        db.commit()
+    res = await db.exams.update_one({"id": exam_id}, {"$set": updates})
+    if res.modified_count > 0:
         if redis_client:
-            redis_client.delete("all_exams_list", "exams_with_counts")
+            await redis_client.delete("all_exams_list", "exams_with_counts")
         return True
     return False
 
-def get_exams_with_candidate_counts(db: Session, bypass_cache: bool = False) -> List[Dict]:
+async def get_exams_with_candidate_counts(db, bypass_cache: bool = False) -> List[Dict]:
     """Returns each exam along with candidate assignment counts. Cached for speed."""
     from app.core.redis import get_cached_data, set_cached_data
     
     if not bypass_cache:
-        cached = get_cached_data("exams_with_counts")
+        cached = await get_cached_data("exams_with_counts")
         if cached:
             print("INFO: Loading dashboard stats from Redis cache")
             return cached
 
     from app.candidates.service import get_all_candidates
-    from sqlalchemy import func
     
     # Always get fresh exams and candidates for dashboard stats
-    exams = get_all_exams(db, bypass_cache=True)
-    candidates = get_all_candidates(db, bypass_cache=True)
+    exams = await get_all_exams(db, bypass_cache=True)
+    candidates = await get_all_candidates(db, bypass_cache=True)
     
-    # Get invite counts per exam (unique emails only)
-    invite_rows = db.query(
-        ExamInvitation.exam_id, 
-        func.count(func.distinct(ExamInvitation.email))
-    ).group_by(ExamInvitation.exam_id).all()
-    invite_counts = {row[0]: row[1] for row in invite_rows}
+    # Get invite counts per exam (Aggregation in MongoDB)
+    pipeline = [
+        {"$group": {"_id": "$exam_id", "count": {"$sum": 1}}},
+    ]
+    invite_rows = await db.exam_invitations.aggregate(pipeline).to_list(length=1000)
+    invite_counts = {row["_id"]: row["count"] for row in invite_rows}
 
     from collections import defaultdict
     candidates_by_exam = defaultdict(list)
@@ -763,7 +736,6 @@ def get_exams_with_candidate_counts(db: Session, bypass_cache: bool = False) -> 
                     total_qs = float(c.get("total_questions") or 1)
                     total_incorrect += (total_qs - score)
                     
-                    # Prefer total_marks for weighted scoring, fallback to total_questions for pass/fail check
                     total_m = float(c.get("total_marks") or c.get("total_questions") or 1)
                     if (score / total_m * 100) >= passing_score_pct:
                         passed += 1
@@ -798,52 +770,54 @@ def get_exams_with_candidate_counts(db: Session, bypass_cache: bool = False) -> 
             "proctoring_type": exam.get("proctoring_type", "video")
         })
     
-    set_cached_data("exams_with_counts", result, expire=300)
+    await set_cached_data("exams_with_counts", result, expire=300)
     return result
 
-def check_and_delete_expired_exams(db: Session):
+async def check_and_delete_expired_exams(db=None):
     """Background task to delete exams that have expired based on auto_delete."""
-    exams = db.query(Exam).all()
+    if not db:
+        from app.database import mongo_db
+        db = mongo_db
+        
+    exams = await db.exams.find({}).to_list(length=1000)
     from datetime import datetime, timezone
     now = datetime.now(timezone.utc)
     
     deleted_any = False
     for exam in exams:
-        auto_delete_str = exam.auto_delete
+        auto_delete_str = exam.get("auto_delete")
         if auto_delete_str:
             try:
-                expiry = datetime.fromisoformat(auto_delete_str.replace("Z", "+00:00"))
+                # Handle Z or timezone offsets
+                clean_date = auto_delete_str.replace("Z", "+00:00")
+                expiry = datetime.fromisoformat(clean_date)
                 if now > expiry:
-                    print(f"INFO: Auto-deleting expired exam: {exam.title} ({exam.id})")
-                    db.delete(exam)
+                    print(f"INFO: Auto-deleting expired exam: {exam.get('title')} ({exam.get('id')})")
+                    await db.exams.delete_one({"id": exam["id"]})
                     deleted_any = True
             except Exception as e:
-                print(f"ERROR: Failed to parse auto_delete for exam {exam.id}: {e}")
+                print(f"ERROR: Failed to parse auto_delete for exam {exam.get('id')}: {e}")
                 
-    if deleted_any:
-        db.commit()
     return deleted_any
 
-def get_invitation_tracking(db: Session):
+async def get_invitation_tracking(db):
     """Returns detailed tracking of who was invited and if they sat for the exam."""
-    exams = db.query(Exam).all()
+    exams = await db.exams.find({}, {"questions": 0}).to_list(length=1000)
     
     result = []
     for exam in exams:
-        invitations = db.query(ExamInvitation).filter(ExamInvitation.exam_id == exam.id).all()
-        candidates = db.query(Candidate).filter(Candidate.assigned_exam_id == exam.id).all()
+        invitations = await db.exam_invitations.find({"exam_id": exam["id"]}).to_list(length=1000)
+        candidates = await db.candidates.find({"assigned_exam_id": exam["id"]}).to_list(length=1000)
         
         # Build map of email to candidate status for faster lookup
-        # Some candidates might be enrolled without invitation (public link), 
-        # but we only care about those who WERE invited for this specific report.
-        enrolled_status_map = {c.email.lower(): c.status for c in candidates}
+        enrolled_status_map = {c["email"].lower(): c["status"] for c in candidates if c.get("email")}
         
         invitation_details = []
         unique_invites = {}
         for inv in invitations:
-            email_lower = inv.email.lower()
+            email_lower = inv["email"].lower()
             # If multiple records exist, keep only the latest one
-            if email_lower not in unique_invites or inv.sent_at > unique_invites[email_lower].sent_at:
+            if email_lower not in unique_invites or inv["sent_at"] > unique_invites[email_lower]["sent_at"]:
                 unique_invites[email_lower] = inv
 
         sat_count = 0
@@ -852,29 +826,27 @@ def get_invitation_tracking(db: Session):
         
         for email_lower, inv in unique_invites.items():
             if email_lower in enrolled_status_map:
-                status = "Sat"
                 sat_count += 1
                 cand_status = enrolled_status_map[email_lower]
                 detail_status = f"Sat ({cand_status})"
             else:
-                status = "Not Sat"
                 not_sat_count += 1
                 detail_status = "Not Sat"
                 
-            admin_nm = getattr(inv, "admin_name", None)
+            admin_nm = inv.get("admin_name")
             display_admin = admin_nm if admin_nm else "Admin"
             sent_by_counts[display_admin] = sent_by_counts.get(display_admin, 0) + 1
                 
             invitation_details.append({
-                "email": inv.email,
-                "sent_at": inv.sent_at,
+                "email": inv["email"],
+                "sent_at": inv["sent_at"],
                 "status": detail_status,
                 "admin_name": admin_nm
             })
             
         result.append({
-            "exam_id": exam.id,
-            "exam_title": exam.title,
+            "exam_id": exam["id"],
+            "exam_title": exam["title"],
             "total_invited": len(unique_invites),
             "sat_count": sat_count,
             "not_sat_count": not_sat_count,
@@ -883,7 +855,7 @@ def get_invitation_tracking(db: Session):
         })
     return result
 
-def delete_category_questions(category_name: str) -> bool:
+async def delete_category_questions(category_name: str) -> bool:
     """Remove all questions belonging to a specific category from the bank JSON."""
     bank = _read_bank()
     if not bank: return True
@@ -894,9 +866,8 @@ def delete_category_questions(category_name: str) -> bool:
         return _write_bank(bank)
     return True
 
-def rename_bank_category(old_name: str, new_name: str, db: Session = None) -> bool:
+async def rename_bank_category(old_name: str, new_name: str, db=None) -> bool:
     """Rename a category in both JSON bank and database."""
-    # Safety Check: Robust case-insensitive and trimmed check
     low_cat = old_name.strip().lower()
     if low_cat.startswith('programming (coding') or low_cat == 'programming (advanced)':
         return False # This category is protected
@@ -912,12 +883,11 @@ def rename_bank_category(old_name: str, new_name: str, db: Session = None) -> bo
     if renamed_count > 0:
         _write_bank(bank)
         
-    # 2. Update Database categories
+    # 2. Update MongoDB categories
     if db:
-        from app.models import QuestionCategory
-        db_cat = db.query(QuestionCategory).filter(QuestionCategory.name == old_name).first()
-        if db_cat:
-            db_cat.name = new_name
-            db.commit()
+        await db.question_categories.update_many(
+            {"name": old_name},
+            {"$set": {"name": new_name}}
+        )
             
     return True
