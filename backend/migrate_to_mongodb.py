@@ -2,6 +2,7 @@ import sqlite3
 import os
 import asyncio
 import json
+import certifi
 from motor.motor_asyncio import AsyncIOMotorClient
 from dotenv import load_dotenv
 
@@ -20,7 +21,7 @@ async def migrate():
         return
 
     print(f"🔄 Connecting to MongoDB: {MONGODB_URL.split('@')[-1] if '@' in MONGODB_URL else MONGODB_URL}")
-    client = AsyncIOMotorClient(MONGODB_URL)
+    client = AsyncIOMotorClient(MONGODB_URL, tlsCAFile=certifi.where())
     db = client[DB_NAME]
 
     print(f"📂 Connecting to SQLite: {SQLITE_DB}")

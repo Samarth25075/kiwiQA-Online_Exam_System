@@ -1,10 +1,14 @@
 import os
+import certifi
 from motor.motor_asyncio import AsyncIOMotorClient
 from app.core.config import MONGODB_URL
 
 # ── Pure MongoDB Implementation ─────────────────────────
 # We connect once and reuse this client/db across the app
-mongo_client = AsyncIOMotorClient(MONGODB_URL)
+mongo_client = AsyncIOMotorClient(
+    MONGODB_URL,
+    tlsCAFile=certifi.where() # Necessary for Atlas on environments like Render
+)
 mongo_db = mongo_client.get_database("exam_portal_db")
 
 # Collection Helpers
