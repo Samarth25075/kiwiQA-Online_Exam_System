@@ -20,14 +20,21 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 async def get_user(db, identifier: str):
     user = await db.users.find_one({"$or": [{"email": identifier}, {"username": identifier}]})
     if user:
-        # MongoDB stores lists/dicts natively, no need for json.loads
+        # Handle cases where permissions might be a JSON string from migration
+        permissions = user.get("permissions", [])
+        if isinstance(permissions, str):
+            try:
+                permissions = json.loads(permissions)
+            except:
+                permissions = []
+        
         return {
             "email": user["email"],
             "username": user.get("username"),
             "hashed_password": user["hashed_password"],
             "role": user["role"],
             "full_name": user["full_name"],
-            "permissions": user.get("permissions", []),
+            "permissions": permissions,
             "session_id": user.get("session_id", "")
         }
     return None
@@ -87,13 +94,19 @@ async def get_all_users(db):
     users = await db.users.find({}).to_list(length=1000)
     res = []
     for user in users:
+        permissions = user.get("permissions", [])
+        if isinstance(permissions, str):
+            try:
+                permissions = json.loads(permissions)
+            except:
+                permissions = []
         res.append({
             "email": user["email"],
             "username": user.get("username"),
             "hashed_password": user["hashed_password"],
             "role": user["role"],
             "full_name": user["full_name"],
-            "permissions": user.get("permissions", []),
+            "permissions": permissions,
             "session_id": user.get("session_id", "")
         })
     return res

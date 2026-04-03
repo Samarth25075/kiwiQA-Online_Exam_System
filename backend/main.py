@@ -26,14 +26,7 @@ def keep_alive_ping():
         time.sleep(840) # 14 minutes
 
 if __name__ == "__main__":
-    # 1. Run the database restructure before the server starts
-    try:
-        from migrate_prod import run as run_migration
-        run_migration()
-    except Exception as e:
-        print(f"FAILED TO RESTRUCTURE DATABASE: {e}")
-
-    # 2. Start the keep-alive thread before Uvicorn takes over the main thread
+    # 1. Start the keep-alive thread before Uvicorn takes over the main thread
     threading.Thread(target=keep_alive_ping, daemon=True).start()
     
     # 3. Run the Uvicorn server

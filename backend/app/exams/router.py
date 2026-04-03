@@ -2,6 +2,7 @@
 from typing import List, Annotated, Optional, Dict
 from pydantic import BaseModel
 from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
+from fastapi_cache.decorator import cache
 from app.auth.router import get_current_admin, check_permission, check_permission_any
 from app.auth.schemas import AdminUser
 from app.exams.schemas import ExamCreate, ExamResponse, ExamFinalize, Question, ExamStatsResponse, SendExamLinkRequest
@@ -128,6 +129,7 @@ async def read_invitation_tracking(
     return await get_invitation_tracking(db)
 
 @router.get("/{exam_id}", response_model=ExamResponse)
+@cache(expire=300)
 async def read_exam(
     exam_id: str,
     current_admin: Annotated[AdminUser, Depends(check_permission("manage exam"))],

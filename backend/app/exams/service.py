@@ -64,7 +64,7 @@ async def get_bank_categories(db=None) -> List[str]:
     bank = _read_bank()
     bank_cats = set(q.get("category", "General") for q in bank if q.get("category"))
     
-    if db:
+    if db is not None:
         # Use MongoDB collection
         db_cats = await db.question_categories.find({}).to_list(length=1000)
         for c in db_cats:
@@ -78,7 +78,7 @@ async def get_bank_stats(db=None) -> List[Dict]:
     stats_map = {}
     
     # Pre-populate with all known categories from DB if session provided
-    if db:
+    if db is not None:
         all_cats = await db.question_categories.find({}).to_list(length=1000)
         for c in all_cats:
             stats_map[c["name"]] = {"count": 0, "total_marks": 0.0}
@@ -775,7 +775,7 @@ async def get_exams_with_candidate_counts(db, bypass_cache: bool = False) -> Lis
 
 async def check_and_delete_expired_exams(db=None):
     """Background task to delete exams that have expired based on auto_delete."""
-    if not db:
+    if db is None:
         from app.database import mongo_db
         db = mongo_db
         

@@ -1,5 +1,6 @@
 from typing import List, Annotated
 from fastapi import APIRouter, Depends
+from fastapi_cache.decorator import cache
 from app.database import get_db
 from app.auth.router import get_current_admin, check_permission, check_permission_any
 from app.auth.schemas import AdminUser
@@ -9,6 +10,7 @@ from app.categories.service import get_all_categories, create_category, delete_c
 router = APIRouter(prefix="/categories", tags=["categories"])
 
 @router.get("", response_model=List[CategoryResponse])
+@cache(expire=600)
 async def read_categories(
     current_admin: Annotated[AdminUser, Depends(check_permission_any(["manage bank", "generate exam"]))],
     db = Depends(get_db)

@@ -56,6 +56,13 @@ async def migrate():
                     except:
                         pass
                 
+                if table == "users" and "permissions" in doc:
+                    try:
+                        if isinstance(doc["permissions"], str):
+                            doc["permissions"] = json.loads(doc["permissions"])
+                    except:
+                        doc["permissions"] = []
+                
                 if table == "candidates":
                     for field in ["violation_logs", "answers"]:
                         if field in doc and isinstance(doc[field], str):

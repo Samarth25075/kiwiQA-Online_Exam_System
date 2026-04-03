@@ -100,13 +100,33 @@ async def startup_event():
         import uuid
         import json
         
-        # 1. Ensure Indexes
+        # 1. Ensure Performance Indexes
         try:
+            # Users
             await users_collection.create_index("email", unique=True)
-            await users_collection.create_index("username", unique=True)
-            print("INFO: MongoDB indexes verified.")
+            await users_collection.create_index("username", unique=True, sparse=True)
+            
+            # Exams
+            await exams_collection.create_index("id", unique=True)
+            await exams_collection.create_index("created_at", -1)
+            
+            # Candidates
+            await candidates_collection.create_index("candidate_id", unique=True)
+            await candidates_collection.create_index("token", unique=True)
+            await candidates_collection.create_index("assigned_exam_id")
+            await candidates_collection.create_index("email")
+            await candidates_collection.create_index("status")
+            
+            # Invitations
+            await invitations_collection.create_index([("exam_id", 1), ("email", 1)], unique=True)
+            await invitations_collection.create_index("exam_id")
+            
+            # Categories
+            await categories_collection.create_index("name", unique=True)
+            
+            print("INFO: MongoDB performance indexes verified.")
         except Exception as e:
-            print(f"ERROR: MongoDB index creation: {e}")
+            print(f"WARNING: MongoDB index creation partial failure: {e}")
 
         # 2. Create Default Admins
         try:
