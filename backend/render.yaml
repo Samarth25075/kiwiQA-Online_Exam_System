@@ -9,6 +9,8 @@ services:
         sync: false
       - key: GOOGLE_API_KEY
         sync: false
+      - key: MONGODB_URL
+        sync: false
       - key: FRONTEND_URL
         sync: false
       - key: SMTP_SERVER

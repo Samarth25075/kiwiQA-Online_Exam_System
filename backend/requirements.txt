@@ -19,3 +19,8 @@ psycopg2-binary
 redis
 fastapi-cache2
 jinja2
+
+# MongoDB Drivers
+motor
+pymongo
+dnspython

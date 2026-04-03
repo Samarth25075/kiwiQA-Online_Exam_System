@@ -21,6 +21,10 @@ SENDGRID_API_KEY: str = os.getenv("SENDGRID_API_KEY", "")
 # Quiz API Configuration
 QUIZ_API_KEY: str = os.getenv("QUIZ_API_KEY", "")
 
+# Database Configuration
+MONGODB_URL: str = os.getenv("MONGODB_URL", "mongodb://localhost:27017/exam_portal_db")
+DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./kiwiqa.db")
+
 # Redis Configuration
 REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 

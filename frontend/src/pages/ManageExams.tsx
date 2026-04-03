@@ -28,6 +28,9 @@ const Icons = {
     ),
     Copy: ({ size = 14 }) => (
         <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+    ),
+    Edit: ({ size = 14 }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
     )
 };
 
@@ -67,6 +70,8 @@ export default function ManageExams() {
     const [loading, setLoading] = useState(true);
     const [selectedExamIds, setSelectedExamIds] = useState<Set<string>>(new Set());
     const [mergedExam, setMergedExam] = useState<Partial<Exam> | null>(null);
+    const [editingExamId, setEditingExamId] = useState<string | null>(null);
+    const [duplicatingExam, setDuplicatingExam] = useState<{ id: string, title: string } | null>(null);
     const [saving, setSaving] = useState(false);
 
     const [popup, setPopup] = useState<{ isOpen: boolean; type: PopupType; title?: string; message: string; onConfirm: () => void; onCancel?: () => void; confirmText?: string; } | null>(null);
@@ -151,16 +156,23 @@ export default function ManageExams() {
         });
     };
 
-    const handleDuplicate = async (id: string, e: React.MouseEvent) => {
+    const handleDuplicate = async (id: string, currentTitle: string, e: React.MouseEvent) => {
         e.stopPropagation();
+        setDuplicatingExam({ id, title: `Copy of ${currentTitle}` });
+    };
+
+    const performDuplicate = async () => {
+        if (!duplicatingExam) return;
         setSaving(true);
         const token = sessionStorage.getItem("access_token");
         try {
-            const res = await fetch(`${API_BASE_URL}/exams/${id}/duplicate`, {
+            const res = await fetch(`${API_BASE_URL}/exams/${duplicatingExam.id}/duplicate`, {
                 method: "POST",
-                headers: { "Authorization": `Bearer ${token}` }
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                body: JSON.stringify({ new_title: duplicatingExam.title })
             });
             if (res.ok) {
+                setDuplicatingExam(null);
                 fetchExams(true);
                 setPopup({ isOpen: true, type: 'alert', title: 'Success', message: 'Exam duplicated successfully!', onConfirm: () => setPopup(null) });
             } else {
@@ -185,6 +197,34 @@ export default function ManageExams() {
             setSelectedExamIds(new Set());
         } else {
             setSelectedExamIds(new Set(exams.map(e => e.id)));
+        }
+    };
+
+    const handleEdit = async (id: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        setSaving(true);
+        try {
+            const token = sessionStorage.getItem("access_token");
+            const res = await fetch(`${API_BASE_URL}/exams/${id}`, {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const fullExam = await res.json();
+                setEditingExamId(id);
+                setMergedExam({
+                    title: fullExam.title,
+                    topic: fullExam.topic,
+                    difficulty: fullExam.difficulty,
+                    duration: fullExam.duration,
+                    questions: fullExam.questions || []
+                });
+            } else {
+                throw new Error();
+            }
+        } catch {
+            setPopup({ isOpen: true, type: 'alert', title: 'Error', message: 'Failed to load exam details.', onConfirm: () => setPopup(null) });
+        } finally {
+            setSaving(false);
         }
     };
 
@@ -233,10 +273,14 @@ export default function ManageExams() {
     const handlePublishMerged = async () => {
         if (!mergedExam || !mergedExam.questions) return;
         setSaving(true);
+        const isEdit = !!editingExamId;
+        const url = isEdit ? `${API_BASE_URL}/exams/${editingExamId}` : `${API_BASE_URL}/exams`;
+        const method = isEdit ? "PUT" : "POST";
+
         try {
             const token = sessionStorage.getItem("access_token");
-            const res = await fetch(`${API_BASE_URL}/exams`, {
-                method: "POST",
+            const res = await fetch(url, {
+                method: method,
                 headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
                 body: JSON.stringify({
                     title: mergedExam.title,
@@ -245,7 +289,7 @@ export default function ManageExams() {
                     duration: mergedExam.duration,
                     num_questions: mergedExam.questions.length,
                     questions: mergedExam.questions,
-                    proctoring_enabled: true, // Default for merged
+                    proctoring_enabled: true, // Preserve default
                     proctoring_type: "video"
                 })
             });
@@ -254,21 +298,21 @@ export default function ManageExams() {
                     isOpen: true,
                     type: 'alert',
                     title: 'Success',
-                    message: 'Merged exam published successfully!',
+                    message: editingExamId ? 'Assessment updated successfully!' : 'Merged exam published successfully!',
                     onConfirm: () => {
                         setPopup(null);
                         setMergedExam(null);
+                        setEditingExamId(null);
                         setSelectedExamIds(new Set());
-                        // Optimistically fetch or just rely on the fact that we'll re-fetch anyway
-                        // But let's at least clear the local state to show it's gone
                         fetchExams();
                     }
                 });
             } else {
-                throw new Error();
+                const errData = await res.json();
+                throw new Error(errData.detail || 'Failed to save.');
             }
-        } catch {
-            setPopup({ isOpen: true, type: 'alert', title: 'Error', message: 'Failed to publish merged exam.', onConfirm: () => setPopup(null) });
+        } catch (err: any) {
+            setPopup({ isOpen: true, type: 'alert', title: 'Error', message: err.message || 'Failed to save assessment.', onConfirm: () => setPopup(null) });
         } finally {
             setSaving(false);
         }
@@ -381,10 +425,10 @@ export default function ManageExams() {
                 // Preview Merged Exam Mode
                 <>
                     <header className="me-header">
-                        <h2 className="me-header-title">Verify Merged Exam</h2>
+                        <h2 className="me-header-title">{editingExamId ? 'Edit Assessment' : 'Verify Merged Exam'}</h2>
                     </header>
                     <div className="me-content">
-                        <button className="aig-btn-back" onClick={() => setMergedExam(null)}>
+                        <button className="aig-btn-back" onClick={() => { setMergedExam(null); setEditingExamId(null); }}>
                             <Icons.ChevronLeft size={12} /> Back to Assessments
                         </button>
                         <div className="aig-summary-bar">
@@ -420,9 +464,9 @@ export default function ManageExams() {
                             </div>
                             <button className="aig-btn-confirm" onClick={handlePublishMerged} disabled={saving}>
                                 {saving ? (
-                                    "Publishing..."
+                                    "Saving..."
                                 ) : (
-                                    <><Icons.Check size={14} /> Finalize & Publish Assessment</>
+                                    <><Icons.Check size={14} /> {editingExamId ? "Update Assessment" : "Finalize & Publish Assessment"}</>
                                 )}
                             </button>
                         </div>
@@ -553,7 +597,16 @@ export default function ManageExams() {
                                                     <button
                                                         className="delete-btn"
                                                         style={{ padding: '6px 10px', borderColor: 'var(--border)', color: 'var(--text-muted)' }}
-                                                        onClick={(e) => handleDuplicate(exam.id, e)}
+                                                        onClick={(e) => handleEdit(exam.id, e)}
+                                                        title="Edit Assessment"
+                                                        disabled={saving}
+                                                    >
+                                                        <Icons.Edit size={14} />
+                                                    </button>
+                                                    <button
+                                                        className="delete-btn"
+                                                        style={{ padding: '6px 10px', borderColor: 'var(--border)', color: 'var(--text-muted)' }}
+                                                        onClick={(e) => handleDuplicate(exam.id, exam.title, e)}
                                                         title="Duplicate Assessment"
                                                         disabled={saving}
                                                     >
@@ -589,6 +642,33 @@ export default function ManageExams() {
                     onCancel={popup.onCancel || (() => setPopup(null))}
                     confirmText={popup.confirmText}
                 />
+            )}
+
+            {duplicatingExam && (
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000 }}>
+                    <div style={{ background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: '16px', padding: '24px', width: '100%', maxWidth: '400px', boxShadow: 'var(--shadow-lg)' }}>
+                        <h3 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text)', marginBottom: '12px' }}>Duplicate Assessment</h3>
+                        <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '20px' }}>Provide a new name for the duplicated assessment.</p>
+                        
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '24px' }}>
+                            <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--ink-3)', textTransform: 'uppercase' }}>New Title</label>
+                            <input 
+                                className="form-input"
+                                style={{ width: '100%', border: '1px solid var(--line)', background: 'var(--bg-neutral)', fontWeight: 600 }}
+                                value={duplicatingExam.title}
+                                onChange={(e) => setDuplicatingExam({ ...duplicatingExam, title: e.target.value })}
+                                autoFocus
+                            />
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '12px' }}>
+                            <button className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setDuplicatingExam(null)}>Cancel</button>
+                            <button className="btn btn-primary" style={{ flex: 1 }} onClick={performDuplicate} disabled={saving || !duplicatingExam.title.trim()}>
+                                {saving ? "Duplicating..." : "Duplicate"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
         </AdminLayout>
     );

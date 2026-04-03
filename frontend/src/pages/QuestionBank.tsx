@@ -86,11 +86,12 @@ const QuestionBank: React.FC = () => {
             { text: '', is_correct: false }
         ]
     });
+    const [renamingCategory, setRenamingCategory] = useState<{ oldName: string, newName: string } | null>(null);
     const [popup, setPopup] = useState<{ isOpen: boolean; title: string; message: string; type: 'alert' | 'confirm'; onConfirm?: () => void } | null>(null);
 
     // Prevent background scrolling when any modal is open
     useEffect(() => {
-        const isAnyModalOpen = isAdding || editingQuestion !== null || isQuickAdding;
+        const isAnyModalOpen = isAdding || editingQuestion !== null || isQuickAdding || renamingCategory !== null;
         if (isAnyModalOpen) {
             document.body.style.overflow = 'hidden';
         } else {
@@ -100,7 +101,7 @@ const QuestionBank: React.FC = () => {
         return () => {
             document.body.style.overflow = 'auto';
         };
-    }, [isAdding, editingQuestion, isQuickAdding]);
+    }, [isAdding, editingQuestion, isQuickAdding, renamingCategory]);
 
     const fetchStats = async () => {
         setLoading(true);
@@ -274,6 +275,31 @@ const QuestionBank: React.FC = () => {
                 }
             } else {
                 setPopup({ isOpen: true, title: 'Error', message: 'Failed to add question.', type: 'alert' });
+            }
+        } catch (err) {
+            setPopup({ isOpen: true, title: 'Error', message: 'Network error.', type: 'alert' });
+        }
+    };
+
+    const handleRenameCategory = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!renamingCategory) return;
+        try {
+            const token = sessionStorage.getItem("access_token");
+            const res = await fetch(`${API_BASE_URL}/exams/bank/categories/${encodeURIComponent(renamingCategory.oldName)}`, {
+                method: 'PUT',
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ new_name: renamingCategory.newName })
+            });
+            if (res.ok) {
+                setRenamingCategory(null);
+                setPopup({ isOpen: true, title: 'Success', message: 'Category renamed successfully!', type: 'alert' });
+                fetchStats();
+            } else {
+                setPopup({ isOpen: true, title: 'Error', message: 'Failed to rename category.', type: 'alert' });
             }
         } catch (err) {
             setPopup({ isOpen: true, title: 'Error', message: 'Network error.', type: 'alert' });
@@ -972,18 +998,30 @@ const QuestionBank: React.FC = () => {
 
                                         <div className="card-actions">
                                             {!(s.category.toLowerCase().startsWith('programming (coding') || s.category.toLowerCase() === 'programming (advanced)') && (
-                                                <button
-                                                    className="btn-delete-bank"
-                                                    onClick={(e) => { e.stopPropagation(); handleDeleteCategory(s.category); }}
-                                                >
-                                                    <Icons.Delete /> Delete
-                                                </button>
+                                                <>
+                                                    <button
+                                                        className="btn-delete-bank"
+                                                        onClick={(e) => { e.stopPropagation(); handleDeleteCategory(s.category); }}
+                                                        style={{ flex: 'none', width: '36px', padding: 0 }}
+                                                        title="Delete Category"
+                                                    >
+                                                        <Icons.Delete />
+                                                    </button>
+                                                    <button
+                                                        className="btn-delete-bank"
+                                                        onClick={(e) => { e.stopPropagation(); setRenamingCategory({ oldName: s.category, newName: s.category }); }}
+                                                        style={{ flex: 'none', width: '36px', padding: 0, background: 'var(--bg-sunken)', color: 'var(--text-muted)', borderColor: 'var(--border)' }}
+                                                        title="Rename Category"
+                                                    >
+                                                        <Icons.Edit />
+                                                    </button>
+                                                </>
                                             )}
                                             <button
                                                 className="btn-edit-bank"
                                                 onClick={() => fetchQuestions(s.category)}
                                             >
-                                                <Icons.Edit /> Edit Bank
+                                                Open Bank
                                             </button>
                                         </div>
                                     </div>
@@ -1030,14 +1068,26 @@ const QuestionBank: React.FC = () => {
                                             <td>
                                                 <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                                                     {!(s.category.toLowerCase().startsWith('programming (coding') || s.category.toLowerCase() === 'programming (advanced)') && (
-                                                        <button
-                                                            onClick={(e) => { e.stopPropagation(); handleDeleteCategory(s.category); }}
-                                                            style={{ width: 32, height: 32, borderRadius: '8px', background: 'rgba(239, 68, 68, 0.05)', border: 'none', color: '#ef4444', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: '0.2s' }}
-                                                            onMouseOver={e => { (e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'); }}
-                                                            onMouseOut={e => { (e.currentTarget.style.background = 'rgba(239, 68, 68, 0.05)'); }}
-                                                        >
-                                                            <Icons.Delete />
-                                                        </button>
+                                                        <>
+                                                            <button
+                                                                onClick={(e) => { e.stopPropagation(); setRenamingCategory({ oldName: s.category, newName: s.category }); }}
+                                                                style={{ width: 32, height: 32, borderRadius: '8px', background: 'var(--slate-50)', border: 'none', color: 'var(--slate-600)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: '0.2s' }}
+                                                                onMouseOver={e => { (e.currentTarget.style.background = 'var(--slate-100)'); (e.currentTarget.style.color = 'var(--primary)'); }}
+                                                                onMouseOut={e => { (e.currentTarget.style.background = 'var(--slate-50)'); (e.currentTarget.style.color = 'var(--slate-600)'); }}
+                                                                title="Rename Category"
+                                                            >
+                                                                <Icons.Edit />
+                                                            </button>
+                                                            <button
+                                                                onClick={(e) => { e.stopPropagation(); handleDeleteCategory(s.category); }}
+                                                                style={{ width: 32, height: 32, borderRadius: '8px', background: 'rgba(239, 68, 68, 0.05)', border: 'none', color: '#ef4444', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: '0.2s' }}
+                                                                onMouseOver={e => { (e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'); }}
+                                                                onMouseOut={e => { (e.currentTarget.style.background = 'rgba(239, 68, 68, 0.05)'); }}
+                                                                title="Delete Category"
+                                                            >
+                                                                <Icons.Delete />
+                                                            </button>
+                                                        </>
                                                     )}
                                                 </div>
                                             </td>
@@ -1713,6 +1763,59 @@ const QuestionBank: React.FC = () => {
                                     }}
                                 >
                                     Create Category
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* ── Edit Category Modal ── */}
+                {renamingCategory && (
+                    <div className="modal-overlay">
+                        <div className="modal-content" style={{ maxWidth: '480px', background: 'var(--bg-raised)', border: '1px solid var(--border)' }}>
+                            <div className="modal-header" style={{ borderBottom: 'none', padding: '32px 32px 14px' }}>
+                                <h3 className="modal-title" style={{ color: 'var(--text)', fontSize: '26px', fontWeight: 800, letterSpacing: '-0.02em' }}>
+                                    <Icons.Edit /> Edit Category
+                                </h3>
+                            </div>
+                            <div className="modal-body" style={{ padding: '0 32px 32px' }}>
+                                <p style={{ fontSize: '15px', color: 'var(--text-muted)', marginBottom: '32px', fontWeight: 500 }}>
+                                    Rename "{renamingCategory.oldName}" across all stored questions.
+                                </p>
+                                <form id="rename-cat-form" onSubmit={handleRenameCategory}>
+                                    <div className="form-group">
+                                        <label className="form-label" style={{ color: 'var(--text)', textTransform: 'uppercase', fontSize: '12px', letterSpacing: '0.05em', marginBottom: '12px', fontWeight: 800 }}>
+                                            NEW CATEGORY NAME
+                                        </label>
+                                        <input
+                                            className="form-input"
+                                            value={renamingCategory.newName}
+                                            onChange={e => setRenamingCategory({ ...renamingCategory, newName: e.target.value })}
+                                            required
+                                            autoFocus
+                                            style={{ background: 'var(--bg-sunken)', border: '1px solid var(--border)', color: 'var(--text)', height: '52px', fontSize: '15px' }}
+                                        />
+                                    </div>
+                                </form>
+                            </div>
+                            <div className="modal-footer" style={{ background: 'var(--bg-sunken)', borderTop: '1px solid var(--border)', padding: '24px 32px', borderRadius: '0 0 24px 24px' }}>
+                                <button
+                                    type="button"
+                                    onClick={() => setRenamingCategory(null)}
+                                    style={{ padding: '12px 28px', borderRadius: '14px', background: 'var(--bg)', border: '1px solid var(--border)', cursor: 'pointer', fontWeight: 800, fontSize: '14px', color: 'var(--text)', minWidth: '100px' }}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    form="rename-cat-form"
+                                    type="submit"
+                                    style={{
+                                        padding: '12px 28px', borderRadius: '14px', background: 'var(--primary)', color: 'white',
+                                        border: 'none', cursor: 'pointer', fontWeight: 800, fontSize: '14px',
+                                        boxShadow: 'var(--shadow-primary)', minWidth: '160px'
+                                    }}
+                                >
+                                    Save Changes
                                 </button>
                             </div>
                         </div>

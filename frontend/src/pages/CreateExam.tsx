@@ -2009,20 +2009,62 @@ export default function CreateExam() {
               </button>
 
               {/* Summary */}
-              <div className="summary-bar">
-                {[
-                  { label: "Title", value: title },
-                  { label: "Topic", value: subject },
-                  { label: "Difficulty", value: difficulty },
-                  { label: "Questions", value: `${questions.length}` },
-                  { label: "Total Marks", value: `${questions.reduce((sum, q) => sum + (q.marks ?? 1), 0)}` },
-                  { label: "Duration", value: `${duration} min` },
-                ].map(item => (
-                  <div key={item.label} className="summary-item">
-                    <div className="summary-label">{item.label}</div>
-                    <div className="summary-value">{item.value}</div>
+              {/* Summary (Editable) */}
+              <div className="summary-bar" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '16px', padding: '20px 24px', background: 'var(--white)', border: '1px solid var(--line)', borderRadius: '12px', marginBottom: '24px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--ink-3)', textTransform: 'uppercase' }}>Exam Title</label>
+                  <input 
+                    className="form-input" 
+                    style={{ height: '34px', fontSize: '13px', fontWeight: 600, background: 'var(--bg)', border: '1px solid var(--line)' }}
+                    value={title} 
+                    onChange={e => setTitle(e.target.value)} 
+                  />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--ink-3)', textTransform: 'uppercase' }}>Topic</label>
+                  <input 
+                    className="form-input" 
+                    style={{ height: '34px', fontSize: '13px', fontWeight: 600, background: 'var(--bg)', border: '1px solid var(--line)' }}
+                    value={subject} 
+                    onChange={e => setSubject(e.target.value)} 
+                  />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--ink-3)', textTransform: 'uppercase' }}>Difficulty</label>
+                  <select 
+                    className="form-input" 
+                    style={{ height: '34px', fontSize: '13px', fontWeight: 600, background: 'var(--bg)', border: '1px solid var(--line)' }}
+                    value={difficulty} 
+                    onChange={e => setDifficulty(e.target.value as DifficultyLevel)}
+                  >
+                    <option value="Beginner">Beginner</option>
+                    <option value="Intermediate">Intermediate</option>
+                    <option value="Advanced">Advanced</option>
+                    <option value="Mixed">Mixed</option>
+                  </select>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--ink-3)', textTransform: 'uppercase' }}>Duration (min)</label>
+                  <input 
+                    className="form-input" 
+                    style={{ height: '34px', fontSize: '13px', fontWeight: 600, background: 'var(--bg)', border: '1px solid var(--line)' }}
+                    type="number"
+                    value={duration} 
+                    onChange={e => setDuration(parseInt(e.target.value) || 0)} 
+                  />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--ink-3)', textTransform: 'uppercase' }}>Questions</label>
+                  <div style={{ height: '34px', display: 'flex', alignItems: 'center', fontSize: '13px', fontWeight: 800, color: 'var(--teal)' }}>
+                    {questions.length} Qs
                   </div>
-                ))}
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--ink-3)', textTransform: 'uppercase' }}>Total Marks</label>
+                  <div style={{ height: '34px', display: 'flex', alignItems: 'center', fontSize: '13px', fontWeight: 800, color: 'var(--teal)' }}>
+                    {questions.reduce((sum, q) => sum + (q.marks ?? 1), 0)} pts
+                  </div>
+                </div>
               </div>
 
               {/* Review Header */}

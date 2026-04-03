@@ -651,7 +651,7 @@ def get_exam_by_id(db: Session, exam_id: str) -> Dict | None:
     exam = db.query(Exam).filter(Exam.id == exam_id).first()
     return _to_full_dict(exam)
 
-def duplicate_exam(db: Session, exam_id: str) -> Dict | None:
+def duplicate_exam(db: Session, exam_id: str, new_title: Optional[str] = None) -> Dict | None:
     from app.core.redis import redis_client
     exam = db.query(Exam).filter(Exam.id == exam_id).first()
     if not exam:
@@ -659,7 +659,7 @@ def duplicate_exam(db: Session, exam_id: str) -> Dict | None:
         
     new_exam = Exam(
         id=str(uuid.uuid4()),
-        title=f"Copy of {exam.title}",
+        title=new_title or f"Copy of {exam.title}",
         topic=exam.topic,
         difficulty=exam.difficulty,
         duration=exam.duration,
@@ -891,11 +891,33 @@ def delete_category_questions(category_name: str) -> bool:
     bank = [q for q in bank if q.get("category") != category_name]
     
     if len(bank) < initial_len:
-        bank_path = os.path.join(os.path.dirname(__file__), "..", "question_bank.json")
-        try:
-            with open(bank_path, "w", encoding="utf-8") as f:
-                json.dump(bank, f, indent=4)
-            return True
-        except:
-            return False
+        return _write_bank(bank)
+    return True
+
+def rename_bank_category(old_name: str, new_name: str, db: Session = None) -> bool:
+    """Rename a category in both JSON bank and database."""
+    # Safety Check: Robust case-insensitive and trimmed check
+    low_cat = old_name.strip().lower()
+    if low_cat.startswith('programming (coding') or low_cat == 'programming (advanced)':
+        return False # This category is protected
+
+    # 1. Update JSON bank
+    bank = _read_bank()
+    renamed_count = 0
+    for q in bank:
+        if q.get('category', '').lower() == old_name.lower():
+            q['category'] = new_name
+            renamed_count += 1
+    
+    if renamed_count > 0:
+        _write_bank(bank)
+        
+    # 2. Update Database categories
+    if db:
+        from app.models import QuestionCategory
+        db_cat = db.query(QuestionCategory).filter(QuestionCategory.name == old_name).first()
+        if db_cat:
+            db_cat.name = new_name
+            db.commit()
+            
     return True

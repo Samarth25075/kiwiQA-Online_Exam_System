@@ -1,10 +1,11 @@
 # app/exams/router.py
 from typing import List, Annotated, Optional, Dict
+from pydantic import BaseModel
 from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from app.auth.router import get_current_admin, check_permission, check_permission_any
 from app.auth.schemas import AdminUser
 from app.exams.schemas import ExamCreate, ExamResponse, ExamFinalize, Question, ExamStatsResponse, SendExamLinkRequest
-from app.exams.service import save_exam, generate_questions, get_all_exams, delete_exam, get_exams_with_candidate_counts, get_bank_categories, get_bank_stats, get_exam_by_id, add_to_bank, upload_to_bank, get_bank_questions_by_category, update_bank_question, delete_bank_question
+from app.exams.service import save_exam, generate_questions, get_all_exams, delete_exam, get_exams_with_candidate_counts, get_bank_categories, get_bank_stats, get_exam_by_id, add_to_bank, upload_to_bank, get_bank_questions_by_category, update_bank_question, delete_bank_question, rename_bank_category
 from app.core.email import send_email
 from sqlalchemy.orm import Session
 from app.database import get_db
@@ -138,15 +139,19 @@ async def read_exam(
     if not exam:
         raise HTTPException(status_code=404, detail="Exam not found")
     return exam
+class DuplicateExamRequest(BaseModel):
+    new_title: Optional[str] = None
+
 @router.post("/{exam_id}/duplicate", response_model=ExamResponse)
 async def copy_exam(
     exam_id: str,
+    payload: DuplicateExamRequest,
     current_admin: Annotated[AdminUser, Depends(check_permission("manage exam"))],
     db: Session = Depends(get_db)
 ):
     """Create a duplicate of an existing exam."""
     from app.exams.service import duplicate_exam
-    res = duplicate_exam(db, exam_id)
+    res = duplicate_exam(db, exam_id, new_title=payload.new_title)
     if not res:
         raise HTTPException(status_code=404, detail="Exam not found")
     return res
@@ -162,6 +167,30 @@ async def remove_exam(
     if not success:
         raise HTTPException(status_code=404, detail="Exam not found")
     return {"message": "Exam deleted"}
+
+@router.put("/{exam_id}", response_model=ExamResponse)
+async def update_exam_route(
+    exam_id: str,
+    exam_in: ExamFinalize,
+    current_admin: Annotated[AdminUser, Depends(check_permission("manage exam"))],
+    db: Session = Depends(get_db)
+):
+    """Update an existing exam."""
+    updates = exam_in.dict()
+    if "questions" in updates and updates["questions"]:
+        updates["questions"] = [
+            q.dict(exclude_none=True) if hasattr(q, "dict") else q 
+            for q in updates["questions"]
+        ]
+        updates["num_questions"] = len(updates["questions"])
+        
+    from app.exams.service import update_exam, get_exam_by_id
+    success = update_exam(db, exam_id, updates)
+    if not success:
+        raise HTTPException(status_code=404, detail="Exam not found")
+    
+    updated = get_exam_by_id(db, exam_id)
+    return updated
 
 @router.post("/{exam_id}/send-link")
 async def send_exam_link_custom(
@@ -227,8 +256,6 @@ async def send_exam_link_custom(
     return {"message": f"Emails queued for {saved_count} recipient(s)."}
 
 
-from pydantic import BaseModel
-
 class ExpiryUpdate(BaseModel):
     link_expiry: Optional[str] = None
     auto_delete: Optional[str] = None
@@ -265,3 +292,19 @@ async def remove_bank_category(
     from app.exams.service import delete_bank_category
     delete_bank_category(name)
     return {"message": f"Category '{name}' deleted from bank"}
+
+class CategoryRenameRequest(BaseModel):
+    new_name: str
+
+@router.put("/bank/categories/{name}")
+async def rename_bank_category_route(
+    name: str,
+    payload: CategoryRenameRequest,
+    current_admin: Annotated[AdminUser, Depends(check_permission("manage bank"))],
+    db: Session = Depends(get_db)
+):
+    """Rename a category in both JSON bank and database."""
+    from app.exams.service import rename_bank_category
+    if rename_bank_category(name, payload.new_name, db):
+        return {"message": f"Category '{name}' renamed to '{payload.new_name}'"}
+    raise HTTPException(status_code=400, detail="Cannot rename bank category (might be protected)")
