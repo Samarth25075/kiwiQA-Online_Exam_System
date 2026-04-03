@@ -94,7 +94,10 @@ app.include_router(chat_router, prefix="/chat")
 async def startup_event():
     # Run heavy DB work in a separate thread so health check passes immediately
     async def db_initialization():
-        from app.database import mongo_db, users_collection
+        from app.database import (
+            mongo_db, users_collection, exams_collection, 
+            candidates_collection, categories_collection, invitations_collection
+        )
         from app.auth.service import hash_password
         from app.core.config import AUTHORIZED_GOOGLE_EMAIL
         import uuid
@@ -104,11 +107,16 @@ async def startup_event():
         try:
             # Users
             await users_collection.create_index("email", unique=True)
+            try:
+                # Drop old non-sparse index if exists to avoid conflict with new sparse requirement
+                await users_collection.drop_index("username_1")
+            except:
+                pass
             await users_collection.create_index("username", unique=True, sparse=True)
             
             # Exams
             await exams_collection.create_index("id", unique=True)
-            await exams_collection.create_index("created_at", -1)
+            await exams_collection.create_index([("created_at", -1)])
             
             # Candidates
             await candidates_collection.create_index("candidate_id", unique=True)
