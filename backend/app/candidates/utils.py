@@ -41,8 +41,8 @@ def get_admin_otp():
     hash_hex = hashlib.sha256(f"{secret}-{window}".encode()).hexdigest()
     return str(int(hash_hex[:8], 16) % 1000000).zfill(6)
 
-def get_exam_and_check_expiry(db: Session, exam_id: str):
-    exam = get_exam_by_id(db, exam_id)
+async def get_exam_and_check_expiry(db: Session, exam_id: str):
+    exam = await get_exam_by_id(db, exam_id)
     if not exam:
         raise HTTPException(status_code=404, detail="Exam not found")
         
